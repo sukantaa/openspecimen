@@ -1,8 +1,9 @@
 package com.krishagni.catissueplus.rest.filter;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +18,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.FilterChainProxy;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -72,12 +75,20 @@ public class SamlFilter extends FilterChainProxy {
 	
 	@SuppressWarnings({"deprecation" })
 	public void setFilterChain(Filter generatorFilter, Map<String, Filter> filters) {
-		Map<RequestMatcher, List<Filter>> filterChainMap = new HashMap<>();
+		List<SecurityFilterChain> filterChains = new ArrayList<>();
 		for (Map.Entry<String, Filter> entry : filters.entrySet()) {
-			filterChainMap.put(new AntPathRequestMatcher(entry.getKey()), Arrays.asList(generatorFilter, entry.getValue()));
+			RequestMatcher matcher = new AntPathRequestMatcher(entry.getKey());
+			List<Filter> chainFilters = Arrays.asList(generatorFilter, entry.getValue());
+			filterChains.add(new DefaultSecurityFilterChain(matcher, chainFilters));
 		}
-		
-		setFilterChainMap(filterChainMap);
+
+		try {
+			Field field = FilterChainProxy.class.getDeclaredField("filterChains");
+			field.setAccessible(true);
+			field.set(this, filterChains);
+		} catch (Exception e) {
+			throw new RuntimeException("Error initialising filter chains", e);
+		}
 	}
 
 	@PlusTransactional

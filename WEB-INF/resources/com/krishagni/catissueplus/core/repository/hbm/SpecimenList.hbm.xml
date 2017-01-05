@@ -30,7 +30,7 @@
     <set name="specimens" table="CATISSUE_SPEC_TAG_ITEMS">
       <key column="TAG_ID"/>
       <many-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.Specimen" column="OBJ_ID">
-        <filter name="activeEntity"/>
+        <filter name="activeEntity" condition="activity_status != 'Disabled'"/>
       </many-to-many>
     </set>
     

@@ -1,6 +1,7 @@
 
 package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -331,7 +332,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 			return;
 		}
 
-		query.add(Restrictions.in("lineage", crit.lineages()));
+		query.add(Restrictions.in("lineage", Arrays.asList(crit.lineages())));
 	}
 
 	private void addCollectionStatusCond(Criteria query, SpecimenListCriteria crit) {
@@ -339,7 +340,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 			return;
 		}
 
-		query.add(Restrictions.in("collectionStatus", crit.collectionStatuses()));
+		query.add(Restrictions.in("collectionStatus", Arrays.asList(crit.collectionStatuses())));
 	}
 
 	private void addSiteCpsCond(Criteria query, SpecimenListCriteria crit) {
