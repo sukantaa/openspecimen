@@ -369,6 +369,7 @@
     "anonymize": "Erase Participant PHI Data",
     "confirm_anonymize": "Are you sure you want to erase all PHI data of participant?",
     "anonymized_successfully": "Successfully erased participant PHI data",
+    "other_cps": "Other Registered Protocols",
 
     "bulk_registration": "Bulk Participant Registration",
     "num_of_participants": "Number of Participants",
