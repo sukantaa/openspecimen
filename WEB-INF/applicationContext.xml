@@ -59,6 +59,9 @@
         <prop key="org.hibernate.envers.global_with_modified_flag">true</prop>
       </props>
     </property>
+    <property name="physicalNamingStrategy">
+      <bean class="com.krishagni.catissueplus.core.common.DataModelNamingStrategy"/>
+    </property>
   </bean>
 
   <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
