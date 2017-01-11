@@ -101,9 +101,9 @@ public class DistributionProtocolDaoImpl extends AbstractDao<DistributionProtoco
 	public Class<DistributionProtocol> getType() {
 		return DistributionProtocol.class;
 	}
-	
-	@Override
+
 	@SuppressWarnings("unchecked")
+	@Override
 	public List<DistributionOrderStat> getOrderStats(DistributionOrderStatListCriteria listCrit) {
 		Criteria query = sessionFactory.getCurrentSession().createCriteria(DistributionOrder.class)
 				.createAlias("orderItems", "item")
@@ -136,10 +136,19 @@ public class DistributionProtocolDaoImpl extends AbstractDao<DistributionProtoco
 		return getObjectIds("dpId", key, value);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<String> getNonConsentingSpecimens(Long dpId, List<Long> specimenIds, int stmtsCount) {
+		return getCurrentSession().getNamedQuery(GET_NON_CONSENTING_SPMNS)
+			.setLong("dpId", dpId)
+			.setParameterList("specimenIds", specimenIds)
+			.setInteger("respCount", stmtsCount)
+			.list();
+	}
+
 	private Criteria getDpListQuery(DpListCriteria crit) {
 		Criteria query = sessionFactory.getCurrentSession().createCriteria(DistributionProtocol.class)
 			.add(Restrictions.ne("activityStatus", "Disabled"));
-
 		return addSearchConditions(query, crit);
 	}
 
@@ -283,4 +292,6 @@ public class DistributionProtocolDaoImpl extends AbstractDao<DistributionProtoco
 	private static final String GET_EXPIRING_DPS = FQN + ".getExpiringDps";
 	
 	private static final String GET_SPMN_COUNT_BY_DPS = FQN + ".getSpmnCountByDps";
+
+	private static final String GET_NON_CONSENTING_SPMNS = FQN + ".getNonConsentingSpecimens";
 }

@@ -8,7 +8,7 @@ angular.module('os.biospecimen.models.cp', ['os.common.models'])
           cp.consentModel = osModel('collection-protocols/' + cp.$id() + '/consent-tiers');
 
           cp.consentModel.prototype.getDisplayName = function() {
-            return this.statement;
+            return this.statementCode;
           }
 
           cp.consentModel.prototype.getType = function() {

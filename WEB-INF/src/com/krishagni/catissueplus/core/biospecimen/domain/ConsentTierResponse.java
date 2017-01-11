@@ -68,7 +68,11 @@ public class ConsentTierResponse {
 	}
 
 	public String getStatement() {
-		return getConsentTier().getStatement();
+		return getConsentTier().getStatement().getStatement();
+	}
+
+	public String getStatementCode() {
+		return getConsentTier().getStatement().getCode();
 	}
 
 	public ConsentTierResponse copy() {

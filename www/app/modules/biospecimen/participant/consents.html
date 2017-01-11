@@ -129,7 +129,9 @@
         ng-repeat="consentTierResponse in consent.consentTierResponses" ng-init="consentTierResponseIdx = $index">
         <div>
           <div class="os-consent-stmt">
-            <span title="{{consentTierResponse.statement}}">{{consentTierResponse.statement}}</span>
+            <span title="{{consentTierResponse.statement}}">
+              {{consentTierResponse.statement}} ({{consentTierResponse.code}})
+            </span>
           </div>
           <div ng-if="!editMode">
             <span>{{consentTierResponse.response | osNoValue:'common.none'| translate}}</span>

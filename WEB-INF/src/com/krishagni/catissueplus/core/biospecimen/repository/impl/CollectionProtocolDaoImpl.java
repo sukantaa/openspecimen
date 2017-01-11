@@ -23,7 +23,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
-import com.krishagni.catissueplus.core.biospecimen.domain.ConsentTier;
+import com.krishagni.catissueplus.core.biospecimen.domain.CpConsentTier;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
@@ -292,16 +292,16 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 	}
 
 	@Override
-	public ConsentTier getConsentTier(Long consentId) {
-		return (ConsentTier) sessionFactory.getCurrentSession()
+	public CpConsentTier getConsentTier(Long consentId) {
+		return (CpConsentTier) sessionFactory.getCurrentSession()
 				.getNamedQuery(GET_CONSENT_TIER)
 				.setLong("consentId", consentId)
 				.uniqueResult();
 	}
 	
 	@Override
-	public ConsentTier getConsentTierByStatement(Long cpId, String statement) {
-		return (ConsentTier) sessionFactory.getCurrentSession()
+	public CpConsentTier getConsentTierByStatement(Long cpId, String statement) {
+		return (CpConsentTier) sessionFactory.getCurrentSession()
 				.getNamedQuery(GET_CONSENT_TIER_BY_STATEMENT)
 				.setLong("cpId", cpId)
 				.setString("statement", statement);

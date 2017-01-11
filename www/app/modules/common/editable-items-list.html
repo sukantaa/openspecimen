@@ -21,11 +21,15 @@
         </div>
       </div>
       <div ng-if="$index == editItemIdx">
-        <fieldset ng-disabled="saving">
-          <div class="form-group">
-            <textarea ui-keyup="{'esc': 'revertEdit()', 'enter': 'updateItem()'}" 
-              os-focus="$index == editItemIdx" class="form-control" 
-              ng-model="editItem.text">
+        <fieldset ng-disabled="saving" ng-switch on="!!itemPvs">
+          <div class="form-group" ng-switch-when="true">
+            <os-select ng-model="editItem.text" list="itemPvs" display-prop="displayValue" select-prop="itemKey"
+              refresh="refresh($select.search)" ui-keyup="{'enter': 'updateItem()', 'esc': 'revertEdit()'}">
+            </os-select>
+          </div>
+          <div class="form-group" ng-switch-when="false">
+            <textarea os-focus="$index == editItemIdx" class="form-control" ng-model="editItem.text"
+              ui-keyup="{'esc': 'revertEdit()', 'enter': 'updateItem()'}" >
             </textarea>
           </div>
           <div>
@@ -38,10 +42,16 @@
     <a class="list-group-item" ng-if="!addMode && allowEdit" ng-click="showAddItem()">
       {{addCaption}}
     </a>
+
     <div class="list-group-item" ng-if="addMode">
-      <fieldset ng-disabled="saving">
-        <div class="form-group">
-          <textarea os-focus="true" class="form-control" ng-model="newItem.text" 
+      <fieldset ng-disabled="saving" ng-switch on="!!itemPvs">
+        <div class="form-group" ng-switch-when="true">
+          <os-select ng-model="newItem.text" list="itemPvs" display-prop="displayValue" select-prop="itemKey" 
+            refresh="refresh($select.search)" ui-keyup="{'enter': 'addItem()', 'esc': 'revertAdd()'}">
+          </os-select>
+        </div>
+        <div class="form-group" ng-switch-when="false">
+          <textarea os-focus="true" class="form-control" ng-model="newItem.text"
             ui-keyup="{'enter': 'addItem()', 'esc': 'revertAdd()'}">
           </textarea> 
         </div>

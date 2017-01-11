@@ -46,4 +46,37 @@
       <column name="activityStatus_MOD" type="${bit.type}"/>
     </createTable>
   </changeSet>
+
+  <changeSet author="mdnasim" id="Audit and track changes to coded consent statements">
+    <createTable tableName="OS_CONSENT_STATEMENTS_AUD">
+      <column name="IDENTIFIER" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="REV" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="REVTYPE" type="${smallint.type}"/>
+
+      <column name="CODE" type="${text.type}(32)"/>
+
+      <column name="code_MOD" type="${bit.type}"/>
+
+      <column name="STATEMENT" type="${text.type}(255)"/>
+
+      <column name="statement_MOD" type="${bit.type}"/>
+
+      <column name="ACTIVITY_STATUS" type="${text.type}(16)"/>
+
+      <column name="activityStatus_MOD" type="${bit.type}"/>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Audit and track changes to CP consent tier statements">
+    <addColumn tableName="CATISSUE_CONSENT_TIER_AUD">
+      <column name="CONSENT_STMT_ID" type="${int.type}"/>
+      <column name="consentStmt_MOD" type="${bit.type}"/>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

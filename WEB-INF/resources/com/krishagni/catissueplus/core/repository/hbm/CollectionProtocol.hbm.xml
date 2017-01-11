@@ -96,7 +96,7 @@
 
     <set name="consentTier" table="CATISSUE_CONSENT_TIER" inverse="true" cascade="all-delete-orphan" order-by="id">
       <key column="COLL_PROTOCOL_ID"/>
-      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.ConsentTier"/>
+      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.CpConsentTier"/>
       <filter name="activeEntity"/>
     </set>
 
@@ -247,7 +247,7 @@
       select 
         ct
       from 
-        com.krishagni.catissueplus.core.biospecimen.domain.ConsentTier ct
+        com.krishagni.catissueplus.core.biospecimen.domain.CpConsentTier ct
       where 
         ct.id = :consentId
     </query>

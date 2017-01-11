@@ -398,6 +398,15 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 		if (StringUtils.isNotBlank(errorLabels)) {
 			ose.addError(DistributionOrderErrorCode.INVALID_SPECIMENS_FOR_DP, errorLabels);
 		}
+
+		int stmtsCount = order.getDistributionProtocol().getConsentTiers().size();
+		if (stmtsCount > 0) {
+			List<String> nonConsentingLabels = daoFactory.getDistributionProtocolDao()
+				.getNonConsentingSpecimens(order.getDistributionProtocol().getId(), specimenIds, stmtsCount);
+			if (!nonConsentingLabels.isEmpty()) {
+				ose.addError(DistributionOrderErrorCode.NON_CONSENTING_SPECIMENS, nonConsentingLabels);
+			}
+		}
 	}
 
 	private SavedQuery getReportQuery(DistributionOrder order) {

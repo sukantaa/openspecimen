@@ -11,8 +11,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.krishagni.catissueplus.core.administrative.events.Mergeable;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
-import com.krishagni.catissueplus.core.biospecimen.domain.ConsentTier;
 import com.krishagni.catissueplus.core.biospecimen.domain.ConsentTierResponse;
+import com.krishagni.catissueplus.core.biospecimen.domain.CpConsentTier;
 import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
@@ -149,12 +149,13 @@ public class ConsentDetail extends AttributeModifiedSupport implements Mergeable
 		if (cpr.getConsentWitness() != null) {
 			consent.setWitness(UserSummary.from(cpr.getConsentWitness()));
 		}
-		
-		for (ConsentTier consentTier : cpr.getCollectionProtocol().getConsentTier()) {
+
+		for (CpConsentTier consentTier : cpr.getCollectionProtocol().getConsentTier()) {
 			ConsentTierResponseDetail response = new ConsentTierResponseDetail();
-			response.setStatement(consentTier.getStatement());
+			response.setCode(consentTier.getStatement().getCode());
+			response.setStatement(consentTier.getStatement().getStatement());
 			for (ConsentTierResponse resp : cpr.getConsentResponses()) {
-				if (consentTier.getStatement().equals(resp.getConsentTier().getStatement())) {
+				if (consentTier.getStatement().getCode().equals(resp.getStatementCode())) {
 					response.setResponse(resp.getResponse());
 					break;
 				}
@@ -162,6 +163,7 @@ public class ConsentDetail extends AttributeModifiedSupport implements Mergeable
 			
 			consent.getConsentTierResponses().add(response);
 		}
+
 		return consent;
 	}
 

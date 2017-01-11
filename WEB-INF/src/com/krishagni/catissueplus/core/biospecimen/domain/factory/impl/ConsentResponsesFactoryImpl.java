@@ -5,14 +5,18 @@ import static com.krishagni.catissueplus.core.common.service.PvValidator.isValid
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.ConsentResponses;
-import com.krishagni.catissueplus.core.biospecimen.domain.ConsentTier;
 import com.krishagni.catissueplus.core.biospecimen.domain.ConsentTierResponse;
+import com.krishagni.catissueplus.core.biospecimen.domain.CpConsentTier;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ConsentResponsesFactory;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.ConsentStatementErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CprErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.ConsentDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierResponseDetail;
@@ -101,13 +105,13 @@ public class ConsentResponsesFactoryImpl implements ConsentResponsesFactory {
 			OpenSpecimenException ose) {
 
 		Map<String, ConsentTierResponse> responsesMap = cpr.getConsentResponses().stream()
-				.collect(Collectors.toMap(ConsentTierResponse::getStatement, ConsentTierResponse::copy));
+				.collect(Collectors.toMap(ConsentTierResponse::getStatementCode, ConsentTierResponse::copy));
 
 		for (ConsentTierResponseDetail responseDetail : detail.getConsentTierResponses()) {
 			ConsentTierResponse response = createConsentTierResponse(
 					responseDetail, cpr, responsesMap.get(responseDetail.getStatement()), ose);
 			if (response != null) {
-				responsesMap.put(response.getConsentTier().getStatement(), response);
+				responsesMap.put(response.getStatementCode(), response);
 			}
 		}
 
@@ -128,18 +132,32 @@ public class ConsentResponsesFactoryImpl implements ConsentResponsesFactory {
 			response = new ConsentTierResponse();
 			response.setCpr(cpr);
 
-			for (ConsentTier consentTier : cpr.getCollectionProtocol().getConsentTier()) {
-				if (consentTier.getStatement().equals(detail.getStatement())) {
-					response.setConsentTier(consentTier);
-					break;
-				}
+			String key = null;
+			Predicate<CpConsentTier> findFn = null;
+			if (StringUtils.isNotBlank(detail.getCode())) {
+				key = detail.getCode();
+				findFn = (t) -> t.getStatement().getCode().equals(detail.getCode());
+			} else if (StringUtils.isNotBlank(detail.getStatement())) {
+				key = detail.getStatement();
+				findFn = (t) -> t.getStatement().getStatement().equals(detail.getStatement());
 			}
 
-			if (response.getConsentTier() == null) {
-				ose.addError(CprErrorCode.INVALID_CONSENT_STATEMENT, detail.getStatement());
+			if (key == null) {
+				ose.addError(ConsentStatementErrorCode.CODE_REQUIRED);
 				return null;
 			}
+
+			CpConsentTier tier = cpr.getCollectionProtocol().getConsentTier().stream()
+				.filter(findFn).findFirst().orElse(null);
+
+			if (tier == null) {
+				ose.addError(CprErrorCode.INVALID_CONSENT_STATEMENT, key);
+				return null;
+			}
+
+			response.setConsentTier(tier);
 		}
+
 
 		String respStr = detail.getResponse();
 		if (!isValid(CONSENT_RESPONSE, respStr)) {

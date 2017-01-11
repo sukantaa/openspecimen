@@ -303,10 +303,10 @@ public class CollectionProtocolRegistration extends BaseEntity {
 
 	private void updateConsentResponses(Collection<ConsentTierResponse> consentResponses) {
 		Map<String, ConsentTierResponse> existingResps = getConsentResponses().stream()
-			.collect(Collectors.toMap(ConsentTierResponse::getStatement, resp -> resp));
+			.collect(Collectors.toMap(ConsentTierResponse::getStatementCode, resp -> resp));
 
 		for(ConsentTierResponse newResp : consentResponses) {
-			ConsentTierResponse existingResp = existingResps.remove(newResp.getConsentTier().getStatement());
+			ConsentTierResponse existingResp = existingResps.remove(newResp.getStatementCode());
 			if (existingResp == null) {
 				getConsentResponses().add(newResp);
 			} else {

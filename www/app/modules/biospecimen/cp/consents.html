@@ -1,9 +1,9 @@
 <div class="clearfix">
   <div class="col-xs-8">
-    <div ng-switch="allowEditConsent">
+    <div ng-switch="consentCtx.allowEdit">
       <div ng-switch-when="true">
         <ul class="os-key-values os-one-col" os-inline-editors on-save="editCp">
-          <li class="item" ng-hide="!!consents.tiers && consents.tiers.length > 0">
+          <li class="item" ng-hide="!!consentCtx.tiers && consentCtx.tiers.length > 0">
             <strong class="key key-sm" translate="cp.consents_waived">Consents Waived</strong>
             <div class="value value-md">
               <div class="btn-group btn-group-xs">
@@ -44,9 +44,10 @@
     </div>
 
     <os-editable-item-list
-      items="consents.tiers" text-attr="{{consents.stmtAttr}}" list-title="{{'cp.consent_tiers' | translate}}"
-      add-caption="{{'cp.add_consent_tier' | translate}}" list-changed="listChanged"
-      ng-if="!cp.consentsWaived && (allowEditConsent || consents.tiers.length > 0)" allow-edit="allowEditConsent">
+      items="consentCtx.tiers" item-pvs="consentCtx.stmts" text-attr="displayValue"
+      list-changed="listChanged" allow-edit="consentCtx.allowEdit" refresh="loadConsentStmts" 
+      add-caption="{{'cp.add_consent_tier' | translate}}" list-title="{{'cp.consent_tiers' | translate}}"
+      ng-if="!cp.consentsWaived && (consentCtx.allowEdit || consentCtx.tiers.length > 0)">
     </os-editable-item-list>
   </div>
 </div>

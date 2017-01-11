@@ -18,6 +18,7 @@
     "shipping_and_tracking": "Shipping and Tracking",
     "jobs": "Jobs",
     "training": "Training",
+    "consent_statements": "Consent Statements",
 
     "cp_desc": "Create, update SOP of visits and specimens",
     "rde_desc": "Rapidly capture patients, visits and specimens data",
@@ -34,7 +35,8 @@
     "distribution_orders_desc": "Create, execute request orders for distributing specimens",
     "shipping_and_tracking_desc": "Create, ship, track and receive specimen shipments",
     "jobs_desc": "Create, schedule, execute jobs",
-    "training_desc": "User manual and training videos portal"
+    "training_desc": "User manual and training videos portal",
+    "consent_statements_desc": "Manage coded consent statements"
   },
 
   "common": {
@@ -194,6 +196,7 @@
     "spmn_print_settings": "Specimen Print Settings",
     "when_to_print": "When to Print",
     "copies": "Copies",
+    "delete_consent_tier": "{{entityType}} {{entityName}} of {{entity.cpShortTitle}} will be deleted forever. Are you sure you want to proceed?",
 
     "consents_waived": "Is participant consent waived?",
     "consents_waived_updated": "Participant consent {{waived ? 'waived' : 'enabled'}} successfully.",
@@ -875,6 +878,9 @@
     "add_requirement": "Add Specimen Requirement",
     "dist_spmns_count": "Distributed Specimens",
     "all_sites": "All current and future sites",
+    "consent_tiers": "Consent Tiers",
+    "add_consent_tier": "Add Consent Tier ...",
+    "delete_consent_tier": "{{entityType}} {{entityName}} of {{entity.dpShortTitle}} will be deleted forever. Are you sure you want to proceed?",
 
     "tooltip": {
       "view_details": "Click to view Distribution Protocol details",
@@ -887,6 +893,7 @@
     
     "menu": {
       "overview": "Overview",
+      "consents": "Consents",
       "history": "History",
       "requirements": "Requirements"
     },
@@ -1918,6 +1925,22 @@
       "success_message": "Feedback sent successfully"
     },
     
+  "consent_statement": {
+    "list": "Consent Statements",
+    "create_stmt": "Create Statement",
+    "code": "Code",
+    "statement": "Statement",
+
+    "tooltip": {
+      "add": "Click to add new Consent Statement",
+      "search": "Click to search Consent Statements"
+    },
+
+    "filter": {
+      "title": "Filters"
+    }
+  },
+
     "settings": {
       "title": "Settings",
       "modules": "Modules",
