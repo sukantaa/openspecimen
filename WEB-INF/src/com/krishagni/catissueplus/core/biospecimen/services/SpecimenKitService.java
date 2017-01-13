@@ -5,19 +5,23 @@ import java.util.List;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenKit;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenKitDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenKitSummary;
+import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenKitListCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 
 public interface SpecimenKitService {
 
-    ResponseEvent<SpecimenKitDetail> getSpecimenKit(RequestEvent<Long> req);
+	ResponseEvent<List<SpecimenKitSummary>> getSpecimenKits(RequestEvent<SpecimenKitListCriteria> req);
 
-    ResponseEvent<SpecimenKitDetail> createSpecimenKit(RequestEvent<SpecimenKitDetail> req);
+	ResponseEvent<SpecimenKitDetail> getSpecimenKit(RequestEvent<Long> req);
 
-    ResponseEvent<SpecimenKitDetail> updateSpecimenKit(RequestEvent<SpecimenKitDetail> req);
+	ResponseEvent<SpecimenKitDetail> createSpecimenKit(RequestEvent<SpecimenKitDetail> req);
 
-    //
-    // internal APIs
-    //
-    SpecimenKit createSpecimenKit(SpecimenKitDetail kitDetail, List<Specimen> specimens);
+	ResponseEvent<SpecimenKitDetail> updateSpecimenKit(RequestEvent<SpecimenKitDetail> req);
+
+	//
+	// internal APIs
+	//
+	SpecimenKit createSpecimenKit(SpecimenKitDetail kitDetail, List<Specimen> specimens);
 }

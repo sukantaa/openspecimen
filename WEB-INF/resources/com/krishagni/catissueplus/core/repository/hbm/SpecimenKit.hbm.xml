@@ -30,5 +30,31 @@
     <property name="comments" column="COMMENTS"/>
 
     <property name="activityStatus" column="ACTIVITY_STATUS"/>
+
+    <filter name="activeEntity"/>
+
+    <sql-query name="getParticipantAndSpecimenCount">
+      <return-scalar column="kitId" type="long"/>
+      <return-scalar column="participantCnt" type="long"/>
+      <return-scalar column="specimenCnt" type="long"/>
+
+      select
+        kit.identifier as kitId,
+        count(distinct(cpr.identifier)) as participantCnt,
+        count(distinct(spmn.identifier)) as specimenCnt
+      from
+        os_specimen_kits kit
+        inner join os_kit_specimens ks on ks.kit_id = kit.identifier
+        inner join catissue_specimen spmn on spmn.identifier = ks.specimen_id
+        inner join catissue_specimen_coll_group visit on visit.identifier = spmn.specimen_collection_group_id
+        inner join catissue_coll_prot_reg cpr on cpr.identifier = visit.collection_protocol_reg_id
+      where
+        kit.identifier in (:kitIds) and
+        kit.activity_status != 'Disabled' and
+        spmn.activity_status != 'Disabled'
+      group by
+        kit.identifier;
+    </sql-query>
   </class>
+
 </hibernate-mapping>

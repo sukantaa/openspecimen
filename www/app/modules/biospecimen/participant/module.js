@@ -17,7 +17,8 @@ angular.module('os.biospecimen.participant',
     'os.biospecimen.visit',
     'os.biospecimen.specimen',
     'os.biospecimen.extensions.list',
-    'os.biospecimen.extensions.addedit-record'
+    'os.biospecimen.extensions.addedit-record',
+    'os.biospecimen.specimenkit'
   ])
 
   .config(function($stateProvider) {

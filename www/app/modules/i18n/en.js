@@ -1617,6 +1617,23 @@
     }
   },
 
+  "specimen_kit": {
+    "title": "Specimen Kit",
+    "list": "Specimen Kits",
+    "id": "ID",
+    "sending_site": "Sending Site",
+    "sender": "Sender",
+    "sending_date": "Sending Date",
+    "receiving_site": "Receiving Site",
+    "participants": "Participants",
+    "specimens": "Specimens",
+    "comments": "Comments",
+
+    "menu": {
+      "overview": "Overview"
+    }
+  },
+
   "specimen_list": {
     "new_list": "New Specimen Cart",
     "create_list": "Create Specimen Cart",

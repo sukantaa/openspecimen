@@ -1,0 +1,35 @@
+<div>
+  <div class="clearfix">
+    <div class="col-xs-9">
+      <ul class="os-key-values os-one-col">
+        <li class="item">
+          <strong class="key key-sm" translate="specimen_kit.sender">Sender</strong>
+          <span class="value value-md">{{kit.sender | osUserDisplayName}}</span>
+        </li>
+
+        <li class="item">
+          <strong class="key key-sm" translate="specimen_kit.sending_date">Sending Date</strong>
+          <span class="value value-md">{{kit.sendingDate | date: global.dateFmt | osNoValue}}</span>
+        </li>
+
+        <li class="item">
+          <strong class="key key-sm" translate="specimen_kit.sending_site">Sending Site</strong>
+          <span class="value value-md">{{kit.sendingSite}}</span>
+        </li>
+
+        <li class="item">
+          <strong class="key key-sm" translate="specimen_kit.receiving_site">Receiving Site</strong>
+          <span class="value value-md">{{kit.receivingSite}}</span>
+        </li>
+      </ul>
+
+      <div class="os-section os-line-section" ng-if="!!kit.comments">
+        <strong class="key key-sm">
+          <span translate="specimen_kit.comments">Comments</span>
+          <span>&nbsp;</span>
+        </strong>
+        <span class="value value-md">{{kit.comments}}</span>
+      </div>
+    </div>
+  </div>
+</div>
