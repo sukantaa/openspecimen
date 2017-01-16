@@ -363,7 +363,7 @@
     "regDate": "Registration Date",
     "reg_another_protocol": "Add to Another Protocol",
     "confirm_merging": "Merging Participant",
-    "confirm_merge": "Participant being updated will be deleted forever. Do you want to continue with merge?",
+    "confirm_merge": "Participant being updated will be deleted. Do you want to continue with merge?",
     "search_results": "Participant Search Result for {{key}}",
     "visits_count": "Visits",
     "specimens_count": "Specimens",
