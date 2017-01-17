@@ -1,11 +1,15 @@
 package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenKit;
@@ -48,6 +52,29 @@ public class SpecimenKitDaoImpl extends AbstractDao<SpecimenKit> implements Spec
 		}
 
 		return kits;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> getCpIds(String key, Object value) {
+		List<Object[]> rows = getCurrentSession().createCriteria(SpecimenKit.class)
+			.createAlias("collectionProtocol", "cp")
+			.setProjection(
+				Projections.projectionList()
+					.add(Projections.property("cp.id"))
+					.add(Projections.property("id")))
+			.add(Restrictions.eq(key, value))
+			.list();
+
+		if (CollectionUtils.isEmpty(rows)) {
+			return Collections.emptyMap();
+		}
+
+		Map<String, Object> result = new HashMap<>();
+		Object[] row = rows.iterator().next();
+		result.put("cpId", row[0]);
+		result.put("kitId", row[1]);
+		return result;
 	}
 
 	private void addCpRestriction(Criteria query, SpecimenKitListCriteria listCrit) {

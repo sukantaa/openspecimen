@@ -1628,9 +1628,16 @@
     "participants": "Participants",
     "specimens": "Specimens",
     "comments": "Comments",
+    "report_gen_initiated": "Generating specimen kit report...",
+    "downloading_report": "Downloading specimen kit report...",
+    "report_will_be_emailed": "Generating specimen kit report is taking more time than anticipated. Link to download report will be sent to you by email",
 
     "menu": {
       "overview": "Overview"
+    },
+
+    "buttons": {
+      "download_report": "Download Report"
     }
   },
 
@@ -2092,6 +2099,8 @@
         "welcome_video_url_desc": "URL for welcome video",
         "shipment_export_report": "Shipment export report",
         "shipment_export_report_desc": "Export Report format for all shipments",
+        "specimen_kit_export_report": "Specimen Kit export report",
+        "specimen_kit_export_report_desc": "Saved query to use for exporting details of specimen kit",
         "field_separator": "Field Separator",
         "field_separator_desc": "A single character that specifies how records in delimited text file should be split into fields. For example: CSV files use comma (,) as the field separator",
         "deploy_env": "Deployment Environment",

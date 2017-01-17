@@ -266,6 +266,28 @@
                 </row>
               </subForm>
             </row>
+
+            <row>
+              <subForm>
+                <name>specimenKits</name>
+                <udn>specimenKits</udn>
+                <caption>#getMessage("specimen_kit_specimens")</caption>
+                <table>OS_KIT_SPECIMENS</table>
+                <foreignKey>SPECIMEN_ID</foreignKey>
+                <parentKey>IDENTIFIER</parentKey>
+
+                <row>
+                  <subForm>
+                    <name>specimenKit</name>
+                    <udn>specimenKit</udn>
+                    <caption>#getMessage("specimen_kit")</caption>
+                    <table>OS_SPECIMEN_KITS</table>
+                    <foreignKey>IDENTIFIER</foreignKey>
+                    <parentKey>KIT_ID</parentKey>
+                  </subForm>
+                </row>
+              </subForm>
+            </row>
           </subForm>
         </row>
       </subForm>

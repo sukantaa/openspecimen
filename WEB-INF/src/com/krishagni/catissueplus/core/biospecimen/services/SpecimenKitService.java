@@ -9,6 +9,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.SpecimenKitSummary;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenKitListCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
 
 public interface SpecimenKitService {
 
@@ -19,6 +20,8 @@ public interface SpecimenKitService {
 	ResponseEvent<SpecimenKitDetail> createSpecimenKit(RequestEvent<SpecimenKitDetail> req);
 
 	ResponseEvent<SpecimenKitDetail> updateSpecimenKit(RequestEvent<SpecimenKitDetail> req);
+
+	ResponseEvent<QueryDataExportResult> exportReport(RequestEvent<Long> req);
 
 	//
 	// internal APIs

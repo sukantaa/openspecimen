@@ -342,6 +342,8 @@
   <bean id="specimenKitSvc" class="com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenKitServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="specimenKitFactory" ref="specimenKitFactory"/>
+    <property name="querySvc" ref="querySvc"/>
+    <property name="deDaoFactory" ref="deDaoFactory"/>
   </bean>
   
   <bean id="formDataMgr" class="edu.common.dynamicextensions.napi.impl.FormDataManagerImpl">
@@ -1022,6 +1024,7 @@
         <ref bean="distributionProtocolService"/>
         <ref bean="distributionOrderService"/>
         <ref bean="shipmentSvc"/>
+        <ref bean="specimenKitSvc"/>
       </list>
     </property>
   </bean>

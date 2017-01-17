@@ -255,4 +255,14 @@
       )
     </sql>
   </changeSet>
+
+  <changeSet author="vgaikwad" id="Setting to specify saved query to use for specimen kit report">
+    <sql>
+      call add_cfg_prop(
+        'common', 'specimen_kit_export_report',
+        'specimen_kit_export_report', 'specimen_kit_export_report_desc',
+        'INT', ''
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

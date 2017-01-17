@@ -4,3 +4,4 @@ scg.xml
 specimen.xml
 order.xml
 shipment.xml
+specimen-kit.xml

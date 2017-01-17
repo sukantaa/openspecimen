@@ -19,6 +19,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenKitListCri
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenKitService;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
 
 @Controller
 @RequestMapping("/specimen-kits")
@@ -87,6 +88,15 @@ public class SpecimenKitsController {
 	public SpecimenKitDetail updateKit(@PathVariable("id") Long id, @RequestBody SpecimenKitDetail detail) {
 		detail.setId(id);
 		ResponseEvent<SpecimenKitDetail> resp = kitSvc.updateSpecimenKit(getRequest(detail));
+		resp.throwErrorIfUnsuccessful();
+		return resp.getPayload();
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/report")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public QueryDataExportResult exportReport(@PathVariable Long id) {
+		ResponseEvent<QueryDataExportResult> resp = kitSvc.exportReport(getRequest(id));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}

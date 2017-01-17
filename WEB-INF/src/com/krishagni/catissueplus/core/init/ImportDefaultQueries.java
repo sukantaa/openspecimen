@@ -30,7 +30,7 @@ import com.krishagni.catissueplus.core.de.domain.SavedQuery;
 import com.krishagni.catissueplus.core.de.repository.DaoFactory;
 
 public class ImportDefaultQueries implements InitializingBean {
-	
+
 	private static Log LOGGER = LogFactory.getLog(ImportDefaultQueries.class);
 
 	private PlatformTransactionManager txnMgr;
@@ -101,6 +101,8 @@ public class ImportDefaultQueries implements InitializingBean {
 						configureDistributionReportQuery(query);
 					} else if (resource.getFilename().equals(SHIPMENT_REPORT_QUERY)) {
 						configureShipmentReportQuery(query);
+					} else if (resource.getFilename().equals(SPECIMEN_KIT_REPORT_QUERY)) {
+						configureKitReportQuery(query);
 					}
 				}
 			} else {
@@ -176,6 +178,10 @@ public class ImportDefaultQueries implements InitializingBean {
 		saveDefaultQuerySetting(query, "common", "shipment_export_report");
 	}
 
+	private void configureKitReportQuery(SavedQuery query) {
+		saveDefaultQuerySetting(query, "common", "specimen_kit_export_report");
+	}
+
 	private void saveDefaultQuerySetting(SavedQuery query, String module, String name) {
 		try {
 			AuthUtil.setCurrentUser(sysUser);
@@ -207,4 +213,6 @@ public class ImportDefaultQueries implements InitializingBean {
 	private static final String DISTRIBUTION_REPORT_QUERY = "DistributionReport.json";
 
 	private static final String SHIPMENT_REPORT_QUERY = "ShipmentReport.json";
+
+	private static final String SPECIMEN_KIT_REPORT_QUERY = "SpecimenKitReport.json";
 }
