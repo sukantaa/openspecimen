@@ -53,7 +53,7 @@
         kit.activity_status != 'Disabled' and
         spmn.activity_status != 'Disabled'
       group by
-        kit.identifier;
+        kit.identifier
     </sql-query>
   </class>
 
