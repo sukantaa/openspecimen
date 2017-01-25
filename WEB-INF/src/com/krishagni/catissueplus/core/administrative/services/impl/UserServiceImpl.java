@@ -29,6 +29,7 @@ import com.krishagni.catissueplus.core.administrative.repository.UserListCriteri
 import com.krishagni.catissueplus.core.administrative.services.UserService;
 import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
 import com.krishagni.catissueplus.core.auth.domain.AuthErrorCode;
+import com.krishagni.catissueplus.core.auth.domain.LoginAuditLog;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
@@ -224,7 +225,6 @@ public class UserServiceImpl implements UserService {
 	@PlusTransactional
 	public ResponseEvent<UserDetail> updateStatus(RequestEvent<UserDetail> req) {
 		try {
-			boolean sendRequestApprovedMail = false;
 			UserDetail detail = req.getPayload();
 			User user =  daoFactory.getUserDao().getById(detail.getId());
 			if (user == null) {
@@ -245,16 +245,11 @@ public class UserServiceImpl implements UserService {
  			
 			if (isActivated(currentStatus, newStatus)) {
 				user.setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
-				sendRequestApprovedMail = currentStatus.equals(Status.ACTIVITY_STATUS_PENDING.getStatus());
+				onAccountActivation(user, currentStatus);
 			} else if (isLocked(currentStatus, newStatus)) {
 				user.setActivityStatus(Status.ACTIVITY_STATUS_LOCKED.getStatus());
 			}
-			
-			if (sendRequestApprovedMail) {
-				ForgotPasswordToken token = generateForgotPwdToken(user);
-				sendUserCreatedEmail(user, token);
-			}
-			
+
 			return ResponseEvent.response(UserDetail.from(user));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -423,14 +418,6 @@ public class UserServiceImpl implements UserService {
 		return ResponseEvent.response(InstituteDetail.from(institute));
 	}
 
-	private UserListCriteria addUserListCriteria(UserListCriteria crit) {
-		if (!AuthUtil.isAdmin() && !crit.listAll()) {
-			crit.instituteName(getCurrUserInstitute().getName());
-		}
-
-		return crit;
-	}
-
 	@Override
 	@PlusTransactional
 	public ResponseEvent<Boolean> broadcastAnnouncement(RequestEvent<AnnouncementDetail> req) {
@@ -454,6 +441,14 @@ public class UserServiceImpl implements UserService {
 		} catch(Exception e) {
 			return ResponseEvent.serverError(e);
 		}
+	}
+
+	private UserListCriteria addUserListCriteria(UserListCriteria crit) {
+		if (!AuthUtil.isAdmin() && !crit.listAll()) {
+			crit.instituteName(getCurrUserInstitute().getName());
+		}
+
+		return crit;
 	}
 
 	private ResponseEvent<UserDetail> updateUser(RequestEvent<UserDetail> req, boolean partial) {
@@ -492,7 +487,7 @@ public class UserServiceImpl implements UserService {
 			ose.checkAndThrow();
 
 			boolean wasInstituteAdmin = existingUser.isInstituteAdmin();
-			
+
 			existingUser.update(user);
 			
 			if (!wasInstituteAdmin && existingUser.isInstituteAdmin()) {
@@ -694,5 +689,24 @@ public class UserServiceImpl implements UserService {
 		props.put("$subject", new String[] { detail.getSubject() });
 		props.put("annDetail", detail);
 		emailService.sendEmail(ANNOUNCEMENT_EMAIL_TMPL, adminEmailAddr, rcpts, null, props);
+	}
+
+	private void onAccountActivation(User user, String prevStatus) {
+		if (prevStatus.equals(Status.ACTIVITY_STATUS_PENDING.getStatus())) {
+			ForgotPasswordToken token = generateForgotPwdToken(user);
+			sendUserCreatedEmail(user, token);
+		} else if (prevStatus.equals(Status.ACTIVITY_STATUS_LOCKED.getStatus())) {
+			addAutoLogin(user);
+		}
+	}
+
+	private void addAutoLogin(User user) {
+		LoginAuditLog log = new LoginAuditLog();
+		log.setUser(user);
+		log.setIpAddress("0.0.0.0");
+		log.setLoginTime(Calendar.getInstance().getTime());
+		log.setLogoutTime(log.getLoginTime());
+		log.setLoginSuccessful(true);
+		daoFactory.getAuthDao().saveLoginAuditLog(log);
 	}
 }
