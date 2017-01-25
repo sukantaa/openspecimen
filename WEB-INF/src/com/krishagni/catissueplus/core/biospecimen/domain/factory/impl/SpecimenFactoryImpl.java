@@ -38,11 +38,11 @@ import com.krishagni.catissueplus.core.biospecimen.events.SpecimenEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenResolver;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
+import com.krishagni.commons.errors.ErrorType;
 
 public class SpecimenFactoryImpl implements SpecimenFactory {
 

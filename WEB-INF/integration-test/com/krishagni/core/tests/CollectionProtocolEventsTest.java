@@ -29,7 +29,6 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CopyCpeOpDetail;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolService;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.core.common.ApplicationContextConfigurer;

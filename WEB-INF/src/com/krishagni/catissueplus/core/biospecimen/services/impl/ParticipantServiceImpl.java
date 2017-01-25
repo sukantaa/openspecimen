@@ -25,13 +25,13 @@ import com.krishagni.catissueplus.core.biospecimen.services.ParticipantService;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.ConfigChangeListener;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.service.MpiGenerator;
+import com.krishagni.commons.errors.ErrorType;
 
 public class ParticipantServiceImpl implements ParticipantService, InitializingBean {
 	private static Log logger = LogFactory.getLog(ParticipantServiceImpl.class);

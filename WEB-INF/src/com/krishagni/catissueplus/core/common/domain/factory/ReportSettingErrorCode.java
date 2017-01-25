@@ -1,6 +1,6 @@
 package com.krishagni.catissueplus.core.common.domain.factory;
 
-import com.krishagni.catissueplus.core.common.errors.ErrorCode;
+import com.krishagni.commons.errors.ErrorCode;
 
 public enum ReportSettingErrorCode implements ErrorCode {
 	DATA_SOURCE_REQ,

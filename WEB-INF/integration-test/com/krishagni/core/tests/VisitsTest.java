@@ -37,7 +37,6 @@ import com.krishagni.catissueplus.core.biospecimen.repository.VisitsListCriteria
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolRegistrationService;
 import com.krishagni.catissueplus.core.biospecimen.services.VisitService;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.core.common.ApplicationContextConfigurer;

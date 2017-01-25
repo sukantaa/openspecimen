@@ -10,6 +10,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.krishagni.catissueplus.core.administrative.domain.Shipment;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.importer.events.Mergeable;
 
 
 public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serializable {

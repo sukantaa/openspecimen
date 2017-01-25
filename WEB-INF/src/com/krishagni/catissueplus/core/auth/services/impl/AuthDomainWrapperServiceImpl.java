@@ -11,7 +11,7 @@ import com.krishagni.catissueplus.core.auth.services.AuthDomainWrapperService;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
-import com.krishagni.commons.errors.AppException;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class AuthDomainWrapperServiceImpl implements AuthDomainWrapperService {
 
@@ -24,30 +24,18 @@ public class AuthDomainWrapperServiceImpl implements AuthDomainWrapperService {
 	@Override
 	@PlusTransactional	
 	public ResponseEvent<List<AuthDomainSummary>> getDomains(RequestEvent<ListAuthDomainCriteria> req) {
-		try {
-			return ResponseEvent.response(authDomainService.getDomains(req.getPayload()));
-		} catch (AppException ae) {
-			return ResponseEvent.serverError(ae);
-		}
+		return Utility.invokeFn(authDomainService::getDomains, req);
 	}
 
 	@Override
 	@PlusTransactional
 	public ResponseEvent<AuthDomainDetail> registerDomain(RequestEvent<AuthDomainDetail> req) {
-		try {
-			return ResponseEvent.response(authDomainService.registerDomain(req.getPayload()));
-		} catch (AppException ae) {
-			return ResponseEvent.serverError(ae);
-		}
+		return Utility.invokeFn(authDomainService::registerDomain, req);
 	}
 
 	@Override
 	@PlusTransactional
 	public ResponseEvent<AuthDomainDetail> updateDomain(RequestEvent<AuthDomainDetail> req) {
-		try {
-			return ResponseEvent.response(authDomainService.updateDomain(req.getPayload()));
-		} catch (AppException ae) {
-			return ResponseEvent.serverError(ae);
-		}
+		return Utility.invokeFn(authDomainService::updateDomain, req);
 	}
 }

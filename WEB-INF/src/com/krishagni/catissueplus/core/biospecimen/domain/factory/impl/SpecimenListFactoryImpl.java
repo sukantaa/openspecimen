@@ -19,10 +19,10 @@ import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDetails;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
-import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.commons.errors.ErrorType;
+import com.krishagni.commons.util.MessageUtil;
 
 public class SpecimenListFactoryImpl implements SpecimenListFactory {
 	private DaoFactory daoFactory;

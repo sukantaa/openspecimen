@@ -8,7 +8,6 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
@@ -17,6 +16,7 @@ import com.krishagni.catissueplus.core.de.domain.SavedQuery;
 import com.krishagni.catissueplus.core.de.domain.factory.CpCatalogSettingFactory;
 import com.krishagni.catissueplus.core.de.events.CpCatalogSettingDetail;
 import com.krishagni.catissueplus.core.de.services.SavedQueryErrorCode;
+import com.krishagni.commons.errors.ErrorType;
 
 public class CpCatalogSettingFactoryImpl implements CpCatalogSettingFactory {
 	
@@ -36,7 +36,7 @@ public class CpCatalogSettingFactoryImpl implements CpCatalogSettingFactory {
 	public CpCatalogSetting createSetting(CpCatalogSettingDetail detail) {
 		CpCatalogSetting query = new CpCatalogSetting();
 		
-		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);		
+		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 		setCollectionProtocol(detail, query, ose);
 		setQuery(detail, query, ose);
 		setCreationDetail(query);

@@ -28,13 +28,13 @@ import com.krishagni.catissueplus.core.biospecimen.events.CpSpecimenLabelPrintSe
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.impl.CollectionProtocolCopier;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.service.LabelGenerator;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
+import com.krishagni.commons.errors.ErrorCode;
+import com.krishagni.commons.errors.ErrorType;
 
 public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory {
 	private DaoFactory daoFactory;

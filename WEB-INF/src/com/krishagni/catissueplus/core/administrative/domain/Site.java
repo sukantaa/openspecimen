@@ -15,11 +15,11 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEven
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.common.CollectionUpdater;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.commons.errors.ErrorType;
 
 @Audited
 public class Site extends BaseExtensionEntity {

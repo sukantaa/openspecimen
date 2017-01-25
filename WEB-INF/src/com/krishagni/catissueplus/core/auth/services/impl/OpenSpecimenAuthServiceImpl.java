@@ -28,12 +28,8 @@ public class OpenSpecimenAuthServiceImpl implements Authenticator {
 		try{
 			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
 			authManager.authenticate(authenticationToken);
-		} catch(AuthenticationException e) {
-			// throw OpenSpecimenException.userError(AuthErrorCode.INVALID_CREDENTIALS);
-			//
-			// TODO: replace with error code
-			//
-			throw new IllegalAccessError("Invalid credentials");
+		} catch (AuthenticationException e) {
+			throw OpenSpecimenException.userError(AuthErrorCode.INVALID_CREDENTIALS);
 		}
 	}
 }

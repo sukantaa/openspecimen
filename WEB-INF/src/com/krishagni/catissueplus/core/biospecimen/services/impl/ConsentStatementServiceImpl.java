@@ -12,12 +12,12 @@ import com.krishagni.catissueplus.core.biospecimen.repository.ConsentStatementLi
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.ConsentStatementService;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.commons.errors.ErrorType;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class ConsentStatementServiceImpl implements ConsentStatementService {

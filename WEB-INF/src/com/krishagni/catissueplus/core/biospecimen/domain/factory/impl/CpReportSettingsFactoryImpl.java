@@ -19,12 +19,12 @@ import com.krishagni.catissueplus.core.common.domain.factory.ReportSettingErrorC
 import com.krishagni.catissueplus.core.common.events.ReportSettingsDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.de.domain.SavedQuery;
 import com.krishagni.catissueplus.core.de.services.SavedQueryErrorCode;
+import com.krishagni.commons.errors.ErrorType;
 
 public class CpReportSettingsFactoryImpl implements CpReportSettingsFactory {
 	private DaoFactory daoFactory;

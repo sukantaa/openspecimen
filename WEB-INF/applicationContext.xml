@@ -545,6 +545,7 @@
     <constructor-arg value="${plugin.dir}"/>
     <property name="basenames">
       <list>
+        <value>classpath:i18n/messages*</value>
         <value>classpath*:errors/messages*</value>
         <value>classpath:com/krishagni/openspecimen/**/errors/messages*</value>
       </list>

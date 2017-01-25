@@ -1,7 +1,7 @@
 
 package com.krishagni.catissueplus.core.biospecimen.domain.factory;
 
-import com.krishagni.catissueplus.core.common.errors.ErrorCode;
+import com.krishagni.commons.errors.ErrorCode;
 
 public enum ParticipantErrorCode implements ErrorCode {
 	NOT_FOUND,

@@ -7,9 +7,9 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.ConsentStateme
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ConsentStatementFactory;
 import com.krishagni.catissueplus.core.biospecimen.events.ConsentStatementDetail;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.commons.errors.ErrorType;
 
 public class ConsentStatementFactoryImpl implements ConsentStatementFactory {
 	

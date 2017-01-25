@@ -41,7 +41,7 @@ import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.CsvFileWriter;
 import com.krishagni.catissueplus.core.common.util.CsvWriter;
-import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.commons.util.MessageUtil;
 
 
 public class SpecimenListServiceImpl implements SpecimenListService {

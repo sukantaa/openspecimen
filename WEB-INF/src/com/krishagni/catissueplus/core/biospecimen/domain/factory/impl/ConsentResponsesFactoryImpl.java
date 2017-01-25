@@ -21,9 +21,9 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.CprErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.ConsentDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierResponseDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.commons.errors.ErrorType;
 
 public class ConsentResponsesFactoryImpl implements ConsentResponsesFactory {
 	

@@ -4,7 +4,7 @@ import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPos
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.common.domain.AbstractLabelTmplToken;
 import com.krishagni.catissueplus.core.common.domain.LabelTmplToken;
-import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.commons.util.MessageUtil;
 
 public class SpecimenLocationPrintToken extends AbstractLabelTmplToken implements LabelTmplToken {
 

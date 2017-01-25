@@ -15,9 +15,9 @@ import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolRegi
 import com.krishagni.catissueplus.core.biospecimen.events.ParticipantDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.commons.errors.ErrorType;
 
 
 public class CollectionProtocolRegistrationFactoryImpl implements CollectionProtocolRegistrationFactory {

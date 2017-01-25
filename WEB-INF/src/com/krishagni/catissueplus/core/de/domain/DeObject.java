@@ -19,12 +19,12 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
-import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
 import com.krishagni.catissueplus.core.de.events.ExtensionDetail.AttrDetail;
 import com.krishagni.catissueplus.core.de.events.FormRecordSummary;
 import com.krishagni.catissueplus.core.de.repository.DaoFactory;
+import com.krishagni.commons.util.MessageUtil;
 
 import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.DatePicker;

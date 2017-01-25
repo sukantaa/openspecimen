@@ -15,7 +15,6 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.events.PmiDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
-import com.krishagni.catissueplus.core.common.errors.ErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.MpiGenerator;
 import com.krishagni.catissueplus.core.common.service.impl.DefaultMpiGenerator;
@@ -23,6 +22,7 @@ import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.RegexValidator;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.common.util.Validator;
+import com.krishagni.commons.errors.ErrorCode;
 
 public class ParticipantUtil {
 	public static boolean ensureUniqueUid(DaoFactory daoFactory, String uid, OpenSpecimenException ose) {

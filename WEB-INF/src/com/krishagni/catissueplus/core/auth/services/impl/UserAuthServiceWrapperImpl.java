@@ -18,6 +18,7 @@ import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.commons.domain.IUser;
 import com.krishagni.commons.errors.AppException;
 
@@ -31,23 +32,13 @@ public class UserAuthServiceWrapperImpl extends UserAuthenticationServiceImpl im
 	@Override
 	@PlusTransactional
 	public ResponseEvent<Map<String, Object>> authenticateUser(RequestEvent<LoginDetail> req) {
-		try {
-			return ResponseEvent.response(super.authenticateUser(req.getPayload()));
-		} catch (AppException ae) {
-			// TODO: handle error codes
-			return ResponseEvent.serverError(ae);
-		}
+		return Utility.invokeFn(super::authenticateUser, req);
 	}
 
 	@Override
 	@PlusTransactional
 	public ResponseEvent<AuthToken> validateToken(RequestEvent<TokenDetail> req) {
-		try {
-			return ResponseEvent.response(super.validateToken(req.getPayload()));
-		} catch (AppException ae) {
-			// TODO: handle error codes
-			return ResponseEvent.serverError(ae);
-		}
+		return Utility.invokeFn(super::validateToken, req);
 	}
 
 	@Override
@@ -57,8 +48,7 @@ public class UserAuthServiceWrapperImpl extends UserAuthenticationServiceImpl im
 			User user = (User)super.getLoggedInUser();
 			return ResponseEvent.response(UserSummary.from(user));
 		} catch (AppException ae) {
-			// TODO: handle error codes
-			return ResponseEvent.serverError(ae);
+			return ResponseEvent.fromAppException(ae);
 		}
 	}
 
@@ -69,7 +59,7 @@ public class UserAuthServiceWrapperImpl extends UserAuthenticationServiceImpl im
 			super.removeToken(req.getPayload());
 			return ResponseEvent.response("Success");
 		} catch (AppException ae) {
-			return ResponseEvent.serverError(ae);
+			return ResponseEvent.fromAppException(ae);
 		}
 	}
 	

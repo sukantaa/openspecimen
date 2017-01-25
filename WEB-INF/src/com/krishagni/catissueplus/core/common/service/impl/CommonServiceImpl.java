@@ -6,7 +6,6 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.domain.UnhandledException;
-import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -15,6 +14,7 @@ import com.krishagni.catissueplus.core.common.repository.UnhandledExceptionListC
 import com.krishagni.catissueplus.core.common.service.CommonService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.commons.errors.CommonErrorCode;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class CommonServiceImpl implements CommonService {

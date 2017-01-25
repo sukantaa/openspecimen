@@ -1,6 +1,6 @@
 package com.krishagni.catissueplus.core.common.domain;
 
-import com.krishagni.catissueplus.core.common.errors.ErrorCode;
+import com.krishagni.commons.errors.ErrorCode;
 
 public enum ConfigErrorCode implements ErrorCode {
 	MODULE_NOT_FOUND,

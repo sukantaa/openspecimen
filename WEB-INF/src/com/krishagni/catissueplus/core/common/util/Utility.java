@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.activation.FileTypeMap;
@@ -41,6 +42,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
 import com.krishagni.catissueplus.core.common.PdfUtil;
+import com.krishagni.catissueplus.core.common.events.RequestEvent;
+import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.commons.errors.AppException;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -434,6 +438,17 @@ public class Utility {
 	public static List<String> equals(Object obj1, Object obj2, List<String> fields) {
 		return fields.stream().filter(field -> !equals(obj1, obj2, field)).collect(Collectors.toList());
 	}
+
+	public static <I, O> ResponseEvent<O> invokeFn(Function<I, O> fn, RequestEvent<I> req) {
+		try {
+			return ResponseEvent.response(fn.apply(req.getPayload()));
+		} catch (AppException ae) {
+			return ResponseEvent.fromAppException(ae);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 
 	private static Map<String, Object> getExtnAttrValues(BaseExtensionEntity obj) {
 		if (obj.getExtension() != null) {

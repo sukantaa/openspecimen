@@ -17,9 +17,9 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeFactory;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.commons.errors.ErrorType;
 
 public class CpeFactoryImpl implements CpeFactory {
 	private DaoFactory daoFactory;

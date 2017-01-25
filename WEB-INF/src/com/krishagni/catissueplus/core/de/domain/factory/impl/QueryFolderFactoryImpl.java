@@ -10,7 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.de.domain.QueryFolder;
@@ -20,6 +19,7 @@ import com.krishagni.catissueplus.core.de.events.QueryFolderDetails;
 import com.krishagni.catissueplus.core.de.events.SavedQuerySummary;
 import com.krishagni.catissueplus.core.de.repository.DaoFactory;
 import com.krishagni.catissueplus.core.de.services.SavedQueryErrorCode;
+import com.krishagni.commons.errors.ErrorType;
 
 public class QueryFolderFactoryImpl implements QueryFolderFactory {
 	private DaoFactory daoFactory;

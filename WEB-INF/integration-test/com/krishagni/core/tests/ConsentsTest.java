@@ -28,7 +28,6 @@ import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierOp;
 import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierOp.OP;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolService;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.core.common.ApplicationContextConfigurer;

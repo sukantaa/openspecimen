@@ -33,7 +33,6 @@ import com.krishagni.catissueplus.core.administrative.events.StorageContainerSum
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.StorageContainerService;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;

@@ -8,8 +8,8 @@ import com.krishagni.catissueplus.core.administrative.domain.factory.Permissible
 import com.krishagni.catissueplus.core.administrative.domain.factory.PvErrorCode;
 import com.krishagni.catissueplus.core.administrative.events.PermissibleValueDetails;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.commons.errors.ErrorType;
 
 public class PermissibleValueFactoryImpl implements PermissibleValueFactory {
 

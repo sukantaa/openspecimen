@@ -26,10 +26,10 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitFactory;
 import com.krishagni.catissueplus.core.biospecimen.events.VisitDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
+import com.krishagni.commons.errors.ErrorType;
 
 public class VisitFactoryImpl implements VisitFactory {
 

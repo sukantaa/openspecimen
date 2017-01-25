@@ -1,91 +1,31 @@
 
 package com.krishagni.catissueplus.core.common.errors;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.krishagni.commons.errors.AppException;
+import com.krishagni.commons.errors.ErrorCode;
+import com.krishagni.commons.errors.ErrorType;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.JDBCException;
-
-import com.krishagni.catissueplus.core.common.util.MessageUtil;
-
-public class OpenSpecimenException extends RuntimeException {
+public class OpenSpecimenException extends AppException {
 	private static final long serialVersionUID = -1473557909717365251L;
 	
-	private ErrorType errorType = ErrorType.NONE;
-
-	private List<ParameterizedError> errors = new ArrayList<ParameterizedError>();
-	
-	private Throwable exception;
-
-	private Long exceptionId;
-	
 	public OpenSpecimenException(ErrorType type, ErrorCode error, Object ... params) {
-		this.errorType = type;
-		errors.add(new ParameterizedError(error, params));
+		super(type, error, params);
 	}
 	
 	public OpenSpecimenException(ErrorType type) {
-		this.errorType = type;
+		super(type);
 	}
 	
 	public OpenSpecimenException(Throwable t) {
-		this(null, t);
+		super(t);
 	}
-	
+
+	public OpenSpecimenException(AppException ae) {
+		super(ae);
+	}
+
 	public OpenSpecimenException(Long exceptionId, Throwable t) {
-		this.exceptionId = exceptionId;
-		this.errorType = ErrorType.SYSTEM_ERROR;
-		this.exception = t;
-
-		if (t instanceof JDBCException) {
-			JDBCException je = (JDBCException)t;
-			String dbMsg = je.getCause().getMessage();
-			if (StringUtils.isBlank(dbMsg)) {
-				dbMsg = je.getSQLException().getMessage();
-			}
-
-			errors.add(new ParameterizedError(CommonErrorCode.SQL_EXCEPTION, dbMsg));
-		}
-	}
-	
-	public ErrorType getErrorType() {
-		return errorType;
-	}
-	
-	public List<ParameterizedError> getErrors() {
-		return errors;
-	}
-
-	public Throwable getException() {
-		return exception;
-	}
-	
-	public void addError(ErrorCode error, Object ... params) {
-		this.errors.add(new ParameterizedError(error, params));
-	}
-
-	public void addErrors(List<ParameterizedError> errors) {
-		this.errors.addAll(errors);
-	}
-	
-	public boolean hasAnyErrors() {
-		return !this.errors.isEmpty() || exception != null;
-	}
-	
-	public void checkAndThrow() {
-		if (hasAnyErrors()) {
-			throw this;
-		}
-	}
-
-	public boolean containsError(ErrorCode error) {
-		if (CollectionUtils.isEmpty(errors)) {
-			return false;
-		}
-
-		return errors.stream().anyMatch(pe -> pe.error().equals(error));
+		super(exceptionId, t);
 	}
 
 	public void rethrow(ErrorCode oldError, ErrorCode newError, Object ... params) {
@@ -95,32 +35,7 @@ public class OpenSpecimenException extends RuntimeException {
 		throw this;
 	}	
 	
-	public String getMessage() {
-		StringBuilder errorMsg = new StringBuilder();
-
-		if (CollectionUtils.isNotEmpty(errors)) {
-			for (ParameterizedError pe : errors) {
-				errorMsg.append(getMessage(pe)).append(", ");
-			}
-			errorMsg.delete(errorMsg.length() - 2, errorMsg.length());
-		} else if (exception != null) {
-			errorMsg.append(exception.getMessage());
-		} else {
-			errorMsg.append(MessageUtil.getInstance().getMessage("internal_error"));
-		}
-
-		return errorMsg.toString();
-	}
-
-	public Long getExceptionId() {
-		return exceptionId;
-	}
-
-	public void setExceptionId(Long exceptionId) {
-		this.exceptionId = exceptionId;
-	}
-
-	public static OpenSpecimenException userError(ErrorCode error, Object ... params) {		
+	public static OpenSpecimenException userError(ErrorCode error, Object ... params) {
 		return new OpenSpecimenException(ErrorType.USER_ERROR, error, params);
 	}
 	
@@ -134,9 +49,5 @@ public class OpenSpecimenException extends RuntimeException {
 	
 	public static OpenSpecimenException serverError(Long exceptionId, Throwable e) {
 		return new OpenSpecimenException(exceptionId, e);
-	}
-
-	private String getMessage(ParameterizedError error) {
-		return MessageUtil.getInstance().getMessage(error.error().code().toLowerCase(), error.params());
 	}
 }

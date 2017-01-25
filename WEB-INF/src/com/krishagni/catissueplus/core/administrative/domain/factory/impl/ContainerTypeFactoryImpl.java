@@ -10,10 +10,10 @@ import com.krishagni.catissueplus.core.administrative.events.ContainerTypeDetail
 import com.krishagni.catissueplus.core.administrative.events.ContainerTypeSummary;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.LabelGenerator;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.commons.errors.ErrorType;
 
 public class ContainerTypeFactoryImpl implements ContainerTypeFactory {
 	private DaoFactory daoFactory;

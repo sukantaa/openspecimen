@@ -25,13 +25,13 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenPoolRequirements;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenRequirementDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
-import com.krishagni.catissueplus.core.common.errors.ErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.service.LabelGenerator;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.commons.errors.ErrorCode;
+import com.krishagni.commons.errors.ErrorType;
 
 public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactory {
 

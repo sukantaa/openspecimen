@@ -7,9 +7,9 @@ import com.krishagni.catissueplus.core.administrative.domain.factory.InstituteEr
 import com.krishagni.catissueplus.core.administrative.domain.factory.InstituteFactory;
 import com.krishagni.catissueplus.core.administrative.events.InstituteDetail;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.commons.errors.ErrorType;
 
 public class InstituteFactoryImpl implements InstituteFactory {
 

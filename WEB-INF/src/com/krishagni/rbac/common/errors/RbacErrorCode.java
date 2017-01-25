@@ -1,6 +1,6 @@
 package com.krishagni.rbac.common.errors;
 
-import com.krishagni.catissueplus.core.common.errors.ErrorCode;
+import com.krishagni.commons.errors.ErrorCode;
 
 
 public enum RbacErrorCode implements ErrorCode {

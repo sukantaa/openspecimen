@@ -14,8 +14,8 @@ import org.apache.log4j.Logger;
 
 import au.com.bytecode.opencsv.CSVReader;
 
-import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.commons.errors.CommonErrorCode;
 
 public class CsvMapReader {
 

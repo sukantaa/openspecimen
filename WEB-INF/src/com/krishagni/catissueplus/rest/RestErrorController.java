@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.krishagni.catissueplus.core.common.errors.ErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
-import com.krishagni.catissueplus.core.common.errors.ParameterizedError;
+import com.krishagni.commons.errors.ErrorCode;
+import com.krishagni.commons.errors.ErrorType;
+import com.krishagni.commons.errors.ParameterizedError;
 
 @ControllerAdvice
 public class RestErrorController extends ResponseEntityExceptionHandler {

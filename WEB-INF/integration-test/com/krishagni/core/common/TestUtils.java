@@ -12,8 +12,6 @@ import org.dbunit.operation.DatabaseOperation;
 import org.junit.Assert;
 import org.springframework.context.ApplicationContext;
 
-import com.krishagni.catissueplus.core.common.errors.ErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 
 public class TestUtils {

@@ -31,13 +31,13 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantErr
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
 import com.krishagni.catissueplus.core.common.Pair;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.Operation;
 import com.krishagni.catissueplus.core.common.events.Resource;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.commons.errors.ErrorType;
 import com.krishagni.importer.services.impl.ImporterContextHolder;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 import com.krishagni.rbac.domain.Subject;

@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.saml.SAMLCredential;
 
 import com.krishagni.auth.domain.AuthDomain;
+import com.krishagni.auth.domain.AuthErrorCode;
 import com.krishagni.auth.domain.ForgotPasswordToken;
 import com.krishagni.auth.repository.AuthDaoFactory;
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
@@ -32,7 +33,6 @@ import com.krishagni.catissueplus.core.administrative.services.UserService;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
@@ -42,9 +42,10 @@ import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.service.EmailService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
-import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.commons.errors.ErrorType;
+import com.krishagni.commons.util.MessageUtil;
 import com.krishagni.rbac.events.SubjectRoleDetail;
 import com.krishagni.rbac.service.RbacService;
 
@@ -399,11 +400,7 @@ public class UserServiceImpl implements UserService {
 			if (user == null || user.isPending() || user.isClosed()) {
 				return ResponseEvent.userError(UserErrorCode.NOT_FOUND);
 			} else if (user.isLocked()) {
-				// return ResponseEvent.userError(AuthErrorCode.USER_LOCKED);
-				//
-				// TODO: replace error code
-				//
-				throw new IllegalAccessError("User locked");
+				return ResponseEvent.userError(AuthErrorCode.USER_LOCKED);
 			}
 
 			ForgotPasswordToken oldToken = authDaoFactory.getForgotPasswordTokenDao().getByUserId(user.getId());

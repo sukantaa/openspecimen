@@ -9,13 +9,13 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
-import com.krishagni.catissueplus.core.administrative.events.Mergeable;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.ConsentTierResponse;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpConsentTier;
 import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.importer.events.Mergeable;
 
 @ListenAttributeChanges
 public class ConsentDetail extends AttributeModifiedSupport implements Mergeable<String, ConsentDetail>, Serializable {

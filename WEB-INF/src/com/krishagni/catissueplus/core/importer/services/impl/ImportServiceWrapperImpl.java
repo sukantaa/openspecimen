@@ -4,15 +4,12 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.Authentication;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
-import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
@@ -20,7 +17,6 @@ import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.importer.services.ImportServiceWrapper;
-import com.krishagni.commons.errors.AppException;
 import com.krishagni.commons.util.MessageUtil;
 import com.krishagni.importer.domain.ImportJob;
 import com.krishagni.importer.events.FileRecordsDetail;
@@ -48,45 +44,45 @@ public class ImportServiceWrapperImpl implements ImportServiceWrapper, Initializ
 			crit.userId(AuthUtil.getCurrentUser().getId());
 		}
 
-		return delegate(importSvc::getImportJobs, req);
+		return Utility.invokeFn(importSvc::getImportJobs, req);
 	}
 
 	@Override
 	@PlusTransactional
 	public ResponseEvent<ImportJobDetail> getImportJob(RequestEvent<Long> req) {
-		return delegate(importSvc::getImportJob, req);
+		return Utility.invokeFn(importSvc::getImportJob, req);
 	}
 
 	@Override
 	@PlusTransactional
 	public ResponseEvent<String> getImportJobFile(RequestEvent<Long> req) {
-		return delegate(importSvc::getImportJobFile, req);
+		return Utility.invokeFn(importSvc::getImportJobFile, req);
 	}
 
 	@Override
 	public ResponseEvent<String> uploadImportJobFile(RequestEvent<InputStream> req) {
-		return delegate(importSvc::uploadImportJobFile, req);
+		return Utility.invokeFn(importSvc::uploadImportJobFile, req);
 	}
 
 	@Override
 	@PlusTransactional
 	public ResponseEvent<ImportJobDetail> importObjects(RequestEvent<ImportDetail> req) {
-		return delegate(importSvc::importObjects, req);
+		return Utility.invokeFn(importSvc::importObjects, req);
 	}
 
 	@Override
 	public ResponseEvent<String> getInputFileTemplate(RequestEvent<ObjectSchemaCriteria> req) {
-		return delegate(importSvc::getInputFileTemplate, req);
+		return Utility.invokeFn(importSvc::getInputFileTemplate, req);
 	}
 
 	@Override
 	public ResponseEvent<List<Map<String, Object>>> processFileRecords(RequestEvent<FileRecordsDetail> req) {
-		return delegate(importSvc::processFileRecords, req);
+		return Utility.invokeFn(importSvc::processFileRecords, req);
 	}
 
 	@Override
 	public ResponseEvent<ImportJobDetail> stopJob(RequestEvent<Long> req) {
-		return delegate(importSvc::stopJob, req);
+		return Utility.invokeFn(importSvc::stopJob, req);
 	}
 
 	@Override
@@ -137,19 +133,6 @@ public class ImportServiceWrapperImpl implements ImportServiceWrapper, Initializ
 				sendJobStatusNotification(job);
 			}
 		});
-	}
-
-	private <I, O> ResponseEvent<O> delegate(Function<I, O> fn, RequestEvent<I> req) {
-		try {
-			return ResponseEvent.response(fn.apply(req.getPayload()));
-		} catch (AppException ae) {
-			//
-			// TODO: handle app exception
-			//
-			return ResponseEvent.error(new OpenSpecimenException(ErrorType.USER_ERROR));
-		} catch (Exception e) {
-			return ResponseEvent.serverError(e);
-		}
 	}
 
 	private void sendJobStatusNotification(ImportJob job) {

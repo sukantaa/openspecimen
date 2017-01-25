@@ -58,7 +58,6 @@ import com.krishagni.catissueplus.core.biospecimen.services.SpecimenKitService;
 import com.krishagni.catissueplus.core.biospecimen.services.VisitService;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -68,6 +67,7 @@ import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
 import com.krishagni.catissueplus.core.common.service.impl.ConfigurationServiceImpl;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.commons.errors.ErrorType;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class CollectionProtocolRegistrationServiceImpl implements CollectionProtocolRegistrationService, ObjectStateParamsResolver {

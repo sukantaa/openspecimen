@@ -41,7 +41,7 @@ import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.ExportedFileDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
-import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.commons.util.MessageUtil;
 
 import edu.common.dynamicextensions.nutility.IoUtil;
 

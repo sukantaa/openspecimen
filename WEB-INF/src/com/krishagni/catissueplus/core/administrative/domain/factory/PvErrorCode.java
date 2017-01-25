@@ -1,6 +1,6 @@
 package com.krishagni.catissueplus.core.administrative.domain.factory;
 
-import com.krishagni.catissueplus.core.common.errors.ErrorCode;
+import com.krishagni.commons.errors.ErrorCode;
 
 public enum PvErrorCode implements ErrorCode {
 	ATTR_NAME_REQUIRED,

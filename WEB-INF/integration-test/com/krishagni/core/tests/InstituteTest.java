@@ -30,7 +30,6 @@ import com.krishagni.catissueplus.core.administrative.events.InstituteQueryCrite
 import com.krishagni.catissueplus.core.administrative.repository.InstituteListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.InstituteService;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;

@@ -1,9 +1,10 @@
 
 package com.krishagni.catissueplus.core.common.events;
 
-import com.krishagni.catissueplus.core.common.errors.ErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.commons.errors.AppException;
+import com.krishagni.commons.errors.ErrorCode;
+import com.krishagni.commons.errors.ErrorType;
 
 public class ResponseEvent<T> {
 
@@ -79,7 +80,7 @@ public class ResponseEvent<T> {
 	}
 
 	public static <P> ResponseEvent<P> response(P payload) {
-		return new ResponseEvent<P>(payload);
+		return new ResponseEvent<>(payload);
 	}
 	
 	public static <P> ResponseEvent<P> error(OpenSpecimenException error) {
@@ -87,26 +88,30 @@ public class ResponseEvent<T> {
 	}
 	
 	public static <P> ResponseEvent<P> error(OpenSpecimenException error, boolean forceTxCommitEnabled) {
-		return new ResponseEvent<P>(error, forceTxCommitEnabled);
+		return new ResponseEvent<>(error, forceTxCommitEnabled);
+	}
+
+	public static <P> ResponseEvent<P> fromAppException(AppException ae) {
+		return new ResponseEvent<P>(new OpenSpecimenException(ae));
 	}
 
 	public static <P> ResponseEvent<P> userError(ErrorCode error) {
-		return new ResponseEvent<P>(OpenSpecimenException.userError(error));
+		return new ResponseEvent<>(OpenSpecimenException.userError(error));
 	}
 
 	public static <P> ResponseEvent<P> serverError(ErrorCode error) {
-		return new ResponseEvent<P>(OpenSpecimenException.serverError(error));
+		return new ResponseEvent<>(OpenSpecimenException.serverError(error));
 	}
 	
 	public static <P> ResponseEvent<P> userError(ErrorCode error, boolean forceTxCommitEnabled) {
-		return new ResponseEvent<P>(OpenSpecimenException.userError(error), forceTxCommitEnabled);
+		return new ResponseEvent<>(OpenSpecimenException.userError(error), forceTxCommitEnabled);
 	}
 
 	public static <P> ResponseEvent<P> userError(ErrorCode error, Object ... params) {
-		return new ResponseEvent<P>(OpenSpecimenException.userError(error, params));
+		return new ResponseEvent<>(OpenSpecimenException.userError(error, params));
 	}
 	
 	public static <P> ResponseEvent<P> serverError(Exception e) {
-		return new ResponseEvent<P>(OpenSpecimenException.serverError(e));
+		return new ResponseEvent<>(OpenSpecimenException.serverError(e));
 	}
 }

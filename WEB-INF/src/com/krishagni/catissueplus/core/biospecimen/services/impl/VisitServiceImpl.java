@@ -42,7 +42,6 @@ import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJob;
 import com.krishagni.catissueplus.core.common.domain.PrintItem;
-import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
@@ -55,6 +54,7 @@ import com.krishagni.catissueplus.core.common.service.LabelPrinter;
 import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.commons.errors.ErrorType;
 
 public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver {
 	private DaoFactory daoFactory;

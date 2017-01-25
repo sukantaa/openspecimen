@@ -10,6 +10,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.importer.events.Mergeable;
 
 public class DistributionOrderDetail extends DistributionOrderSummary implements Mergeable<String, DistributionOrderDetail>, Serializable {
 	private UserSummary distributor;
