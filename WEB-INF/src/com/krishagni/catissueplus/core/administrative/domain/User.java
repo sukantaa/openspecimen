@@ -268,6 +268,22 @@ public class User extends BaseEntity implements UserDetails, IUser {
 		return this.activityStatus.equals(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
 	}
 
+
+	@Override
+	public String getDomainName() {
+		return getDomainName();
+	}
+
+	@Override
+	public void lock() {
+		setActivityStatus(Status.ACTIVITY_STATUS_LOCKED.getStatus());
+	}
+
+	@Override
+	public boolean isPasswordExpired() {
+		return isExpired();
+	}
+
 	public void update(User user) {
 		setFirstName(user.getFirstName());
 		setLastName(user.getLastName());

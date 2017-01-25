@@ -48,6 +48,12 @@
         <span translate="participant.generate_report">Generate Report</span>
       </a>
     </li>
+    <li ng-if="!!cp.bulkPartRegEnabled">
+      <a ui-sref="specimen-kit-list">
+        <span class="fa fa-medkit"></span>
+        <span translate="specimen_kit.list">Specimen Kits</span>
+      </a>
+    </li>
 
     <os-plugin-hooks view-name="'participant-list'" sec-name="'more-menu'"></os-plugin-hooks>
   </ul>

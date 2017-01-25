@@ -355,6 +355,16 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 				aliquot.setFreezeThawCycles(spec.getFreezeThawCycles());
 				aliquot.setIncrParentFreezeThaw(spec.getIncrParentFreezeThaw());
 				aliquot.setExtensionDetail(spec.getExtensionDetail());
+
+				if (StringUtils.isNotBlank(spec.getParentContainerName())) {
+					StorageLocationSummary containerLocation = new StorageLocationSummary();
+					containerLocation.setName(spec.getParentContainerName());
+					aliquot.setContainerLocation(containerLocation);
+				}
+
+				if (StringUtils.isNotBlank(spec.getContainerType())) {
+					aliquot.setContainerTypeName(spec.getContainerType());
+				}
 				
 				StorageLocationSummary location = new StorageLocationSummary();
 				location.setName(spec.getContainerName());

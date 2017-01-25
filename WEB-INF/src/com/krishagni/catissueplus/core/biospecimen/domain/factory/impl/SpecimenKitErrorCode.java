@@ -15,7 +15,9 @@ public enum SpecimenKitErrorCode implements ErrorCode {
 
     RECV_SITE_REQUIRED,
 
-    INVALID_RECV_SITE;
+    INVALID_RECV_SITE,
+
+    RPT_TMPL_NOT_CONF;
 
     @Override
     public String code() {

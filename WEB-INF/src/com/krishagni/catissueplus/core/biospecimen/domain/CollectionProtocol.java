@@ -115,7 +115,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	
 	private Boolean consentsWaived;
 
-	private Set<ConsentTier> consentTier = new HashSet<ConsentTier>();
+	private Set<CpConsentTier> consentTier = new HashSet<>();
 	
 	private Set<User> coordinators = new HashSet<User>();
 	
@@ -398,15 +398,15 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	}
 
 	@NotAudited
-	public Set<ConsentTier> getConsentTier() {
+	public Set<CpConsentTier> getConsentTier() {
 		return consentTier;
 	}
 
-	public void setConsentTier(Set<ConsentTier> consentTier) {
+	public void setConsentTier(Set<CpConsentTier> consentTier) {
 		this.consentTier = consentTier;
 	}
 
-	public ConsentTier addConsentTier(ConsentTier ct) {
+	public CpConsentTier addConsentTier(CpConsentTier ct) {
 		ct.setId(null);
 		ct.setCollectionProtocol(this);
 		ct.setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
@@ -548,7 +548,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	}
 	
 	public void copyConsentTierTo(CollectionProtocol cp) {
-		for (ConsentTier consentTier : getConsentTier()) {
+		for (CpConsentTier consentTier : getConsentTier()) {
 			cp.addConsentTier(consentTier.copy());
 		}
 	}
@@ -571,12 +571,12 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		}
 	}
 	
-	public ConsentTier updateConsentTier(ConsentTier ct) {
+	public CpConsentTier updateConsentTier(CpConsentTier ct) {
 		if (ct.getId() == null) {
 			throw OpenSpecimenException.userError(CpErrorCode.CONSENT_TIER_NOT_FOUND);
 		}
 
-		ConsentTier existing = getConsentTierById(ct.getId());
+		CpConsentTier existing = getConsentTierById(ct.getId());
 		if (existing == null) {
 			throw OpenSpecimenException.userError(CpErrorCode.CONSENT_TIER_NOT_FOUND);
 		}
@@ -585,15 +585,15 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		return ct;		
 	}
 	
-	public ConsentTier removeConsentTier(Long ctId) {		
-		ConsentTier ct = getConsentTierById(ctId);
+	public CpConsentTier removeConsentTier(Long ctId) {		
+		CpConsentTier ct = getConsentTierById(ctId);
 		if (ct == null) {
 			throw OpenSpecimenException.userError(CpErrorCode.CONSENT_TIER_NOT_FOUND);
 		}
 		
 		List<DependentEntityDetail> dependentEntities = ct.getDependentEntities();
 		if (!dependentEntities.isEmpty()) {
-			throw OpenSpecimenException.userError(CpErrorCode.CONSENT_REF_ENTITY_FOUND, ct.getStatement());
+			throw OpenSpecimenException.userError(CpErrorCode.CONSENT_REF_ENTITY_FOUND, ct.getStatement().getCode());
 		}
 		ct.setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 		return ct;
@@ -705,8 +705,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		return events;
 	}
 
-	private ConsentTier getConsentTierById(Long ctId) {
-		for (ConsentTier ct : consentTier) {
+	private CpConsentTier getConsentTierById(Long ctId) {
+		for (CpConsentTier ct : consentTier) {
 			if (ct.getId().equals(ctId)) {
 				return ct;
 			}

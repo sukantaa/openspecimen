@@ -7,11 +7,14 @@ angular.module('openspecimen')
         items: '=',
         allowEdit: '=',
 
+        itemPvs:    '=',
+
         textAttr: '@',
         listTitle: '@',
         addCaption: '@',
 
-        listChanged: '&'
+        listChanged: '&',
+        refresh: '&'
       },
 
       link: function(scope, element, attrs) {
@@ -35,7 +38,11 @@ angular.module('openspecimen')
           }
 
           var item = {};
-          item[scope.textAttr] = scope.newItem.text;
+          if (scope.itemPvs) {
+            item.itemKey = scope.newItem.text;
+          } else {
+            item[scope.textAttr] = scope.newItem.text;
+          }
 
           if (scope.listChanged) {
             scope.saving = true;
@@ -51,6 +58,10 @@ angular.module('openspecimen')
                 /** This is trick to enable auto focus on add */
                 scope.addMode = false;
                 $timeout(function() { scope.addMode = true; }, 0);
+              },
+
+              function() {
+                scope.saving = false;
               } 
             );
           } else {
@@ -64,8 +75,9 @@ angular.module('openspecimen')
             return;
           }
 
+          var prop = !scope.itemPvs ? scope.textAttr : 'itemKey';
           scope.editItemIdx = idx;
-          scope.editItem = {text: scope.items[idx][scope.textAttr]};
+          scope.editItem = {text: scope.items[idx][prop]};
           scope.addMode = false;
         };
 
@@ -130,7 +142,11 @@ angular.module('openspecimen')
 
                 scope.editItemIdx = undefined;
                 scope.saving = false;
-              } 
+              },
+
+              function(result) {
+                scope.saving = false;
+              }
             );
           } else {
             scope.items[scope.editItemIdx] = item;

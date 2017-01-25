@@ -1,0 +1,9 @@
+<div class="clearfix">
+  <div class="col-xs-8">
+    <os-editable-item-list
+      items="consentCtx.tiers" item-pvs="consentCtx.stmts" text-attr="displayValue"
+      list-changed="listChanged" allow-edit="consentCtx.allowEdit" refresh="loadConsentStmts"
+      add-caption="{{'dp.add_consent_tier' | translate}}" list-title="{{'dp.consent_tiers' | translate}}">
+    </os-editable-item-list>
+  </div>
+</div>

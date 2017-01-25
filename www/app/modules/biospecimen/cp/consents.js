@@ -1,33 +1,77 @@
 
 angular.module('os.biospecimen.cp.consents', ['os.biospecimen.models'])
   .controller('CpConsentsCtrl', function($scope, $state, $q, cp, consentTiers, DeleteUtil, Alerts,
-    AuthorizationService) {
-    $scope.cp = cp;
-    $scope.allowEditConsent = AuthorizationService.isAllowed($scope.cpResource.updateOpts);
+    AuthorizationService, ConsentStatement) {
 
-    var consents = {
-      tiers: consentTiers,
-      stmtAttr: 'statement'
-    };
+    var defStmts;
 
-    $scope.consents = consents;
+    function init() {
+      $scope.cp = cp;
+      $scope.consentCtx = {
+        allowEdit: AuthorizationService.isAllowed($scope.cpResource.updateOpts),
+        tiers: initConsentTiers(consentTiers),
+        stmts: []
+      };
+
+      loadConsentStmts();
+    }
+
+    function initConsentTiers(consentTiers) {
+      angular.forEach(consentTiers, initConsentTier);
+      return consentTiers;
+    }
+
+    function initConsentTier(consentTier) {
+      return addDisplayValue(consentTier, consentTier.statementCode, consentTier.statement);
+    }
+
+    function loadConsentStmts(searchString) {
+      if (defStmts && !searchString) {
+        $scope.consentCtx.stmts = defStmts;
+        return;
+      }
+
+      if (defStmts && defStmts.length < 100) {
+        return;
+      }
+
+      ConsentStatement.query({searchString: searchString}).then(
+        function(stmts) {
+          $scope.consentCtx.stmts = stmts;
+          angular.forEach(stmts,
+            function(stmt) {
+              addDisplayValue(stmt, stmt.code, stmt.statement);
+            }
+          );
+
+          if (!searchString) {
+            defStmts = stmts;
+          }
+        }
+      );
+    }
+
+    function addDisplayValue(obj, code, statement) {
+      return angular.extend(obj, {itemKey: code, displayValue: statement + ' (' + code + ')'});
+    }
+
+    $scope.loadConsentStmts = loadConsentStmts;
 
     $scope.listChanged = function(action, stmt) {
       if (action == 'add') {
-        stmt = cp.newConsentTier(stmt);
-      }
-
-      if (action == 'add' || action == 'update') {
-        return stmt.$saveOrUpdate();
+        return cp.newConsentTier({statementCode: stmt.itemKey}).$saveOrUpdate().then(initConsentTier);
+      } else if (action == 'update') {
+        return cp.newConsentTier({id: stmt.id, statementCode: stmt.displayValue}).$saveOrUpdate().then(initConsentTier);
       } else if (action == 'remove') {
         var deferred = $q.defer();
-        DeleteUtil.delete(
-          stmt,
-          {
-            onDeletion: onConsentDeletion(deferred),
-            onDeleteFail: onConsentDeleteFail(deferred)
-          }
-        );
+        var opts = {
+          confirmDelete: 'cp.delete_consent_tier',
+          onDeletion: function() { deferred.resolve(true); },
+          onDeleteFail: function() { deferred.reject(); }
+        }
+
+        stmt.cpShortTitle = cp.shortTitle;
+        DeleteUtil.delete(stmt, opts);
         return deferred.promise;
       }
 
@@ -42,16 +86,5 @@ angular.module('os.biospecimen.cp.consents', ['os.biospecimen.models'])
       );
     }
 
-    function onConsentDeletion(deferred) {
-      return function() {
-        deferred.resolve(true);
-      }
-    }
-
-    function onConsentDeleteFail(deferred) {
-      return function() {
-        deferred.reject();
-      }
-    }
-
+    init();
   });

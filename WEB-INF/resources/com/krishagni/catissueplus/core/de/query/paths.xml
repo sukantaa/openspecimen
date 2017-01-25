@@ -33,11 +33,19 @@
 		<links>
 		</links>
 	</path>
-	
+
 	<path>
 		<from>Participant</from>
 		<to>Shipment</to>
 		<start-field>scgs.specimens.specimenShipments.shipment</start-field>
+		<links>
+		</links>
+	</path>
+
+	<path>
+		<from>Participant</from>
+		<to>SpecimenKit</to>
+		<start-field>scgs.specimens.specimenKits.specimenKit</start-field>
 		<links>
 		</links>
 	</path>
@@ -62,47 +70,59 @@
 		<from>Specimen</from>
 		<to>CollectionProtocol</to>
 		<start-field>scg.participant</start-field>
-                <links>
-                        <link>
-                                <key>CP_ID</key>
-                                <ref-tab-key>IDENTIFIER</ref-tab-key>
-                        </link>
-                </links>
+		<links>
+			<link>
+				<key>CP_ID</key>
+				<ref-tab-key>IDENTIFIER</ref-tab-key>
+			</link>
+		</links>
 	</path>
 
 	<path>
 		<from>SpecimenCollectionGroup</from>
 		<to>CollectionProtocol</to>
 		<start-field>participant</start-field>
-                <links>
-                        <link>
-                                <key>CP_ID</key>
-                                <ref-tab-key>IDENTIFIER</ref-tab-key>
-                        </link>
-                </links>
+		<links>
+			<link>
+				<key>CP_ID</key>
+				<ref-tab-key>IDENTIFIER</ref-tab-key>
+			</link>
+		</links>
 	</path>
 
 	<path>
 		<from>Shipment</from>
 		<to>CollectionProtocol</to>
 		<start-field>shipmentItems.specimen.scg.participant</start-field>
-                <links>
-                        <link>
-                                <key>CP_ID</key>
-                                <ref-tab-key>IDENTIFIER</ref-tab-key>
-                        </link>
-                </links>
+		<links>
+			<link>
+				<key>CP_ID</key>
+				<ref-tab-key>IDENTIFIER</ref-tab-key>
+			</link>
+		</links>
 	</path>
 
 	<path>
 		<from>Order</from>
 		<to>CollectionProtocol</to>
 		<start-field>orderItems.specimen.scg.participant</start-field>
-                <links>
-                        <link>
-                                <key>CP_ID</key>
-                                <ref-tab-key>IDENTIFIER</ref-tab-key>
-                        </link>
-                </links>
+		<links>
+			<link>
+				<key>CP_ID</key>
+				<ref-tab-key>IDENTIFIER</ref-tab-key>
+			</link>
+		</links>
+	</path>
+
+	<path>
+		<from>SpecimenKit</from>
+		<to>CollectionProtocol</to>
+		<start-field>kitSpecimens.specimen.scg.participant</start-field>
+		<links>
+			<link>
+				<key>CP_ID</key>
+				<ref-tab-key>IDENTIFIER</ref-tab-key>
+			</link>
+		</links>
 	</path>
 </paths>

@@ -113,6 +113,9 @@
           <li show-if-allowed="scheduledJobReadOpts">
             <a ui-sref="job-list" translate="menu.jobs">Jobs</a>
           </li>
+          <li show-if-admin="institute">
+            <a ui-sref="consent-statement-list" translate="menu.consent_statements">Consent Statements</a>
+          </li>
           <li>
             <a href="{{userCtx.trainingUrl}}" target="_blank" translate="menu.training">Training</a>
           </li>

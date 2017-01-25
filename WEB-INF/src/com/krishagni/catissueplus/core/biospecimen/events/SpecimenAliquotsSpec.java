@@ -17,8 +17,18 @@ public class SpecimenAliquotsSpec {
 	private BigDecimal qtyPerAliquot;
 	
 	private Date createdOn;
-	
+
+	private String parentContainerName;
+
+	private String containerType;
+
 	private String containerName;
+
+	private String positionX;
+
+	private String positionY;
+
+	private int position;
 
 	private Integer freezeThawCycles;
 
@@ -26,12 +36,6 @@ public class SpecimenAliquotsSpec {
 
 	private Boolean closeParent;
 
-	private String positionX;
-
-	private String positionY;
-
-	private int position;
-	
 	private ExtensionDetail extensionDetail;
 
 	public Long getParentId() {
@@ -82,12 +86,52 @@ public class SpecimenAliquotsSpec {
 		this.createdOn = createdOn;
 	}
 
+	public String getParentContainerName() {
+		return parentContainerName;
+	}
+
+	public void setParentContainerName(String parentContainerName) {
+		this.parentContainerName = parentContainerName;
+	}
+
+	public String getContainerType() {
+		return containerType;
+	}
+
+	public void setContainerType(String containerType) {
+		this.containerType = containerType;
+	}
+
 	public String getContainerName() {
 		return containerName;
 	}
 
 	public void setContainerName(String containerName) {
 		this.containerName = containerName;
+	}
+
+	public String getPositionX() {
+		return positionX;
+	}
+
+	public void setPositionX(String positionX) {
+		this.positionX = positionX;
+	}
+
+	public String getPositionY() {
+		return positionY;
+	}
+
+	public void setPositionY(String positionY) {
+		this.positionY = positionY;
+	}
+
+	public int getPosition() {
+		return position;
+	}
+
+	public void setPosition(int position) {
+		this.position = position;
 	}
 
 	public Integer getFreezeThawCycles() {
@@ -116,30 +160,6 @@ public class SpecimenAliquotsSpec {
 
 	public boolean closeParent() {
 		return closeParent == null ? false : closeParent;
-	}
-
-	public String getPositionX() {
-		return positionX;
-	}
-
-	public void setPositionX(String positionX) {
-		this.positionX = positionX;
-	}
-
-	public String getPositionY() {
-		return positionY;
-	}
-
-	public void setPositionY(String positionY) {
-		this.positionY = positionY;
-	}
-
-	public int getPosition() {
-		return position;
-	}
-
-	public void setPosition(int position) {
-		this.position = position;
 	}
 
 	public ExtensionDetail getExtensionDetail() {

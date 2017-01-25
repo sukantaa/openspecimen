@@ -346,6 +346,8 @@
   <bean id="specimenKitSvc" class="com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenKitServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="specimenKitFactory" ref="specimenKitFactory"/>
+    <property name="querySvc" ref="querySvc"/>
+    <property name="deDaoFactory" ref="deDaoFactory"/>
   </bean>
   
   <bean id="formDataMgr" class="edu.common.dynamicextensions.napi.impl.FormDataManagerImpl">
@@ -547,6 +549,13 @@
   
   <bean id="commonSvc" class="com.krishagni.catissueplus.core.common.service.impl.CommonServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
+  </bean>
+  
+  <bean id="consentStmtSvc" class="com.krishagni.catissueplus.core.biospecimen.services.impl.ConsentStatementServiceImpl">
+    <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="consentStatementFactory">
+      <bean class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.ConsentStatementFactoryImpl"/>
+    </property>
   </bean>
   
   <bean id="messageSource" class="com.krishagni.catissueplus.core.common.WildcardReloadableResourceBundle">
@@ -1027,6 +1036,7 @@
         <ref bean="distributionProtocolService"/>
         <ref bean="distributionOrderService"/>
         <ref bean="shipmentSvc"/>
+        <ref bean="specimenKitSvc"/>
       </list>
     </property>
   </bean>

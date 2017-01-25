@@ -105,4 +105,164 @@
       tableName="OS_KIT_SPECIMENS"
       columnNames="KIT_ID, SPECIMEN_ID"/>
   </changeSet>
+
+  <changeSet author="mdnasim" id="Coded consent statements">
+    <createTable tableName="OS_CONSENT_STATEMENTS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+
+      <column name="CODE" type="${text.type}(32)">
+        <constraints unique="true" nullable="false"/>
+      </column>
+
+      <column name="STATEMENT" type="${text.type}(255)">
+        <constraints unique="true" nullable="false"/>
+      </column>
+
+      <column name="ACTIVITY_STATUS" type="${text.type}(16)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Identifier sequence for coded consent statements" dbms="oracle">
+    <createSequence sequenceName="OS_CONSENT_STMTS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="mdnasim" id="DP consent tiers">
+    <createTable tableName="OS_DP_CONSENT_TIERS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+
+      <column name="DP_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="CONSENT_STMT_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="ACTIVITY_STATUS" type="${text.type}(16)" defaultValue="Active">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Identifier sequence for DP consent tiers" dbms="oracle">
+    <createSequence sequenceName="OS_DP_CONSENT_TIER_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="mdnasim" id="FK on DP ID of DP coded consent statements">
+    <addForeignKeyConstraint
+      constraintName="FK_DP_CONSENT_STMTS_DP_ID"
+      baseTableName="OS_DP_CONSENT_TIERS" baseColumnNames="DP_ID"
+      referencedTableName="CATISSUE_DISTRIBUTION_PROTOCOL" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="FK on consent ID of DP consent statements">
+    <addForeignKeyConstraint
+      constraintName="FK_DP_CONSENT_TIERS_CONSENT_ID"
+      baseTableName="OS_DP_CONSENT_TIERS" baseColumnNames="CONSENT_STMT_ID"
+      referencedTableName="OS_CONSENT_STATEMENTS" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="CP consent tier statement">
+    <addColumn tableName="CATISSUE_CONSENT_TIER">
+      <column name="CONSENT_STMT_ID" type="${int.type}"/>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="FK on CP consent tier statement">
+    <addForeignKeyConstraint
+      constraintName="FK_CP_CONSENT_TIERS_CONSENT_ID"
+      baseTableName="CATISSUE_CONSENT_TIER" baseColumnNames="CONSENT_STMT_ID"
+      referencedTableName="OS_CONSENT_STATEMENTS" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Move existing CP consent tier statement text to coded consent statement table" dbms="oracle">
+    <sql>
+      insert into os_consent_statements
+        (identifier, code, statement, activity_status)
+      select
+        os_consent_stmts_seq.nextval, concat('C', os_consent_stmts_seq.currval), t0.statement, 'Active'
+      from
+        (
+          select
+            distinct statement
+          from
+            catissue_consent_tier
+          where
+            activity_status = 'Active'
+        ) t0
+    </sql>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Move existing CP consent tier statement text to coded consent statement table" dbms="mysql">
+    <sql>
+      set @row := 0;
+
+      insert into os_consent_statements
+        (code, statement, activity_status)
+      select
+        concat('C', @row := @row + 1), t0.statement, 'Active'
+      from
+        (
+          select
+            distinct statement
+          from
+            catissue_consent_tier
+          where
+            activity_status = 'Active'
+        ) t0
+    </sql>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Update consent tier statement ID">
+    <sql>
+      update
+        catissue_consent_tier tier
+      set
+        consent_stmt_id = (
+          select
+            identifier
+          from
+            os_consent_statements stmt
+          where
+            stmt.statement = tier.statement
+        )
+      where
+        activity_status = 'Active'
+    </sql>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Drop CP consent tier text statement column">
+    <dropColumn tableName="CATISSUE_CONSENT_TIER" columnName="STATEMENT"/>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Updated consent tier view" runOnChange="true">
+    <sql>
+      create or replace view consent_tier_view as (
+        select
+          tier.identifier as identifier, resp.coll_prot_reg_id as cpr_id, stmt.statement as statement, resp.response as response
+        from
+          catissue_consent_tier tier
+          inner join catissue_consent_tier_response resp on resp.consent_tier_id = tier.identifier
+          inner join os_consent_statements stmt on stmt.identifier =  tier.consent_stmt_id
+        where
+          resp.coll_prot_reg_id is not null
+      )
+    </sql>
+  </changeSet>
+
+  <changeSet author="vgaikwad" id="Setting to specify saved query to use for specimen kit report">
+    <sql>
+      call add_cfg_prop(
+        'common', 'specimen_kit_export_report',
+        'specimen_kit_export_report', 'specimen_kit_export_report_desc',
+        'INT', ''
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

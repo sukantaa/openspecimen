@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.hibernate.envers.RelationTargetAuditMode;
 
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolErrorCode;
@@ -54,6 +55,8 @@ public class DistributionProtocol extends BaseExtensionEntity {
 	private Set<DpDistributionSite> distributingSites = new HashSet<DpDistributionSite>();
 	
 	private Set<DpRequirement> requirements = new HashSet<DpRequirement>();
+	
+	private Set<DpConsentTier> consentTiers = new HashSet<>();
 	
 	public static String getEntityName() {
 		return ENTITY_NAME;
@@ -171,6 +174,15 @@ public class DistributionProtocol extends BaseExtensionEntity {
 		this.requirements = requirements;
 	}
 
+	@NotAudited
+	public Set<DpConsentTier> getConsentTiers() {
+		return consentTiers;
+	}
+
+	public void setConsentTiers(Set<DpConsentTier> consentTiers) {
+		this.consentTiers = consentTiers;
+	}
+
 	public void update(DistributionProtocol dp) {
 		if (dp.getActivityStatus().equals(Status.ACTIVITY_STATUS_DISABLED.getStatus())) {
 			setShortTitle(Utility.getDisabledValue(dp.getShortTitle(), 50));
@@ -238,5 +250,34 @@ public class DistributionProtocol extends BaseExtensionEntity {
 	@Override
 	public String getEntityType() {
 		return EXTN;
+	}
+
+	public DpConsentTier addConsentTier(DpConsentTier ct) {
+		ct.setId(null);
+		ct.setDistributionProtocol(this);
+		ct.setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
+		getConsentTiers().add(ct);
+		return ct;
+	}
+
+	public DpConsentTier updateConsentTier(DpConsentTier ct) {
+		DpConsentTier existing = getConsentTierById(ct.getId());
+		existing.setStatement(ct.getStatement());
+		return existing;
+	}
+
+	public DpConsentTier removeConsentTier(Long ctId) {
+		DpConsentTier ct = getConsentTierById(ctId);
+		ct.setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
+		return ct;
+	}
+
+	private DpConsentTier getConsentTierById(Long ctId) {
+		DpConsentTier tier = consentTiers.stream().filter(ct -> ct.getId().equals(ctId)).findFirst().orElse(null);
+		if (tier == null) {
+			throw OpenSpecimenException.userError(DistributionProtocolErrorCode.CONSENT_NOT_FOUND, ctId, getShortTitle());
+		}
+
+		return tier;
 	}
 }

@@ -32,4 +32,6 @@ public interface DistributionProtocolDao extends Dao<DistributionProtocol> {
 	public List<DistributionOrderStat> getOrderStats(DistributionOrderStatListCriteria listCrit);
 
 	public Map<String, Object> getDpIds(String key, Object value);
+
+	List<String> getNonConsentingSpecimens(Long dpId, List<Long> specimenIds, int stmtsCount);
 }

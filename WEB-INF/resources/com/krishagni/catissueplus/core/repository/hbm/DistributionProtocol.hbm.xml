@@ -65,6 +65,12 @@
       <filter name="activeEntity"/>
     </set>
 
+    <set name="consentTiers" table="OS_DP_CONSENT_TIERS" inverse="true" cascade="all-delete-orphan" order-by="id">
+      <key column="DP_ID"/>
+      <one-to-many class="com.krishagni.catissueplus.core.administrative.domain.DpConsentTier"/>
+      <filter name="activeEntity"/>
+    </set>
+
     <filter name="activeEntity"/>
 
     <query name="getDistributionProtocolByTitle">
@@ -114,5 +120,37 @@
         dp.endDate between :fromDate and :toDate and
         dp.activityStatus = 'Active'
     </query>
+
+    <sql-query name="getNonConsentingSpecimens">
+      <return-scalar column="label" type="string"/>
+
+      select
+        s.label as label
+      from
+        catissue_specimen s
+      where
+        s.identifier in (:specimenIds) and
+        s.identifier not in (
+          select
+            s.identifier
+          from
+            catissue_specimen s
+            inner join catissue_specimen_coll_group v on v.identifier = s.specimen_collection_group_id
+            inner join catissue_coll_prot_reg reg on reg.identifier = v.collection_protocol_reg_id
+            inner join catissue_consent_tier_response resp on resp.coll_prot_reg_id = reg.identifier
+            inner join catissue_consent_tier cp_ct on cp_ct.identifier = resp.consent_tier_id
+            inner join os_dp_consent_tiers dp_ct on dp_ct.consent_stmt_id = cp_ct.consent_stmt_id
+          where
+            s.identifier in (:specimenIds) and
+            dp_ct.dp_id = :dpId and
+            dp_ct.activity_status = 'Active' and
+            cp_ct.activity_status = 'Active' and
+            resp.response = 'Yes'
+          group by
+            s.identifier
+          having
+            count(resp.identifier) = :respCount
+        )
+    </sql-query>
   </class>
 </hibernate-mapping>

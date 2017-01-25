@@ -18,6 +18,7 @@
     "shipping_and_tracking": "Shipping and Tracking",
     "jobs": "Jobs",
     "training": "Training",
+    "consent_statements": "Consent Statements",
 
     "cp_desc": "Create, update SOP of visits and specimens",
     "rde_desc": "Rapidly capture patients, visits and specimens data",
@@ -34,7 +35,8 @@
     "distribution_orders_desc": "Create, execute request orders for distributing specimens",
     "shipping_and_tracking_desc": "Create, ship, track and receive specimen shipments",
     "jobs_desc": "Create, schedule, execute jobs",
-    "training_desc": "User manual and training videos portal"
+    "training_desc": "User manual and training videos portal",
+    "consent_statements_desc": "Manage coded consent statements"
   },
 
   "common": {
@@ -194,6 +196,7 @@
     "spmn_print_settings": "Specimen Print Settings",
     "when_to_print": "When to Print",
     "copies": "Copies",
+    "delete_consent_tier": "{{entityType}} {{entityName}} of {{entity.cpShortTitle}} will be deleted forever. Are you sure you want to proceed?",
 
     "consents_waived": "Is participant consent waived?",
     "consents_waived_updated": "Participant consent {{waived ? 'waived' : 'enabled'}} successfully.",
@@ -360,7 +363,7 @@
     "regDate": "Registration Date",
     "reg_another_protocol": "Add to Another Protocol",
     "confirm_merging": "Merging Participant",
-    "confirm_merge": "Participant being updated will be deleted forever. Do you want to continue with merge?",
+    "confirm_merge": "Participant being updated will be deleted. Do you want to continue with merge?",
     "search_results": "Participant Search Result for {{key}}",
     "visits_count": "Visits",
     "specimens_count": "Specimens",
@@ -369,6 +372,7 @@
     "anonymize": "Erase Participant PHI Data",
     "confirm_anonymize": "Are you sure you want to erase all PHI data of participant?",
     "anonymized_successfully": "Successfully erased participant PHI data",
+    "other_cps": "Other Registered Protocols",
 
     "bulk_registration": "Bulk Participant Registration",
     "num_of_participants": "Number of Participants",
@@ -874,6 +878,9 @@
     "add_requirement": "Add Specimen Requirement",
     "dist_spmns_count": "Distributed Specimens",
     "all_sites": "All current and future sites",
+    "consent_tiers": "Consent Tiers",
+    "add_consent_tier": "Add Consent Tier ...",
+    "delete_consent_tier": "{{entityType}} {{entityName}} of {{entity.dpShortTitle}} will be deleted forever. Are you sure you want to proceed?",
 
     "tooltip": {
       "view_details": "Click to view Distribution Protocol details",
@@ -886,6 +893,7 @@
     
     "menu": {
       "overview": "Overview",
+      "consents": "Consents",
       "history": "History",
       "requirements": "Requirements"
     },
@@ -1609,6 +1617,30 @@
     }
   },
 
+  "specimen_kit": {
+    "title": "Specimen Kit",
+    "list": "Specimen Kits",
+    "id": "ID",
+    "sending_site": "Sending Site",
+    "sender": "Sender",
+    "sending_date": "Sending Date",
+    "receiving_site": "Receiving Site",
+    "participants": "Participants",
+    "specimens": "Specimens",
+    "comments": "Comments",
+    "report_gen_initiated": "Generating specimen kit report...",
+    "downloading_report": "Downloading specimen kit report...",
+    "report_will_be_emailed": "Generating specimen kit report is taking more time than anticipated. Link to download report will be sent to you by email",
+
+    "menu": {
+      "overview": "Overview"
+    },
+
+    "buttons": {
+      "download_report": "Download Report"
+    }
+  },
+
   "specimen_list": {
     "new_list": "New Specimen Cart",
     "create_list": "Create Specimen Cart",
@@ -1917,6 +1949,22 @@
       "success_message": "Feedback sent successfully"
     },
     
+  "consent_statement": {
+    "list": "Consent Statements",
+    "create_stmt": "Create Statement",
+    "code": "Code",
+    "statement": "Statement",
+
+    "tooltip": {
+      "add": "Click to add new Consent Statement",
+      "search": "Click to search Consent Statements"
+    },
+
+    "filter": {
+      "title": "Filters"
+    }
+  },
+
     "settings": {
       "title": "Settings",
       "modules": "Modules",
@@ -2051,6 +2099,8 @@
         "welcome_video_url_desc": "URL for welcome video",
         "shipment_export_report": "Shipment export report",
         "shipment_export_report_desc": "Export Report format for all shipments",
+        "specimen_kit_export_report": "Specimen Kit export report",
+        "specimen_kit_export_report_desc": "Saved query to use for exporting details of specimen kit",
         "field_separator": "Field Separator",
         "field_separator_desc": "A single character that specifies how records in delimited text file should be split into fields. For example: CSV files use comma (,) as the field separator",
         "deploy_env": "Deployment Environment",

@@ -5,7 +5,8 @@ angular.module('os.administrative.dp',
     'os.administrative.dp.detail',
     'os.administrative.dp.addedit',
     'os.administrative.dp.history',
-    'os.administrative.dp.requirement'
+    'os.administrative.dp.requirement',
+    'os.administrative.dp.consents'
   ])
 
   .config(function($stateProvider) {
@@ -48,6 +49,17 @@ angular.module('os.administrative.dp',
         url: '/overview',
         templateUrl: 'modules/administrative/dp/overview.html',
         parent: 'dp-detail'
+      })
+      .state('dp-detail.consents', {
+        url: '/consents',
+        templateUrl: 'modules/administrative/dp/consents.html',
+        parent: 'dp-detail',
+        resolve: {
+          consentTiers: function(distributionProtocol) {
+            return distributionProtocol.getConsentTiers();
+          }
+        },
+        controller: 'DpConsentsCtrl'
       })
       .state('dp-detail.history', {
         url: '/history',

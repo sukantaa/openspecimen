@@ -27,7 +27,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
       $scope.cpr = angular.copy(cpr);
 
       $scope.partCtx = {
-        obj: {cpr: $scope.cpr},
+        obj: {cpr: $scope.cpr, cp: cp},
         inObjs: ['cpr'],
         twoStepReg: !cpr.id && (twoStepReg && $stateParams.twoStep == 'true')
       }
@@ -106,7 +106,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
       var matchingCp = function(cpr) { return cpr.cpId == $scope.cpId };
       angular.forEach(matchedParticipants,
         function(matchedPart) {
-          matchedPart.preReg = (matchedPart.participant.registeredCps || []).find(matchingCp) != null;
+          matchedPart.preReg = (matchedPart.participant.registeredCps || []).filter(matchingCp).length > 0;
           if (matchedPart.preReg) {
             $scope.partCtx.hasPreRegParticipants = true;
           }
@@ -240,7 +240,10 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
             $scope.matchedParticipants = result;
 
             inputParticipant = $scope.cpr.participant;
-            $scope.selectParticipant(result[0].participant);
+
+            if (result.length == 1 && !result[0].preReg) {
+              $scope.selectParticipant(result[0].participant);
+            }
           }
         }
       );
