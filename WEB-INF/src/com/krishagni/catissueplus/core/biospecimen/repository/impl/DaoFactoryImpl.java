@@ -27,10 +27,6 @@ import com.krishagni.catissueplus.core.administrative.repository.impl.SiteDaoImp
 import com.krishagni.catissueplus.core.administrative.repository.impl.SpecimenRequestDaoImpl;
 import com.krishagni.catissueplus.core.administrative.repository.impl.StorageContainerDaoImpl;
 import com.krishagni.catissueplus.core.administrative.repository.impl.UserDaoImpl;
-import com.krishagni.catissueplus.core.audit.repository.AuditDao;
-import com.krishagni.catissueplus.core.audit.repository.impl.AuditDaoImpl;
-import com.krishagni.catissueplus.core.auth.repository.AuthDao;
-import com.krishagni.catissueplus.core.auth.repository.impl.AuthDaoImpl;
 import com.krishagni.catissueplus.core.biospecimen.repository.AnonymizeEventDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.CollectionProtocolDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.CollectionProtocolRegistrationDao;
@@ -134,13 +130,6 @@ public class DaoFactoryImpl implements DaoFactory {
 	}
 
 	@Override
-	public AuthDao getAuthDao() {
-		AuthDaoImpl dao = new AuthDaoImpl();
-		setSessionFactory(dao);
-		return dao;
-	}
-
-	@Override
 	public UniqueIdGenerator getUniqueIdGenerator() {
 		UniqueIdGeneratorImpl impl = new UniqueIdGeneratorImpl();
 		setSessionFactory(impl);
@@ -224,13 +213,6 @@ public class DaoFactoryImpl implements DaoFactory {
 		return dao;
 	}
 
-	@Override
-	public AuditDao getAuditDao() {
-		AuditDaoImpl dao = new AuditDaoImpl();
-		setSessionFactory(dao);
-		return dao;
-	}
-	
 	@Override
 	public DpRequirementDao getDistributionProtocolRequirementDao() {
 		DpRequirementDaoImpl dao = new DpRequirementDaoImpl();

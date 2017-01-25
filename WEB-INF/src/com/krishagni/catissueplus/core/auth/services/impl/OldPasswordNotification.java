@@ -10,7 +10,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
-import com.krishagni.catissueplus.core.administrative.domain.ForgotPasswordToken;
+import com.krishagni.auth.domain.ForgotPasswordToken;
+import com.krishagni.auth.repository.AuthDaoFactory;
 import com.krishagni.catissueplus.core.administrative.domain.Password;
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -31,6 +32,9 @@ public class OldPasswordNotification implements ScheduledTask {
 	
 	@Autowired
 	private EmailService emailSvc;
+
+	@Autowired
+	private AuthDaoFactory authDaoFactory;
 	
 	@Override
 	@PlusTransactional
@@ -86,13 +90,13 @@ public class OldPasswordNotification implements ScheduledTask {
 	private String getPasswordUpdateToken(User user) {
 		UserDao userDao = daoFactory.getUserDao();
 
-		ForgotPasswordToken oldToken = userDao.getFpTokenByUser(user.getId());
+		ForgotPasswordToken oldToken = authDaoFactory.getForgotPasswordTokenDao().getByUserId(user.getId());
 		if (oldToken != null) {
-			userDao.deleteFpToken(oldToken);
+			authDaoFactory.getForgotPasswordTokenDao().delete(oldToken);
 		}
 		
 		ForgotPasswordToken token = new ForgotPasswordToken(user);
-		userDao.saveFpToken(token);
+		authDaoFactory.getForgotPasswordTokenDao().saveOrUpdate(token);
 		return token.getToken();
 	}
 

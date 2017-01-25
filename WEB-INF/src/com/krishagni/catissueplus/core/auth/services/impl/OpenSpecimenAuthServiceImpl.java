@@ -9,12 +9,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 
-import com.krishagni.catissueplus.core.auth.domain.AuthErrorCode;
-import com.krishagni.catissueplus.core.auth.services.AuthenticationService;
+import com.krishagni.auth.domain.AuthErrorCode;
+import com.krishagni.auth.domain.Authenticator;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 
 @Configurable
-public class OpenSpecimenAuthServiceImpl implements AuthenticationService {
+public class OpenSpecimenAuthServiceImpl implements Authenticator {
 	
 	@Autowired
 	private AuthenticationManager authManager;
@@ -26,13 +26,14 @@ public class OpenSpecimenAuthServiceImpl implements AuthenticationService {
 	@Override
 	public void authenticate(String username, String password) {
 		try{
-			UsernamePasswordAuthenticationToken authenticationToken =
-				new UsernamePasswordAuthenticationToken(username, password);
-		
+			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
 			authManager.authenticate(authenticationToken);
 		} catch(AuthenticationException e) {
-			throw OpenSpecimenException.userError(AuthErrorCode.INVALID_CREDENTIALS);
+			// throw OpenSpecimenException.userError(AuthErrorCode.INVALID_CREDENTIALS);
+			//
+			// TODO: replace with error code
+			//
+			throw new IllegalAccessError("Invalid credentials");
 		}
 	}
-
 }

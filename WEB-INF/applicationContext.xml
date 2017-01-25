@@ -262,24 +262,7 @@
     <property name="userFactory" ref="userFact"/>
     <property name="emailService" ref="emailService"/>
     <property name="rbacSvc" ref="rbacSvc"/>
-  </bean>
-
-  <bean id="domainFact" class="com.krishagni.catissueplus.core.auth.domain.factory.impl.DomainRegistrationFactoryImpl">
-  	<property name="daoFactory" ref="biospecimenDaoFactory"/>
-  </bean>
-
-  <bean id="domainRegSvc" class="com.krishagni.catissueplus.core.auth.services.impl.DomainRegistrationServiceImpl">
-    <property name="daoFactory" ref="biospecimenDaoFactory"/>
-    <property name="domainRegFactory" ref="domainFact"/>	
-  </bean>
-  
-  <bean id="auditService" class="com.krishagni.catissueplus.core.audit.services.impl.AuditServiceImpl">
-    <property name="daoFactory" ref="biospecimenDaoFactory"/>
-  </bean> 
-
-  <bean id="userAuthService" class="com.krishagni.catissueplus.core.auth.services.impl.UserAuthenticationServiceImpl">
-    <property name="daoFactory" ref="biospecimenDaoFactory"/>
-    <property name="auditService" ref="auditService"/>
+    <property name="authDaoFactory" ref="authDaoFactory"/>
   </bean>
 
   <bean id="specimenResolver" class="com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenResolverImpl">
@@ -570,21 +553,45 @@
   </bean>
 
   <bean id="appCtxProvider" class="com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider"/>
-  
+
+  <bean id="authDaoFactory" class="com.krishagni.auth.repository.impl.AuthDaoFactoryImpl">
+    <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
+
+  <bean id="authConfig" class="com.krishagni.catissueplus.core.auth.AuthConfigImpl" factory-method="getInstance"/>
+
+  <bean id="domainRegSvc" class="com.krishagni.catissueplus.core.auth.services.impl.AuthDomainWrapperServiceImpl">
+    <property name="authDomainService">
+      <bean class="com.krishagni.auth.services.impl.AuthDomainServiceImpl">
+        <property name="authDaoFactory" ref="authDaoFactory"/>
+        <property name="authDomainFactory">
+          <bean class="com.krishagni.auth.factory.impl.AuthDomainFactoryImpl"/>
+        </property>
+      </bean>
+    </property>
+  </bean>
+
+  <bean id="userAuthService" class="com.krishagni.catissueplus.core.auth.services.impl.UserAuthServiceWrapperImpl">
+    <property name="authDaoFactory" ref="authDaoFactory"/>
+    <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="authConfig" ref="authConfig"/>
+  </bean>
+
   <security:authentication-manager alias="authManager">
     <security:authentication-provider user-service-ref="userSvc" >
        <security:password-encoder ref="passwordEncoder"></security:password-encoder>
     </security:authentication-provider>
   </security:authentication-manager>
   
-  <bean id="samlFilter" class="com.krishagni.catissueplus.rest.filter.SamlFilter">
-    <property name="daoFactory" ref="biospecimenDaoFactory"/>
+  <bean id="samlFilter" class="com.krishagni.auth.services.impl.saml.SamlFilter">
+    <property name="authDaoFactory" ref="authDaoFactory"/>
     <property name="authService" ref="userAuthService"/>
+    <property name="authConfig" ref="authConfig"/>
   </bean>
   
   <bean id="authTokenFilter" class="com.krishagni.catissueplus.rest.filter.AuthTokenFilter">
     <property name="authService" ref="userAuthService"/>
-    <property name="auditService" ref="auditService"/>
+    <property name="authDaoFactory" ref="authDaoFactory"/>
     <property name="excludeUrls">
       <map>
         <entry key="POST">

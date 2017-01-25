@@ -5,13 +5,14 @@ import java.util.Calendar;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.krishagni.auth.domain.AuthDomain;
+import com.krishagni.auth.repository.AuthDaoFactory;
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.InstituteErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserFactory;
 import com.krishagni.catissueplus.core.administrative.events.UserDetail;
-import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.CommonValidator;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
@@ -22,8 +23,14 @@ public class UserFactoryImpl implements UserFactory {
 
 	private DaoFactory daoFactory;
 
+	private AuthDaoFactory authDaoFactory;
+
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
+	}
+
+	public void setAuthDaoFactory(AuthDaoFactory authDaoFactory) {
+		this.authDaoFactory = authDaoFactory;
 	}
 
 	@Override
@@ -240,7 +247,7 @@ public class UserFactoryImpl implements UserFactory {
 			return;
 		}
 
-		AuthDomain authDomain = daoFactory.getAuthDao().getAuthDomainByName(domainName);
+		AuthDomain authDomain = authDaoFactory.getAuthDao().getAuthDomainByName(domainName);
 		if (authDomain == null) {
 			ose.addError(UserErrorCode.DOMAIN_NOT_FOUND);
 			return;

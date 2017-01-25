@@ -22,14 +22,15 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
+import com.krishagni.auth.domain.AuthToken;
+import com.krishagni.auth.domain.LoginAuditLog;
+import com.krishagni.auth.domain.UserApiCallLog;
+import com.krishagni.auth.events.LoginDetail;
+import com.krishagni.auth.events.TokenDetail;
+import com.krishagni.auth.repository.AuthDaoFactory;
 import com.krishagni.catissueplus.core.administrative.domain.User;
-import com.krishagni.catissueplus.core.audit.domain.UserApiCallLog;
-import com.krishagni.catissueplus.core.audit.services.AuditService;
-import com.krishagni.catissueplus.core.auth.domain.AuthToken;
-import com.krishagni.catissueplus.core.auth.domain.LoginAuditLog;
-import com.krishagni.catissueplus.core.auth.events.LoginDetail;
-import com.krishagni.catissueplus.core.auth.events.TokenDetail;
-import com.krishagni.catissueplus.core.auth.services.UserAuthenticationService;
+import com.krishagni.catissueplus.core.auth.services.UserAuthServiceWrapper;
+import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
@@ -42,19 +43,27 @@ public class AuthTokenFilter extends GenericFilterBean {
 	private static final String BASIC_AUTH = "Basic ";
 	
 	private static final String DEFAULT_AUTH_DOMAIN = "openspecimen";
-	
-	private UserAuthenticationService authService;
-	
-	private Map<String, List<String>> excludeUrls = new HashMap<String, List<String>>();
-	
-	private AuditService auditService;
-	
-	public UserAuthenticationService getAuthService() {
+
+	private UserAuthServiceWrapper authService;
+
+	private AuthDaoFactory authDaoFactory;
+
+	private Map<String, List<String>> excludeUrls = new HashMap<>();
+
+	public UserAuthServiceWrapper getAuthService() {
 		return authService;
 	}
 
-	public void setAuthService(UserAuthenticationService authService) {
+	public void setAuthService(UserAuthServiceWrapper authService) {
 		this.authService = authService;
+	}
+
+	public AuthDaoFactory getAuthDaoFactory() {
+		return authDaoFactory;
+	}
+
+	public void setAuthDaoFactory(AuthDaoFactory authDaoFactory) {
+		this.authDaoFactory = authDaoFactory;
 	}
 
 	public Map<String, List<String>> getExcludeUrls() {
@@ -77,11 +86,7 @@ public class AuthTokenFilter extends GenericFilterBean {
 		}
 	}
 
-	public void setAuditService(AuditService auditService) {
-		this.auditService = auditService;
-	}
-
-	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) 
+	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
 	throws IOException, ServletException {
 		if (!(req instanceof HttpServletRequest)) {
 			throw new IllegalAccessError("Unknown protocol request");
@@ -131,7 +136,7 @@ public class AuthTokenFilter extends GenericFilterBean {
 			RequestEvent<TokenDetail> atReq = new RequestEvent<TokenDetail>(tokenDetail);			
 			ResponseEvent<AuthToken> atResp = authService.validateToken(atReq);
 			if (atResp.isSuccessful()) {
-				userDetails = atResp.getPayload().getUser();
+				userDetails = (User) atResp.getPayload().getUser();
 				loginAuditLog = atResp.getPayload().getLoginAuditLog();
 			}
 		} else if(httpReq.getHeader(HttpHeaders.AUTHORIZATION) != null) {
@@ -153,15 +158,15 @@ public class AuthTokenFilter extends GenericFilterBean {
 		chain.doFilter(req, resp);
 		AuthUtil.clearCurrentUser();
 	
-		UserApiCallLog userAuditLog = new UserApiCallLog();
-		userAuditLog.setUser(userDetails);
-		userAuditLog.setUrl(httpReq.getRequestURI().toString());
-		userAuditLog.setMethod(httpReq.getMethod());
-		userAuditLog.setCallStartTime(callStartTime);
-		userAuditLog.setCallEndTime(Calendar.getInstance().getTime());
-		userAuditLog.setResponseCode(Integer.toString(httpResp.getStatus()));
-		userAuditLog.setLoginAuditLog(loginAuditLog);
-		auditService.insertApiCallLog(userAuditLog);
+		UserApiCallLog apiCallLog = new UserApiCallLog();
+		apiCallLog.setUser(userDetails);
+		apiCallLog.setUrl(httpReq.getRequestURI());
+		apiCallLog.setMethod(httpReq.getMethod());
+		apiCallLog.setCallStartTime(callStartTime);
+		apiCallLog.setCallEndTime(Calendar.getInstance().getTime());
+		apiCallLog.setResponseCode(Integer.toString(httpResp.getStatus()));
+		apiCallLog.setLoginAuditLog(loginAuditLog);
+		saveApiCallLog(apiCallLog);
 	}
 	
 	private User doBasicAuthentication(HttpServletRequest httpReq, HttpServletResponse httpResp) throws UnsupportedEncodingException {
@@ -183,7 +188,7 @@ public class AuthTokenFilter extends GenericFilterBean {
 		detail.setDomainName(DEFAULT_AUTH_DOMAIN);
 		detail.setDoNotGenerateToken(true);
 
-		RequestEvent<LoginDetail> req = new RequestEvent<LoginDetail>(detail);
+		RequestEvent<LoginDetail> req = new RequestEvent<>(detail);
 		ResponseEvent<Map<String, Object>> resp = authService.authenticateUser(req);
 		if (resp.isSuccessful()) {
 			return (User)resp.getPayload().get("user");
@@ -213,5 +218,10 @@ public class AuthTokenFilter extends GenericFilterBean {
 		}
 
 		return new AntPathRequestMatcher(url, httpReq.getMethod(), true).matches(httpReq);
+	}
+
+	@PlusTransactional
+	private void saveApiCallLog(UserApiCallLog callLog) {
+		authDaoFactory.getUserApiCallLogDao().saveOrUpdate(callLog);
 	}
 }

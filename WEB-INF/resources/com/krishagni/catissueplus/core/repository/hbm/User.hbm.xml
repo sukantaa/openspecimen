@@ -121,17 +121,19 @@
         u.identifier
     </sql-query>
 
-    <query name="getActiveUsersEmailIds">
+    <sql-query name="getActiveUsersEmailIds">
+      <return-scalar column="emailAddress" type="string"/>
+
       select
-        distinct user.emailAddress
+        distinct u.email_address as emailAddress
       from
-        com.krishagni.catissueplus.core.auth.domain.LoginAuditLog log
-        join log.user user
+        os_login_audit_logs log
+        inner join catissue_user u on u.identifier = log.user_id
       where
-        log.loginTime between :startDate and :endDate and
-        log.loginSuccessful is true and
-        user.activityStatus != 'Disabled'
-    </query>
+        (log.login_time between :startDate and :endDate) and
+        log.is_login_successful = 1 and
+        u.activity_status != 'Disabled'
+    </sql-query>
     
     <query name="getPasswordsUpdatedBeforeDate">
       select
@@ -147,27 +149,29 @@
         max(passwd.updationDate) &lt;= :updateDate
     </query>
     
-    <query name="getInactiveUsers">
+    <sql-query name="getInactiveUsers">
+      <return alias="iu" class="com.krishagni.catissueplus.core.administrative.domain.User"/>
+
       select
-        iu
+        iu.*
       from
-        com.krishagni.catissueplus.core.administrative.domain.User iu
+        catissue_user iu
       where
-        iu.id in (
+        iu.identifier in (
           select
-            user.id
+            user.identifier
           from
-            com.krishagni.catissueplus.core.auth.domain.LoginAuditLog log
-            right join log.user user
+            os_login_audit_logs log
+            right join catissue_user user on user.identifier = log.user_id
           where
-            user.activityStatus = 'Active' and
-            ((log.loginSuccessful is null and user.creationDate &lt;= :lastLoginTime) or log.loginSuccessful = 1)
+            user.activity_status = 'Active' and
+            ((log.is_login_successful is null and user.start_date &lt;= :lastLoginTime) or log.is_login_successful = 1)
           group by
-            user.id
+            user.identifier
           having
-            max(log.loginTime) &lt;= :lastLoginTime or max(log.loginTime) is null)
+            max(log.login_time) &lt;= :lastLoginTime or max(log.login_time) is null
         )
-    </query>
+    </sql-query>
     
     <query name="updateStatus">
       update

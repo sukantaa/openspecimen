@@ -23,7 +23,7 @@ import com.krishagni.catissueplus.core.common.util.Utility;
 public class InactiveUserAccountsNotification implements ScheduledTask {
 	@Autowired
 	private DaoFactory daoFactory;
-	
+
 	@Autowired
 	private EmailService emailSvc;
 	

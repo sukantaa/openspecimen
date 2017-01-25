@@ -15,7 +15,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.saml.SAMLCredential;
 
-import com.krishagni.catissueplus.core.administrative.domain.ForgotPasswordToken;
+import com.krishagni.auth.domain.AuthDomain;
+import com.krishagni.auth.domain.ForgotPasswordToken;
+import com.krishagni.auth.repository.AuthDaoFactory;
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
@@ -27,8 +29,6 @@ import com.krishagni.catissueplus.core.administrative.events.UserDetail;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.UserService;
-import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
-import com.krishagni.catissueplus.core.auth.domain.AuthErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
@@ -73,6 +73,8 @@ public class UserServiceImpl implements UserService {
 
 	private DaoFactory daoFactory;
 
+	private AuthDaoFactory authDaoFactory;
+
 	private UserFactory userFactory;
 	
 	private EmailService emailService;
@@ -81,6 +83,10 @@ public class UserServiceImpl implements UserService {
 
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
+	}
+
+	public void setAuthDaoFactory(AuthDaoFactory authDaoFactory) {
+		this.authDaoFactory = authDaoFactory;
 	}
 
 	public void setUserFactory(UserFactory userFactory) {
@@ -130,7 +136,7 @@ public class UserServiceImpl implements UserService {
 		// The assumption is - there can be only one SAML auth provider
 		// We should perhaps use SAML local entity ID
 		//
-		AuthDomain domain = daoFactory.getAuthDao().getAuthDomainByType("saml");
+		AuthDomain domain = authDaoFactory.getAuthDao().getAuthDomainByType("saml");
 
 		Map<String, String> props = domain.getAuthProvider().getProps();
 		String loginNameAttr = props.get("loginNameAttr");
@@ -357,23 +363,23 @@ public class UserServiceImpl implements UserService {
 				return ResponseEvent.userError(UserErrorCode.INVALID_PASSWD_TOKEN);
 			}
 			
-			ForgotPasswordToken token = dao.getFpToken(detail.getResetPasswordToken());
+			ForgotPasswordToken token = authDaoFactory.getForgotPasswordTokenDao().getByToken(detail.getResetPasswordToken());
 			if (token == null) {
 				return ResponseEvent.userError(UserErrorCode.INVALID_PASSWD_TOKEN);
 			}
 			
-			User user = token.getUser();
+			User user = (User) token.getUser();
 			if (!user.getLoginName().equals(detail.getLoginName())) {
 				return ResponseEvent.userError(UserErrorCode.NOT_FOUND);
 			}
 			
 			if (token.hasExpired()) {
-				dao.deleteFpToken(token);
+				authDaoFactory.getForgotPasswordTokenDao().delete(token);
 				return ResponseEvent.userError(UserErrorCode.INVALID_PASSWD_TOKEN, true);
 			}
 			
 			user.changePassword(detail.getNewPassword());
-			dao.deleteFpToken(token);
+			authDaoFactory.getForgotPasswordTokenDao().delete(token);
 			sendPasswdChangedEmail(user);
 			return ResponseEvent.response(true);
 		}catch (OpenSpecimenException ose) {
@@ -393,16 +399,20 @@ public class UserServiceImpl implements UserService {
 			if (user == null || user.isPending() || user.isClosed()) {
 				return ResponseEvent.userError(UserErrorCode.NOT_FOUND);
 			} else if (user.isLocked()) {
-				return ResponseEvent.userError(AuthErrorCode.USER_LOCKED);
+				// return ResponseEvent.userError(AuthErrorCode.USER_LOCKED);
+				//
+				// TODO: replace error code
+				//
+				throw new IllegalAccessError("User locked");
 			}
 
-			ForgotPasswordToken oldToken = userDao.getFpTokenByUser(user.getId());
+			ForgotPasswordToken oldToken = authDaoFactory.getForgotPasswordTokenDao().getByUserId(user.getId());
 			if (oldToken != null) {
-				userDao.deleteFpToken(oldToken);
+				authDaoFactory.getForgotPasswordTokenDao().delete(oldToken);
 			}
 			
 			ForgotPasswordToken token = new ForgotPasswordToken(user);
-			userDao.saveFpToken(token);
+			authDaoFactory.getForgotPasswordTokenDao().saveOrUpdate(token);
 			sendForgotPasswordLinkEmail(user, token.getToken());
 			return ResponseEvent.response(true);
 		} catch (Exception e) {
@@ -642,7 +652,7 @@ public class UserServiceImpl implements UserService {
 		ForgotPasswordToken token = null;
 		if (user.getAuthDomain().getName().equals(DEFAULT_AUTH_DOMAIN)) {
 			token = new ForgotPasswordToken(user);
-			daoFactory.getUserDao().saveFpToken(token);
+			authDaoFactory.getForgotPasswordTokenDao().saveOrUpdate(token);
 		}
 		return token;
 	}

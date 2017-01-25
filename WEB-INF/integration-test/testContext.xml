@@ -200,12 +200,12 @@
   	<property name="daoFactory" ref="biospecimenDaoFactory"/>
   </bean>
 
-  <bean id="domainRegSvc" class="com.krishagni.catissueplus.core.auth.services.impl.DomainRegistrationServiceImpl">
+  <bean id="domainRegSvc" class="com.krishagni.catissueplus.core.auth.services.impl.AuthDomainWrapperServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="domainRegFactory" ref="domainFact"/>	
   </bean>
 
-  <bean id="userAuthService" class="com.krishagni.catissueplus.core.auth.services.impl.UserAuthenticationServiceImpl">
+  <bean id="userAuthService" class="com.krishagni.catissueplus.core.auth.services.impl.UserAuthServiceWrapperImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
   </bean>
 

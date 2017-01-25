@@ -4,7 +4,6 @@ package com.krishagni.catissueplus.core.administrative.repository;
 import java.util.Date;
 import java.util.List;
 
-import com.krishagni.catissueplus.core.administrative.domain.ForgotPasswordToken;
 import com.krishagni.catissueplus.core.administrative.domain.Password;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
@@ -32,14 +31,6 @@ public interface UserDao extends Dao<User> {
 	
 	public List<DependentEntityDetail> getDependentEntities(Long userId);
 	
-	public ForgotPasswordToken getFpToken(String token);
-	
-	public ForgotPasswordToken getFpTokenByUser(Long userId);
-	
-	public void saveFpToken(ForgotPasswordToken token);
-	
-	public void deleteFpToken(ForgotPasswordToken token);
-
 	public List<String> getActiveUsersEmailIds(Date startDate, Date endDate);
 	
 	public List<Password> getPasswordsUpdatedBefore(Date updateDate);

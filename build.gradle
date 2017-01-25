@@ -11,6 +11,7 @@ apply plugin: 'idea'
 archivesBaseName = 'openspecimen'
 
 def springVersion = "4.3.5.RELEASE"
+def kaLibVersion  = "4.0.0-SNAPSHOT"
 
 Properties props = new Properties()
 props.load(new FileInputStream("build.properties"))
@@ -179,9 +180,10 @@ dependencies {
   compile group: 'ca.juliusdavies', name: 'not-yet-commons-ssl', version: '0.3.9'
 
   // Krishagni libraries
-  compile group: 'com.krishagni', name: 'krishagni-commons', version:'4.0.0-SNAPSHOT'
-  compile group: 'com.krishagni', name: 'krishagni-bulk-importer', version:'4.0.0-SNAPSHOT'
-  compile group: 'com.krishagni', name: 'krishagni-de', version:'4.0.0-SNAPSHOT'
+  compile group: 'com.krishagni', name: 'krishagni-commons', version: kaLibVersion
+  compile group: 'com.krishagni', name: 'krishagni-bulk-importer', version: kaLibVersion
+  compile group: 'com.krishagni', name: 'krishagni-de', version: kaLibVersion
+  compile group: 'com.krishagni', name: 'krishagni-auth', version: kaLibVersion
 
   runtime group: 'antlr', name: 'antlr', version: '2.7.7'
   runtime group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.12'

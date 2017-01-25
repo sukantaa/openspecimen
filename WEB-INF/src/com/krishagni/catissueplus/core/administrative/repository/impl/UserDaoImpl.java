@@ -19,7 +19,6 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
-import com.krishagni.catissueplus.core.administrative.domain.ForgotPasswordToken;
 import com.krishagni.catissueplus.core.administrative.domain.Password;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
@@ -60,8 +59,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	
 	@SuppressWarnings("unchecked")
 	public List<User> getUsersByIdsAndInstitute(List<Long> userIds, Long instituteId) {
-		Criteria criteria = sessionFactory.getCurrentSession()
-			.createCriteria(User.class, "u")
+		Criteria criteria = getCurrentSession().createCriteria(User.class, "u")
 			.add(Restrictions.in("u.id", userIds));
 		
 		if (instituteId != null) {
@@ -104,47 +102,15 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	
 	@SuppressWarnings("unchecked")
 	public List<DependentEntityDetail> getDependentEntities(Long userId) {
-		List<Object[]> rows = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_DEPENDENT_ENTITIES)
-				.setLong("userId", userId)
-				.list();
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_DEPENDENT_ENTITIES)
+			.setParameter("userId", userId)
+			.list();
 		
 		return getDependentEntities(rows);
 	}
 
-	@SuppressWarnings("unchecked")
-	public ForgotPasswordToken getFpToken(String token) {
-		List<ForgotPasswordToken> result = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_FP_TOKEN)
-				.setString("token", token)
-				.list();
-		
-		return result.isEmpty() ? null : result.get(0);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public ForgotPasswordToken getFpTokenByUser(Long userId) {
-		List<ForgotPasswordToken> result = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_FP_TOKEN_BY_USER)
-				.setLong("userId", userId)
-				.list();
-		
-		return result.isEmpty() ? null : result.get(0);
-	}
-	
-	@Override
-	public void saveFpToken(ForgotPasswordToken token) {
-		sessionFactory.getCurrentSession().saveOrUpdate(token);
-	};
-	
-	@Override
-	public void deleteFpToken(ForgotPasswordToken token) {
-		getCurrentSession().delete(token);
-	}
-
 	private Criteria getUsersListQuery(UserListCriteria crit) {
-		Criteria criteria = sessionFactory.getCurrentSession()
-			.createCriteria(User.class, "u")
+		Criteria criteria = getCurrentSession().createCriteria(User.class, "u")
 			.add( // not system user
 				Restrictions.not(Restrictions.conjunction()
 					.add(Restrictions.eq("u.loginName", User.SYS_USER))
@@ -158,8 +124,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<String> getActiveUsersEmailIds(Date startDate, Date endDate) {
-		return sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_ACTIVE_USERS_EMAIL_IDS)
+		return getCurrentSession().getNamedQuery(GET_ACTIVE_USERS_EMAIL_IDS)
 			.setTimestamp("startDate", startDate)
 			.setTimestamp("endDate", endDate)
 			.list();
@@ -194,7 +159,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	@SuppressWarnings("unchecked")
 	public List<User> getInactiveUsers(Date lastLoginTime) {
 		return getCurrentSession().getNamedQuery(GET_INACTIVE_USERS)
-			.setDate("lastLoginTime", lastLoginTime)
+			.setParameter("lastLoginTime", lastLoginTime)
 			.list();
 	}
 
@@ -377,12 +342,6 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	private static final String GET_DEPENDENT_ENTITIES = FQN + ".getDependentEntities";
 
 	private static final String GET_CP_COUNT_BY_USERS = FQN + ".getCpCountByUsers";
-
-	private static final String TOKEN_FQN = ForgotPasswordToken.class.getName();
-	
-	private static final String GET_FP_TOKEN_BY_USER = TOKEN_FQN + ".getFpTokenByUser";
-	
-	private static final String GET_FP_TOKEN = TOKEN_FQN + ".getFpToken";
 
 	private static final String GET_ACTIVE_USERS_EMAIL_IDS = FQN + ".getActiveUsersEmailIds";
 	
