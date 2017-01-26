@@ -449,6 +449,15 @@ public class Utility {
 		}
 	}
 
+	public static <I, O> ResponseEvent<O> invokeFn(Function<I, O> fn, RequestEvent<I> req, boolean forceTxCommit) {
+		ResponseEvent<O> resp = invokeFn(fn, req);
+		if (resp.isUserError() && forceTxCommit) {
+			resp.setForceTxCommitEnabled(forceTxCommit);
+		}
+
+		return resp;
+	}
+
 
 	private static Map<String, Object> getExtnAttrValues(BaseExtensionEntity obj) {
 		if (obj.getExtension() != null) {

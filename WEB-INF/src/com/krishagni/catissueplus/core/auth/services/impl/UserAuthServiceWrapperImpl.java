@@ -32,7 +32,7 @@ public class UserAuthServiceWrapperImpl extends UserAuthenticationServiceImpl im
 	@Override
 	@PlusTransactional
 	public ResponseEvent<Map<String, Object>> authenticateUser(RequestEvent<LoginDetail> req) {
-		return Utility.invokeFn(super::authenticateUser, req);
+		return Utility.invokeFn(super::authenticateUser, req, true);
 	}
 
 	@Override

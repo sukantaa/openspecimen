@@ -71,6 +71,10 @@ public class ResponseEvent<T> {
 		return error == null;
 	}
 
+	public boolean isUserError() {
+		return error != null && error.getErrorType() == ErrorType.USER_ERROR;
+	}
+
 	public boolean isSystemError() {
 		return error != null && error.getErrorType() == ErrorType.SYSTEM_ERROR;
 	}
