@@ -554,4 +554,49 @@
       <column name="TISSUE_SITE"/>
     </createIndex>
   </changeSet>
+
+  <changeSet author="vgaikwad" id="Primary site of a user">
+    <addColumn tableName="CATISSUE_USER">
+      <column name="PRIMARY_SITE_ID" type="${int.type}"/>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vgaikwad" id="FK on user's primary site">
+    <addForeignKeyConstraint
+      constraintName="FK_USER_PRIMARY_SITE_ID"
+      baseTableName="CATISSUE_USER" baseColumnNames="PRIMARY_SITE_ID"
+      referencedTableName="CATISSUE_SITE" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
+  <changeSet author="vgaikwad" id="Migrate user's department to primary site" dbms="mysql">
+    <sql>
+      update
+        catissue_user user
+        inner join os_departments dept on user.department_id = dept.identifier
+        inner join catissue_site site on site.institute_id = dept.institute_id
+      set
+        user.primary_site_id = site.identifier
+      where
+        site.name = dept.name
+    </sql>
+  </changeSet>
+
+  <changeSet author="vgaikwad" id="Migrate user's department to primary site" dbms="oracle">
+    <sql>
+      merge into
+        catissue_user usr
+      using (
+        select
+          dept.identifier as deptId, site.identifier as siteId
+        from
+          os_departments dept
+          inner join catissue_site site on dept.institute_id = site.institute_id
+        where
+          site.name = dept.name
+      ) t on (t.deptId = usr.department_id)
+      when matched
+      then
+        update set usr.primary_site_id = t.siteId
+    </sql>
+  </changeSet>
 </databaseChangeLog>

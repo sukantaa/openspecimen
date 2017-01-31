@@ -943,6 +943,7 @@
     "email_address": "Email Address",
     "phone_number": "Phone Number",
     "institute": "Institute",
+    "primary_site": "Primary Site",
     "type": "Type",
     "address": "Address",
     "super_admin": "Super Administrator",
