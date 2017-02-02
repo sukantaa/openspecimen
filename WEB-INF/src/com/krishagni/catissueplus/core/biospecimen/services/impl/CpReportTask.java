@@ -40,14 +40,15 @@ public class CpReportTask implements ScheduledTask, Runnable {
 	public void doJob(ScheduledJobRun jobRun)
 	throws Exception {
 		CpReportSettings sysSettings = getSysRptSetting();
+		CpReportSettings spmnCpSysSettings = getSpecimenCentricSysRptSetting();
 		for (Long cpId : getAllCpIds()) {
-			generateCpReport(cpId, sysSettings);
+			generateCpReport(cpId, sysSettings, spmnCpSysSettings);
 		}
 	}
 
 	@Override
 	public void run() {
-		generateCpReport(cpId, null);
+		generateCpReport(cpId, null, null);
 	}
 
 	@PlusTransactional
@@ -56,38 +57,54 @@ public class CpReportTask implements ScheduledTask, Runnable {
 	}
 
 	@PlusTransactional
-	private void generateCpReport(Long cpId, CpReportSettings sysSettings) {
+	private void generateCpReport(Long cpId, CpReportSettings sysSettings, CpReportSettings spmnCpSysSettings) {
 		try {
 			CpReportSettings cpSettings = daoFactory.getCpReportSettingsDao().getByCp(cpId);
 			if (cpSettings != null && !cpSettings.isEnabled()) {
 				return;
 			}
 
-			if (sysSettings == null) {
-				sysSettings = getSysRptSetting();
+			CpReportSettings sysSettingsToUse = null;
+			CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(cpId);
+			if (cp.isSpecimenCentric()) {
+				sysSettingsToUse = spmnCpSysSettings != null ? spmnCpSysSettings : getSpecimenCentricSysRptSetting();
+			}
+
+			if (sysSettingsToUse == null) {
+				sysSettingsToUse = sysSettings != null ? sysSettings : getSysRptSetting();
 			}
 
 			AuthUtil.setCurrentUser(daoFactory.getUserDao().getSystemUser());
-			CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(cpId);
-			new CpReportGenerator().generateReport(cp, sysSettings, cpSettings);
+			new CpReportGenerator().generateReport(cp, sysSettingsToUse, cpSettings);
 		} catch (Exception e) {
 			logger.error("Error generating report for collection protocol: " + cpId, e);
 		}
 	}
 
 	private CpReportSettings getSysRptSetting() {
-		try {
-			String cfg = ConfigUtil.getInstance().getFileContent(ConfigParams.MODULE, ConfigParams.SYS_RPT_SETTINGS, null);
+		CpReportSettings settings = getRptSetting(ConfigParams.SYS_RPT_SETTINGS);
+		if (settings == null) {
+			settings = new CpReportSettings();
+		}
 
-			CpReportSettings settings = new CpReportSettings();
-			if (StringUtils.isNotBlank(cfg)) {
-				settings = new ObjectMapper().readValue(cfg, CpReportSettings.class);
+		return settings;
+	}
+
+	private CpReportSettings getSpecimenCentricSysRptSetting() {
+		return getRptSetting(ConfigParams.SYS_SPMN_CP_RPT_SETTINGS);
+	}
+
+	private CpReportSettings getRptSetting(String configPropName) {
+		try {
+			String cfg = ConfigUtil.getInstance().getFileContent(ConfigParams.MODULE, configPropName, null);
+			if (StringUtils.isBlank(cfg)) {
+				return null;
 			}
 
-			return settings;
+			return new ObjectMapper().readValue(cfg, CpReportSettings.class);
 		} catch (Exception e) {
-			logger.error("Error reading system level CP report settings", e);
-			throw new RuntimeException("Error reading system level CP report settings", e);
+			logger.error("Error reading CP report settings: " + configPropName, e);
+			throw new RuntimeException("Error reading CP report settings: " + configPropName, e);
 		}
 	}
 }

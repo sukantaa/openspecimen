@@ -192,6 +192,8 @@
     <property name="daoFactory" ref="biospecimenDaoFactory" />
     <property name="specimenResolver" ref="specimenResolver"/>
     <property name="containerSvc" ref="storageContainerSvc"/>
+    <property name="cprFactory" ref="cprFactory"/>
+    <property name="visitFactory" ref="visitFactory"/>
   </bean>
 
   <bean id="visitFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.VisitFactoryImpl">
@@ -409,7 +411,8 @@
   </bean>
 
   <bean id="catalogSvc" class="com.krishagni.catissueplus.core.de.services.impl.CatalogServiceImpl">
-    <property name="daoFactory" ref="deDaoFactory"/>
+    <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="deDaoFactory" ref="deDaoFactory"/>
     <property name="catalogSettingFactory" ref="catalogSettingFact"/>
     <property name="cpCopier" ref="cpCopier"/>
   </bean>

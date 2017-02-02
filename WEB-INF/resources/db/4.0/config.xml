@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog 
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Default system level specimen centric CP report settings">
+    <sql>
+      call add_cfg_prop(
+        'biospecimen', 'sys_spmn_cp_rpt_settings',
+        'sys_spmn_cp_rpt_settings', 'sys_spmn_cp_rpt_settings_desc',
+        'FILE', 'classpath:/com/krishagni/catissueplus/core/biospecimen/spmn-cp-report-settings.json'
+      );
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="ID of saved query to use as default catalog for specimen centric CPs">
+    <sql>
+      call add_cfg_prop(
+        'catalog', 'default_spmn_centric_query',
+        'default_spmn_centric_query', 'default_spmn_centric_query_desc',
+        'INT', ''
+      );
+    </sql>
+  </changeSet>
+</databaseChangeLog>

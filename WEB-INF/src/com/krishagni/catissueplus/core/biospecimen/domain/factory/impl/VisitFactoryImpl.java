@@ -158,13 +158,15 @@ public class VisitFactoryImpl implements VisitFactory {
 	private void setCpr(VisitDetail visitDetail, Visit visit, OpenSpecimenException ose) {
 		CollectionProtocolRegistration cpr = null;
 
-		Long cprId = visitDetail.getCprId();
+		Long cprId = visitDetail.getCprId(), cpId = visitDetail.getCpId();
 		String cpTitle = visitDetail.getCpTitle(),
 				cpShortTitle = visitDetail.getCpShortTitle(),
 				ppid = visitDetail.getPpid();
 		
 		if (cprId != null) {
 			cpr = daoFactory.getCprDao().getById(cprId);
+		} else if (cpId != null && StringUtils.isNotBlank(ppid)) {
+			cpr = daoFactory.getCprDao().getCprByPpid(cpId, ppid);
 		} else if (StringUtils.isNotBlank(cpTitle) && StringUtils.isNotBlank(ppid)) {			
 			cpr = daoFactory.getCprDao().getCprByPpid(cpTitle, ppid);
 		} else if (StringUtils.isNotBlank(cpShortTitle) && StringUtils.isNotBlank(ppid)) {

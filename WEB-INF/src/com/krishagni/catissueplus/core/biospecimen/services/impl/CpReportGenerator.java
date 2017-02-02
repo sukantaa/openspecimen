@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
+import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpReportSettings;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolService;
@@ -63,12 +64,12 @@ public class CpReportGenerator {
 		}
 
 		List<String> rcptEmailIds = rptSettings.getRecipients().stream()
-			.map(user -> user.getEmailAddress())
+			.map(User::getEmailAddress)
 			.collect(Collectors.toList());
 
 		if (rcptEmailIds.isEmpty()) {
 			rcptEmailIds = cp.getCoordinators().stream()
-				.map(user -> user.getEmailAddress())
+				.map(User::getEmailAddress)
 				.collect(Collectors.toList());
 			rcptEmailIds.add(0, cp.getPrincipalInvestigator().getEmailAddress());
 		}
@@ -76,8 +77,9 @@ public class CpReportGenerator {
 		Map<String, Object> emailCtxt = new HashMap<>();
 		emailCtxt.putAll(getMetrics(cp, sysSettings, rptSettings));
 		emailCtxt.put("dataFile", getDataFile(cp, sysSettings, rptSettings));
-		emailCtxt.put("cpId", cp.getId());
-		emailCtxt.put("cpShortTitle", cp.getShortTitle());
+		emailCtxt.put("cp", cp); // introduced in v4.0
+		emailCtxt.put("cpId", cp.getId()); // retaining this for backward compatibility
+		emailCtxt.put("cpShortTitle", cp.getShortTitle()); // retaining this for backward compatibility
 		emailCtxt.put("$subject", new String[] { cp.getShortTitle() });
 
 		if (StringUtils.isNotBlank(emailTmpl)) {

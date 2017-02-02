@@ -21,20 +21,26 @@ import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCo
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerDetail;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.administrative.services.StorageContainerService;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenReceivedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CollectionProtocolRegistrationFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitFactory;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionEventDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolRegistrationDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ReceivedEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenEventDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.VisitDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenResolver;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
@@ -52,6 +58,10 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 
 	private StorageContainerService containerSvc;
 
+	private CollectionProtocolRegistrationFactory cprFactory;
+
+	private VisitFactory visitFactory;
+
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
 	}
@@ -62,6 +72,14 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 
 	public void setContainerSvc(StorageContainerService containerSvc) {
 		this.containerSvc = containerSvc;
+	}
+
+	public void setCprFactory(CollectionProtocolRegistrationFactory cprFactory) {
+		this.cprFactory = cprFactory;
+	}
+
+	public void setVisitFactory(VisitFactory visitFactory) {
+		this.visitFactory = visitFactory;
 	}
 
 	@Override
@@ -208,8 +226,22 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		} else if (parent != null) {
 			visit = parent.getVisit();
 		} else {
-			ose.addError(SpecimenErrorCode.VISIT_REQUIRED);
-			return null;
+			if (detail.getCpId() != null) {
+				CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(detail.getCpId());
+				if (cp != null && cp.isSpecimenCentric()) {
+					visit = getVisitFor(cp);
+				}
+			} else if (StringUtils.isNotBlank(detail.getCpShortTitle())) {
+				CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getCpByShortTitle(detail.getCpShortTitle());
+				if (cp != null && cp.isSpecimenCentric()) {
+					visit = getVisitFor(cp);
+				}
+			}
+
+			if (visit == null) {
+				ose.addError(SpecimenErrorCode.VISIT_REQUIRED);
+				return null;
+			}
 		}
 		
 		if (visit == null) {
@@ -218,6 +250,37 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		}
 		
 		return visit;
+	}
+
+	private Visit getVisitFor(CollectionProtocol cp) {
+		String visitName = cp.getVisitName();
+		Visit cpVisit = daoFactory.getVisitsDao().getByName(visitName);
+		if (cpVisit != null) {
+			return cpVisit;
+		}
+
+		String ppid = cp.getPpid();
+		CollectionProtocolRegistration cpReg = daoFactory.getCprDao().getCprByPpid(cp.getId(), ppid);
+		if (cpReg == null) {
+			CollectionProtocolRegistrationDetail cprInput = new CollectionProtocolRegistrationDetail();
+			cprInput.setCpId(cp.getId());
+			cprInput.setPpid(ppid);
+			cprInput.setRegistrationDate(Calendar.getInstance().getTime());
+			cpReg = cprFactory.createCpr(cprInput);
+
+			daoFactory.getParticipantDao().saveOrUpdate(cpReg.getParticipant());
+			daoFactory.getCprDao().saveOrUpdate(cpReg);
+		}
+
+		VisitDetail visitInput = new VisitDetail();
+		visitInput.setCpId(cp.getId());
+		visitInput.setPpid(ppid);
+		visitInput.setName(visitName);
+		visitInput.setVisitDate(Calendar.getInstance().getTime());
+		visitInput.setSite(cp.getRepositories().iterator().next().getName());
+		cpVisit = visitFactory.createVisit(visitInput);
+		daoFactory.getVisitsDao().saveOrUpdate(cpVisit);
+		return cpVisit;
 	}
 	
 	private void setLineage(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {
@@ -292,6 +355,13 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 	}
 
 	private SpecimenRequirement getSpecimenRequirement(SpecimenDetail detail, Specimen existing, Visit visit, OpenSpecimenException ose) {
+		if (visit != null && visit.getCollectionProtocol().isSpecimenCentric()) {
+			//
+			// No anticipated specimens for specimen centric CPs
+			//
+			return null;
+		}
+
 		Long reqId = detail.getReqId();
 		String reqCode = detail.getReqCode();
 

@@ -79,4 +79,11 @@
       <column name="consentStmt_MOD" type="${bit.type}"/>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit and track changes to CP specimen centric setting">
+    <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
+      <column name="SPECIMEN_CENTRIC" type="${boolean.type}"/>
+      <column name="specimenCentric_MOD" type="${bit.type}"/>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

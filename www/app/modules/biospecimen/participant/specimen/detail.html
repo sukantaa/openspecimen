@@ -7,12 +7,12 @@
             {{cpr.cpShortTitle}}
           </a> 
         </li>
-        <li>
+        <li ng-if="!cp.specimenCentric">
           <a ui-sref="participant-detail.overview({cprId: cpr.id})">
             <span>{{cpr.ppid}}</span>
           </a>
         </li>
-        <li>
+        <li ng-if="!cp.specimenCentric">
           <a ui-sref="visit-detail.overview({visitId: visit.id, eventId: visit.eventId})">
             <os-event-desc event-point="visit.eventPoint" event-label="visit.eventLabel"></os-event-desc>
           </a>

@@ -17,6 +17,7 @@ import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitFactory;
 import com.krishagni.catissueplus.core.biospecimen.events.CpEntityDeleteCriteria;
@@ -200,6 +201,7 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 		try {
 			CpEntityDeleteCriteria crit = req.getPayload();
 			Visit visit = getVisit(crit.getId(), crit.getName());
+			raiseErrorIfSpecimenCentric(visit);
 			AccessCtrlMgr.getInstance().ensureDeleteVisitRights(visit);
 			visit.delete(!crit.isForceDelete());
 			return ResponseEvent.response(VisitDetail.from(visit));
@@ -308,7 +310,8 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 		try {
 			SprDetail detail = req.getPayload();
 			Visit visit = getVisit(detail.getId(), null);
-			
+
+			raiseErrorIfSpecimenCentric(visit);
 			ensureUpdateSprRights(visit);
 			
 			String filename = detail.getFilename();
@@ -341,7 +344,8 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 		try {
 			SprDetail detail = req.getPayload();
 			Visit visit = getVisit(detail.getId(), null);
-			
+
+			raiseErrorIfSpecimenCentric(visit);
 			ensureUpdateSprRights(visit);
 			
 			File file = getSprFile(detail.getId());
@@ -368,7 +372,8 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 		try {
 			EntityQueryCriteria crit = req.getPayload();
 			Visit visit = getVisit(crit.getId(), crit.getName());
-		
+
+			raiseErrorIfSpecimenCentric(visit);
 			AccessCtrlMgr.getInstance().ensureDeleteSprRights(visit);
 			
 			if (visit.isSprLocked()) {
@@ -402,6 +407,7 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 	public ResponseEvent<SprLockDetail> updateSprLockStatus(RequestEvent<SprLockDetail> req) {
 		SprLockDetail detail = req.getPayload();
 		Visit visit = getVisit(detail.getVisitId(), detail.getVisitName());
+		raiseErrorIfSpecimenCentric(visit);
 		
 		if (detail.isLocked()) {
 			AccessCtrlMgr.getInstance().ensureLockSprRights(visit);
@@ -505,13 +511,15 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 			visit = visitFactory.createVisit(input);
 		}
 
+		raiseErrorIfSpecimenCentric(visit);
 		AccessCtrlMgr.getInstance().ensureCreateOrUpdateVisitRights(visit);
 		return saveOrUpdateVisit(visit, existing);
 	}
 
 	private Visit saveOrUpdateVisit(Visit visit, Visit existing) {
-		String prevVisitStatus = existing != null ? existing.getStatus() : null;
+		raiseErrorIfSpecimenCentric(visit);
 
+		String prevVisitStatus = existing != null ? existing.getStatus() : null;
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 		ensureValidAndUniqueVisitName(existing, visit, ose);
 		ose.checkAndThrow();
@@ -726,5 +734,11 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 		}
 
 		return extractSprText;
+	}
+
+	private void raiseErrorIfSpecimenCentric(Visit visit) {
+		if (visit.getCollectionProtocol().isSpecimenCentric()) {
+			throw OpenSpecimenException.userError(CpErrorCode.OP_NOT_ALLOWED_SC, visit.getCollectionProtocol().getShortTitle());
+		}
 	}
 }

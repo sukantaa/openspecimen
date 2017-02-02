@@ -166,7 +166,6 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			for (int i = 0; i < detail.getRegCount(); i++) {
 				CollectionProtocolRegistrationDetail cpr = null;
 				result.add((cpr = registerParticipant(detail, regDate, i == 0)));
-
 				visits.addAll(addVisits(cpr.getId(), detail.getEvents(), i == 0));
 			}
 
@@ -206,6 +205,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		try {
 			RegistrationQueryCriteria detail = req.getPayload();
 			CollectionProtocolRegistration cpr = getCpr(detail.getCprId(), detail.getCpId(), null, detail.getPpid());
+			raiseErrorIfSpecimenCentric(cpr);
 			AccessCtrlMgr.getInstance().ensureUpdateCprRights(cpr);
 			anonymizer.anonymize(cpr);
 
@@ -244,6 +244,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		try {
 			CpEntityDeleteCriteria crit = req.getPayload();
 			CollectionProtocolRegistration cpr = getCpr(crit.getId(), null, crit.getCpShortTitle(), crit.getName());
+			raiseErrorIfSpecimenCentric(cpr);
 			AccessCtrlMgr.getInstance().ensureDeleteCprRights(cpr);
 			cpr.delete(!crit.isForceDelete());
 			return ResponseEvent.response(CollectionProtocolRegistrationDetail.from(cpr, false));
@@ -302,6 +303,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			}
 
 			CollectionProtocolRegistration existing = getCpr(cprId, null, cpShortTitle, ppid);
+			raiseErrorIfSpecimenCentric(existing);
 			AccessCtrlMgr.getInstance().ensureUpdateCprRights(existing);
 			
 			if (existing.getCollectionProtocol().isConsentsWaived()) {
@@ -341,7 +343,8 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			if (cpr == null) {
 				return ResponseEvent.userError(CprErrorCode.NOT_FOUND);
 			}
-			
+
+			raiseErrorIfSpecimenCentric(cpr);
 			AccessCtrlMgr.getInstance().ensureUpdateCprRights(cpr);
 
 			String fileName = cpr.getSignedConsentDocumentName();
@@ -390,6 +393,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 
 			CollectionProtocolRegistration existing = getCpr(consentDetail.getCprId(),
 				consentDetail.getCpId(), consentDetail.getCpShortTitle(), consentDetail.getPpid());
+			raiseErrorIfSpecimenCentric(existing);
 			boolean hasPhiAccess = AccessCtrlMgr.getInstance().ensureUpdateCprRights(existing);
 			
 			ConsentResponses consentResponses = consentResponsesFactory.createConsentResponses(existing, consentDetail);
@@ -503,6 +507,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			boolean saveParticipant) {
 
 		CollectionProtocolRegistration cpr = cprFactory.createCpr(existing, input);
+		raiseErrorIfSpecimenCentric(cpr);
 
 		if (existing == null) {
 			AccessCtrlMgr.getInstance().ensureCreateCprRights(cpr);
@@ -517,7 +522,9 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			CollectionProtocolRegistration cpr,
 			CollectionProtocolRegistration existing,
 			boolean saveParticipant) {
-		
+
+		raiseErrorIfSpecimenCentric(cpr);
+
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 		ensureValidAndUniquePpid(existing, cpr, ose);
 		ensureUniqueBarcode(existing, cpr, ose);
@@ -940,5 +947,11 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		}
 
 		return visits;
+	}
+
+	private void raiseErrorIfSpecimenCentric(CollectionProtocolRegistration cpr) {
+		if (cpr.getCollectionProtocol().isSpecimenCentric()) {
+			throw OpenSpecimenException.userError(CpErrorCode.OP_NOT_ALLOWED_SC, cpr.getCollectionProtocol().getShortTitle());
+		}
 	}
 }

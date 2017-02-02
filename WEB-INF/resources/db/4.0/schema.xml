@@ -265,4 +265,12 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Setting to specify whether CP is specimen centric">
+    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
+      <column name="SPECIMEN_CENTRIC" type="${boolean.type}" defaultValueBoolean="0">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

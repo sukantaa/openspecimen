@@ -26,12 +26,12 @@
 <script type="text/ng-template" id="modules/biospecimen/cp/label-settings-overview.html">
   <div>
     <ul class="os-key-values os-one-col">
-      <li class="item">
+      <li class="item" ng-if="!cp.specimenCentric">
         <strong class="key key-sm" translate="cp.label_format.ppid">PPID Format</strong>
         <span class="value value-md">{{settingCtx.cp.ppidFmt | osNoValue}}</span>
       </li>
 
-      <li class="item">
+      <li class="item" ng-if="!cp.specimenCentric">
         <strong class="key key-sm" translate="cp.label_format.visit">Visit</strong>
         <span class="value value-md">{{settingCtx.cp.visitNameFmt | osNoValue}}</span>
       </li>
@@ -56,7 +56,7 @@
         <span class="value value-md">{{settingCtx.userInputLabels | osNoValue}}</span>
       </li>
 
-      <li class="item">
+      <li class="item" ng-if="!cp.specimenCentric">
         <strong class="key key-sm" translate="cp.bulk_part_reg_allowed">Bulk Participant Registration Allowed</strong>
         <span class="value value-md" ng-switch on="settingCtx.cp.bulkPartRegEnabled">
           <span ng-switch-when="true" translate="common.enabled">Enabled</span>
@@ -72,7 +72,7 @@
       </li>
     </ul>
 
-    <div class="os-section os-line-section">
+    <div class="os-section os-line-section" ng-if="!cp.specimenCentric">
       <strong class="key key-sm" translate="cp.visit_print_settings">Visit Print Settings</strong>
       <ul class="os-key-values os-one-col">
         <li class="item">
@@ -91,7 +91,7 @@
 
     <div class="os-section os-line-section">
       <strong class="key key-sm" translate="cp.spmn_print_settings">Specimen Print Settings</strong>
-      <ul class="os-key-values os-one-col">
+      <ul class="os-key-values os-one-col" ng-if="!cp.specimenCentric">
         <li class="item">
           <strong class="key key-sm" translate="cp.pre_print_spmn_labels">Pre-print Labels</strong>
           <span class="value value-md">
@@ -140,7 +140,7 @@
 
 <script type="text/ng-template" id="modules/biospecimen/cp/label-settings-addedit.html">
   <form name="lsForm" os-form-validator="lsForm" class="form-horizontal" novalidate>
-    <div class="form-group">
+    <div class="form-group" ng-if="!cp.specimenCentric">
       <label class="control-label col-xs-3">
         <span translate="cp.label_format.ppid">PPID Format</span>
       </label>
@@ -150,7 +150,7 @@
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-if="!cp.specimenCentric">
       <label class="control-label col-xs-3">
         <span translate="cp.label_format.visit">Visit</span>
       </label>
@@ -198,11 +198,11 @@
         <span translate="cp.label_format.manual">User Inputs Allowed for</span>
       </label>
       <div class="col-xs-9">
-        <label class="checkbox-inline">
+        <label class="checkbox-inline" ng-if="!cp.specimenCentric">
           <input type="checkbox" ng-model="settingCtx.cp.manualPpidEnabled">
           <span translate="cp.ppids">Participant Protocol IDs</span>
         </label>
-        <label class="checkbox-inline">
+        <label class="checkbox-inline" ng-if="!cp.specimenCentric">
           <input type="checkbox" ng-model="settingCtx.cp.manualVisitNameEnabled">
           <span translate="cp.visit_names">Visit Names</span>
         </label>
@@ -213,7 +213,7 @@
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-if="!cp.specimenCentric">
       <label class="control-label col-xs-3">
         <span translate="cp.bulk_part_reg_allowed">Bulk Registrations</span>
       </label>
@@ -245,11 +245,11 @@
       </div>
     </div>
 
-    <div class="os-section-divider">
+    <div class="os-section-divider" ng-if="!cp.specimenCentric">
       <span translate="cp.visit_print_settings">Visit Print Settings</span>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-if="!cp.specimenCentric">
       <label class="control-label col-xs-3">
         <span translate="cp.when_to_print">When to Print</span>
       </label>
@@ -260,7 +260,7 @@
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-if="!cp.specimenCentric">
       <label class="control-label col-xs-3">
         <span translate="cp.copies">Copies</span>
       </label>
@@ -275,7 +275,7 @@
       <span translate="cp.spmn_print_settings">Specimen Print Settings</span>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-if="!cp.specimenCentric">
       <label class="control-label col-xs-3">
         <span translate="cp.pre_print_spmn_labels">Pre-print Labels</span>
       </label>

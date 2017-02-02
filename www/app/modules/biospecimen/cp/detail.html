@@ -23,13 +23,13 @@
          <span class="os-title" translate="cp.tab.overview">Overview</span>
        </a>
      </li>
-     <li ui-sref-active="active">
+     <li ui-sref-active="active" ng-if="!cp.specimenCentric">
        <a ui-sref=".consents">
          <span class="fa fa-pencil-square-o"></span>
          <span class="os-title" translate="cp.tab.consents">Consents</span>
        </a>
      </li>
-     <li ui-sref-active="active">
+     <li ui-sref-active="active" ng-if="!cp.specimenCentric">
        <a ui-sref=".specimen-requirements">
          <span class="fa fa-list-alt"></span>
          <span class="os-title" translate="cp.tab.events">Events</span>

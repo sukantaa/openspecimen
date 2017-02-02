@@ -93,7 +93,7 @@
             <span>{{cp.startDate | date: global.dateFmt}}</span>
           </td>
           <td class="col">
-            <span>{{cp.participantCount | number: 0}}</span>
+            <span>{{cp.participantCount | number: 0 | osNoValue: 'common.na' | translate}}</span>
           </td>
           <td class="col">
             <span>{{cp.specimenCount | number: 0}}</span>
@@ -121,10 +121,14 @@
                         <span translate="cp.view_details">View Details</span>
                       </a>
                     </li>
-                    <li>
-                      <a ui-sref="participant-list({cpId: cp.id})">
+                    <li ng-switch on="!cp.specimenCentric">
+                      <a ng-switch-when="true" ui-sref="participant-list({cpId: cp.id})">
                         <span class="fa fa-group"></span>
                         <span translate="cp.view_participants">View Participants</span>
+                      </a>
+                      <a ng-switch-when="false" ui-sref="cp-specimens({cpId: cp.id})">
+                        <span class="fa fa-flask"></span>
+                        <span translate="cp.view_specimens">View Specimens</span>
                       </a>
                     </li>
                     <li>

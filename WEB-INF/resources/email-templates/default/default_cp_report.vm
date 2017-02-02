@@ -25,6 +25,7 @@
       <td>
         <table border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse; margin: 10px auto;">
           <tbody>
+            #if (!$cp.specimenCentric)
             <tr>
               <td valign="top" style="text-align:center;border-collapse:collapse;font-family:Helvetica,Arial,sans-serif;width:33.33%;padding-bottom:25px">
                 <div style="margin: 0px 10px; border: 1px solid #ddd; border-radius: 5px; padding: 5px;">
@@ -72,6 +73,7 @@
                 </div>
               </td>
             </tr>
+            #end
             <tr>
               <td valign="top" style="text-align:center;border-collapse:collapse;font-family:Helvetica,Arial,sans-serif;width:33.33%;padding-bottom:25px">
                 <div style="margin: 0px 10px; border: 1px solid #ddd; border-radius: 5px; padding: 5px;">

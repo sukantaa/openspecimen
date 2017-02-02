@@ -165,6 +165,9 @@
     "ethics_approval_id": "Ethics Approval ID",
     "ppid_fmt": "PPID Format",
     "clinical_diagnoses": "Clinical Diagnoses",
+    "type": "Type",
+    "participant_centric": "Participant Centric",
+    "specimen_centric": "Specimen Centric",
     "anticipated_participants_cnt": "Anticipated Participants Count",
     "sop_document": "SOP Document",
     "sop_document_url": "SOP Document URL",
@@ -2064,8 +2067,10 @@
         "cp_sop_doc_url_desc": "System level collection protocol SOP document link",
         "cp_sop_doc": "CP SOP Document",
         "cp_sop_doc_desc": "System level collection protocol SOP document",
-        "sys_cp_rpt_settings": "Default CP Report Settings",
+        "sys_cp_rpt_settings": "CP Report",
         "sys_cp_rpt_settings_desc": "System level collection protocol report settings. These settings are used when CP specific reporting settings are not specified",
+        "sys_spmn_cp_rpt_settings": "Specimen centric CP Report",
+        "sys_spmn_cp_rpt_settings_desc": "System level specimen centric collection protocol report settings. These settings are used when CP specific reporting settings are not specified. If this setting is also not specified then settings for regular CP reports is used",
         "sys_workflows": "System Workflows",
         "sys_workflows_desc": "System level participants and specimens list view configuration. This configuration is used when CP specific configuration is not specified",
         "pending_spmns_disp_interval": "Anticipated Specimens Display Interval",
@@ -2168,8 +2173,10 @@
 
       "catalog": {
         "title": "Catalog",
-        "default_query": "Default Catalog Query",
-        "default_query_desc": "Identifier of saved query to be used as default catalog query"
+        "default_query": "CP Catalog Query",
+        "default_query_desc": "Identifier of saved query to be used as CP catalog query. This setting value is used when CP specific catalog query is not specified",
+        "default_spmn_centric_query": "Specimen centric CP Catalog Query",
+        "default_spmn_centric_query_desc": "Identifier of saved query to be used as catalog query for specimen centric CPs. If this setting is not specified then regular CP catalog query is used"
       },
 
       "query": {

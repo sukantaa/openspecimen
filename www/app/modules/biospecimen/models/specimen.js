@@ -1,5 +1,15 @@
 angular.module('os.biospecimen.models.specimen', ['os.common.models', 'os.biospecimen.models.form'])
   .factory('Specimen', function(osModel, $http, SpecimenRequirement, Form, Util) {
+
+    function matches(name, regex) {
+      return name && name.match(regex) != null;
+    }
+
+    function isSpecimenCentric(specimen) {
+      return matches(specimen.ppid, /^(\$\$cp_reg_\d+\$\$)$/g) ||
+               matches(specimen.visitName, /^(\$\$cp_visit_\d+\$\$)$/g);
+    }
+
     var Specimen = osModel(
       'specimens',
       function(specimen) {
@@ -18,6 +28,8 @@ angular.module('os.biospecimen.models.specimen', ['os.common.models', 'os.biospe
             }
           );
         }
+
+        specimen.$$specimenCentricCp = isSpecimenCentric(specimen);
       }
     );
 

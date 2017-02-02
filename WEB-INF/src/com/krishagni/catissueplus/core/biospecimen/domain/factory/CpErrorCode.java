@@ -89,7 +89,9 @@ public enum CpErrorCode implements ErrorCode {
 
 	INV_CONT_SEL_STRATEGY,
 
-	CANNOT_ENABLE_BARCODING;
+	CANNOT_ENABLE_BARCODING,
+
+	OP_NOT_ALLOWED_SC;
 	
 	@Override
 	public String code() {

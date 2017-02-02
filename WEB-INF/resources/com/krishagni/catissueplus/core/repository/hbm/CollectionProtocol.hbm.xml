@@ -59,6 +59,8 @@
 
     <property name="bulkPartRegEnabled" column="BULK_PART_REG_ALLOWED"/>
 
+    <property name="specimenCentric" column="SPECIMEN_CENTRIC"/>
+
     <property name="barcodingEnabled" column="BARCODING_ENABLED"/>
 
     <property name="unsignedConsentDocumentURL" column="UNSIGNED_CONSENT_DOC_URL"/>

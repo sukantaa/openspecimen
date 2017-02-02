@@ -70,6 +70,7 @@
   <include file="db/3.4/audit.xml"/>
 
   <include file="db/4.0/schema.xml"/>
+  <include file="db/4.0/config.xml"/>
   <include file="db/4.0/seed-data.xml"/>
   <include file="db/4.0/audit.xml"/>
 </databaseChangeLog>

@@ -89,18 +89,21 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		setDate(input, cp, ose);
 
 		cp.setIrbIdentifier(input.getIrbId());
-		cp.setEnrollment(input.getAnticipatedParticipantsCount());
 		cp.setSopDocumentUrl(input.getSopDocumentUrl());
 		cp.setSopDocumentName(input.getSopDocumentName());
 		cp.setExtractSprText(input.getExtractSprText());
 		cp.setDescriptionURL(input.getDescriptionUrl());
 		cp.setConsentsWaived(input.getConsentsWaived());
 		cp.setBulkPartRegEnabled(input.getBulkPartRegEnabled());
+		cp.setSpecimenCentric(input.isSpecimenCentric());
+		if (!cp.isSpecimenCentric()) {
+			cp.setEnrollment(input.getAnticipatedParticipantsCount());
+		}
 
 		setPpidFormat(input, cp, ose);
+		setVisitNameFmt(input, cp, ose);
 		setLabelFormats(input, cp, ose);
 		setBarcodeSetting(input, cp, ose);
-		setVisitNameFmt(input, cp, ose);
 		setContainerSelectionStrategy(input, cp, ose);
 		setVisitNamePrintMode(input, cp, ose);
 		cp.setVisitNamePrintCopies(input.getVisitNamePrintCopies());
@@ -278,6 +281,11 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 	}
 	
 	private void setPpidFormat(CollectionProtocolDetail input, CollectionProtocol result, OpenSpecimenException ose) {
+		if (result.isSpecimenCentric()) {
+			// PPID format is ignored if CP is specimen centric
+			return;
+		}
+
 		String ppidFmt = ensureValidPpidFormat(input.getPpidFmt(), ose);
 		result.setPpidFormat(ppidFmt);
 		result.setManualPpidEnabled(input.getManualPpidEnabled());
@@ -322,6 +330,11 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 	}
 
 	private void setVisitNameFmt(CollectionProtocolDetail input, CollectionProtocol result, OpenSpecimenException ose) {
+		if (result.isSpecimenCentric()) {
+			// Visit name format is ignored if CP is specimen centric
+			return;
+		}
+
 		String nameFmt = ensureValidVisitNameFmt(input.getVisitNameFmt(), ose);
 		result.setVisitNameFormat(nameFmt);
 		result.setManualVisitNameEnabled(input.getManualVisitNameEnabled());
@@ -351,7 +364,7 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 	}
 
 	private void setVisitNamePrintMode(CollectionProtocolDetail input, CollectionProtocol cp, OpenSpecimenException ose) {
-		if (StringUtils.isBlank(input.getVisitNamePrintMode())) {
+		if (cp.isSpecimenCentric() || StringUtils.isBlank(input.getVisitNamePrintMode())) {
 			return;
 		}
 

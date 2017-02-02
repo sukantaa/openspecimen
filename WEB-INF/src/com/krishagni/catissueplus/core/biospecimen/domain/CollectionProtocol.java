@@ -52,6 +52,10 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	public static final String EXTN = "CollectionProtocolExtension";
 
 	private static final String ENTITY_NAME = "collection_protocol";
+
+	private static final String CP_REG_PPID_FMT = "$$cp_reg_%d$$";
+
+	private static final String CP_VISIT_NAME_FMT = "$$cp_visit_%d$$";
 	
 	private String title;
 
@@ -98,6 +102,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	private Boolean manualSpecLabelEnabled;
 
 	private Boolean bulkPartRegEnabled;
+
+	private Boolean specimenCentric;
 
 	private Boolean barcodingEnabled;
 
@@ -315,6 +321,14 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		this.bulkPartRegEnabled = bulkPartRegEnabled;
 	}
 
+	public Boolean isSpecimenCentric() {
+		return specimenCentric != null ? specimenCentric : false;
+	}
+
+	public void setSpecimenCentric(Boolean specimenCentric) {
+		this.specimenCentric = specimenCentric;
+	}
+
 	public boolean isBarcodingEnabled() {
 		return barcodingEnabled != null ? barcodingEnabled : false;
 	}
@@ -518,6 +532,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		cp.setIrbIdentifier(getIrbIdentifier());
 		cp.setEnrollment(getEnrollment());
 		cp.setDescriptionURL(getDescriptionURL());
+		cp.setEnrollment(getEnrollment());
+		cp.setSpecimenCentric(isSpecimenCentric());
 
 		cp.setPpidFormat(getPpidFormat());
 		cp.setManualPpidEnabled(isManualPpidEnabled());
@@ -703,6 +719,14 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		List<CollectionProtocolEvent> events = new ArrayList<CollectionProtocolEvent>(getCollectionProtocolEvents());
 		Collections.sort(events);
 		return events;
+	}
+
+	public String getPpid() {
+		return String.format(CP_REG_PPID_FMT, getId());
+	}
+
+	public String getVisitName() {
+		return String.format(CP_VISIT_NAME_FMT, getId());
 	}
 
 	private CpConsentTier getConsentTierById(Long ctId) {

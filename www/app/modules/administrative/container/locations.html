@@ -120,7 +120,7 @@
         {{lctx.entityInfo.specimen.barcode | osNoValue}}
       </span>
     </li>
-    <li class="item">
+    <li class="item" ng-if="!lctx.entityInfo.specimen.$$specimenCentricCp">
       <strong class="key key-sm" translate="specimens.ppid">PPID</strong>
       <span class="value value-md">
         <a ui-sref="participant-detail.overview({

@@ -60,7 +60,8 @@ angular.module('os.biospecimen.participant',
           },
 
           listView: function(cp, CpConfigSvc) {
-            return CpConfigSvc.getListView(cp.id, 'participant-list');
+            var defListViewState = !cp.specimenCentric ? 'participant-list' : 'cp-specimens';
+            return CpConfigSvc.getListView(cp.id, defListViewState);
           },
 
           reqBasedDistOrShip: function($injector) {
@@ -205,14 +206,19 @@ angular.module('os.biospecimen.participant',
         templateUrl: 'modules/common/import/add.html',
         controller: 'ImportObjectCtrl',
         resolve: {
-          allowedEntityTypes: function(cpViewCtx) {
+          allowedEntityTypes: function(cp, cpViewCtx) {
             var entityTypes = [];
-            if (cpViewCtx.participantUpdateAllowed) {
+            if (!cp.specimenCentric && cpViewCtx.participantUpdateAllowed) {
               entityTypes.push('Participant');
             }
 
+            if (!cp.specimenCentric && cpViewCtx.visitSpecimenUpdateAllowed) {
+              entityTypes.push('SpecimenCollectionGroup');
+            }
+
             if (cpViewCtx.visitSpecimenUpdateAllowed) {
-              entityTypes = entityTypes.concat(['SpecimenCollectionGroup', 'Specimen', 'SpecimenEvent']);
+              entityTypes.push('Specimen');
+              entityTypes.push('SpecimenEvent');
             }
 
             return entityTypes;

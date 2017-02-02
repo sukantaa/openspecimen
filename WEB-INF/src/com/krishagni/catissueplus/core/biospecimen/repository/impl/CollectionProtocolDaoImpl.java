@@ -39,8 +39,8 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<CollectionProtocolSummary> getCollectionProtocols(CpListCriteria cpCriteria) {
-		List<CollectionProtocolSummary> cpList = new ArrayList<CollectionProtocolSummary>();
-		Map<Long, CollectionProtocolSummary> cpMap = new HashMap<Long, CollectionProtocolSummary>();
+		List<CollectionProtocolSummary> cpList = new ArrayList<>();
+		Map<Long, CollectionProtocolSummary> cpMap = new HashMap<>();
 		
 		boolean includePi = cpCriteria.includePi();
 		boolean includeStats = cpCriteria.includeStat();		
@@ -56,15 +56,17 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 		}
 
 		if (includeStats && !cpMap.isEmpty()) {
-			rows = getSessionFactory().getCurrentSession()
-					.getNamedQuery(GET_PARTICIPANT_N_SPECIMEN_CNT)
-					.setParameterList("cpIds", cpMap.keySet())
-					.list();
+			rows = getCurrentSession().getNamedQuery(GET_PARTICIPANT_N_SPECIMEN_CNT)
+				.setParameterList("cpIds", cpMap.keySet())
+				.list();
 			
 			for (Object[] row : rows) {
 				Long cpId = (Long)row[0];
 				CollectionProtocolSummary cp = cpMap.get(cpId);
-				cp.setParticipantCount((Long)row[1]);
+				if (!cp.isSpecimenCentric()) {
+					cp.setParticipantCount((Long)row[1]);
+				}
+
 				cp.setSpecimenCount((Long)row[2]);			
 			}			
 		}
@@ -73,8 +75,9 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<Long> getAllCpIds() {
-		return getCurrentSession().getNamedQuery(GET_ALL_CP_IDS).list();
+		return (List<Long>) getCurrentSession().getNamedQuery(GET_ALL_CP_IDS).list();
 	}
 
 	@Override
@@ -392,6 +395,7 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 		projs.add(Projections.property("startDate"));
 		projs.add(Projections.property("ppidFormat"));
 		projs.add(Projections.property("manualPpidEnabled"));
+		projs.add(Projections.property("specimenCentric"));
 
 		if (cpCriteria.includePi()) {
 			projs.add(Projections.property("pi.id"));
@@ -413,6 +417,8 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 		cp.setStartDate((Date)fields[idx++]);
 		cp.setPpidFmt((String)fields[idx++]);
 		cp.setManualPpidEnabled((Boolean)fields[idx++]);
+		cp.setSpecimenCentric((Boolean)fields[idx++]);
+
 		if (includePi) {
 			UserSummary user = new UserSummary();
 			user.setId((Long)fields[idx++]);

@@ -63,7 +63,7 @@
             <td class="col">
               <a ui-sref="specimen({specimenId: aliquotSpec.parent.id})">
                 <span>{{aliquotSpec.parent.label}}</span>
-                <span>({{aliquotSpec.ppid}})</span>
+                <span ng-if="!aliquotSpec.$$specimenCentricCp">({{aliquotSpec.ppid}})</span>
               </a>
             </td>
             <td class="col">
@@ -164,7 +164,7 @@
               <div style="display: flex;">
                 <a ui-sref="specimen({specimenId: aliquot.parent.id})">
                   <span>{{aliquot.parentLabel}}</span>
-                  <span>({{aliquot.ppid}})</span>
+                  <span ng-if="!aliquot.$$specimenCentricCp">({{aliquot.ppid}})</span>
                 </a>
                 <span ng-if="aliquot.$$count > 1" style="padding-left: 5px;">
                   <button class="btn btn-xs btn-default" ng-click="toggleAliquotsGroup(aliquot)">

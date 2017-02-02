@@ -47,7 +47,7 @@
 <os-assign-to-spmn-list menu-align="left" on-add-to-list="listViewCtx.ctrl.addSpecimensToList(list)">
 </os-assign-to-spmn-list>
 
-<button class="default" ui-sref="participant-list({cpId: cp.id})">
+<button class="default" ui-sref="participant-list({cpId: cp.id})" ng-if="!cp.specimenCentric">
   <span class="fa fa-group"></span>
   <span translate="cp.view_participants">View Participants</span>
 </button>

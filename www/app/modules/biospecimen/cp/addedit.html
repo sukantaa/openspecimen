@@ -130,7 +130,21 @@
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group" ng-if="(!mode || mode != 'copy') && !cp.id">
+        <label class="col-xs-3 control-label" translate="cp.type">Type</label>
+        <div class="col-xs-9">
+          <label class="radio-inline">
+            <input type="radio" name="type" ng-model="cp.specimenCentric" ng-value="false">
+            <span translate="cp.participant_centric">Participant Centric</span>
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="type" ng-model="cp.specimenCentric" ng-value="true">
+            <span translate="cp.specimen_centric">Specimen Centric</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group" ng-if="!cp.specimenCentric">
         <label class="control-label col-xs-3" translate="cp.anticipated_participants_cnt">
           Anticipated Participants Count
         </label>
