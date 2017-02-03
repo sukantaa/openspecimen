@@ -22,7 +22,8 @@ angular.module('os.administrative.container',
           $scope.containerResource = {
             createOpts: {resource: 'StorageContainer', operations: ['Create']},
             updateOpts: {resource: 'StorageContainer', operations: ['Update']},
-            deleteOpts: {resource: 'StorageContainer', operations: ['Delete']}
+            deleteOpts: {resource: 'StorageContainer', operations: ['Delete']},
+            importOpts: {resource: 'StorageContainer', operations: ['Bulk Import']}
           }
         },
         parent: 'signed-in'

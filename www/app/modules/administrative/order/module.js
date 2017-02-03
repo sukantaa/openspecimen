@@ -17,7 +17,8 @@ angular.module('os.administrative.order',
           $scope.orderResource = {
             createOpts: {resource: 'Order', operations: ['Create']},
             updateOpts: {resource: 'Order', operations: ['Update']},
-            deleteOpts: {resource: 'Order', operations: ['Delete']}
+            deleteOpts: {resource: 'Order', operations: ['Delete']},
+            importOpts: {resource: 'Order', operations: ['Bulk Import']}
           }
         },
         parent: 'signed-in'

@@ -42,14 +42,14 @@ angular.module('os.biospecimen.cp',
         resolve: {
           cpsCtx: function(currentUser, AuthorizationService) {
             return {
-              participantUpdateAllowed: AuthorizationService.isAllowed({
+              participantImportAllowed: AuthorizationService.isAllowed({
                 resource: 'ParticipantPhi',
-                operations: ['Create', 'Update']
+                operations: ['Bulk Import']
               }),
 
-              visitSpecimenUpdateAllowed: AuthorizationService.isAllowed({
+              visitSpecimenImportAllowed: AuthorizationService.isAllowed({
                 resource: 'VisitAndSpecimen',
-                operations: ['Create', 'Update']
+                operations: ['Bulk Import']
               })
             }
           }
@@ -111,11 +111,11 @@ angular.module('os.biospecimen.cp',
 
           allowedEntityTypes: function(cpsCtx) {
             var entityTypes = [];
-            if (cpsCtx.participantUpdateAllowed) {
+            if (cpsCtx.participantImportAllowed) {
               entityTypes.push('Participant');
             }
 
-            if (cpsCtx.visitSpecimenUpdateAllowed) {
+            if (cpsCtx.visitSpecimenImportAllowed) {
               entityTypes = entityTypes.concat(['SpecimenCollectionGroup', 'Specimen', 'SpecimenEvent']);
             }
 

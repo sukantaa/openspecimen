@@ -18,7 +18,7 @@ angular.module('os.administrative.shipment',
             createOpts: {resource: 'ShippingAndTracking', operations: ['Create']},
             updateOpts: {resource: 'ShippingAndTracking', operations: ['Update']},
             deleteOpts: {resource: 'ShippingAndTracking', operations: ['Delete']},
-            createUpdateOpts: {resource: 'ShippingAndTracking', operations: ['Create', 'Update']}
+            importOpts: {resource: 'ShippingAndTracking', operations: ['Bulk Import']}
           }
         },
         parent: 'signed-in'

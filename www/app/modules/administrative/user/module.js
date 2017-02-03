@@ -21,7 +21,8 @@ angular.module('os.administrative.user',
           $scope.userResource = {
             createOpts: {resource: 'User', operations: ['Create']},
             updateOpts: {resource: 'User', operations: ['Update']},
-            deleteOpts: {resource: 'User', operations: ['Delete']}
+            deleteOpts: {resource: 'User', operations: ['Delete']},
+            importOpts: {resource: 'User', operations: ['Bulk Import']}
           }
         },
         parent: 'signed-in'
