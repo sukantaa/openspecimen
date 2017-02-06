@@ -15,13 +15,13 @@ angular.module('os.biospecimen.visit', [
         template: '<div ui-view></div>',
         resolve: {
           visit: function($stateParams, cpr, Visit) {
-            if (!!$stateParams.visitId) {
+            if (!!$stateParams.visitId && $stateParams.visitId > 0) {
               return Visit.getById($stateParams.visitId);
             } else if (!!$stateParams.eventId) {
               return Visit.getAnticipatedVisit($stateParams.eventId, cpr.registrationDate);
             }
 
-            return null;           
+            return null;
           }
         },
         controller: function($scope, cpr, visit) {

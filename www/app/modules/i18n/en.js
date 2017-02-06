@@ -531,6 +531,7 @@
     "closed": "Closed",
 
     "unplanned": "Unplanned",
+    "new_spmn": "New Specimen",
 
     "id": "Identifier",
     "lineage": "Lineage",
@@ -681,7 +682,8 @@
       "print": "Print",
       "assign_to": "Add to Cart",
       "reopen": "Reopen",
-      "close": "Close"
+      "close": "Close",
+      "add_specimen": "Add Specimen"
     },
 
     "errors": {

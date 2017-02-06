@@ -10,7 +10,8 @@ angular.module('os.biospecimen.specimen.addedit', [])
       var currSpecimen = $scope.currSpecimen = angular.copy(specimen);
       delete currSpecimen.children;
 
-      currSpecimen.visitId = visit.id;
+      currSpecimen.cpId = currSpecimen.cpId || cp.id;
+      currSpecimen.visitId = visit && visit.id;
       currSpecimen.createdOn = currSpecimen.createdOn || new Date();
 
       if (currSpecimen.lineage == 'Aliquot') {
@@ -140,7 +141,7 @@ angular.module('os.biospecimen.specimen.addedit', [])
       $scope.currSpecimen.$saveOrUpdate().then(
         function(result) {
           angular.extend($scope.specimen, result);
-          var params = {specimenId: result.id, srId: result.reqId};
+          var params = {specimenId: result.id, cprId: result.cprId, visitId: result.visitId, srId: result.reqId};
           $state.go('specimen-detail.overview', params);
         }
       );

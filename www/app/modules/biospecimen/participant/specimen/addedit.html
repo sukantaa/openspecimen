@@ -26,7 +26,12 @@
 
       <h3 ng-switch on="!!currSpecimen.label">
         <span ng-switch-when="true">{{currSpecimen.label}}</span>
-        <span ng-switch-default>{{currSpecimen.type}} ({{currSpecimen.specimenClass}})</span>
+        <span ng-switch-default>
+          <span ng-switch on="!!currSpecimen.type">
+            <span ng-switch-when="true">{{currSpecimen.type}} ({{currSpecimen.specimenClass}})</span>
+            <span ng-switch-default translate="specimens.new_spmn">New Specimen</span>
+          </span>
+        </span>
       </h3>
     </div>
   </div>

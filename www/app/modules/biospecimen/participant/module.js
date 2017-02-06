@@ -260,13 +260,16 @@ angular.module('os.biospecimen.participant',
         url: '/participants/:cprId',
         template: '<div ui-view></div>',
         resolve: {
-          cpr: function($stateParams, Participant, CollectionProtocolRegistration) {
+          cpr: function($stateParams, cp, Participant, CollectionProtocolRegistration) {
             if (!!$stateParams.cprId && $stateParams.cprId > 0) {
               return CollectionProtocolRegistration.getById($stateParams.cprId);
             } 
 
             var participant = new Participant({source: 'OpenSpecimen'});
-            return new CollectionProtocolRegistration({registrationDate: new Date(), participant: participant});
+            return new CollectionProtocolRegistration({
+              cpId: cp.id, cpShortTitle: cp.shortTitle,
+              registrationDate: new Date(), participant: participant
+            });
           },
 
           hasSde: function($injector) {
