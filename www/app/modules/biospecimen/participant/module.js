@@ -448,7 +448,18 @@ angular.module('os.biospecimen.participant',
             // required for lastest visit clinical diagnosis.
             //
             return $stateParams.visitId ? null : cpr.getLatestVisit();
-          }
+          },
+          customFieldGroups: function($stateParams, hasSde, cp, CpConfigSvc) {
+            if (!hasSde) {
+              return [];
+            }
+
+            return CpConfigSvc.getWorkflowData(cp.id, 'specimenCollection').then(
+              function(data) {
+                return (data && data.fieldGroups) || [];
+              }
+            );
+          },
         },
         parent: 'participant-root'
       })
