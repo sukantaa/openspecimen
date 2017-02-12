@@ -1,7 +1,7 @@
 angular.module('os.biospecimen.specimenlist')
   .controller('SpecimenListSpecimensCtrl', function(
     $scope, $state, $stateParams, $timeout, $filter, currentUser, reqBasedDistOrShip, list,
-    SpecimensHolder, SpecimenList, DeleteUtil, Alerts, Util) {
+    SpecimensHolder, SpecimenList, CollectionProtocol, Container, DeleteUtil, Alerts, Util) {
 
     function init() { 
       $scope.orderCreateOpts =    {resource: 'Order', operations: ['Create']};
@@ -10,111 +10,109 @@ angular.module('os.biospecimen.specimenlist')
 
       $scope.ctx = {
         list: list,
-        spmnsInView: list.specimens,
+        spmnsInView: [],
         filterOpts: {},
         filterPvs: {init: false},
-        selection: {},
+        selection: {all: false, any: false, specimens: []},
         reqBasedDistOrShip: (reqBasedDistOrShip.value == 'true'),
         url: SpecimenList.url(),
         breadcrumbs: $stateParams.breadcrumbs
       }
 
       $scope.$on('osRightDrawerOpen', initFilterPvs);
-      resetSelection();
-      Util.filter($scope, 'ctx.filterOpts', filterSpecimens);
+
+      $scope.pagingOpts = {
+        totalSpmns: 0,
+        currPage: 1,
+        spmnsPerPage: 100
+      };
+
+      Util.filter($scope, 'ctx.filterOpts', loadSpecimens);
+      $scope.$watch('pagingOpts.currPage', function() {
+        loadSpecimens();
+      });
     }
+
+    function loadSpecimens(filterOpts) {
+      if (filterOpts) {
+        $scope.pagingOpts = {
+          totalSpmns: 0,
+          currPage: 1,
+          spmnsPerPage: 100
+        };
+      }
+
+      var pagingOpts = $scope.pagingOpts;
+      var startAt = (pagingOpts.currPage - 1) * pagingOpts.spmnsPerPage;
+      var maxResults = pagingOpts.spmnsPerPage + 1;
+
+      var queryParams = angular.extend({startAt: startAt, maxResults: maxResults}, $scope.ctx.filterOpts);
+      $scope.ctx.list.getSpecimens(queryParams).then(
+        function(specimens) {
+          pagingOpts.totalSpmns = (pagingOpts.currPage - 1) * pagingOpts.spmnsPerPage + specimens.length;
+          if (specimens.length >= maxResults) {
+            specimens.splice(specimens.length - 1, 1);
+          }
+
+          $scope.ctx.spmnsInView = specimens;
+        }
+      );
+    };
 
     function initFilterPvs() {
       if ($scope.ctx.filterPvs.init) {
         return;
       }
 
-      var types = [], sites = [], cps = [], lineages = [], containers = [];
-      angular.forEach(list.specimens,
-        function(specimen) {
-          if (types.indexOf(specimen.type) == -1) {
-            types.push(specimen.type);
-          }
+      $scope.ctx.filterPvs.init = true;
+      $scope.ctx.filterPvs.lineages = ['New', 'Aliquot', 'Derivative'];
+      loadCpList();
+      loadContainerList();
+    }
 
-          if (sites.indexOf(specimen.anatomicSite) == -1) {
-            sites.push(specimen.anatomicSite);
-          }
+    function loadCpList(name) {
+      if (!$scope.ctx.filterPvs.defCpList || (!!name && $scope.ctx.filterPvs.defCpList.length >= 100)) {
+        var opts = {detailedList: false};
+        if (!!name) {
+          opts.query = name;
+        }
 
-          if (cps.indexOf(specimen.cpShortTitle) == -1) {
-            cps.push(specimen.cpShortTitle);
+        CollectionProtocol.list(opts).then(
+          function(cpList) {
+            $scope.ctx.filterPvs.cpList = cpList;
+            if (!name) {
+              $scope.ctx.filterPvs.defCpList = cpList;
+            }
           }
+        );
+      } else {
+        $scope.ctx.filterPvs.cpList = $scope.ctx.filterPvs.defCpList;
+      }
+    }
 
-          if (lineages.indexOf(specimen.lineage) == -1) {
-            lineages.push(specimen.lineage);
-          }
+    // containers are invariably more than 100
+    // so no point in trying to optimise the load
+    function loadContainerList(name) {
+      var opts = {topLevelContainers: false};
+      if (!!name) {
+        opts.name = name;
+      }
 
-          var location = specimen.storageLocation;
-          if (location && location.name && containers.indexOf(location.name) == -1) {
-            containers.push(location.name);
-          }
+      Container.list(opts).then(
+        function(containerList) {
+          $scope.ctx.filterPvs.containerList = containerList;
         }
       );
-
-      var filterPvs = {
-        init: true,
-        types: types.sort(),
-        sites: sites.sort(),
-        cps: cps.sort(),
-        lineages: lineages.sort(),
-        containers: containers.sort()
-      }
-
-      $timeout(function() {$scope.ctx.filterPvs = filterPvs});
-    }
-
-    function reinitFilterPvs() {
-      $scope.ctx.filterPvs.init = false;
-      initFilterPvs();
-    }
-
-    function resetSelection() {
-      return $scope.ctx.selection = {all: false, any: false, specimens: []};
-    }
-
-    function isSpecimenAvailable(spmn) {
-      return (spmn.availableQty == undefined || spmn.availableQty > 0);
-    }
-
-    function filterSpecimens(filterOpts) {
-      var showAvailable = filterOpts.showAvailable;
-      filterOpts.showAvailable = undefined;
-
-      var spmnsInView = $filter('filter')(list.specimens, filterOpts);
-      if (showAvailable) {
-        spmnsInView = spmnsInView.filter(isSpecimenAvailable);
-      }
-
-      filterOpts.showAvailable = showAvailable;
-
-      var selectedSpmns = spmnsInView.filter(function(spmn) { return !!spmn.selected });
-      $scope.ctx.spmnsInView = spmnsInView;
-      $scope.ctx.selection.specimens = selectedSpmns;
-      $scope.ctx.selection.all = (selectedSpmns.length > 0 && selectedSpmns.length == spmnsInView.length);
-      $scope.ctx.selection.any = (selectedSpmns.length > 0);
     }
 
     function removeSpecimensFromList() {
       var list = $scope.ctx.list;
       list.removeSpecimens($scope.ctx.selection.specimens).then(
         function(listSpecimens) {
-          var spmnsInView = $scope.ctx.spmnsInView;
-          for (var i = spmnsInView.length - 1; i >= 0; --i) {
-            if (spmnsInView[i].selected) {
-              spmnsInView.splice(i, 1);
-            }
-          }
-
-          list.specimens = listSpecimens.specimens;
-          $scope.ctx.selection = resetSelection();
-
           var type = list.getListType(currentUser);
           Alerts.success('specimen_list.specimens_removed_from_' + type, list);
-          reinitFilterPvs();
+          $scope.ctx.selection.all = false;
+          loadSpecimens();
         }
       );
     }
@@ -131,18 +129,19 @@ angular.module('os.biospecimen.specimenlist')
 
     $scope.addChildSpecimens = function() {
       var list = $scope.ctx.list;
-      var oldLen = list.specimens.length;
-
       list.addChildSpecimens().then(
-        function(listSpecimens) {
-          list.specimens = listSpecimens.specimens;
-          filterSpecimens($scope.ctx.filterOpts);
+        function() {
+          Alerts.success('specimen_list.child_specimens_added');
+          loadSpecimens();
+        }
+      );
+    }
 
-          var newLen = list.specimens.length;
-          if (newLen > oldLen) {
-            Alerts.success('specimen_list.child_specimens_added', {count: (newLen - oldLen)});
-            reinitFilterPvs();
-          }
+    $scope.sortByRel = function() {
+      $scope.ctx.list.getSpecimenSortedByRel().then(
+        function(listSpmns) {
+          $scope.ctx.spmnsInView = listSpmns;
+          $scope.pagingOpts.totalSpmns = listSpmns.length;
         }
       );
     }
@@ -200,6 +199,14 @@ angular.module('os.biospecimen.specimenlist')
         templateUrl: 'modules/biospecimen/specimen-list/confirm-remove-specimens.html',
         delete: removeSpecimensFromList
       });
+    }
+
+    $scope.searchCp = function(name) {
+      loadCpList(name);
+    }
+
+    $scope.searchContainer = function(name) {
+      loadContainerList(name);
     }
 
     $scope.distributeSpecimens = function() {

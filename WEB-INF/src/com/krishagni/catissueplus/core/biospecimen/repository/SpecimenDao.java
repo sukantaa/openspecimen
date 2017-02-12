@@ -11,6 +11,8 @@ import com.krishagni.catissueplus.core.common.repository.Dao;
 
 public interface SpecimenDao extends Dao<Specimen> {
 	public List<Specimen> getSpecimens(SpecimenListCriteria crit);
+
+	public List<Long> getSpecimenIds(SpecimenListCriteria crit);
 	
 	public Specimen getByLabel(String label);
 

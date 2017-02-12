@@ -5,7 +5,6 @@ import java.util.List;
 public class UpdateListSpecimensOp {
 	public enum Operation {
 		ADD,
-		UPDATE,
 		REMOVE
 	}
 

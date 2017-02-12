@@ -87,4 +87,8 @@ public class ConfigUtil {
 	public String getFileContent(String module, String name, File defValue) {
 		return cfgSvc.getFileContent(module, name, defValue);
 	}
+
+	public boolean isOracle() {
+		return cfgSvc.isOracle();
+	}
 }

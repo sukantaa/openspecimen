@@ -1714,6 +1714,7 @@
     "filter_lists": "Filters",
     "search_def_list_tip": "Use $$ to search users' default carts",
     "add_child_specimens": "Add Child Specimens",
+    "sort_by_rel": "Sort by Relationship",
     "child_specimens_added": "Successfully added {{count}} child specimens",
     "available_spmns": "Available Specimens",
     "enter_specimen_label": "Enter specimen labels or barcodes separated by a comma, tab or newline"
@@ -2086,7 +2087,9 @@
         "participant_lookup_flow": "Participants Lookup Workflow",
         "participant_lookup_flow_desc": "Spring bean name or fully qualified name of class implementing customised matching participants lookup workflow. For example: bean: customisedLookup or class: com.krishagni.openspecimen.plugins.CustomisedLookup",
         "enable_spmn_barcoding": "Specimen Barcoding",
-        "enable_spmn_barcoding_desc": "Enable or disable barcoding support for Specimen"
+        "enable_spmn_barcoding_desc": "Enable or disable barcoding support for Specimen",
+        "rel_sorting_max_spmns": "Specimens Sorting by Relationship Limit",
+        "rel_sorting_max_spmns_desc": "Maximum number of specimens that can be sorted based on their relationship."
       },
 
       "common": {

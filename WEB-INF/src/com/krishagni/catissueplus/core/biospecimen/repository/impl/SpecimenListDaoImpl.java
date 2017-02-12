@@ -8,10 +8,14 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListsCriteria;
@@ -66,38 +70,6 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	}
 
 	@Override
-	public Map<Long, List<Specimen>> getListCpSpecimens(Long listId) {
-		List<Object[]> rows = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_LIST_CP_SPECIMENS)
-				.setLong("listId", listId)
-				.list();
-
-		Map<Long, List<Specimen>> cpSpecimens = new HashMap<Long, List<Specimen>>();
-		for (Object[] row : rows) {
-			Long cpId = (Long)row[0];
-			Specimen specimen = (Specimen)row[1];
-
-			List<Specimen> specimens = cpSpecimens.get(cpId);
-			if (specimens == null) {
-				specimens = new ArrayList<Specimen>();
-				cpSpecimens.put(cpId, specimens);
-			}
-
-			specimens.add(specimen);
-		}
-
-		return cpSpecimens;
-	}
-
-	@Override
-	public List<Long> getListSpecimensCpIds(Long listId) {
-		return sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_LIST_SPMNS_CP_IDS)
-				.setLong("listId", listId)
-				.list();
-	}
-
-	@Override
 	public SpecimenList getSpecimenList(Long listId) {
 		return (SpecimenList)sessionFactory.getCurrentSession()
 				.get(SpecimenList.class, listId);
@@ -119,10 +91,10 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 		return getSpecimenListByName(SpecimenList.getDefaultListName(userId));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public int getListSpecimensCount(Long listId) {
-		List<Object[]> rows = sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_LIST_SPECIMENS_COUNT)
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_LIST_SPECIMENS_COUNT)
 			.setParameterList("listIds", Collections.singletonList(listId))
 			.list();
 
@@ -136,6 +108,83 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	@Override
 	public void deleteSpecimenList(SpecimenList list) {
 		sessionFactory.getCurrentSession().delete(list);
+	}
+
+	//
+	// specimen list items
+	//
+	@Override
+	public void saveListItems(List<SpecimenListItem> items) {
+		int i = 0;
+		for (SpecimenListItem item : items) {
+			getCurrentSession().saveOrUpdate(item);
+			i++;
+
+			if (i % 50 == 0) {
+				getCurrentSession().flush();
+				getCurrentSession().clear();
+			}
+		}
+	}
+
+	@Override
+	public int deleteListItems(Long listId, List<Long> specimenIds) {
+		return getCurrentSession().getNamedQuery(DELETE_LIST_SPECIMENS)
+			.setParameter("listId", listId)
+			.setParameterList("specimenIds", specimenIds)
+			.executeUpdate();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Long> getSpecimenIdsInList(Long listId, List<Long> specimenIds) {
+		Criteria query = getCurrentSession().createCriteria(SpecimenList.class, "list")
+			.createAlias("list.specimens", "item")
+			.createAlias("item.specimen", "specimen")
+			.setProjection(Projections.property("specimen.id"))
+			.add(Restrictions.eq("list.id", listId));
+		applyIdsFilter(query, "specimen.id", specimenIds);
+		return query.list();
+	}
+
+	@Override
+	public void addChildSpecimens(Long listId, boolean oracle) {
+		getCurrentSession().getNamedQuery(oracle ? ADD_CHILD_SPECIMENS_ORA : ADD_CHILD_SPECIMENS_MYSQL)
+			.setParameter("listId", listId)
+			.executeUpdate();
+	}
+
+	@Override
+	@Deprecated
+	public Map<Long, List<Specimen>> getListCpSpecimens(Long listId) {
+		List<Object[]> rows = sessionFactory.getCurrentSession()
+			.getNamedQuery(GET_LIST_CP_SPECIMENS)
+			.setLong("listId", listId)
+			.list();
+
+		Map<Long, List<Specimen>> cpSpecimens = new HashMap<Long, List<Specimen>>();
+		for (Object[] row : rows) {
+			Long cpId = (Long)row[0];
+			Specimen specimen = (Specimen)row[1];
+
+			List<Specimen> specimens = cpSpecimens.get(cpId);
+			if (specimens == null) {
+				specimens = new ArrayList<>();
+				cpSpecimens.put(cpId, specimens);
+			}
+
+			specimens.add(specimen);
+		}
+
+		return cpSpecimens;
+	}
+
+	@Override
+	@Deprecated
+	public List<Long> getListSpecimensCpIds(Long listId) {
+		return sessionFactory.getCurrentSession().getNamedQuery(GET_LIST_SPMNS_CP_IDS)
+			.setLong("listId", listId)
+			.list();
 	}
 
 	private Query getSpecimenListsQuery(SpecimenListsCriteria crit, boolean countReq) {
@@ -186,4 +235,10 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	private static final String GET_SPECIMEN_LIST_BY_NAME = FQN + ".getSpecimenListByName";
 
 	private static final String GET_LIST_SPECIMENS_COUNT = FQN + ".getListSpecimensCount";
+
+	private static final String DELETE_LIST_SPECIMENS = FQN + ".deleteListSpecimens";
+
+	private static final String ADD_CHILD_SPECIMENS_MYSQL = FQN + ".addChildSpecimensMySQL";
+
+	private static final String ADD_CHILD_SPECIMENS_ORA = FQN + ".addChildSpecimensOracle";
 }

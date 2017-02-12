@@ -57,6 +57,8 @@ public class ConfigParams {
 
 	public static final String CONSENTS_DIR              = "participant_consent_dir";
 
+	public static final String REL_SORTING_MAX_SPMNS     = "rel_sorting_max_spmns";
+
 	public static String getConsentsDirPath() {
 		String path = ConfigUtil.getInstance().getStrSetting(MODULE, CONSENTS_DIR, null);
 		if (StringUtils.isBlank(path)) {

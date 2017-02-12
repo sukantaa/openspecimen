@@ -4,21 +4,17 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
-import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenListErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenListFactory;
-import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
-import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDetails;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
-import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
@@ -36,7 +32,7 @@ public class SpecimenListFactoryImpl implements SpecimenListFactory {
 	}
 
 	@Override
-	public SpecimenList createSpecimenList(SpecimenListDetails details) {
+	public SpecimenList createSpecimenList(SpecimenListDetail details) {
 		SpecimenList specimenList = new SpecimenList();
 		
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
@@ -47,7 +43,7 @@ public class SpecimenListFactoryImpl implements SpecimenListFactory {
 	}
 	
 	@Override
-	public SpecimenList createSpecimenList(SpecimenList existing, SpecimenListDetails details) {
+	public SpecimenList createSpecimenList(SpecimenList existing, SpecimenListDetail details) {
 		SpecimenList specimenList = new SpecimenList();
 		BeanUtils.copyProperties(existing, specimenList);
 		
@@ -68,7 +64,7 @@ public class SpecimenListFactoryImpl implements SpecimenListFactory {
 		return specimenList;
 	}
 
-	private void setSpecimenListAttributes(SpecimenListDetails details, SpecimenList specimenList, boolean partial, OpenSpecimenException ose) {
+	private void setSpecimenListAttributes(SpecimenListDetail details, SpecimenList specimenList, boolean partial, OpenSpecimenException ose) {
 		if (specimenList.getId() == null && details.getId() != null) {
 			specimenList.setId(details.getId()); 
 		}
@@ -76,14 +72,13 @@ public class SpecimenListFactoryImpl implements SpecimenListFactory {
 		setOwner(details, specimenList, partial , ose);
 		setName(details, specimenList, partial , ose);
 		setDescription(details, specimenList, partial, ose);
-		setSpecimens(details, specimenList, partial, ose);
 		setSharedUsers(details, specimenList, partial, ose);
 
 		specimenList.setCreatedOn(Calendar.getInstance().getTime());
 		specimenList.setLastUpdatedOn(specimenList.getCreatedOn());
 	}
     
-	private void setOwner(SpecimenListDetails details, SpecimenList specimenList, boolean partial, OpenSpecimenException ose) {
+	private void setOwner(SpecimenListDetail details, SpecimenList specimenList, boolean partial, OpenSpecimenException ose) {
 		if (partial && !details.isAttrModified("owner")) {
 			return;
 		}
@@ -102,7 +97,7 @@ public class SpecimenListFactoryImpl implements SpecimenListFactory {
 		}
 	}
 
-	private void setName(SpecimenListDetails details, SpecimenList specimenList, boolean partial, OpenSpecimenException ose) {
+	private void setName(SpecimenListDetail details, SpecimenList specimenList, boolean partial, OpenSpecimenException ose) {
 		if (partial && !details.isAttrModified("name")) {
 			return;
 		}
@@ -115,7 +110,7 @@ public class SpecimenListFactoryImpl implements SpecimenListFactory {
 		}		
 	}
 
-	private void setDescription(SpecimenListDetails details, SpecimenList specimenList, boolean partial, OpenSpecimenException ose) {
+	private void setDescription(SpecimenListDetail details, SpecimenList specimenList, boolean partial, OpenSpecimenException ose) {
 		if (partial && !details.isAttrModified("description")) {
 			return;
 		}
@@ -123,30 +118,7 @@ public class SpecimenListFactoryImpl implements SpecimenListFactory {
 		specimenList.setDescription(details.getDescription());
 	}
 
-	private void setSpecimens(SpecimenListDetails details, SpecimenList specimenList, boolean partial, OpenSpecimenException ose) {
-		if (partial && !details.isAttrModified("specimens")) {
-			return;
-		}
-		
-		List<Long> ids = new ArrayList<>();
-		if (CollectionUtils.isNotEmpty(details.getSpecimens())) {
-			ids = details.getSpecimens().stream().map(SpecimenInfo::getId).collect(Collectors.toList());
-		}
-		
-		if (CollectionUtils.isNotEmpty(ids)) {
-			SpecimenListCriteria crit = new SpecimenListCriteria().ids(ids);
-			List<Specimen> specimens = daoFactory.getSpecimenDao().getSpecimens(crit);
-			if (specimens.size() != ids.size()) {
-				ose.addError(SpecimenListErrorCode.INVALID_SPECIMENS);
-			} else {
-				specimenList.setSpecimens(new HashSet<Specimen>(specimens));
-			}			
-		} else {
-			specimenList.getSpecimens().clear();
-		}
-	}
-	
-	private void setSharedUsers(SpecimenListDetails details, SpecimenList specimenList, boolean partial, OpenSpecimenException ose) {
+	private void setSharedUsers(SpecimenListDetail details, SpecimenList specimenList, boolean partial, OpenSpecimenException ose) {
 		if (partial && !details.isAttrModified("sharedWith")) {
 			return;
 		}

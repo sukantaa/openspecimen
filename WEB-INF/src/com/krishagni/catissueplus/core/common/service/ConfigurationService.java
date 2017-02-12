@@ -62,4 +62,6 @@ public interface ConfigurationService {
 	public String getDataDir();
 	
 	Map<String, String> getPasswordSettings();
+
+	boolean isOracle();
 }

@@ -4,7 +4,8 @@ import java.util.List;
 
 import com.krishagni.catissueplus.core.biospecimen.events.ListSpecimensDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ShareSpecimenListOp;
-import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDetails;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.UpdateListSpecimensOp;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
@@ -16,27 +17,29 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 
 public interface SpecimenListService {
-	public ResponseEvent<List<SpecimenListSummary>> getSpecimenLists(RequestEvent<SpecimenListsCriteria> req);
+	ResponseEvent<List<SpecimenListSummary>> getSpecimenLists(RequestEvent<SpecimenListsCriteria> req);
 	
-	public ResponseEvent<Long> getSpecimenListsCount(RequestEvent<SpecimenListsCriteria> req);
+	ResponseEvent<Long> getSpecimenListsCount(RequestEvent<SpecimenListsCriteria> req);
 	
-	public ResponseEvent<SpecimenListDetails> getSpecimenList(RequestEvent<Long> req);
+	ResponseEvent<SpecimenListDetail> getSpecimenList(RequestEvent<EntityQueryCriteria> req);
 	
-	public ResponseEvent<SpecimenListDetails> createSpecimenList(RequestEvent<SpecimenListDetails> req);
+	ResponseEvent<SpecimenListDetail> createSpecimenList(RequestEvent<SpecimenListDetail> req);
 	
-	public ResponseEvent<SpecimenListDetails> updateSpecimenList(RequestEvent<SpecimenListDetails> req);
-	
-	public ResponseEvent<ListSpecimensDetail> getListSpecimens(RequestEvent<SpecimenListCriteria> req);
-	
-	public ResponseEvent<SpecimenListDetails> patchSpecimenList(RequestEvent<SpecimenListDetails> req);
-	
-	public ResponseEvent<ListSpecimensDetail>  updateListSpecimens(RequestEvent<UpdateListSpecimensOp> req);
-	
-	public ResponseEvent<List<UserSummary>> shareSpecimenList(RequestEvent<ShareSpecimenListOp> req);
-	
-	public ResponseEvent<SpecimenListDetails> deleteSpecimenList(RequestEvent<Long> req);
+	ResponseEvent<SpecimenListDetail> updateSpecimenList(RequestEvent<SpecimenListDetail> req);
 
-	public ResponseEvent<ListSpecimensDetail> addChildSpecimens(RequestEvent<Long> req);
+	ResponseEvent<SpecimenListDetail> patchSpecimenList(RequestEvent<SpecimenListDetail> req);
 
-	public ResponseEvent<ExportedFileDetail> exportSpecimenList(RequestEvent<EntityQueryCriteria> req);
+	ResponseEvent<List<SpecimenInfo>> getListSpecimens(RequestEvent<SpecimenListCriteria> req);
+
+	ResponseEvent<List<SpecimenInfo>> getListSpecimensSortedByRel(RequestEvent<EntityQueryCriteria> req);
+
+	ResponseEvent<Integer>  updateListSpecimens(RequestEvent<UpdateListSpecimensOp> req);
+	
+	ResponseEvent<List<UserSummary>> shareSpecimenList(RequestEvent<ShareSpecimenListOp> req);
+	
+	ResponseEvent<SpecimenListDetail> deleteSpecimenList(RequestEvent<Long> req);
+
+	ResponseEvent<Boolean> addChildSpecimens(RequestEvent<Long> req);
+
+	ResponseEvent<ExportedFileDetail> exportSpecimenList(RequestEvent<EntityQueryCriteria> req);
 }

@@ -123,7 +123,7 @@ public class Specimen extends BaseExtensionEntity {
 	
 	private List<SpecimenTransferEvent> transferEvents;
 	
-	private Set<SpecimenList> specimenLists =  new HashSet<SpecimenList>();
+	private Set<SpecimenListItem> specimenListItems =  new HashSet<>();
 	
 	private boolean concentrationInit = false;
 
@@ -502,12 +502,12 @@ public class Specimen extends BaseExtensionEntity {
 	}
 	
 	@NotAudited
-	public Set<SpecimenList> getSpecimenLists() {
-		return specimenLists;
+	public Set<SpecimenListItem> getSpecimenListItems() {
+		return specimenListItems;
 	}
 
-	public void setSpecimenLists(Set<SpecimenList> specimenLists) {
-		this.specimenLists = specimenLists;
+	public void setSpecimenListItems(Set<SpecimenListItem> specimenListItems) {
+		this.specimenListItems = specimenListItems;
 	}
 
 	public LabelGenerator getLabelGenerator() {

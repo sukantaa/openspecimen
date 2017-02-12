@@ -1,6 +1,7 @@
 
 package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.MatchMode;
@@ -20,6 +22,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Subqueries;
 import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
@@ -35,50 +38,33 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	}
 
 	@SuppressWarnings("unchecked")
+	@Override
 	public List<Specimen> getSpecimens(SpecimenListCriteria crit) {
-		Criteria query = getSessionFactory().getCurrentSession()
-			.createCriteria(Specimen.class, "specimen")
-			.addOrder(Order.asc("specimen.id"))
-			.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-
-
-		if (CollectionUtils.isNotEmpty(crit.ids())) {
-			addIdsCond(query, crit.ids());
-		} else {
-			Disjunction labelOrBarcode = Restrictions.disjunction();
-			if (CollectionUtils.isNotEmpty(crit.labels())) {
-				if (crit.labels().size() == 1) {
-					addLabelCond(labelOrBarcode, crit.labels().iterator().next(), crit.matchMode());
-				} else {
-					addLabelsCond(labelOrBarcode, crit.labels());
-				}
-			}
-
-			if (CollectionUtils.isNotEmpty(crit.barcodes())) {
-				if (crit.barcodes().size() == 1) {
-					addBarcodeCond(labelOrBarcode, crit.barcodes().iterator().next(), crit.matchMode());
-				} else {
-					addBarcodesCond(labelOrBarcode, crit.barcodes());
-				}
-			}
-
-			query.add(labelOrBarcode);
-		}
-
-		addLineageCond(query, crit);
-		addCollectionStatusCond(query, crit);
-		addSiteCpsCond(query, crit);
-		addCpCond(query, crit);
-		addSpecimenListCond(query, crit);
-		addStorageLocationSiteCond(query, crit);
+		Criteria query = getCurrentSession().createCriteria(Specimen.class, "specimen")
+			.add(Subqueries.propertyIn("specimen.id", getSpecimenIdsQuery(crit)));
 
 		if (crit.limitItems()) {
+			if (crit.specimenListId() != null) {
+				query.createAlias("specimen.specimenListItems", "listItem")
+					.createAlias("listItem.list", "list")
+					.add(Restrictions.eq("list.id", crit.specimenListId()))
+					.addOrder(Order.asc("listItem.id"));
+			} else {
+				query.addOrder(Order.asc("specimen.id"));
+			}
+
 			query.setFirstResult(crit.startAt()).setMaxResults(crit.maxResults());
 		}
 
 		return query.list();
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Long> getSpecimenIds(SpecimenListCriteria crit) {
+		return getSpecimenIdsQuery(crit).getExecutableCriteria(getCurrentSession()).list();
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Specimen getByLabel(String label) {
@@ -326,6 +312,47 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		query.add(labelIn);
 	}
 
+	private DetachedCriteria getSpecimenIdsQuery(SpecimenListCriteria crit) {
+		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Specimen.class, "specimen")
+			.setProjection(Projections.distinct(Projections.property("specimen.id")));
+		Criteria query = detachedCriteria.getExecutableCriteria(getCurrentSession());
+
+		if (CollectionUtils.isNotEmpty(crit.ids())) {
+			addIdsCond(query, crit.ids());
+		} else {
+			Disjunction labelOrBarcode = Restrictions.disjunction();
+			if (CollectionUtils.isNotEmpty(crit.labels())) {
+				if (crit.labels().size() == 1) {
+					addLabelCond(labelOrBarcode, crit.labels().iterator().next(), crit.matchMode());
+				} else {
+					addLabelsCond(labelOrBarcode, crit.labels());
+				}
+			}
+
+			if (CollectionUtils.isNotEmpty(crit.barcodes())) {
+				if (crit.barcodes().size() == 1) {
+					addBarcodeCond(labelOrBarcode, crit.barcodes().iterator().next(), crit.matchMode());
+				} else {
+					addBarcodesCond(labelOrBarcode, crit.barcodes());
+				}
+			}
+
+			query.add(labelOrBarcode);
+		}
+
+		addLineageCond(query, crit);
+		addCollectionStatusCond(query, crit);
+		addSiteCpsCond(query, crit);
+		addCpCond(query, crit);
+		addPpidCond(query, crit);
+		addSpecimenListCond(query, crit);
+		addStorageLocationCond(query, crit);
+		addSpecimenTypeCond(query, crit);
+		addAnatomicSiteCond(query, crit);
+		addAvailableSpecimenCond(query, crit);
+		return detachedCriteria;
+	}
+
 	private void addLineageCond(Criteria query, SpecimenListCriteria crit) {
 		if (crit.lineages() == null || crit.lineages().length == 0) {
 			return;
@@ -419,26 +446,51 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		query.add(Restrictions.eq("cp.id", crit.cpId()));
 	}
 
+	private void addPpidCond(Criteria query, SpecimenListCriteria crit) {
+		if (StringUtils.isBlank(crit.ppid())) {
+			return;
+		}
+
+		if (CollectionUtils.isEmpty(crit.siteCps()) && crit.cpId() == null) {
+			if (!query.getAlias().equals("visit")) {
+				query.createAlias("specimen.visit", "visit");
+			}
+
+			query.createAlias("visit.registration", "cpr");
+		}
+
+		query.add(Restrictions.ilike("cpr.ppid", crit.ppid(), crit.matchMode()));
+	}
+
 	private void addSpecimenListCond(Criteria query, SpecimenListCriteria crit) {
 		if (crit.specimenListId() == null) {
 			return;
 		}
 
-		query.createAlias("specimen.specimenLists", "list").add(Restrictions.eq("list.id", crit.specimenListId()));
+		query.createAlias("specimen.specimenListItems", "listItem")
+			.createAlias("listItem.list", "list")
+			.add(Restrictions.eq("list.id", crit.specimenListId()));
 	}
 
-	private void addStorageLocationSiteCond(Criteria query, SpecimenListCriteria crit) {
-		if (StringUtils.isBlank(crit.storageLocationSite())) {
+	private void addStorageLocationCond(Criteria query, SpecimenListCriteria crit) {
+		if (StringUtils.isBlank(crit.storageLocationSite()) && StringUtils.isBlank(crit.container())) {
 			return;
 		}
 
 		query.createAlias("specimen.position", "pos", JoinType.LEFT_OUTER_JOIN)
-			.createAlias("pos.container", "cont", JoinType.LEFT_OUTER_JOIN)
-			.createAlias("cont.site", "contSite", JoinType.LEFT_OUTER_JOIN)
-			.add(Restrictions.or(
-				Restrictions.isNull("pos.id"),
-				Restrictions.eq("contSite.name", crit.storageLocationSite())
-			));
+			.createAlias("pos.container", "cont", JoinType.LEFT_OUTER_JOIN);
+
+		if (StringUtils.isNotBlank(crit.storageLocationSite())) {
+			query.createAlias("cont.site", "contSite", JoinType.LEFT_OUTER_JOIN)
+				.add(Restrictions.or(
+					Restrictions.isNull("pos.id"),
+					Restrictions.eq("contSite.name", crit.storageLocationSite())
+				));
+		}
+
+		if (StringUtils.isNotBlank(crit.container())) {
+			query.add(Restrictions.eq("cont.name", crit.container()));
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -453,6 +505,34 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 	private String getDistributionStatus(Date execDate, Date returnDate) {
 		return (returnDate == null || execDate.after(returnDate)) ? "Distributed" : "Returned";
+	}
+
+	private void addSpecimenTypeCond(Criteria query, SpecimenListCriteria crit) {
+		if (StringUtils.isBlank(crit.type())) {
+			return;
+		}
+
+		query.add(Restrictions.eq("specimenType", crit.type()));
+	}
+
+	private void addAnatomicSiteCond(Criteria query, SpecimenListCriteria crit) {
+		if (StringUtils.isBlank(crit.anatomicSite())) {
+			return;
+		}
+
+		query.add(Restrictions.eq("tissueSite", crit.anatomicSite()));
+	}
+
+	private void addAvailableSpecimenCond(Criteria query, SpecimenListCriteria crit) {
+		if (!crit.available()) {
+			return;
+		}
+
+		query.add(
+			Restrictions.disjunction()
+				.add(Restrictions.isNull("availableQuantity"))
+				.add(Restrictions.gt("availableQuantity", new BigDecimal(0)))
+		);
 	}
 
 	private static final String FQN = Specimen.class.getName();

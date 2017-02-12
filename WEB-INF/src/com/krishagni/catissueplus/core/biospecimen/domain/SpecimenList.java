@@ -15,9 +15,7 @@ import java.util.Set;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
-public class SpecimenList {
-	private Long id;
-	
+public class SpecimenList extends BaseEntity {
 	private String name;
 	
 	private User owner;
@@ -30,17 +28,9 @@ public class SpecimenList {
 	
 	private Set<User> sharedWith = new HashSet<>();
 	
-	private Set<Specimen> specimens = new HashSet<>();
+	private Set<SpecimenListItem> specimens = new HashSet<>();
 	
 	private Date deletedOn;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getName() {
 		return name;
@@ -90,11 +80,11 @@ public class SpecimenList {
 		this.sharedWith = sharedWith;
 	}
 
-	public Set<Specimen> getSpecimens() {
+	public Set<SpecimenListItem> getSpecimens() {
 		return specimens;
 	}
 
-	public void setSpecimens(Set<Specimen> specimens) {
+	public void setSpecimens(Set<SpecimenListItem> specimens) {
 		this.specimens = specimens;
 	}
 	
@@ -104,37 +94,6 @@ public class SpecimenList {
 
 	public void setDeletedOn(Date deletedOn) {
 		this.deletedOn = deletedOn;
-	}
-
-	public void addSpecimens(List<Specimen> specimens) {
-		this.specimens.addAll(specimens);
-		setLastUpdatedOn(Calendar.getInstance().getTime());
-	}
-	
-	public void updateSpecimens(List<Specimen> specimens) {
-		this.specimens.retainAll(specimens);
-
-		for (Specimen specimen : specimens) {
-			if (!this.specimens.contains(specimen)) {
-				this.specimens.add(specimen);
-			}
-		}
-
-		setLastUpdatedOn(Calendar.getInstance().getTime());
-	}
-	
-	public void removeSpecimens(List<Specimen> specimens) {
-		this.specimens.removeAll(specimens);
-		setLastUpdatedOn(Calendar.getInstance().getTime());
-	}
-
-	public boolean contains(Specimen specimen) {
-		return specimens.contains(specimen);
-	}
-
-	public void clear() {
-		specimens.clear();
-		setLastUpdatedOn(Calendar.getInstance().getTime());
 	}
 
 	public void addSharedUsers(List<User> users) {
@@ -178,7 +137,6 @@ public class SpecimenList {
 	public void update(SpecimenList specimenList) {
 		setName(specimenList.getName());
 		setDescription(specimenList.getDescription());
-		setSpecimens(specimenList.getSpecimens());
 		updateSharedUsers(specimenList.getSharedWith());
 		setLastUpdatedOn(Calendar.getInstance().getTime());
 	}
@@ -199,10 +157,6 @@ public class SpecimenList {
 
 	public boolean isDefaultList() {
 		return isDefaultList(getOwner());
-	}
-
-	public List<Specimen> getSpecimensGroupedByAncestors() {
-		return groupByAncestors(specimens);
 	}
 
 	public static String getDefaultListName(User user) {
@@ -260,5 +214,4 @@ public class SpecimenList {
 			addSpecimens(spmnsMap, childSpmn.getLabel(), listSpecimens, result);
 		}
 	}
-
 }

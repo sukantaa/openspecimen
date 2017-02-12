@@ -27,11 +27,9 @@
       <many-to-many class="com.krishagni.catissueplus.core.administrative.domain.User" column="USER_ID"/>
     </set>
 	
-    <set name="specimens" table="CATISSUE_SPEC_TAG_ITEMS">
+    <set name="specimens" table="CATISSUE_SPEC_TAG_ITEMS" inverse="true">
       <key column="TAG_ID"/>
-      <many-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.Specimen" column="OBJ_ID">
-        <filter name="activeEntity"/>
-      </many-to-many>
+      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem"/>
     </set>
     
     <property name="deletedOn" column="DELETED_ON"/>
@@ -44,9 +42,12 @@
       select 
         l.id, count(s.id)
       from
-        SpecimenList l inner join l.specimens s
+        SpecimenList l
+        join l.specimens li
+        join li.specimen s
       where 
-        l.id in (:listIds)
+        l.id in (:listIds) and
+        s.activityStatus != 'Disabled'
       group by
         l.id
     </query>
@@ -56,7 +57,8 @@
         cp.id, s
       from
         SpecimenList l
-        join l.specimens s
+        join l.specimens li
+        join li.specimen s
         join s.visit v
         join v.registration cpr
         join cpr.collectionProtocol cp
@@ -70,7 +72,8 @@
         distinct cp.id
       from
         SpecimenList l
-        join l.specimens s
+        join l.specimens li
+        join li.specimen s
         join s.visit v
         join v.registration cpr
         join cpr.collectionProtocol cp
@@ -78,5 +81,41 @@
         l.id = :listId and
         l.deletedOn is null
     </query>
+
+    <sql-query name="deleteListSpecimens">
+      delete from catissue_spec_tag_items where tag_id = :listId and obj_id in (:specimenIds)
+    </sql-query>
+
+    <sql-query name="addChildSpecimensMySQL">
+      insert into
+        catissue_spec_tag_items(tag_id, obj_id)
+      select
+        distinct e.tag_id, h.descendent_id
+      from
+        catissue_specimen_hierarchy h
+        inner join catissue_spec_tag_items e on e.obj_id = h.ancestor_id
+        left join catissue_spec_tag_items ne on ne.obj_id = h.descendent_id and ne.tag_id = e.tag_id
+      where
+        e.tag_id = :listId and
+        ne.obj_id is null
+    </sql-query>
+
+    <sql-query name="addChildSpecimensOracle">
+      insert into
+        catissue_spec_tag_items(identifier, tag_id, obj_id)
+      select
+        os_spmn_cart_items_seq.nextval, t.tag_id, t.descendent_id
+      from (
+        select
+          distinct e.tag_id, h.descendent_id
+        from
+          catissue_specimen_hierarchy h
+          inner join catissue_spec_tag_items e on e.obj_id = h.ancestor_id
+          left join catissue_spec_tag_items ne on ne.obj_id = h.descendent_id and ne.tag_id = e.tag_id
+        where
+          e.tag_id = :listId and
+          ne.obj_id is null
+      ) t
+    </sql-query>
   </class>
 </hibernate-mapping>

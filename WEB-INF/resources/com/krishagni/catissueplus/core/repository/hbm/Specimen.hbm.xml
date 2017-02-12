@@ -93,9 +93,9 @@
       column="IDENTIFIER" not-found="ignore"
       update="false" insert="false"/>
 
-    <set name="specimenLists" table="CATISSUE_SPEC_TAG_ITEMS" lazy="true">
+    <set name="specimenListItems" table="CATISSUE_SPEC_TAG_ITEMS" lazy="true">
       <key column="OBJ_ID"/>
-      <many-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList" column="TAG_ID" />
+      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem"/>
     </set>
 
     <filter name="activeEntity"/>

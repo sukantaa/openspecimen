@@ -266,6 +266,34 @@
     </sql>
   </changeSet>
 
+  <changeSet author="vpawar" id="Add specimen cart item ID column" dbms="mysql">
+    <addColumn tableName="CATISSUE_SPEC_TAG_ITEMS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Add specimen cart item ID column" dbms="oracle">
+    <addColumn tableName="CATISSUE_SPEC_TAG_ITEMS">
+      <column name="IDENTIFIER" type="${int.type}"/>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen cart item ID sequence" dbms="oracle">
+    <createSequence sequenceName="OS_SPMN_CART_ITEMS_SEQ" ordered="true" startValue="1" incrementBy="1"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Update existing cart item identifier values" dbms="oracle">
+    <sql>
+      update catissue_spec_tag_items set identifier = os_spmn_cart_items_seq.nextval;
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Add primary key constraint on specimen cart item identifier" dbms="oracle">
+    <addPrimaryKey tableName="CATISSUE_SPEC_TAG_ITEMS" columnNames="IDENTIFIER"/>
+  </changeSet>
+
   <changeSet author="vpawar" id="Setting to specify whether CP is specimen centric">
     <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
       <column name="SPECIMEN_CENTRIC" type="${boolean.type}" defaultValueBoolean="0">

@@ -24,6 +24,16 @@ public class SpecimenListCriteria extends AbstractListCriteria<SpecimenListCrite
 
 	private String storageLocationSite;
 
+	private String ppid;
+
+	private String anatomicSite;
+
+	private String type;
+
+	private String container;
+
+	private boolean available;
+
 	public SpecimenListCriteria() {
 		exactMatch(true);
 	}
@@ -111,6 +121,51 @@ public class SpecimenListCriteria extends AbstractListCriteria<SpecimenListCrite
 
 	public SpecimenListCriteria storageLocationSite(String storageLocationSite) {
 		this.storageLocationSite = storageLocationSite;
+		return self();
+	}
+
+	public String ppid() {
+		return ppid;
+	}
+
+	public SpecimenListCriteria ppid(String ppid) {
+		this.ppid = ppid;
+		return self();
+	}
+
+	public String anatomicSite() {
+		return anatomicSite;
+	}
+
+	public SpecimenListCriteria anatomicSite(String anatomicSite) {
+		this.anatomicSite = anatomicSite;
+		return self();
+	}
+
+	public String type() {
+		return type;
+	}
+
+	public SpecimenListCriteria type(String type) {
+		this.type = type;
+		return self();
+	}
+
+	public String container() {
+		return container;
+	}
+
+	public SpecimenListCriteria container(String container) {
+		this.container = container;
+		return self();
+	}
+
+	public boolean available() {
+		return this.available;
+	}
+
+	public SpecimenListCriteria available(boolean available) {
+		this.available = available;
 		return self();
 	}
 }

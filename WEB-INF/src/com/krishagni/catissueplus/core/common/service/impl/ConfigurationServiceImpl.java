@@ -486,7 +486,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		
 		return result;
 	}
-				
+
+	@Override
+	public boolean isOracle() {
+		return "oracle".equalsIgnoreCase(appProps.getProperty("database.type"));
+	}
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		reload();

@@ -67,6 +67,12 @@
             </a>
           </li>
           <li>
+            <a ng-click="sortByRel()">
+              <span class="fa fa-sort"></span>
+              <span translate="specimen_list.sort_by_rel">Sort by Relationship</span>
+            </a>
+          </li>
+          <li>
             <a target="_blank" href="{{ctx.url + '/' + ctx.list.id + '/csv-file'}}">
               <span class="fa fa-download"></span>
               <span translate="specimen_list.export">Export Cart</span>
@@ -95,7 +101,7 @@
       </div>
     </div>
     <div class="right">
-      <button class="default" os-right-drawer-toggle ng-if="ctx.list.specimens.length > 1">
+      <button class="default" os-right-drawer-toggle ng-if="ctx.spmnsInView.length > 1">
         <span class="fa fa-search"></span>
         <span translate="common.buttons.search">Search</span>
       </button>
@@ -103,7 +109,7 @@
   </div>
 
   <div class="container os-list-container">
-    <table class="os-table os-table-hover" overflow="auto" ng-if="ctx.list.specimens.length > 0">
+    <table class="os-table os-table-hover" overflow="auto" ng-if="ctx.spmnsInView.length > 0">
       <thead class="os-table-head">
         <tr class="row">
           <th class="col os-click-esc os-pointer-cursor" ng-click="toggleAllSpecimenSelect($event)">
@@ -172,7 +178,13 @@
       </tbody>
     </table>
 
-    <table class="os-table" ng-if="ctx.list.specimens.length == 0">
+    <span ng-if="ctx.spmnsInView.length > 0 && ctx.spmnsInView.length < pagingOpts.totalSpmns">
+      <pager total-items="pagingOpts.totalSpmns" items-per-page="pagingOpts.spmnsPerPage"
+        ng-model="pagingOpts.currPage">
+      </pager>
+    </span>
+
+    <table class="os-table" ng-if="ctx.spmnsInView.length == 0">
       <thead class="os-table-head">
         <tr class="row">
           <td class="col os-col-100">
@@ -196,7 +208,7 @@
 </div>
 
 <script type="text/ng-template" id="modules/biospecimen/specimen-list/search-specimens.html">
-  <div class="os-search">
+  <div class="os-search" ng-if="ctx.filterPvs.init">
     <div class="os-head">
       <h3 class="os-title" translate="specimen_list.filter_specimens">
         Specimens Filter
@@ -204,9 +216,9 @@
     </div>
 
     <div class="os-body">
-      <div class="form-group" ng-if="ctx.filterPvs.cps.length > 1">
-        <os-select os-md-input ng-model="ctx.filterOpts.cpShortTitle" list="ctx.filterPvs.cps"
-          placeholder="{{'specimen_list.cp' | translate}}">
+      <div class="form-group">
+        <os-select os-md-input ng-model="ctx.filterOpts.cpId" list="ctx.filterPvs.cpList" refresh="searchCp($select.search)"
+          display-prop="shortTitle" select-prop="id" placeholder="{{'specimen_list.cp' | translate}}">
         </os-select>
       </div>
 
@@ -215,7 +227,7 @@
           placeholder="{{'specimen_list.ppid' | translate}}">
       </div>
 
-      <div class="form-group" ng-if="ctx.filterPvs.lineages.length > 1">
+      <div class="form-group">
         <os-select os-md-input ng-model="ctx.filterOpts.lineage" list="ctx.filterPvs.lineages"
           placeholder="{{'specimen_list.lineage' | translate}}">
         </os-select>
@@ -226,28 +238,29 @@
           placeholder="{{'specimen_list.label' | translate}}">
       </div>
 
-      <div class="form-group" ng-if="ctx.filterPvs.types.length > 1">
-        <os-select os-md-input ng-model="ctx.filterOpts.type" list="ctx.filterPvs.types"
-          placeholder="{{'specimen_list.type' | translate}}">
-        </os-select>
+      <div class="form-group">
+        <os-pvs os-md-input ng-model="ctx.filterOpts.type" attribute="specimen_type"
+          show-only-leaf-values="true" placeholder="{{'specimen_list.type' | translate}}">
+        </os-pvs>
       </div>
 
-      <div class="form-group" ng-if="ctx.filterPvs.sites.length > 1">
-        <os-select os-md-input ng-model="ctx.filterOpts.anatomicSite" list="ctx.filterPvs.sites"
-          placeholder="{{'specimen_list.anatomic_site' | translate}}">
-        </os-select>
+      <div class="form-group">
+        <os-pvs os-md-input ng-model="ctx.filterOpts.anatomicSite" attribute="anatomic_site"
+          show-only-leaf-values="true" placeholder="{{'specimen_list.anatomic_site' | translate}}">
+        </os-pvs>
       </div>
 
-      <div class="form-group" ng-if="ctx.filterPvs.containers.length > 1">
-        <os-select os-md-input ng-model="ctx.filterOpts.storageLocation.name" list="ctx.filterPvs.containers"
-          placeholder="{{'specimen_list.container' | translate}}">
+      <div class="form-group">
+        <os-select os-md-input ng-model="ctx.filterOpts.container" list="ctx.filterPvs.containerList"
+          refresh="searchContainer($select.search)"
+          display-prop="name" select-prop="name" placeholder="{{'specimen_list.container' | translate}}">
         </os-select>
       </div>
 
       <div class="form-group">
         <div class="os-text-checkbox">
           <div class="checkbox">
-            <os-checkbox ng-model="ctx.filterOpts.showAvailable"></os-checkbox>
+            <os-checkbox ng-model="ctx.filterOpts.available"></os-checkbox>
           </div>
           <div class="message">
             <span translate="specimen_list.available_spmns">Available Specimens?</span>

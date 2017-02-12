@@ -5,25 +5,40 @@ import java.util.Map;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
 import com.krishagni.catissueplus.core.common.repository.Dao;
 
 public interface SpecimenListDao extends Dao<SpecimenList> {
-	public List<SpecimenListSummary> getSpecimenLists(SpecimenListsCriteria crit);
+	List<SpecimenListSummary> getSpecimenLists(SpecimenListsCriteria crit);
 
-	public Long getSpecimenListsCount(SpecimenListsCriteria crit);
+	Long getSpecimenListsCount(SpecimenListsCriteria crit);
 
-	public Map<Long, List<Specimen>> getListCpSpecimens(Long listId);
+	SpecimenList getSpecimenList(Long listId);
+	
+	SpecimenList getSpecimenListByName(String name);
 
-	public List<Long> getListSpecimensCpIds(Long listId);
+	SpecimenList getDefaultSpecimenList(Long userId);
 	
-	public SpecimenList getSpecimenList(Long listId);
+	int getListSpecimensCount(Long listId);
 	
-	public SpecimenList getSpecimenListByName(String name);
+	void deleteSpecimenList(SpecimenList list);
 
-	public SpecimenList getDefaultSpecimenList(Long userId);
-	
-	public int getListSpecimensCount(Long listId);
-	
-	public void deleteSpecimenList(SpecimenList list);
+	//
+	// APIs to save specimen list items
+	//
+	void saveListItems(List<SpecimenListItem> items);
+
+	int deleteListItems(Long listId, List<Long> specimenIds);
+
+	List<Long> getSpecimenIdsInList(Long listId, List<Long> specimenIds);
+
+	void addChildSpecimens(Long listId, boolean oracle);
+
+	//
+	// Deprecated, used mostly by specimen request plugin
+	//
+	Map<Long, List<Specimen>> getListCpSpecimens(Long listId);
+
+	List<Long> getListSpecimensCpIds(Long listId);
 }

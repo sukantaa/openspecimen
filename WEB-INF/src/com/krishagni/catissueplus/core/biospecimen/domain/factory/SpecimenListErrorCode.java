@@ -17,7 +17,9 @@ public enum SpecimenListErrorCode implements ErrorCode {
 	
 	INVALID_SPECIMENS,
 	
-	INVALID_USERS_LIST;
+	INVALID_USERS_LIST,
+
+	EXCEEDS_REL_SORT_SIZE;
 
 	@Override
 	public String code() {

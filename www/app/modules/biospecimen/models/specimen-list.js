@@ -32,8 +32,8 @@ angular.module('os.biospecimen.models.specimenlist', ['os.common.models'])
       return this.name;
     }
 
-    SpecimenList.prototype.getSpecimens = function() {
-      var params = {maxResults: 1000, includeListCount: true};
+    SpecimenList.prototype.getSpecimens = function(params) {
+      var params = params || {maxResults: 1000, includeListCount: true};
       return $http.get(getSpecimensUrl(this.$id()), {params: params}).then(Specimen.modelArrayRespTransform);
     };
 
@@ -63,6 +63,14 @@ angular.module('os.biospecimen.models.specimenlist', ['os.common.models'])
 
     SpecimenList.prototype.addChildSpecimens = function() {
       return $http.post(SpecimenList.url() + this.$id() + '/add-child-specimens').then(
+        function(result) {
+          return result.data;
+        }
+      );
+    }
+
+    SpecimenList.prototype.getSpecimenSortedByRel = function() {
+      return $http.get(SpecimenList.url() + this.$id() + '/specimens-sorted-by-rel').then(
         function(result) {
           return result.data;
         }
