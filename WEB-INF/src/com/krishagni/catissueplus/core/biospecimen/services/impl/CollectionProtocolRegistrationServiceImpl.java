@@ -44,6 +44,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.MatchedParticipant;
 import com.krishagni.catissueplus.core.biospecimen.events.ParticipantDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ParticipantRegistrationsList;
+import com.krishagni.catissueplus.core.biospecimen.events.PmiDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.RegistrationQueryCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.VisitDetail;
@@ -159,14 +160,18 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	public ResponseEvent<List<CollectionProtocolRegistrationDetail>> bulkRegistration(RequestEvent<BulkRegistrationsDetail> req) {
 		try {
 			BulkRegistrationsDetail detail = req.getPayload();
-			Date regDate = Calendar.getInstance().getTime();
+			String collectionSite = detail.getCollectionSite();
+			if (StringUtils.isBlank(collectionSite)) {
+				throw OpenSpecimenException.userError(CprErrorCode.COLLECTION_SITE_REQUIRED);
+			}
 
+			Date regDate = Calendar.getInstance().getTime();
 			List<CollectionProtocolRegistrationDetail> result = new ArrayList<>();
 			List<Visit> visits = new ArrayList<>();
 			for (int i = 0; i < detail.getRegCount(); i++) {
-				CollectionProtocolRegistrationDetail cpr = null;
-				result.add((cpr = registerParticipant(detail, regDate, i == 0)));
-				visits.addAll(addVisits(cpr.getId(), detail.getEvents(), i == 0));
+				CollectionProtocolRegistrationDetail cpr;
+				result.add((cpr = registerParticipant(detail, regDate, collectionSite, i == 0)));
+				visits.addAll(addVisits(cpr.getId(), collectionSite, detail.getEvents(), i == 0));
 			}
 
 			if (detail.getKitDetail() != null && !result.isEmpty()) {
@@ -174,6 +179,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 					.flatMap(visit -> visit.getSpecimens().stream())
 					.collect(Collectors.toList());
 				detail.getKitDetail().setCpId(result.get(0).getCpId());
+				detail.getKitDetail().setReceivingSite(collectionSite);
 				specimenKitSvc.createSpecimenKit(detail.getKitDetail(), spmns);
 			}
 
@@ -913,14 +919,14 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		);
 	}
 
-	private CollectionProtocolRegistrationDetail registerParticipant(BulkRegistrationsDetail bulkRegDetail, Date regDate, boolean checkPermission) {
+	private CollectionProtocolRegistrationDetail registerParticipant(BulkRegistrationsDetail bulkRegDetail, Date regDate, String mrnSite, boolean checkPermission) {
 		CollectionProtocolRegistrationDetail cprDetail = new CollectionProtocolRegistrationDetail();
 		cprDetail.setRegistrationDate(regDate);
 		cprDetail.setCpId(bulkRegDetail.getCpId());
 		cprDetail.setCpTitle(bulkRegDetail.getCpTitle());
 		cprDetail.setCpShortTitle(bulkRegDetail.getCpShortTitle());
+		cprDetail.setParticipant(getParticipantDetail(mrnSite));
 
-		CollectionProtocolRegistrationDetail cpr = null;
 		if (checkPermission) {
 			return saveOrUpdateRegistration(cprDetail, null, true);
 		} else {
@@ -928,7 +934,19 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		}
 	}
 
-	private List<Visit> addVisits(Long cprId, List<CollectionProtocolEventDetail> events, boolean checkPermission) {
+	private ParticipantDetail getParticipantDetail(String mrnSite) {
+		if (StringUtils.isBlank(mrnSite)) {
+			return null;
+		}
+
+		ParticipantDetail participant = new ParticipantDetail();
+		PmiDetail pmi = new PmiDetail();
+		pmi.setSiteName(mrnSite);
+		participant.setPmi(pmi);
+		return participant;
+	}
+
+	private List<Visit> addVisits(Long cprId, String visitSite, List<CollectionProtocolEventDetail> events, boolean checkPermission) {
 		if (CollectionUtils.isEmpty(events)) {
 			return Collections.emptyList();
 		}
@@ -939,7 +957,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			visitDetail.setCprId(cprId);
 			visitDetail.setEventId(cpeDetail.getId());
 			visitDetail.setEventLabel(cpeDetail.getEventLabel());
-			visitDetail.setSite(cpeDetail.getDefaultSite());
+			visitDetail.setSite(visitSite);
 			visitDetail.setStatus(Visit.VISIT_STATUS_PENDING);
 
 			visits.add(visitSvc.addVisit(visitDetail, checkPermission));

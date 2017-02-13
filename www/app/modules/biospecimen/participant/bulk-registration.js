@@ -49,6 +49,7 @@ angular.module('os.biospecimen.participant.bulkregistration', ['os.biospecimen.m
       var bulkRegDetail = {
         cpId: $scope.ctx.cpId,
         regCount: $scope.ctx.regCount,
+        collectionSite: $scope.ctx.collectionSite,
         events: angular.copy($scope.ctx.selection.events)
       }
 

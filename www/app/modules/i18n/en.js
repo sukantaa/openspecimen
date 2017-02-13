@@ -449,7 +449,6 @@
     "specimen_kit": {
       "prepare_kit": "Prepare Specimen Kit",
       "sending_site": "Sending Site",
-      "receiving_site": "Receiving Site",
       "sending_date": "Sending Date",
       "sender": "Sender",
       "comments": "Comments"
@@ -1630,7 +1629,7 @@
     "sending_site": "Sending Site",
     "sender": "Sender",
     "sending_date": "Sending Date",
-    "receiving_site": "Receiving Site",
+    "collection_site": "Collection Site",
     "participants": "Participants",
     "specimens": "Specimens",
     "comments": "Comments",

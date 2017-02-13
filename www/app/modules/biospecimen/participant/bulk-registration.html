@@ -30,11 +30,25 @@
 <script type="text/ng-template" id="modules/biospecimen/participant/registration-details.html">
   <form name="pform" class="form-horizontal" os-form-validator="pform" novalidate>
     <div class="form-group">
-      <label class="col-xs-3 control-label" translate="participant.num_of_participants">Number of Participants</label>
+      <label class="col-xs-3 control-label">
+        <span translate="participant.num_of_participants">Number of Participants</span>
+      </label>
       <div class="col-xs-6">
         <input type="text" name="numOfParticipants" ng-model="ctx.regCount" class="form-control"
-          placeholder="{{'participant.num_of_participants' | translate}}" required>
+          placeholder="{{'participant.num_of_participants' | translate}}" ng-pattern="/^[1-9]+$/" required>
         <div os-field-error field="pform.numOfParticipants"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-xs-3 control-label">
+        <span translate="participant.collection_site">Collection Site</span>
+      </label>
+      <div class="col-xs-6">
+        <os-select name="collectionSite" ng-model="ctx.collectionSite" list="ctx.cpSites"
+          placeholder="{{'participant.collection_site' | translate}}" required>
+        </os-select>
+        <div os-field-error field="pform.collectionSite"></div>
       </div>
     </div>
 
@@ -43,7 +57,7 @@
         <table class="os-table os-table-hover os-table-fixed bulk-edit" overflow="auto" ng-if="ctx.cpEvents.length > 0">
           <thead class="os-table-head">
             <tr class="row">
-              <th class="col col-xs-6">
+              <th class="col col-xs-12">
                 <div class="clearfix">
                   <div class="pull-left">
                     <os-checkbox ng-change="toggleAllEventSelect()" ng-model="ctx.selection.all"></os-checkbox>
@@ -52,9 +66,6 @@
                     <span translate="cp.cpe_point_label">Event Point Label</span>
                   </div>
                 </div>
-              </th>
-              <th class="col col-xs-6">
-                <span translate="participant.collection_site">Collection Site</span>
               </th>
             </tr>
           </thead>
@@ -72,11 +83,6 @@
                     </os-event-desc>
                   </div>
                 </div>
-              </td>
-              <td class="col">
-                <os-sites name="defaultSite" md-type="true" ng-model="event.defaultSite"
-                  placeholder="{{'participant.collection_site' | translate}}">
-                </os-sites>
               </td>
             </tr>
           </tbody>
@@ -111,16 +117,6 @@
            placeholder="{{'participant.specimen_kit.sending_site' | translate}}" required>
         </os-select>
         <div os-field-error field="kitForm.sendingSite"></div>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="col-xs-3 control-label" translate="participant.specimen_kit.receiving_site">Receiving Site</label>
-      <div class="col-xs-6">
-        <os-select name="receivingSite" ng-model="ctx.kitDetail.receivingSite" list="ctx.cpSites"
-           placeholder="{{'participant.specimen_kit.receiving_site' | translate}}" required>
-        </os-select>
-        <div os-field-error field="kitForm.receivingSite"></div>
       </div>
     </div>
 

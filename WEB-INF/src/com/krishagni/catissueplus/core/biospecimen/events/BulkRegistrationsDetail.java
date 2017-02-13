@@ -11,6 +11,8 @@ public class BulkRegistrationsDetail {
 
     private int regCount;
 
+    private String collectionSite;
+
     private List<CollectionProtocolEventDetail> events;
 
     //
@@ -48,6 +50,14 @@ public class BulkRegistrationsDetail {
 
     public void setRegCount(int regCount) {
         this.regCount = regCount;
+    }
+
+    public String getCollectionSite() {
+        return collectionSite;
+    }
+
+    public void setCollectionSite(String collectionSite) {
+        this.collectionSite = collectionSite;
     }
 
     public List<CollectionProtocolEventDetail> getEvents() {
