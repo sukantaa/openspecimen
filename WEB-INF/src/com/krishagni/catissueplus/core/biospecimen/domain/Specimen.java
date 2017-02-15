@@ -620,7 +620,12 @@ public class Specimen extends BaseExtensionEntity {
 	public static boolean isMissed(String status) {
 		return MISSED_COLLECTION.equals(status);
 	}
-	
+
+	public boolean isPrePrintEnabled() {
+		return getSpecimenRequirement() != null &&
+			getSpecimenRequirement().getLabelAutoPrintModeToUse() == CollectionProtocol.SpecimenLabelAutoPrintMode.PRE_PRINT;
+	}
+
 	public void close(User user, Date time, String reason) {
 		if (!getActivityStatus().equals(Status.ACTIVITY_STATUS_ACTIVE.getStatus())) {
 			return;

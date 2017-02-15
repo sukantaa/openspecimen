@@ -3,6 +3,7 @@ angular.module('os.biospecimen.specimenkit')
     $scope.kit = specimenKit;
 
     $scope.downloadReport = function() {
-      Util.downloadReport(specimenKit, 'specimen_kit');
+      var filename = specimenKit.cpShortTitle + '_kit_' + specimenKit.id;
+      Util.downloadReport(specimenKit, 'specimen_kit', filename);
     }
   });

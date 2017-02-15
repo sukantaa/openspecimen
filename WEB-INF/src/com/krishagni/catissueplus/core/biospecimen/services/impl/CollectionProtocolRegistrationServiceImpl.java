@@ -177,6 +177,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			if (detail.getKitDetail() != null && !result.isEmpty()) {
 				List<Specimen> spmns = visits.stream()
 					.flatMap(visit -> visit.getSpecimens().stream())
+					.filter(Specimen::isPrePrintEnabled)
 					.collect(Collectors.toList());
 				detail.getKitDetail().setCpId(result.get(0).getCpId());
 				detail.getKitDetail().setReceivingSite(collectionSite);

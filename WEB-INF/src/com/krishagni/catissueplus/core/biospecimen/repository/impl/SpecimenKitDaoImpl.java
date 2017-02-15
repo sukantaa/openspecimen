@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
@@ -30,7 +31,8 @@ public class SpecimenKitDaoImpl extends AbstractDao<SpecimenKit> implements Spec
 	public List<SpecimenKitSummary> getSpecimenKits(SpecimenKitListCriteria listCrit) {
 		Criteria query = getCurrentSession().createCriteria(SpecimenKit.class)
 			.setFirstResult(listCrit.startAt())
-			.setMaxResults(listCrit.maxResults());
+			.setMaxResults(listCrit.maxResults())
+			.addOrder(Order.desc("id"));
 
 		addCpRestriction(query, listCrit);
 

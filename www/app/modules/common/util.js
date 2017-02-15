@@ -164,14 +164,14 @@ angular.module('openspecimen')
       return value;
     }
 
-    function downloadReport(entity, msgClass) {
+    function downloadReport(entity, msgClass, filename) {
       var alert = Alerts.info(msgClass + '.report_gen_initiated', {}, false);
       entity.generateReport().then(
         function(result) {
           Alerts.remove(alert);
           if (result.completed) {
             Alerts.info(msgClass + '.downloading_report');
-            QueryExecutor.downloadDataFile(result.dataFile, entity.name + '.csv');
+            QueryExecutor.downloadDataFile(result.dataFile, (filename || entity.name) + '.csv');
           } else if (result.dataFile) {
             Alerts.info(msgClass + '.report_will_be_emailed');
           }
