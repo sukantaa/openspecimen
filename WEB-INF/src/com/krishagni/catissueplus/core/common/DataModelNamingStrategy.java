@@ -1,12 +1,18 @@
 package com.krishagni.catissueplus.core.common;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
+import org.apache.commons.io.IOUtils;
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 public class DataModelNamingStrategy extends PhysicalNamingStrategyStandardImpl implements PhysicalNamingStrategy {
 	private Map<String, String> tableNames = new HashMap<String, String>() {
@@ -33,6 +39,11 @@ public class DataModelNamingStrategy extends PhysicalNamingStrategyStandardImpl 
 		}
 	};
 
+	public DataModelNamingStrategy() {
+		loadPluginMappings("classpath*:tabNamesMap.properties", tableNames);
+		loadPluginMappings("classpath*:seqNamesMap.properties", sequenceNames);
+	}
+
 	public Identifier toPhysicalTableName(Identifier name, JdbcEnvironment jdbcEnvironment) {
 		return toId(tableNames, name);
 	}
@@ -47,6 +58,29 @@ public class DataModelNamingStrategy extends PhysicalNamingStrategyStandardImpl 
 			return name;
 		} else {
 			return new Identifier(mappedName, name.isQuoted());
+		}
+	}
+
+	private void loadPluginMappings(String pattern, Map<String, String> mapping) {
+		try {
+			ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+			Resource[] resources = resourcePatternResolver.getResources(pattern);
+			for (Resource resource : resources) {
+				InputStream in = null;
+				try {
+					in = resource.getURL().openStream();
+
+					Properties props = new Properties();
+					props.load(in);
+					for (String key : props.stringPropertyNames()) {
+						mapping.put(key, props.getProperty(key));
+					}
+				} finally {
+					IOUtils.closeQuietly(in);
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error loading mappings from: " + pattern, e);
 		}
 	}
 }

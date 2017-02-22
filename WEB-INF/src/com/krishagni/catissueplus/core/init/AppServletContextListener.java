@@ -25,6 +25,7 @@ import org.apache.log4j.PropertyConfigurator;
 
 import com.krishagni.catissueplus.core.common.PluginManager;
 import com.krishagni.catissueplus.core.common.util.ClassPathUtil;
+import com.krishagni.commons.domain.Status;
 
 public class AppServletContextListener implements ServletContextListener {
 
@@ -51,6 +52,10 @@ public class AppServletContextListener implements ServletContextListener {
 		InputStream in = null;
 		
 		try {
+			Status.ACTIVE.setValue(com.krishagni.catissueplus.core.common.util.Status.ACTIVITY_STATUS_ACTIVE.getStatus());
+			Status.DELETED.setValue(com.krishagni.catissueplus.core.common.util.Status.ACTIVITY_STATUS_DISABLED.getStatus());
+			Status.CLOSED.setValue(com.krishagni.catissueplus.core.common.util.Status.ACTIVITY_STATUS_DISABLED.getStatus());
+
 			in = this.getClass().getClassLoader().getResourceAsStream(APP_PROPS);
 			
 			Properties props = new Properties();

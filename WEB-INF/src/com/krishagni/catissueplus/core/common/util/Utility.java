@@ -397,30 +397,6 @@ public class Utility {
 				(input.charAt(0) == '\'' && input.charAt(input.length() - 1) == '\'');
 	}
 
-	public static Map<String, Object> jsonToMap(String json) {
-		try {
-			if (StringUtils.isBlank(json)) {
-				return Collections.emptyMap();
-			}
-
-			return new ObjectMapper().readValue(json, new TypeReference<HashMap<String, Object>>(){});
-		} catch (Exception e) {
-			throw new RuntimeException("Error parsing JSON into Map:\n" + json, e);
-		}
-	}
-
-	public static String mapToJson(Map<String, Object> map) {
-		try {
-			if (map == null) {
-				map = Collections.emptyMap();
-			}
-
-			return new ObjectMapper().writeValueAsString(map);
-		} catch (IOException e) {
-			throw new RuntimeException("Error on converting Map to JSON", e);
-		}
-	}
-
 	public static List<String> diff(BaseExtensionEntity obj1, BaseExtensionEntity obj2, List<String> fields) {
 		Map<String, Object> map1 = getExtnAttrValues(obj1);
 		Map<String, Object> map2 = getExtnAttrValues(obj2);

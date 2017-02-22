@@ -21,9 +21,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -40,7 +37,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
-import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -79,13 +75,13 @@ import com.krishagni.catissueplus.core.de.repository.QueryAuditLogDao;
 import com.krishagni.catissueplus.core.de.repository.SavedQueryDao;
 import com.krishagni.catissueplus.core.de.services.QueryService;
 import com.krishagni.catissueplus.core.de.services.SavedQueryErrorCode;
+import com.krishagni.commons.errors.AppException;
 import com.krishagni.query.events.ExecuteQueryOp;
 import com.krishagni.query.events.FieldDetail;
 import com.krishagni.query.events.QueryExecResult;
 import com.krishagni.query.services.QueryExecutor;
 import com.krishagni.query.services.impl.QueryExecutorImpl;
 
-import edu.common.dynamicextensions.domain.nui.Control;
 import edu.common.dynamicextensions.nutility.DeConfiguration;
 import edu.common.dynamicextensions.query.Query;
 import edu.common.dynamicextensions.query.QueryException;
@@ -96,12 +92,8 @@ import edu.common.dynamicextensions.query.WideRowMode;
 public class QueryServiceImpl implements QueryService, InitializingBean {
 	private static final Log logger = LogFactory.getLog(QueryServiceImpl.class);
 
-	private static final String cpForm = "CollectionProtocol";
-
 	private static final String cprForm = "Participant";
 
-	private static final Pattern SELECT_PATTERN = Pattern.compile("^(select\\s+distinct|select)\\s+.*$");
-	
 	private static String QUERY_DATA_EXPORTED_EMAIL_TMPL = "query_export_data";
 	
 	private static String SHARE_QUERY_FOLDER_EMAIL_TMPL = "query_share_query_folder";
@@ -320,12 +312,9 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 	@PlusTransactional
 	public ResponseEvent<QueryExecResult> executeQuery(RequestEvent<ExecuteQueryOp> req) {
 		try {
-			ExecuteQueryOp op = req.getPayload();
-			addRestrictions(op);
-			return ResponseEvent.response(queryExecutor.executeQuery(op));
-		} catch (Exception e) {
-			// TODO:
-			return ResponseEvent.serverError(e);
+			return ResponseEvent.response(queryExecutor.executeQuery(req.getPayload()));
+		} catch (AppException e) {
+			return ResponseEvent.error(new OpenSpecimenException(e));
 		}
 	}
 
@@ -771,7 +760,6 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 
 		try {
 			final Authentication auth = AuthUtil.getAuth();
-			final User user = AuthUtil.getCurrentUser();
 			final String filename = getExportFilename(opDetail, processor);
 			final OutputStream fout = new FileOutputStream(getExportDataDir() + File.separator + filename);
 			out = fout;
@@ -780,7 +768,6 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				processor.headers(out);
 			}
 
-			addRestrictions(opDetail);
 			Future<Boolean> result = exportThreadPool.submit(new Callable<Boolean>() {
 				@Override
 				@PlusTransactional
@@ -892,103 +879,6 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				queryDetail.getQueryExpression());
 	}
 
-	private void addRestrictions(ExecuteQueryOp op) {
-		String rootForm = cprForm;
-		if (StringUtils.isNotBlank(op.getDrivingForm())) {
-			rootForm = op.getDrivingForm();
-		}
-
-		Query query = Query.createQuery()
-			.wideRowMode(WideRowMode.valueOf(op.getWideRowMode()))
-			.ic(true)
-			.dateFormat(ConfigUtil.getInstance().getDeDateFmt())
-			.timeFormat(ConfigUtil.getInstance().getTimeFmt());
-		query.compile(rootForm, op.getAql());
-
-		String aql = op.getAql();
-		if (query.isPhiResult(true) && !AuthUtil.isAdmin()) {
-			if (query.isAggregateQuery() || StringUtils.isNotBlank(query.getResultProcessorName())) {
-				throw OpenSpecimenException.userError(SavedQueryErrorCode.PHI_NOT_ALLOWED_IN_AGR);
-			}
-
-			aql = getAqlWithCpIdInSelect(AuthUtil.getCurrentUser(), "Count".equals(op.getRunType()), aql);
-		}
-
-		Map<String, Object> appData = op.getAppData();
-		Long cpId = -1L;
-		if (appData != null && appData.get("cpId") != null) {
-			cpId = ((Number)appData.get("cpId")).longValue();
-		}
-
-		op.setDrivingForm(rootForm);
-		op.setAql(aql);
-		op.setRestriction(getRestriction(AuthUtil.getCurrentUser(), cpId));
-	}
-
-	private String getRestriction(User user, Long cpId) {
-		if (user.isAdmin()) {
-			if (cpId != null && cpId != -1) {
-				return cpForm + ".id = " + cpId;
-			}
-		} else {			
-			Set<Long> cpIds = AccessCtrlMgr.getInstance().getReadableCpIds();
-			if (cpIds == null || cpIds.isEmpty()) {
-				throw new IllegalAccessError("User does not have access to any CP");
-			}
-						
-			if (cpId != null && cpId != -1) {
-				if (cpIds.contains(cpId)) {
-					return cpForm + ".id = " + cpId; 
-				}
-				
-				throw new IllegalAccessError("Access to cp is not permitted: " + cpId);
-			} else {
-				List<String> restrictions = new ArrayList<String>();
-				List<Long> cpIdList = new ArrayList<Long>(cpIds);
-				
-				int startIdx = 0, numCpIds = cpIdList.size();
-				int chunkSize = 999;
-				while (startIdx < numCpIds) {
-					int endIdx = startIdx + chunkSize;
-					if (endIdx > numCpIds) {
-						endIdx = numCpIds;
-					}
-					
-					restrictions.add(getCpIdRestriction(cpIdList.subList(startIdx, endIdx)));
-					startIdx = endIdx;
-				}
-				
-				return "(" + StringUtils.join(restrictions, " or ") + ")";
-			}
-		}
-		
-		return null;
-	}
-	
-	private String getCpIdRestriction(List<Long> cpIds) {
-		return new StringBuilder(cpForm)
-			.append(".id in (")
-			.append(StringUtils.join(cpIds, ", "))
-			.append(")")
-			.toString();
-	}
-			
-	private String getAqlWithCpIdInSelect(User user, boolean isCount, String aql) {
-		if (user.isAdmin() || isCount) {
-			return aql;
-		} else {
-			aql = aql.trim();
-			Matcher matcher = SELECT_PATTERN.matcher(aql);
-			if (matcher.matches()) {
-				String select = matcher.group(1);
-				return select + " " + cpForm + ".id, " + aql.substring(select.length());
-			} else {
-				String afterSelect = aql.trim().substring("select".length());
-				return "select " + cpForm + ".id, " + afterSelect;
-			}
-		}
-	}
-	
 	private static int getThreadPoolSize() {
 		return 5; // TODO: configurable property
 	}
@@ -1080,9 +970,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 	}
 
 	private FieldDetail getFieldDetail(Long cpId, String field, String searchTerm) {
-		String restriction = getRestriction(AuthUtil.getCurrentUser(), cpId);
-		Function<Control, String> fieldsFn = (ctrl) -> (ctrl.isPhi() && !AuthUtil.isAdmin()) ? cpForm + ".id, " : "";
-		return queryExecutor.getFieldValues(field, searchTerm, restriction, fieldsFn);
+		return queryExecutor.getFieldValues(field, searchTerm, Collections.singletonMap("cpId", cpId));
 	}
 
 	private void refreshConfig() {
