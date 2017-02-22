@@ -381,6 +381,12 @@
     <property name="userDao" ref="userDao"/>
   </bean>
 
+  <bean id="queryExecutor" class="com.krishagni.query.services.impl.QueryExecutorImpl">
+    <property name="config">
+      <bean class="com.krishagni.catissueplus.core.de.services.impl.QueryExecutorConfigImpl"/>
+    </property>
+  </bean>
+
   <bean id="querySvc" class="com.krishagni.catissueplus.core.de.services.impl.QueryServiceImpl">
     <property name="daoFactory" ref="deDaoFactory"/>
     <property name="userDao" ref="userDao"/>
@@ -388,6 +394,7 @@
     <property name="emailService" ref="emailService"/>
     <property name="templateService" ref="templateService"/>
     <property name="cfgService" ref="cfgSvc"/>
+    <property name="queryExecutor" ref="queryExecutor"/>
   </bean>
 
   <bean id="catalogSettingFact" class="com.krishagni.catissueplus.core.de.domain.factory.impl.CpCatalogSettingFactoryImpl">

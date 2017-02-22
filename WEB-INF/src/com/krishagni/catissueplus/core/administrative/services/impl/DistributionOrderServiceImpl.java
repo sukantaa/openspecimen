@@ -61,12 +61,12 @@ import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.domain.Filter;
 import com.krishagni.catissueplus.core.de.domain.Filter.Op;
 import com.krishagni.catissueplus.core.de.domain.SavedQuery;
-import com.krishagni.catissueplus.core.de.events.ExecuteQueryEventOp;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
 import com.krishagni.catissueplus.core.de.services.QueryService;
 import com.krishagni.commons.errors.ErrorCode;
 import com.krishagni.commons.errors.ErrorType;
 import com.krishagni.commons.util.MessageUtil;
+import com.krishagni.query.events.ExecuteQueryOp;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 import edu.common.dynamicextensions.query.WideRowMode;
@@ -429,7 +429,7 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 		filter.setOp(Op.EQ);
 		filter.setValues(new String[] { order.getId().toString() });
 		
-		ExecuteQueryEventOp execReportOp = new ExecuteQueryEventOp();
+		ExecuteQueryOp execReportOp = new ExecuteQueryOp();
 		execReportOp.setDrivingForm("Participant");
 		execReportOp.setAql(report.getAql(new Filter[] { filter }));			
 		execReportOp.setWideRowMode(WideRowMode.DEEP.name());

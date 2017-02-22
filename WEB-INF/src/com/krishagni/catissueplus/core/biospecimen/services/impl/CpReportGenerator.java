@@ -22,10 +22,10 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.EmailService;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
-import com.krishagni.catissueplus.core.de.events.ExecuteQueryEventOp;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
-import com.krishagni.catissueplus.core.de.events.QueryExecResult;
 import com.krishagni.catissueplus.core.de.services.QueryService;
+import com.krishagni.query.events.ExecuteQueryOp;
+import com.krishagni.query.events.QueryExecResult;
 
 import edu.common.dynamicextensions.query.WideRowMode;
 
@@ -195,9 +195,9 @@ public class CpReportGenerator {
 				return null;
 			}
 
-			ExecuteQueryEventOp op = new ExecuteQueryEventOp();
+			ExecuteQueryOp op = new ExecuteQueryOp();
 			op.setRunType("Data");
-			op.setCpId(cp.getId());
+			op.setAppData(Collections.singletonMap("cpId", cp.getId()));
 			op.setWideRowMode(WideRowMode.OFF.name());
 			op.setAql(aql);
 
@@ -210,8 +210,8 @@ public class CpReportGenerator {
 
 		@Override
 		public File getDataFile(CollectionProtocol cp, Map<String, Object> input) {
-			ExecuteQueryEventOp op = new ExecuteQueryEventOp();
-			op.setCpId(cp.getId());
+			ExecuteQueryOp op = new ExecuteQueryOp();
+			op.setAppData(Collections.singletonMap("cpId", cp.getId()));
 			op.setDrivingForm("Participant");
 			op.setAql((String)input.get("aql"));
 			op.setRunType("Export");

@@ -24,11 +24,11 @@ import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.Filter;
 import com.krishagni.catissueplus.core.de.domain.SavedQuery;
-import com.krishagni.catissueplus.core.de.events.ExecuteQueryEventOp;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
 import com.krishagni.catissueplus.core.de.services.QueryService;
 import com.krishagni.catissueplus.core.de.services.SavedQueryErrorCode;
 import com.krishagni.commons.util.MessageUtil;
+import com.krishagni.query.events.ExecuteQueryOp;
 
 import edu.common.dynamicextensions.query.WideRowMode;
 
@@ -172,7 +172,7 @@ public class SpecimenKitServiceImpl implements SpecimenKitService, ObjectStatePa
 		filter.setOp(Filter.Op.EQ);
 		filter.setValues(new String[] { kit.getId().toString() });
 
-		ExecuteQueryEventOp execReportOp = new ExecuteQueryEventOp();
+		ExecuteQueryOp execReportOp = new ExecuteQueryOp();
 		execReportOp.setDrivingForm("Participant");
 		execReportOp.setAql(query.getAql(new Filter[] { filter }));
 		execReportOp.setWideRowMode(WideRowMode.DEEP.name());

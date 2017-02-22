@@ -16,11 +16,11 @@ import org.springframework.beans.BeanUtils;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
-import com.krishagni.catissueplus.core.de.events.ExecuteQueryEventOp;
-import com.krishagni.catissueplus.core.de.events.FacetDetail;
-import com.krishagni.catissueplus.core.de.events.GetFacetValuesOp;
-import com.krishagni.catissueplus.core.de.events.QueryExecResult;
+import com.krishagni.catissueplus.core.de.events.GetFieldValuesOp;
 import com.krishagni.catissueplus.core.de.services.QueryService;
+import com.krishagni.query.events.ExecuteQueryOp;
+import com.krishagni.query.events.FieldDetail;
+import com.krishagni.query.events.QueryExecResult;
 
 import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.Control;
@@ -68,12 +68,12 @@ public class DefaultListGenerator implements ListGenerator {
 	@Override
 	@PlusTransactional
 	public Collection<Object> getExpressionValues(Long cpId, String expr, String searchTerm) {
-		GetFacetValuesOp op = new GetFacetValuesOp();
+		GetFieldValuesOp op = new GetFieldValuesOp();
 		op.setCpId(cpId);
-		op.setFacets(Collections.singletonList(expr));
+		op.setFields(Collections.singletonList(expr));
 		op.setSearchTerm(searchTerm);
 
-		ResponseEvent<List<FacetDetail>> resp = querySvc.getFacetValues(new RequestEvent<>(op));
+		ResponseEvent<List<FieldDetail>> resp = querySvc.getFacetValues(new RequestEvent<>(op));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload().get(0).getValues();
 	}
@@ -333,15 +333,14 @@ public class DefaultListGenerator implements ListGenerator {
 	}
 
 	private QueryExecResult executeQuery(String aql, Long cpId, String drivingForm) {
-		ExecuteQueryEventOp op = new ExecuteQueryEventOp();
+		ExecuteQueryOp op = new ExecuteQueryOp();
 		op.setAql(aql);
-		op.setCpId(cpId);
+		op.setAppData(Collections.singletonMap("cpId", cpId));
 		op.setRunType("Data");
 		op.setDrivingForm(StringUtils.isBlank(drivingForm) ? "Participant" : drivingForm);
 		op.setWideRowMode("OFF");
 
-		RequestEvent<ExecuteQueryEventOp> req = new RequestEvent<>(op);
-		ResponseEvent<QueryExecResult> resp = querySvc.executeQuery(req);
+		ResponseEvent<QueryExecResult> resp = querySvc.executeQuery(new RequestEvent<>(op));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}

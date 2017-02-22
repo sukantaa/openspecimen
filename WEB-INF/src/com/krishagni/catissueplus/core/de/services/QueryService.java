@@ -8,6 +8,9 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.de.events.*;
+import com.krishagni.query.events.ExecuteQueryOp;
+import com.krishagni.query.events.FieldDetail;
+import com.krishagni.query.events.QueryExecResult;
 
 public interface QueryService {	
 	ResponseEvent<SavedQueriesList> getSavedQueries(RequestEvent<ListSavedQueriesCriteria> req);
@@ -24,15 +27,15 @@ public interface QueryService {
 	// query execution APIs
 	//
 
-	ResponseEvent<QueryExecResult> executeQuery(RequestEvent<ExecuteQueryEventOp> req);
+	ResponseEvent<QueryExecResult> executeQuery(RequestEvent<ExecuteQueryOp> req);
 
 	ResponseEvent<QueryExecResult> executeSavedQuery(RequestEvent<ExecuteSavedQueryOp> req);
 
-	ResponseEvent<QueryDataExportResult> exportQueryData(RequestEvent<ExecuteQueryEventOp> req);
+	ResponseEvent<QueryDataExportResult> exportQueryData(RequestEvent<ExecuteQueryOp> req);
 
 	ResponseEvent<File> getExportDataFile(RequestEvent<String> req);
 
-	ResponseEvent<List<FacetDetail>> getFacetValues(RequestEvent<GetFacetValuesOp> req);
+	ResponseEvent<List<FieldDetail>> getFacetValues(RequestEvent<GetFieldValuesOp> req);
 
 	//
 	// folder related APIs
@@ -75,7 +78,7 @@ public interface QueryService {
 		void headers(OutputStream out);
 	}	
 
-	QueryDataExportResult exportQueryData(ExecuteQueryEventOp opDetail, ExportProcessor processor);
+	QueryDataExportResult exportQueryData(ExecuteQueryOp opDetail, ExportProcessor processor);
 
 	//
 	// internal use

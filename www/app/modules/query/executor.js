@@ -6,8 +6,8 @@ angular.module('os.query.executor', [])
     return {
       getCount: function(queryId, cpId, aql) {
         var req = {
-          savedQueryId: queryId, 
-          cpId: cpId, 
+          queryId: queryId,
+          appData: {cpId: cpId},
           drivingForm: 'Participant',
           runType: 'Count',
           aql: aql
@@ -29,8 +29,8 @@ angular.module('os.query.executor', [])
 
       getRecords: function(queryId, cpId, aql, wideRowMode) {
         var req = {
-          savedQueryId: queryId, 
-          cpId: cpId,
+          queryId: queryId,
+          appData: {cpId: cpId},
           drivingForm: 'Participant',
           runType: 'Data', 
           aql: aql, 
@@ -45,8 +45,8 @@ angular.module('os.query.executor', [])
 
       exportQueryResultsData: function(queryId, cpId, aql, wideRowMode) {
         var req = {
-          savedQueryId: queryId,
-          cpId: cpId,
+          queryId: queryId,
+          appData: {cpId: cpId},
           drivingForm: 'Participant',
           runType: 'Export',
           aql: aql,

@@ -2,10 +2,10 @@ package com.krishagni.catissueplus.core.de.events;
 
 import java.util.List;
 
-public class GetFacetValuesOp {
+public class GetFieldValuesOp {
 	private Long cpId;
 
-	private List<String> facets;
+	private List<String> fields;
 
 	private String searchTerm;
 
@@ -17,12 +17,12 @@ public class GetFacetValuesOp {
 		this.cpId = cpId;
 	}
 
-	public List<String> getFacets() {
-		return facets;
+	public List<String> getFields() {
+		return fields;
 	}
 
-	public void setFacets(List<String> facets) {
-		this.facets = facets;
+	public void setFields(List<String> facets) {
+		this.fields = facets;
 	}
 
 	public String getSearchTerm() {

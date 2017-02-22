@@ -94,6 +94,8 @@ dependencies {
   compile   "javax.persistence:persistence-api:1.0.2"
   aspects   "org.springframework:spring-aspects:4.3.5.RELEASE"
 
+  compile fileTree(dir: 'lib', include: ['krishagni-query-api-1.0.0.jar'])
+
   compile group: 'javax', name: 'javaee-api', version: '7.0'
   compile group: 'org.antlr', name: 'antlr4', version:'4.5.1'
   compile group: 'aopalliance', name: 'aopalliance', version:'1.0'

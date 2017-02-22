@@ -22,13 +22,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
-import com.krishagni.catissueplus.core.de.events.ExecuteQueryEventOp;
 import com.krishagni.catissueplus.core.de.events.ExecuteSavedQueryOp;
-import com.krishagni.catissueplus.core.de.events.FacetDetail;
-import com.krishagni.catissueplus.core.de.events.GetFacetValuesOp;
+import com.krishagni.catissueplus.core.de.events.GetFieldValuesOp;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
-import com.krishagni.catissueplus.core.de.events.QueryExecResult;
 import com.krishagni.catissueplus.core.de.services.QueryService;
+import com.krishagni.query.events.ExecuteQueryOp;
+import com.krishagni.query.events.FieldDetail;
+import com.krishagni.query.events.QueryExecResult;
 
 import edu.common.dynamicextensions.nutility.IoUtil;
 
@@ -45,7 +45,7 @@ public class QueryController {
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody	
-	public QueryExecResult executeQuery(@RequestBody ExecuteQueryEventOp opDetail) {
+	public QueryExecResult executeQuery(@RequestBody ExecuteQueryOp opDetail) {
 		return response(querySvc.executeQuery(getRequest(opDetail)));
 	}
 
@@ -66,7 +66,7 @@ public class QueryController {
 	@RequestMapping(method = RequestMethod.POST, value="/export")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public QueryDataExportResult exportQueryData(@RequestBody ExecuteQueryEventOp opDetail) {
+	public QueryDataExportResult exportQueryData(@RequestBody ExecuteQueryOp opDetail) {
 		return response(querySvc.exportQueryData(getRequest(opDetail)));
 	}	
 	
@@ -100,7 +100,7 @@ public class QueryController {
 	@RequestMapping(method = RequestMethod.GET, value="/facet-values")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public List<FacetDetail> getFacetValues(
+	public List<FieldDetail> getFacetValues(
 			@RequestParam(value = "facet", required = true)
 			List<String> facets,
 
@@ -110,12 +110,12 @@ public class QueryController {
 			@RequestParam(value = "searchTerm", required = false, defaultValue = "")
 			String searchTerm) {
 
-		GetFacetValuesOp op = new GetFacetValuesOp();
-		op.setFacets(facets);
+		GetFieldValuesOp op = new GetFieldValuesOp();
+		op.setFields(facets);
 		op.setCpId(cpId);
 		op.setSearchTerm(searchTerm);
 
-		ResponseEvent<List<FacetDetail>> resp = querySvc.getFacetValues(getRequest(op));
+		ResponseEvent<List<FieldDetail>> resp = querySvc.getFacetValues(getRequest(op));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}

@@ -11,7 +11,6 @@ import com.krishagni.auth.events.LoginDetail;
 import com.krishagni.auth.events.TokenDetail;
 import com.krishagni.auth.services.impl.UserAuthenticationServiceImpl;
 import com.krishagni.catissueplus.core.administrative.domain.User;
-import com.krishagni.catissueplus.core.auth.AuthConfigImpl;
 import com.krishagni.catissueplus.core.auth.services.UserAuthServiceWrapper;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
@@ -23,6 +22,8 @@ import com.krishagni.commons.domain.IUser;
 import com.krishagni.commons.errors.AppException;
 
 public class UserAuthServiceWrapperImpl extends UserAuthenticationServiceImpl implements UserAuthServiceWrapper {
+	private static final String DEFAULT_AUTH_DOMAIN = "openspecimen";
+
 	private DaoFactory daoFactory;
 
 	public void setDaoFactory(DaoFactory daoFactory) {
@@ -74,12 +75,23 @@ public class UserAuthServiceWrapperImpl extends UserAuthenticationServiceImpl im
 	}
 
 	@Override
-	public IUser getUser(LoginDetail loginDetail) {
-		return daoFactory.getUserDao().getUser(loginDetail.getLoginName(), loginDetail.getDomainName());
+	public AuthDomain getAuthDomain(IUser user) {
+		return ((User) user).getAuthDomain();
+	}
+
+
+	@Override
+	public IUser getUser(String username, String domain) {
+		return daoFactory.getUserDao().getUser(username, domain);
 	}
 
 	@Override
-	public AuthDomain getAuthDomain(IUser user) {
-		return ((User) user).getAuthDomain();
+	public IUser getUserByEmailAddress(String emailAddress) {
+		return daoFactory.getUserDao().getUserByEmailAddress(emailAddress);
+	}
+
+	@Override
+	public String getDefaultAuthDomain() {
+		return DEFAULT_AUTH_DOMAIN;
 	}
 }
