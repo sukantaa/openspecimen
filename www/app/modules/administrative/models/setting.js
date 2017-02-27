@@ -41,6 +41,14 @@ angular.module('os.administrative.models.setting', ['os.common.models'])
       );
     };
 
+    Setting.getDeploymentSiteAssets = function() {
+      return $http.get(Setting.url() + 'deployment-site-assets').then(
+        function(resp) {
+          return resp.data;
+        }
+      );
+    };
+
     Setting.updateSetting = function(setting) {
       return $http.put(Setting.url(), setting).then(
         function(resp) {

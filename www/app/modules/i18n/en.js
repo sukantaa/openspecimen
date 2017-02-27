@@ -2118,7 +2118,11 @@
         "distribution_report_query": "Default Distribution Report Query",
         "distribution_report_query_desc": "Identifier of saved query to be used as default distribution report query",
         "import_max_records_per_txn": "Pre-validate Records Limit",
-        "import_max_records_per_txn_desc": "Maximum number of records that can be pre-validated before importing to database."
+        "import_max_records_per_txn_desc": "Maximum number of records that can be pre-validated before importing to database.",
+        "deployment_site_logo": "Deployemnt Site Logo",
+        "deployment_site_logo_desc": "Image file of the deployment site logo to be displayed on OpenSpecimen navigation bar",
+        "deployment_site_url": "Deployment Site URL",
+        "deployment_site_url_desc": "Website URL to navigate users on clicking deployment site logo"
       },
 
       "email": {

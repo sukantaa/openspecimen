@@ -64,4 +64,6 @@ public interface ConfigurationService {
 	Map<String, String> getPasswordSettings();
 
 	boolean isOracle();
+
+	Map<String, String> getDeploymentSiteAssets();
 }

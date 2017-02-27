@@ -4,6 +4,9 @@
       <a href="http://www.openspecimen.org">
         <img src="images/os_logo.png"></img>
       </a>
+      <a class="deploy-logo" href="{{global.siteAssets.siteUrl}}" ng-if="global.siteAssets.siteLogo" target="_blank">
+        <img src="{{global.siteAssets.siteLogo}}"></img>
+      </a>
       <div class="deploy-env" ng-if="!!global.appProps.deploy_env">
         <span>{{global.appProps.deploy_env | uppercase | limitTo: 10}}</span>
       </div>

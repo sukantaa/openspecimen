@@ -356,4 +356,10 @@ osApp.config(function(
         $translate.refresh();
       }
     );
+
+    Setting.getDeploymentSiteAssets().then(
+      function(resp) {
+        $rootScope.global.siteAssets = resp;
+      }
+    );
   });

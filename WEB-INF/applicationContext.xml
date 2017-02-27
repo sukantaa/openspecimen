@@ -603,6 +603,8 @@
             <value>/config-settings/app-props</value>
             <value>/config-settings/welcome-video</value>
             <value>/config-settings/password</value>
+            <value>/config-settings/deployment-site-assets</value>
+            <value>/config-settings/deployment-site-logo</value>
             <value>/auth-domains/</value>
           </list>
         </entry>

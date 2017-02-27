@@ -31,12 +31,21 @@ body {
   height: 40px;
   width: 235px;
   padding: 2.5px;
-  flex-grow: 0.25;
+  flex-grow: 0.30;
   position: relative;
 }
 
 .os-navbar .logo img {
   height: 30px;
+}
+
+.os-navbar .logo .deploy-logo {
+  margin-left: 6px;
+}
+
+.os-navbar .logo .deploy-logo img {
+  height: 30px;
+  width: 40px;
 }
 
 .os-navbar .logo .deploy-env {

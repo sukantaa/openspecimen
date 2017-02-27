@@ -514,6 +514,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		addToSettingsMap(settings, configSettings);
 	}
 
+	@Override
+	public Map<String, String> getDeploymentSiteAssets() {
+		Map<String, String> result = new HashMap<>();
+		result.put("siteUrl", getDeploymentSiteUrl());
+		result.put("siteLogo", getDeploymentSiteLogo());
+		return result;
+	}
+
 	private boolean isValidSetting(ConfigProperty property, String setting) {
 		if (StringUtils.isBlank(setting)) {
 			return true;
@@ -633,5 +641,36 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 
 			moduleSettings.put(prop.getName(), setting);
 		}
+	}
+
+	private String getDeploymentSiteUrl() {
+		Map<String, ConfigSetting> moduleConfig = configSettings.get("common");
+		if (moduleConfig == null) {
+			return null;
+		}
+
+		ConfigSetting url = moduleConfig.get("deployment_site_url");
+		return url != null ? url.getValue() : null;
+	}
+
+	private String getDeploymentSiteLogo() {
+		Map<String, ConfigSetting> moduleConfig = configSettings.get("common");
+		if (moduleConfig == null) {
+			return null;
+		}
+
+		String result = null;
+		ConfigSetting logo = moduleConfig.get("deployment_site_logo");
+		if (logo != null && StringUtils.isNotBlank(logo.getValue())) {
+			ConfigSetting appUrl = moduleConfig.get("app_url");
+			String prefix = "";
+			if (appUrl != null && StringUtils.isNotBlank(appUrl.getValue())) {
+				prefix = appUrl.getValue();
+			}
+
+			result = prefix + "/rest/ng/config-settings/deployment-site-logo";
+		}
+
+		return result;
 	}
 }

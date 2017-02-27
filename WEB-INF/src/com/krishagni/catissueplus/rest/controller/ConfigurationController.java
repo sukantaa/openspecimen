@@ -131,11 +131,30 @@ public class ConfigurationController {
 		return cfgSvc.getPasswordSettings();
 	}
 
-	public static <T> RequestEvent<T> request(T payload) {
+	@RequestMapping(method = RequestMethod.GET, value="/deployment-site-assets")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, String> getDeploymentSiteAssets() {
+		return cfgSvc.getDeploymentSiteAssets();
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value="/deployment-site-logo")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public void getDeploymentSiteLogo(HttpServletResponse httpResp) {
+		FileDetail detail = cfgSvc.getFileDetail("common", "deployment_site_logo");
+		if (detail == null || detail.getFileIn() == null) {
+			return;
+		}
+
+		Utility.sendToClient(httpResp, detail.getFilename(), detail.getContentType(), detail.getFileIn());
+	}
+
+	private static <T> RequestEvent<T> request(T payload) {
 		return new RequestEvent<T>(payload);
 	}
 
-	public static <T> T response(ResponseEvent<T> resp) {
+	private static <T> T response(ResponseEvent<T> resp) {
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}

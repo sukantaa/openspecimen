@@ -34,4 +34,24 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="mdnasim" id="Deployment site logo to display on OpenSpecimen navigation bar">
+    <sql>
+      call add_cfg_prop(
+        'common', 'deployment_site_logo',
+        'deployment_site_logo', 'deployment_site_logo_desc',
+        'FILE', ''
+      );
+    </sql>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Site URL to navigate on clicking deployment site logo">
+    <sql>
+      call add_cfg_prop(
+        'common', 'deployment_site_url',
+        'deployment_site_url', 'deployment_site_url_desc',
+        'STRING', ''
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>
