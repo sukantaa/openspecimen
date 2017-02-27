@@ -89,8 +89,6 @@ public class TransactionalInterceptor {
 			logger.error("Error doing work inside " + pjp.getSignature(), t);
 			Long exceptionId = handleServerError(t.getCause(), pjp.getArgs());
 			throw OpenSpecimenException.serverError(exceptionId, t);
-		} finally {
-			TransactionalThreadLocals.getInstance().cleanup();
 		}
 	}
 
