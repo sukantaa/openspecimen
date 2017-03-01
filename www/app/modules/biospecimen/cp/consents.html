@@ -20,15 +20,6 @@
               </div>
             </div>
           </li>
-          <li class="item" ng-if="!cp.consentsWaived">
-            <strong class="key key-sm" translate="cp.unsigned_consent_url">Unsigned Consent Form URL</strong>
-            <os-inline-edit editor="fuEditor" name="consentFormUrl" class="value value-md" value="cp.unsignedConsentUrl">
-              <a ng-if="fuEditor.isDisplayMode()" ng-href="{{fuEditor.viewValue | osPrefixHttp}}" target="_blank">
-                {{fuEditor.viewValue | osNoValue}}
-              </a>
-              <input ng-if="fuEditor.isEditMode()" class="form-control" type="text" ng-model="fuEditor.editValue">
-            </os-inline-edit>
-          </li>
         </ul>
       </div>
 
