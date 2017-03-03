@@ -58,11 +58,15 @@
   table-layout: fixed;
 }
 
-.os-table-fixed td,
-.os-table-fixed .col {
+.os-table-fixed td:not(.text-wrap),
+.os-table-fixed .col:not(.text-wrap) {
   text-overflow: ellipsis; 
   overflow: hidden; 
   white-space: nowrap;
+}
+
+.os-table-fixed .col.text-wrap {
+  word-wrap: break-word;
 }
 
 .os-table-tree a.fa-chevron-circle-down, 
