@@ -43,9 +43,5 @@ angular.module('os.administrative.shipment.list', ['os.administrative.models'])
       $scope.filterOpts.recvSite = undefined;
     }
 
-    $scope.clearFilters = function() {
-      $scope.filterOpts = {maxResults: pagerOpts.recordsPerPage + 1};
-    }
-
     init();
   });

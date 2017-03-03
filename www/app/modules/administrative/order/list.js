@@ -62,10 +62,6 @@ angular.module('os.administrative.order.list', ['os.administrative.models'])
 
     $scope.loadDps = loadDps;
 
-    $scope.clearFilters = function() {
-      $scope.filterOpts = {maxResults: pagerOpts.recordsPerPage + 1};
-    }
-
     $scope.showOrderOverview = function(order) {
       $state.go('order-detail.overview', {orderId: order.id});
     }
