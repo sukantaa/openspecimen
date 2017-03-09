@@ -1041,6 +1041,13 @@
   <bean id="listGenerator" class="com.krishagni.catissueplus.core.query.DefaultListGenerator">
     <property name="querySvc" ref="querySvc"/>
   </bean>
+
+  <bean id="autoFreezerProvidersSvc" class="com.krishagni.catissueplus.core.administrative.services.impl.AutoFreezerProviderServiceImpl">
+    <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="providerFactory">
+      <bean class="com.krishagni.catissueplus.core.administrative.domain.factory.impl.AutoFreezerProviderFactoryImpl"/>
+    </property>
+  </bean>
   
   <task:scheduler id="taskScheduler" pool-size="1"/>
   <task:annotation-driven scheduler="taskScheduler"/>

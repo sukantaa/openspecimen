@@ -880,16 +880,21 @@ public class Specimen extends BaseExtensionEntity {
 		transferEvent.setTime(time == null ? Calendar.getInstance().getTime() : time);
 		
 		if (oldPosition != null && newPosition != null) {
+			oldPosition.getContainer().retrieveSpecimen(this);
+			newPosition.getContainer().storeSpecimen(this);
+
 			transferEvent.setFromPosition(oldPosition);
 			transferEvent.setToPosition(newPosition);
-			
+
 			oldPosition.update(newPosition);			
 		} else if (oldPosition != null) {
+			oldPosition.getContainer().retrieveSpecimen(this);
 			transferEvent.setFromPosition(oldPosition);
-			
+
 			oldPosition.vacate();
 			setPosition(null);
 		} else if (newPosition != null) {
+			newPosition.getContainer().storeSpecimen(this);
 			transferEvent.setToPosition(newPosition);
 			
 			newPosition.setOccupyingSpecimen(this);
@@ -940,7 +945,8 @@ public class Specimen extends BaseExtensionEntity {
 			position = null;
 			return;
 		}
-				
+
+		position.getContainer().storeSpecimen(this);
 		position.occupy();
 	}
 	

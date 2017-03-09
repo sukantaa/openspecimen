@@ -8,7 +8,9 @@ angular.module('os.administrative.container.addedit', ['os.administrative.models
 
     function init() {
       container.storageLocation = container.storageLocation || {};
+      container.$$regular = !container.id;
       container.$$dimensionless = !!container.id && container.noOfRows == null && container.noOfColumns == null;
+      container.automated = !container.id ? false : container.automated;
 
       $scope.container = container;
 
@@ -333,10 +335,21 @@ angular.module('os.administrative.container.addedit', ['os.administrative.models
     }
 
     $scope.setDimensionless = function() {
+      $scope.container.$$regular = false;
+      $scope.container.$$dimensionless = true;
       $scope.container.noOfRows = $scope.container.noOfColumns = null;
       $scope.container.positionLabelingMode = 'LINEAR';
       $scope.container.storeSpecimensEnabled = true;
       $scope.container.rowLabelingScheme = $scope.container.columnLabelingScheme = 'Numbers';
+    }
+
+    $scope.setAutomated = function() {
+      $scope.container.automated = true;
+      $scope.setDimensionless();
+    }
+
+    $scope.setRegular = function() {
+      $scope.container.$$dimensionless = $scope.container.automated = false;
     }
 
     init();

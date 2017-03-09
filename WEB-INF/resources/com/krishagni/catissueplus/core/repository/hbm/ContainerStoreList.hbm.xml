@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false">
+  <class name="com.krishagni.catissueplus.core.administrative.domain.ContainerStoreList" table="OS_CONTAINER_STORE_LISTS">
+    <id name="id" column="IDENTIFIER">
+      <generator class="native">
+        <param name="sequence">OS_CONT_STORE_LIST_SEQ</param>
+      </generator>
+    </id>
+
+    <many-to-one name="container" column="CONTAINER_ID"/>
+
+    <many-to-one name="user" column="USER_ID"/>
+
+    <property name="op" column="OP">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">com.krishagni.catissueplus.core.administrative.domain.ContainerStoreList$Op</param>
+        <param name="type">12</param>
+      </type>
+    </property>
+
+    <property name="creationTime" column="CREATION_TIME"/>
+
+    <property name="executionTime" column="EXECUTION_TIME"/>
+
+    <set name="items" table="OS_CONT_STORE_LIST_ITEMS" inverse="true" cascade="all-delete-orphan">
+      <key column="STORE_LIST_ID"/>
+      <one-to-many class="com.krishagni.catissueplus.core.administrative.domain.ContainerStoreListItem"/>
+    </set>
+
+    <query name="getPendingLists">
+      select
+        sl
+      from
+        com.krishagni.catissueplus.core.administrative.domain.ContainerStoreList sl
+      where
+        sl.executionTime is null
+      order by
+        sl.id asc
+    </query>
+  </class>
+</hibernate-mapping>

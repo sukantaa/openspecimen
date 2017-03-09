@@ -36,6 +36,10 @@
 
     <property name="storeSpecimenEnabled" column="STORE_SPECIMENS"/>
 
+    <property name="automated" column="AUTOMATED"/>
+
+    <many-to-one name="autoFreezerProvider" column="AUTO_FREEZER_PROVIDER_ID"/>
+
     <many-to-one
       name="type"
       class="com.krishagni.catissueplus.core.administrative.domain.ContainerType"

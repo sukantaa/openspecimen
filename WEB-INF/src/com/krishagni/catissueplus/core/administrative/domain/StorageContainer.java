@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
@@ -89,7 +90,11 @@ public class StorageContainer extends BaseEntity {
 	private String comments;
 
 	private Integer capacity;
-	
+
+	private Boolean automated;
+
+	private AutoFreezerProvider autoFreezerProvider;
+
 	private Set<StorageContainer> childContainers = new LinkedHashSet<>();
 	
 	private Set<StorageContainer> ancestorContainers = new HashSet<>();
@@ -293,6 +298,23 @@ public class StorageContainer extends BaseEntity {
 
 	public void setCapacity(Integer capacity) {
 		this.capacity = capacity;
+	}
+
+	public boolean isAutomated() {
+		return BooleanUtils.isTrue(automated);
+	}
+
+	public void setAutomated(Boolean automated) {
+		this.automated = automated;
+	}
+
+	@NotAudited
+	public AutoFreezerProvider getAutoFreezerProvider() {
+		return autoFreezerProvider;
+	}
+
+	public void setAutoFreezerProvider(AutoFreezerProvider autoFreezerProvider) {
+		this.autoFreezerProvider = autoFreezerProvider;
 	}
 
 	public StorageContainerPosition getLastAssignedPos() {
@@ -899,6 +921,19 @@ public class StorageContainer extends BaseEntity {
 		}
 
 		freezer.setCapacity(capacity);
+	}
+
+	public void retrieveSpecimen(Specimen specimen) {
+		AutomatedContainerContext.getInstance().retrieveSpecimen(this, specimen);
+	}
+
+	public void storeSpecimen(Specimen specimen) {
+		AutomatedContainerContext.getInstance().storeSpecimen(this, specimen);
+	}
+
+	public void processList(ContainerStoreList list) {
+		getAutoFreezerProvider().getInstance().processList(list);
+		list.setExecutionTime(Calendar.getInstance().getTime());
 	}
 
 	private void deleteWithoutCheck() {

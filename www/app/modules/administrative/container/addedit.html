@@ -119,17 +119,20 @@
 
     <div class="form-group" ng-if="!container.id && ctx.mode == 'single'">
       <label class="col-xs-3 control-label">
-        <span translate="container.dimensionless">Dimensionless?</span>
+        <span translate="container.usage_mode">Usage Mode</span>
       </label>
       <div class="col-xs-9">
         <label class="radio-inline">
-          <input type="radio" name="dimensionless" ng-model="container.$$dimensionless" ng-value="true"
-            ng-click="setDimensionless(true)">
-          <span translate="common.yes">Yes</span>
+          <input type="radio" name="class" ng-model="container.$$regular" ng-value="true" ng-click="setRegular()">
+          <span translate="container.regular">Regular</span>
         </label>
         <label class="radio-inline">
-          <input type="radio" name="dimensionless" ng-model="container.$$dimensionless" ng-value="false">
-          <span translate="common.no">No</span>
+          <input type="radio" name="class" ng-click="setDimensionless()">
+          <span translate="container.dimensionless">Dimensionless</span>
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="class" ng-click="setAutomated()">
+          <span translate="container.automated">Automated</span>
         </label>
       </div>
     </div>

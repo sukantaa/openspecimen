@@ -1,6 +1,9 @@
 
 package com.krishagni.catissueplus.core.biospecimen.repository;
 
+import com.krishagni.catissueplus.core.administrative.repository.AutoFreezerProviderDao;
+import com.krishagni.catissueplus.core.administrative.repository.ContainerStoreListDao;
+import com.krishagni.catissueplus.core.administrative.repository.ContainerTypeDao;
 import com.krishagni.catissueplus.core.administrative.repository.DistributionOrderDao;
 import com.krishagni.catissueplus.core.administrative.repository.DistributionProtocolDao;
 import com.krishagni.catissueplus.core.administrative.repository.DpRequirementDao;
@@ -11,7 +14,6 @@ import com.krishagni.catissueplus.core.administrative.repository.ShipmentDao;
 import com.krishagni.catissueplus.core.administrative.repository.SiteDao;
 import com.krishagni.catissueplus.core.administrative.repository.SpecimenRequestDao;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerDao;
-import com.krishagni.catissueplus.core.administrative.repository.ContainerTypeDao;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.audit.repository.AuditDao;
 import com.krishagni.catissueplus.core.auth.repository.AuthDao;
@@ -78,6 +80,10 @@ public interface DaoFactory {
 	public CpReportSettingsDao getCpReportSettingsDao();
 	
 	public UnhandledExceptionDao getUnhandledExceptionDao();
-	
+
 	ConsentStatementDao getConsentStatementDao();
+
+	ContainerStoreListDao getContainerStoreListDao();
+
+	AutoFreezerProviderDao getAutoFreezerProviderDao();
 } 

@@ -10,7 +10,9 @@ import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
+import com.krishagni.catissueplus.core.administrative.domain.AutoFreezerProvider;
 import com.krishagni.catissueplus.core.administrative.domain.ContainerType;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
@@ -21,6 +23,7 @@ import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCo
 import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerFactory;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
+import com.krishagni.catissueplus.core.administrative.events.AutoFreezerProviderErrorCode;
 import com.krishagni.catissueplus.core.administrative.events.ContainerHierarchyDetail;
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerDetail;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
@@ -73,6 +76,8 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 		setActivityStatus(detail, existing, container, ose);
 		setComments(detail, existing, container, ose);
 		setStoreSpecimenEnabled(detail, existing, container, ose);
+		setAutomated(detail, existing, container, ose);
+		setAutoFreezerProvider(detail, existing, container, ose);
 		setCellDisplayProp(detail, existing, container, ose);
 		setAllowedSpecimenClasses(detail, existing, container, ose);
 		setAllowedSpecimenTypes(detail, existing, container, ose);
@@ -583,6 +588,43 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 			setStoreSpecimenEnabled(detail, container, ose);
 		} else {
 			container.setStoreSpecimenEnabled(existing.isStoreSpecimenEnabled());
+		}
+	}
+
+	private void setAutomated(StorageContainerDetail detail, StorageContainer container, OpenSpecimenException ose) {
+		container.setAutomated(BooleanUtils.isTrue(detail.getAutomated()));
+	}
+
+	private void setAutomated(StorageContainerDetail detail, StorageContainer existing, StorageContainer container, OpenSpecimenException ose) {
+		if (detail.isAttrModified("automated") || existing == null) {
+			setAutomated(detail, container, ose);
+		} else {
+			container.setAutomated(existing.isAutomated());
+		}
+
+		if (container.isAutomated() && !container.isDimensionless()) {
+			ose.addError(StorageContainerErrorCode.AUTOMATED_NOT_DIMENSIONLESS, detail.getName());
+		}
+	}
+
+	private void setAutoFreezerProvider(StorageContainerDetail detail, StorageContainer container, OpenSpecimenException ose) {
+		if (StringUtils.isBlank(detail.getAutoFreezerProvider())) {
+			return;
+		}
+
+		AutoFreezerProvider provider = daoFactory.getAutoFreezerProviderDao().getByName(detail.getAutoFreezerProvider());
+		if (provider == null) {
+			ose.addError(AutoFreezerProviderErrorCode.NOT_FOUND, detail.getAutoFreezerProvider());
+		}
+
+		container.setAutoFreezerProvider(provider);
+	}
+
+	private void setAutoFreezerProvider(StorageContainerDetail detail, StorageContainer existing, StorageContainer container, OpenSpecimenException ose) {
+		if (detail.isAttrModified("autoFreezerProvider") || existing == null) {
+			setAutoFreezerProvider(detail, container, ose);
+		} else {
+			container.setAutoFreezerProvider(existing.getAutoFreezerProvider());
 		}
 	}
 

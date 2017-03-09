@@ -86,4 +86,14 @@
       <column name="specimenCentric_MOD" type="${bit.type}"/>
     </addColumn>
   </changeSet>
+
+  <changeSet author="ckhilosiya" id="Audit and track changes to container automated settings">
+    <addColumn tableName="OS_STORAGE_CONTAINERS_AUD">
+      <column name="AUTOMATED" type="${boolean.type}"/>
+      <column name="automated_MOD" type="${bit.type}"/>
+
+      <column name="AUTO_FREEZER_PROVIDER_ID" type="${int.type}"/>
+      <column name="autoFreezerProvider_MOD" type="${bit.type}"/>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

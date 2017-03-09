@@ -3,6 +3,8 @@ package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
 import org.hibernate.SessionFactory;
 
+import com.krishagni.catissueplus.core.administrative.repository.AutoFreezerProviderDao;
+import com.krishagni.catissueplus.core.administrative.repository.ContainerStoreListDao;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerTypeDao;
 import com.krishagni.catissueplus.core.administrative.repository.DistributionOrderDao;
 import com.krishagni.catissueplus.core.administrative.repository.DistributionProtocolDao;
@@ -15,6 +17,8 @@ import com.krishagni.catissueplus.core.administrative.repository.SiteDao;
 import com.krishagni.catissueplus.core.administrative.repository.SpecimenRequestDao;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerDao;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
+import com.krishagni.catissueplus.core.administrative.repository.impl.AutoFreezerProviderDaoImpl;
+import com.krishagni.catissueplus.core.administrative.repository.impl.ContainerStoreListDaoImpl;
 import com.krishagni.catissueplus.core.administrative.repository.impl.ContainerTypeDaoImpl;
 import com.krishagni.catissueplus.core.administrative.repository.impl.DistributionOrderDaoImpl;
 import com.krishagni.catissueplus.core.administrative.repository.impl.DistributionProtocolDaoImpl;
@@ -272,11 +276,25 @@ public class DaoFactoryImpl implements DaoFactory {
 		setSessionFactory(dao);
 		return dao;
 	}
-	
+
 	@Override
 	public ConsentStatementDao getConsentStatementDao() {
 		ConsentStatementDaoImpl dao = new ConsentStatementDaoImpl();
 		setSessionFactory(dao);;
+		return dao;
+	}
+
+	@Override
+	public ContainerStoreListDao getContainerStoreListDao() {
+		ContainerStoreListDaoImpl dao = new ContainerStoreListDaoImpl();
+		setSessionFactory(dao);
+		return dao;
+	}
+
+	@Override
+	public AutoFreezerProviderDao getAutoFreezerProviderDao() {
+		AutoFreezerProviderDaoImpl dao = new AutoFreezerProviderDaoImpl();
+		setSessionFactory(dao);
 		return dao;
 	}
 }

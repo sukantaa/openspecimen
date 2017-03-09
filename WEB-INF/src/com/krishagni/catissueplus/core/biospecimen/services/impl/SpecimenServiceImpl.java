@@ -302,7 +302,6 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 				specimens.add(specimen);
 			}
 
-
 			getLabelPrinter().print(getSpecimenPrintItems(specimens));
 			return ResponseEvent.response(SpecimenDetail.from(specimens));
 		} catch (OpenSpecimenException ose) {
@@ -751,7 +750,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 		} else {
 			specimen = specimenFactory.createSpecimen(detail, parent);
 		}
-		
+
 		AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(specimen);
 
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
@@ -765,6 +764,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 		// before the specimen is associated to session to ensure specimen is not flushed
 		// to database
 		//
+
 		if (existing != null) {
 			existing.update(specimen);
 			specimen = existing;
@@ -786,7 +786,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 
 		daoFactory.getSpecimenDao().saveOrUpdate(specimen);
 		specimen.addOrUpdateCollRecvEvents();
-		specimen.addOrUpdateExtension();		
+		specimen.addOrUpdateExtension();
 		return specimen;
 	}
 

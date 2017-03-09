@@ -66,7 +66,9 @@ public enum StorageContainerErrorCode implements ErrorCode {
 
 	DIMLESS_NO_MAP,
 
-	INVALID_CAPACITY;
+	INVALID_CAPACITY,
+
+	AUTOMATED_NOT_DIMENSIONLESS;
 
 	@Override
 	public String code() {

@@ -53,6 +53,10 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 	private Integer capacity;
 
 	private Integer storedSpecimens;
+
+	private Boolean automated;
+
+	private String autoFreezerProvider;
 	
 	private List<StorageContainerSummary> childContainers;
 
@@ -207,6 +211,22 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 		this.storedSpecimens = storedSpecimens;
 	}
 
+	public Boolean getAutomated() {
+		return automated;
+	}
+
+	public void setAutomated(Boolean automated) {
+		this.automated = automated;
+	}
+
+	public String getAutoFreezerProvider() {
+		return autoFreezerProvider;
+	}
+
+	public void setAutoFreezerProvider(String autoFreezerProvider) {
+		this.autoFreezerProvider = autoFreezerProvider;
+	}
+
 	public List<StorageContainerSummary> getChildContainers() {
 		return childContainers;
 	}
@@ -233,6 +253,11 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 		result.setRowLabelingScheme(container.getRowLabelingScheme());
 		result.setFreePositions(container.freePositionsCount());
 		result.setStoreSpecimensEnabled(container.isStoreSpecimenEnabled());
+		result.setAutomated(container.isAutomated());
+
+		if (container.getAutoFreezerProvider() != null) {
+			result.setAutoFreezerProvider(container.getAutoFreezerProvider().getName());
+		}
 		
 		if (container.getType() != null) {
 			result.setTypeId(container.getType().getId());

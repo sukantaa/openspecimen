@@ -301,4 +301,144 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="ckhilosiya" id="Automated container settings">
+    <addColumn tableName="OS_STORAGE_CONTAINERS">
+      <column name="AUTOMATED" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="AUTO_FREEZER_PROVIDER_ID" type="${int.type}"/>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Automated container store lists">
+    <createTable tableName="OS_CONTAINER_STORE_LISTS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+
+      <column name="CONTAINER_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="USER_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="OP" type="${text.type}(16)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="CREATION_TIME" type="${timestamp.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="EXECUTION_TIME" type="${nullable.ts.type}"/>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="ckhilosiya" id="Sequence for container store list" dbms="oracle">
+    <createSequence sequenceName="OS_CONT_STORE_LIST_SEQ" startValue="1" incrementBy="1" ordered="true"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Foreign key on store list container">
+    <addForeignKeyConstraint constraintName="FK_STORE_LIST_CONTAINER_ID"
+      baseTableName="OS_CONTAINER_STORE_LISTS" baseColumnNames="CONTAINER_ID"
+      referencedTableName="OS_STORAGE_CONTAINERS" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Foreign key on store list creator">
+    <addForeignKeyConstraint constraintName="FK_STORE_LIST_USER_ID"
+      baseTableName="OS_CONTAINER_STORE_LISTS" baseColumnNames="USER_ID"
+      referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Automated container store list items">
+    <createTable tableName="OS_CONTAINER_STORE_LIST_ITEMS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+      <column name="STORE_LIST_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="SPECIMEN_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="STATUS" type="${text.type}(16)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="ACK_TIME" type="${nullable.ts.type}">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="ckhilosiya" id="Sequence for container store list specimens" dbms="oracle">
+    <createSequence sequenceName="OS_CONT_STORE_LIST_ITEM_SEQ" startValue="1" incrementBy="1" ordered="true"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="FK on item store list">
+    <addForeignKeyConstraint constraintName="FK_STORE_LIST_ITEM_STORE_LIST"
+      baseTableName="OS_CONTAINER_STORE_LIST_ITEMS" baseColumnNames="STORE_LIST_ID"
+      referencedTableName="OS_CONTAINER_STORE_LISTS" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
+  <changeSet author="ckhilosiya" id="FK on store list item specimen">
+    <addForeignKeyConstraint constraintName="FK_STORE_LIST_ITEM_SPMN_ID"
+      baseTableName="OS_CONTAINER_STORE_LIST_ITEMS" baseColumnNames="SPECIMEN_ID"
+      referencedTableName="CATISSUE_SPECIMEN" referencedColumnNames="IDENTIFIER" />
+  </changeSet>
+
+  <changeSet author="ckhilosiya" id="Automated freezer providers">
+    <createTable tableName="OS_AUTO_FREEZER_PROVIDERS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true"/>
+      </column>
+      
+      <column name="NAME" type="${text.type}(64)">
+        <constraints nullable="false"/>
+      </column>
+      
+      <column name="IMPL_CLASS" type="${text.type}(255)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="ckhilosiya" id="Automated freezer providers identifier sequence" dbms="oracle">
+    <createSequence sequenceName="OS_AUTO_FREEZER_PROVIDERS_SEQ" startValue="1" incrementBy="1" ordered="true"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Foreign key on auto freezer provider of container">
+    <addForeignKeyConstraint constraintName="FK_STOR_CONT_AUTO_PROVIDER_ID"
+      baseTableName="OS_STORAGE_CONTAINERS" baseColumnNames="AUTO_FREEZER_PROVIDER_ID"
+      referencedTableName="OS_AUTO_FREEZER_PROVIDERS" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
+  <changeSet author="ckhilosiya" id="Auto freezer provider props">
+    <createTable tableName="OS_AUTO_FREEZER_PROVIDER_PROPS">
+      <column name="PROVIDER_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="NAME" type="${text.type}(64)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="VALUE" type="${text.type}(255)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="ckhilosiya" id="FK on provider of auto freezer provider props">
+    <addForeignKeyConstraint constraintName="OS_FK_AUTO_PROV_PROPS_PROV_ID"
+      baseTableName="OS_AUTO_FREEZER_PROVIDER_PROPS" baseColumnNames="PROVIDER_ID"
+      referencedTableName="OS_AUTO_FREEZER_PROVIDERS" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
 </databaseChangeLog>
