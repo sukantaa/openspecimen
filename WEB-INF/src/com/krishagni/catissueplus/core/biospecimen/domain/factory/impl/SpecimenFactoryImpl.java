@@ -959,7 +959,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 			return;
 		}
 		
-		SpecimenCollectionEvent event = SpecimenCollectionEvent.createFromSr(specimen);
+		SpecimenCollectionEvent event = SpecimenCollectionEvent.getFor(specimen);
 		setEventAttrs(collDetail, event, ose);
 
 		String collCont = collDetail.getContainer();
@@ -1001,7 +1001,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 			return;
 		}
 		
-		SpecimenReceivedEvent event = SpecimenReceivedEvent.createFromSr(specimen);
+		SpecimenReceivedEvent event = SpecimenReceivedEvent.getFor(specimen);
 		setEventAttrs(recvDetail, event, ose);
 		
 		String recvQuality = recvDetail.getReceivedQuality();
