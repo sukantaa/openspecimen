@@ -24,7 +24,7 @@ angular.module('os.biospecimen.specimenlist')
       $scope.pagingOpts = {
         totalSpmns: 0,
         currPage: 1,
-        spmnsPerPage: 100
+        spmnsPerPage: 10000 // for v3.5, practically disabling list specimens pagination
       };
 
       Util.filter($scope, 'ctx.filterOpts', loadSpecimens);
@@ -38,7 +38,7 @@ angular.module('os.biospecimen.specimenlist')
         $scope.pagingOpts = {
           totalSpmns: 0,
           currPage: 1,
-          spmnsPerPage: 100
+          spmnsPerPage: 10000
         };
       }
 
