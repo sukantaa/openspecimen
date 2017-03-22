@@ -2,6 +2,7 @@
 package com.krishagni.catissueplus.core.biospecimen.services;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +18,6 @@ import com.krishagni.catissueplus.core.biospecimen.events.CopyCpOpDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CopyCpeOpDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpQueryCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.CpReportSettingsDetail;
-import com.krishagni.catissueplus.core.common.events.ReportSettingsDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CprSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
@@ -172,6 +172,8 @@ public interface CollectionProtocolService {
 	public ResponseEvent<ListDetail> getList(RequestEvent<Map<String, Object>> req);
 
 	public ResponseEvent<Integer> getListSize(RequestEvent<Map<String, Object>> req);
+
+	public ResponseEvent<Collection<Object>> getListExprValues(RequestEvent<Map<String, Object>> req);
 
 
 	interface DataSource {
