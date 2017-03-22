@@ -1,21 +1,44 @@
 <div>
   <div os-page-header>
-    <div class="os-page-header-content">
-      <ul os-breadcrumbs>
-        <li>
-          <a ui-sref="query-list" translate="queries.list">Queries</a>
-        </li>
-      </ul>
-
-      <h3> 
-        <span ng-if="!queryCtx.id" translate="queries.new_query">
-          New Query
-        </span>
-        <span ng-if="!!queryCtx.id">
-          {{queryCtx.title}}
-        </span>
-        <span>({{resultsCtx.numRows}})</span>
-      </h3>
+    <div class="os-page-header-content-wrapper">
+      <div class="os-page-header-content">
+        <ul os-breadcrumbs>
+          <li>
+            <a ui-sref="query-list" translate="queries.list">Queries</a>
+          </li>
+        </ul>
+        <h3>
+          <span ng-if="!queryCtx.id" translate="queries.new_query">
+            New Query
+          </span>
+          <span ng-if="!!queryCtx.id">
+            {{queryCtx.title}}
+          </span>
+        </h3>
+      </div>
+    </div>
+    <div class="os-page-header-actions-wrapper">
+      <div class="os-page-header-actions" ng-switch on="!!resultsCtx.counters.waiting">
+        <div ng-switch-when="true">
+          <span translate="common.loading">Loading ...</span>
+        </div>
+        <div ng-switch-when="false">
+          <div class="os-query-result-counters" ng-if="!resultsCtx.counters.error">
+            <span class="counter" title="{{'queries.participants' | translate}}">
+              <span class="fa fa-users"></span>
+              <span>{{resultsCtx.counters.cprCnt | number}}</span>
+            </span>
+            <span class="counter" title="{{'queries.visits' | translate}}">
+              <span class="fa fa-calendar"></span>
+              <span>{{resultsCtx.counters.visitCnt | number}}</span>
+            </span>
+            <span class="counter" title="{{'queries.specimens' | translate}}">
+              <span class="fa fa-flask"></span>
+              <span>{{resultsCtx.counters.specimenCnt | number}}</span>
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

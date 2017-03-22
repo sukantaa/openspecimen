@@ -1402,6 +1402,7 @@
     "view_records": "View Records",
     "count_results": "Count Query Results",
     "participants": "Participants",
+    "visits": "Visits",
     "specimens": "Specimens",
     "waiting_for_count": "Please wait for a moment while we count Participants and Specimens matching your criteria",
     "waiting_for_records": "Loading records, please wait for a moment...",

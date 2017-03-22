@@ -445,3 +445,18 @@
 .os-query-results-grid .ngHeaderCell:hover .ngVerticalBarVisible {
   background: #ddd!important;
 }
+
+/** Query result counters **/
+.os-query-result-counters {
+  font-size: 24px;
+  font-weight: 700;
+  opacity: 0.8;
+  margin-top: -10px;
+}
+
+.os-query-result-counters .counter {
+  border: 1px solid #ddd;
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  margin: 5px;
+}

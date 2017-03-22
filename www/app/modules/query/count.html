@@ -12,17 +12,36 @@
   <table class="table table-bordered" ng-if="!queryLocal.waitingForCnt && !!queryLocal.countResults">
     <tbody>
       <tr>
-        <td translate="queries.participants">Participants</td>
-        <td>{{queryLocal.countResults.cprCnt}}</td>
+        <td>
+          <span class="fa fa-users"></span>
+          <span translate="queries.participants">Participants</span>
+        </td>
+        <td>
+          <span>{{queryLocal.countResults.cprCnt | number}}</span>
+        </td>
       </tr>
       <tr>
-        <td translate="queries.specimens">Specimens</td>
-        <td>{{queryLocal.countResults.specimenCnt}}</td>
+        <td>
+          <span class="fa fa-calendar"></span>
+          <span translate="queries.visits">Visits</span>
+        </td>
+        <td>
+          <span>{{queryLocal.countResults.visitCnt | number}}</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <span class="fa fa-flask"></span>
+          <span translate="queries.specimens">Specimens</span>
+        </td>
+        <td>
+          <span>{{queryLocal.countResults.specimenCnt | number}}</span>
+        </td>
       </tr>
     </tbody>
   </table>
  
-  <button class="btn btn-success" ng-click="closePopover()" translate="common.buttons.ok">
-    Ok
+  <button class="btn btn-success" ng-click="closePopover()">
+    <span translate="common.buttons.ok">Ok</span>
   </button>
 </div>

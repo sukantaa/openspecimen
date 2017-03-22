@@ -452,10 +452,13 @@ angular.module('os.query.util', [])
     };
 
     function getCountAql(filtersMap, exprNodes) {
-      var query = getWhereExpr(filtersMap, exprNodes);
-      return "select count(distinct Participant.id) as \"cprCnt\", " +
-                       "count(distinct Specimen.id) as \"specimenCnt\" " + 
-                " where " + query;
+      return "" +
+        "select " +
+        "  count(distinct Participant.id) as \"cprCnt\", " +
+        "  count(distinct SpecimenCollectionGroup.id) as \"visitCnt\", " +
+        "  count(distinct Specimen.id) as \"specimenCnt\" " +
+        "where " +
+           getWhereExpr(filtersMap, exprNodes);
     }
 
     function getDataAql(selectedFields, filtersMap, exprNodes, reporting, addLimit, addPropIds) {
