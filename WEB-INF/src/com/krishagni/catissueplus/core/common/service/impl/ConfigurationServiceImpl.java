@@ -54,8 +54,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 	
 	private Map<String, Map<String, ConfigSetting>> configSettings;
 
-	private Long maxSettingId;
-	
 	private DaoFactory daoFactory;
 	
 	private MessageSource messageSource;
@@ -361,12 +359,26 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		Map<String, Map<String, ConfigSetting>> settingsMap = new ConcurrentHashMap<>();
 		
 		List<ConfigSetting> settings = daoFactory.getConfigSettingDao().getAllSettings();
-		addToSettingsMap(settings, settingsMap);
+		for (ConfigSetting setting : settings) {
+			ConfigProperty prop = setting.getProperty();
+			Hibernate.initialize(prop.getAllowedValues()); // pre-init
+
+			Module module = prop.getModule();
+
+			Map<String, ConfigSetting> moduleSettings = settingsMap.get(module.getName());
+			if (moduleSettings == null) {
+				moduleSettings = new ConcurrentHashMap<>();
+				settingsMap.put(module.getName(), moduleSettings);
+			}
+
+			moduleSettings.put(prop.getName(), setting);
+		}
+
 		this.configSettings = settingsMap;
 		
 		for (List<ConfigChangeListener> listeners : changeListeners.values()) {
 			for (ConfigChangeListener listener : listeners) {
-				listener.onConfigChange(null, null);
+				listener.onConfigChange(StringUtils.EMPTY, StringUtils.EMPTY);
 			}			
 		}
 	}
@@ -510,8 +522,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 	@Override
 	@PlusTransactional
 	public void onApplicationEvent(ContextRefreshedEvent event) {
-		List<ConfigSetting> settings = daoFactory.getConfigSettingDao().getSettingsLaterThan(maxSettingId);
-		addToSettingsMap(settings, configSettings);
+		reload();
 	}
 
 	@Override
@@ -619,27 +630,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		File file = new File(getSettingFilesDir() + oldSetting.getValue());
 		if (file.exists()) {
 			file.delete(); // Very dangerous to do! Should we just rename the file?
-		}
-	}
-
-	private void addToSettingsMap(List<ConfigSetting> settings, Map<String, Map<String, ConfigSetting>> settingsMap) {
-		for (ConfigSetting setting : settings) {
-			if (maxSettingId == null || setting.getId() > maxSettingId) {
-				maxSettingId = setting.getId();
-			}
-
-			ConfigProperty prop = setting.getProperty();
-			Hibernate.initialize(prop.getAllowedValues()); // pre-init
-
-			Module module = prop.getModule();
-
-			Map<String, ConfigSetting> moduleSettings = settingsMap.get(module.getName());
-			if (moduleSettings == null) {
-				moduleSettings = new ConcurrentHashMap<>();
-				settingsMap.put(module.getName(), moduleSettings);
-			}
-
-			moduleSettings.put(prop.getName(), setting);
 		}
 	}
 

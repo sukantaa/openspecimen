@@ -82,7 +82,7 @@
            scheduled_day_of_month, activity_status, repeat_schedule, type, command,
            task_impl_fqn, rt_args_provided, rt_args_help_text)
         values
-          (OS_SCHEDULED_JOBS_SEQ.nextVal, "Create automated container's store list", userId, SYSDATE, null, 0, null, null,
+          (OS_SCHEDULED_JOBS_SEQ.nextVal, 'Create automated containers store list', userId, SYSDATE, null, 0, null, null,
            null, 'Active', 'MINUTELY', 'INTERNAL', null,
            'com.krishagni.catissueplus.core.administrative.services.impl.ContainerStoreListExecutor', 0, null);
       end;
