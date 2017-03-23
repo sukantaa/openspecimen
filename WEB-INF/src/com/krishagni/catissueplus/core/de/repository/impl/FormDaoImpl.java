@@ -30,6 +30,7 @@ import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.de.domain.Form;
 import com.krishagni.catissueplus.core.de.events.FormContextDetail;
 import com.krishagni.catissueplus.core.de.events.FormCtxtSummary;
 import com.krishagni.catissueplus.core.de.events.FormRecordSummary;
@@ -50,6 +51,14 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	@Override
 	public FormContextBean getById(Long id) {
 		return getById(id, "deletedOn is null");
+	}
+
+	@Override
+	public Form getFormById(Long formId) {
+		return (Form) getCurrentSession().createCriteria(Form.class)
+			.add(Restrictions.eq("id", formId))
+			.add(Restrictions.isNull("deletedOn"))
+			.uniqueResult();
 	}
 
 	@SuppressWarnings("unchecked")

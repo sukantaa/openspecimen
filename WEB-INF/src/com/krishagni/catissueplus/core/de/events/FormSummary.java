@@ -2,8 +2,12 @@ package com.krishagni.catissueplus.core.de.events;
 
 import java.util.Date;
 
-import com.krishagni.catissueplus.core.common.events.UserSummary;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
+import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.catissueplus.core.de.domain.Form;
+
+@JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
 public class FormSummary {
 	private Long formId;
 	
@@ -93,5 +97,16 @@ public class FormSummary {
 
 	public void setEntityType(String entityType) {
 		this.entityType = entityType;
+	}
+
+	public static FormSummary from(Form form) {
+		FormSummary result = new FormSummary();
+		result.setFormId(form.getId());
+		result.setName(form.getName());
+		result.setCaption(form.getCaption());
+		result.setCreatedBy(UserSummary.from(form.getCreatedBy()));
+		result.setCreationTime(form.getCreationTime());
+		result.setModificationTime(form.getUpdateTime());
+		return result;
 	}
 }

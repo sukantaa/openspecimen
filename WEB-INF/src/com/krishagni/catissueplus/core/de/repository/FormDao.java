@@ -12,13 +12,16 @@ import com.krishagni.catissueplus.core.administrative.repository.FormListCriteri
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.repository.Dao;
+import com.krishagni.catissueplus.core.de.domain.Form;
 import com.krishagni.catissueplus.core.de.events.FormContextDetail;
 import com.krishagni.catissueplus.core.de.events.FormCtxtSummary;
 import com.krishagni.catissueplus.core.de.events.FormRecordSummary;
 import com.krishagni.catissueplus.core.de.events.FormSummary;
 import com.krishagni.catissueplus.core.de.events.ObjectCpDetail;
 
-public interface FormDao extends Dao<FormContextBean>{	
+public interface FormDao extends Dao<FormContextBean> {
+	public Form getFormById(Long formId);
+
 	public List<FormSummary> getAllFormsSummary(FormListCriteria crit);
 	
 	public Long getAllFormsCount(FormListCriteria crit);

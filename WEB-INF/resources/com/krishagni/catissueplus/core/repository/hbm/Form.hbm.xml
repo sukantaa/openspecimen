@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false">
+  <class name="com.krishagni.catissueplus.core.de.domain.Form" table="DYEXTN_CONTAINERS" batch-size="25">
+    <id name="id" column="IDENTIFIER"/>
+
+    <property name="name" column="NAME"/>
+
+    <property name="caption" column="CAPTION"/>
+
+    <many-to-one name="createdBy" column="CREATED_BY"/>
+
+    <property name="creationTime" column="CREATE_TIME"/>
+
+    <many-to-one name="updatedBy" column="LAST_MODIFIED_BY"/>
+
+    <property name="updateTime" column="LAST_MODIFY_TIME"/>
+
+    <property name="deletedOn" column="DELETED_ON"/>
+
+    <filter name="activeForms" condition="deletedOn is null"/>
+  </class>
+</hibernate-mapping>
