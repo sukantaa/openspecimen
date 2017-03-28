@@ -80,7 +80,7 @@ angular.module('openspecimen')
         };
         $rootScope.loggedIn = true;
         AuthService.saveToken(result.data.token);
-        if ($rootScope.reqState) {
+        if ($rootScope.reqState && $rootScope.state.name != $rootScope.reqState.name) {
           $state.go($rootScope.reqState.name, $rootScope.reqState.params);
           $rootScope.reqState = undefined;
         } else {
