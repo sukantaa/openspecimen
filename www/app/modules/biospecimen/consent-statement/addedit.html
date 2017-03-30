@@ -10,7 +10,7 @@
       </ul>
       <h3 ng-switch on="!consentStatement.id">
         <span ng-switch-when="true" translate="consent_statement.create_stmt">Create Statement</span>
-        <span ng-switch-when="false">{{consentStatement.code}}</span>
+        <span ng-switch-when="false">{{consentStatement.statement}} ({{consentStatement.code}})</span>
       </h3>
     </div>
   </div>

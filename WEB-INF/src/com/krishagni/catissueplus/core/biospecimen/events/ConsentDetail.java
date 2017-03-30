@@ -5,6 +5,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -150,17 +152,19 @@ public class ConsentDetail extends AttributeModifiedSupport implements Mergeable
 			consent.setWitness(UserSummary.from(cpr.getConsentWitness()));
 		}
 
+		Map<String, ConsentTierResponse> respMap = cpr.getConsentResponses().stream()
+			.collect(Collectors.toMap(ConsentTierResponse::getStatementCode, item -> item));
+
 		for (CpConsentTier consentTier : cpr.getCollectionProtocol().getConsentTier()) {
 			ConsentTierResponseDetail response = new ConsentTierResponseDetail();
 			response.setCode(consentTier.getStatement().getCode());
 			response.setStatement(consentTier.getStatement().getStatement());
-			for (ConsentTierResponse resp : cpr.getConsentResponses()) {
-				if (consentTier.getStatement().getCode().equals(resp.getStatementCode())) {
-					response.setResponse(resp.getResponse());
-					break;
-				}
+
+			ConsentTierResponse answer = respMap.get(consentTier.getStatement().getCode());
+			if (answer != null) {
+				response.setResponse(answer.getResponse());
 			}
-			
+
 			consent.getConsentTierResponses().add(response);
 		}
 
