@@ -983,6 +983,10 @@ public class AccessCtrlMgr {
 	}
 
 	public Set<Site> getSites(Resource resource, Operation[] operations) {
+		return getSites(resource.getName(), operations);
+	}
+
+	public Set<Site> getSites(String resource, Operation[] operations) {
 		User user = AuthUtil.getCurrentUser();
 
 		//
@@ -997,8 +1001,8 @@ public class AccessCtrlMgr {
 		for (int i = 0; i < operations.length; i++ ) {
 			ops[i] = operations[i].getName();
 		}
-		
-		List<SubjectAccess> accessList = daoFactory.getSubjectDao().getAccessList(user.getId(), resource.getName(), ops);
+
+		List<SubjectAccess> accessList = daoFactory.getSubjectDao().getAccessList(user.getId(), resource, ops);
 		Set<Site> results = new HashSet<Site>();
 		boolean allSites = false;
 		for (SubjectAccess access : accessList) {
@@ -1328,7 +1332,6 @@ public class AccessCtrlMgr {
 	// Utility methods                                                   //
 	//                                                                   //
 	///////////////////////////////////////////////////////////////////////
-
 	private Set<Pair<Long, Long>> getSiteCps(String resource, Long cpId, String[] ops) {
 		Long userId = AuthUtil.getCurrentUser().getId();
 
@@ -1380,7 +1383,7 @@ public class AccessCtrlMgr {
 
 	private boolean isAccessAllowedOnSite(Site accessSite, Site site, Long userId) {
 		return (accessSite != null && accessSite.equals(site)) ||
-			(accessSite == null && getUserInstituteSites(userId).contains(site));
+				(accessSite == null && getUserInstituteSites(userId).contains(site));
 	}
 
 	private boolean isImportOp() {
