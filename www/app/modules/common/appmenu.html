@@ -104,7 +104,7 @@
           <li ng-if="currentUser.admin || currentUser.manageForms">
             <a ui-sref="form-list" translate="menu.forms">Forms</a>
           </li>
-          <li show-if-admin="institute">
+          <li show-if-allowed="dpReadOpts">
             <a ui-sref="dp-list" translate="menu.distribution_protocols">Distribution Protocols</a>
           </li>
           <li show-if-allowed="orderReadOpts">

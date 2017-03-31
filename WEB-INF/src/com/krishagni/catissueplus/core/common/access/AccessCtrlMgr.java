@@ -164,39 +164,47 @@ public class AccessCtrlMgr {
 	//          Distribution Protocol object access control helper methods              //
 	//                                                                                  //
 	//////////////////////////////////////////////////////////////////////////////////////
-	public void ensureCreateUpdateDeleteDpRights(DistributionProtocol dp) {
+	public Set<Long> getReadAccessDistributionProtocolSites() {
 		if (AuthUtil.isAdmin()) {
-			return;
+			return null;
 		}
 
-		boolean allowed = false;
-		if (AuthUtil.isInstituteAdmin()) {
-			Institute userInst = AuthUtil.getCurrentUser().getInstitute();
-			allowed = Utility.isEmptyOrSameAs(dp.getDistributingInstitutes(), userInst);
-		}
-
-		if (!allowed) {
-			throw OpenSpecimenException.userError(RbacErrorCode.ADMIN_RIGHTS_REQUIRED);
-		}
+		return Utility.collect(getSites(Resource.DP, Operation.READ), "id", true);
 	}
 
-	public void ensureReadDpRights() {
-		if (!canUserPerformOp(Resource.ORDER, new Operation[] {Operation.CREATE, Operation.UPDATE})) {
-			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
-		}
-	}
-	
 	public void ensureReadDpRights(DistributionProtocol dp) {
+		ensureDpObjectRights(dp, new Operation[] {Operation.READ}, false);
+	}
+
+	public void ensureCreateUpdateDpRights(DistributionProtocol dp) {
+		ensureDpObjectRights(dp, new Operation[] {Operation.CREATE, Operation.UPDATE});
+	}
+
+	public void ensureDeleteDpRights(DistributionProtocol dp) {
+		ensureDpObjectRights(dp, new Operation[] {Operation.DELETE});
+	}
+
+	private void ensureDpObjectRights(DistributionProtocol dp, Operation[] ops) {
+		ensureDpObjectRights(dp, ops, true);
+	}
+
+	private void ensureDpObjectRights(DistributionProtocol dp, Operation[] ops, boolean allSites) {
 		if (AuthUtil.isAdmin()) {
 			return;
 		}
-		
-		Set<Site> userSites = getSites(Resource.ORDER, new Operation[]{Operation.CREATE, Operation.UPDATE});
-		if (CollectionUtils.intersection(userSites, dp.getAllDistributingSites()).isEmpty()) {
-			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+
+		Set<Site> allowedSites = getSites(Resource.DP, ops);
+		if (allSites) {
+			if (!allowedSites.containsAll(dp.getAllDistributingSites())) {
+				throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+		} else {
+			if (CollectionUtils.intersection(allowedSites, dp.getAllDistributingSites()).isEmpty()) {
+				throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+			}
 		}
 	}
-	
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	//                                                                                  //
 	//          Collection Protocol object access control helper methods                //

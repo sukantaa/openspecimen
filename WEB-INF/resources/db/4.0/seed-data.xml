@@ -71,4 +71,25 @@
       //
     </sql>
   </changeSet>
+
+  <changeSet author="mdnasim" id="Add resources for distribution protocol" dbms="mysql">
+    <sql>
+      insert into RBAC_RESOURCES(NAME) values('DistributionProtocol');
+    </sql>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Add resources for distribution protocol" dbms="oracle">
+    <sql>
+      insert into RBAC_RESOURCES(IDENTIFIER, NAME) values(RBAC_RESOURCES_SEQ.nextval, 'DistributionProtocol');
+    </sql>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Give permissions on distribution protocol">
+    <sql>call assign_to_role('Administrator', 'DistributionProtocol', 'Read,Create,Update,Delete');</sql>
+    <sql>call assign_to_role('Coordinator', 'DistributionProtocol', 'Read');</sql>
+    <sql>call assign_to_role('Principal Investigator', 'DistributionProtocol', 'Read');</sql>
+    <sql>call assign_to_role('Researcher', 'DistributionProtocol', 'Read');</sql>
+    <sql>call assign_to_role('Technician', 'DistributionProtocol', 'Read');</sql>
+    <sql>call assign_to_role('Tissue Banker', 'DistributionProtocol', 'Read');</sql>
+  </changeSet>
 </databaseChangeLog>

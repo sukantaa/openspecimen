@@ -11,11 +11,22 @@ angular.module('os.administrative.dp',
 
   .config(function($stateProvider) {
     $stateProvider
+      .state('dp-root', {
+        abstract: true,
+        template: '<div ui-view></div>',
+        controller: function($scope) {
+          // Distribution Protocol Authorization Options
+          $scope.dpResource = {
+            createOpts: {resource: 'DistributionProtocol', operations: ['Create']}
+          }
+        },
+        parent: 'signed-in'
+      })
       .state('dp-list', {
         url: '/dps',
-        templateUrl: 'modules/administrative/dp/list.html',     
+        templateUrl: 'modules/administrative/dp/list.html',
         controller: 'DpListCtrl',
-        parent: 'signed-in'
+        parent: 'dp-root'
       })
       .state('dp-addedit', {
         url: '/dp-addedit/:dpId',
@@ -32,7 +43,7 @@ angular.module('os.administrative.dp',
           }
         },
         controller: 'DpAddEditCtrl',
-        parent: 'signed-in'
+        parent: 'dp-root'
       })
       .state('dp-detail', {
         url: '/dps/:dpId',
@@ -43,7 +54,7 @@ angular.module('os.administrative.dp',
           }
         },
         controller: 'DpDetailCtrl',
-        parent: 'signed-in'
+        parent: 'dp-root'
       })
       .state('dp-detail.overview', {
         url: '/overview',

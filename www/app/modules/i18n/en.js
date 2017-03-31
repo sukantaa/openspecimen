@@ -1247,7 +1247,8 @@
       "StorageContainer": "Storage Containers",
       "User": "Users",
       "ScheduledJob": "Jobs",
-      "ShippingAndTracking": "Shipping and Tracking"
+      "ShippingAndTracking": "Shipping and Tracking",
+      "DistributionProtocol": "Distribution Protocols"
     },
 
     "menu": {

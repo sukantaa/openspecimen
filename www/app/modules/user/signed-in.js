@@ -26,6 +26,7 @@ angular.module('openspecimen')
      $scope.orderReadOpts = {resource: 'Order', operations: ['Read']};
      $scope.shipmentReadOpts = {resource: 'ShippingAndTracking', operations: ['Read']};
      $scope.scheduledJobReadOpts = {resource: 'ScheduledJob', operations: ['Read']};
+     $scope.dpReadOpts = {resource: 'DistributionProtocol', operations: ['Read']};
 
      init();
   })
