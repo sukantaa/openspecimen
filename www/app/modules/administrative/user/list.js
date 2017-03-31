@@ -39,6 +39,7 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
       PvManager.loadPvs('activity-status').then(
         function(result) {
           $scope.activityStatuses = [].concat(result);
+          $scope.activityStatuses.push('Locked');
           var idx = $scope.activityStatuses.indexOf('Disabled');
           if (idx != -1) {
             $scope.activityStatuses.splice(idx, 1);
