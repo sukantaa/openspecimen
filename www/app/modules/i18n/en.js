@@ -76,6 +76,7 @@
     "confirm_navigation": " You've unsaved form changes. If you navigate away from this page without submitting form, the changes will be lost. Are you sure you want to leave this page?",
     "footer_note": "<a href=\"http://www.openspecimen.org\" target=\"_blank\">OpenSpecimen</a> - powered by <a href=\"http://www.krishagni.com\" target=\"_blank\">Krishagni</a>",
     "download_initiated": "Download of file initiated. Please check your download directory ...",
+    "error": "Error",
 
     "filters": {
       "title": "Filters",
@@ -118,7 +119,9 @@
       "back": "Back",
       "list_view": "List View",
       "disable": "Disable",
-      "help": "Help"
+      "help": "Help",
+      "validate": "Validate",
+      "copy_to_clipboard": "Copy to Clipboard"
     }
   },
 
@@ -1808,6 +1811,15 @@
 
     "errors": {
       "insufficient_qty": "The distribution quantity of {{count}} {{ count == 1 ? 'specimen' : 'specimens' }} is more than the available quantity. Do you want to proceed?"
+    },
+
+    "specimen_validation": {
+      "title": "Specimens Validation Report",
+      "found_count": "Passed",
+      "not_found_count": "Failed: Specimens not present in the order",
+      "not_found_error": "Failed: Specimen not present in the order",
+      "extra_count": "Failed: Additional specimens present in the order",
+      "extra_error": "Failed: Additional specimen present in the order"
     }
   },
 
@@ -1880,6 +1892,15 @@
     "tooltip": {
       "create": "Create new shipment",
       "search": "Filter out shipments"
+    },
+
+    "specimen_validation": {
+      "title": "Specimens Validation Report",
+      "found_count": "Passed",
+      "not_found_count": "Failed: Specimens not present in the shipment",
+      "not_found_error": "Failed: Specimen not present in the shipment",
+      "extra_count": "Failed: Additional specimens present in the shipment",
+      "extra_error": "Failed: Additional specimen present in the shipment"
     }
   },
 

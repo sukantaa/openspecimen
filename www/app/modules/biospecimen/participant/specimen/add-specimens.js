@@ -4,13 +4,20 @@ angular.module('os.biospecimen.specimen')
     return {
       restrict: 'E',
 
+      transclude: true,
+
       scope: {
         onAdd: '&',
         filterOpts: '=?',
-        errorOpts: '=?'
+        errorOpts: '=?',
+        ctrl: '=?',
       },
 
       controller: function($scope) {
+        if ($scope.ctrl) {
+          $scope.ctrl.ctrl = this;
+        }
+
         $scope.input = {useBarcode: false};
 
         $scope.addSpecimen = function(inputs) {
@@ -37,6 +44,14 @@ angular.module('os.biospecimen.specimen')
             }
           );
         }
+
+        this.getLabels = function() {
+          return $scope.input.ctrl.getItems();
+        }
+
+        this.useBarcode = function() {
+          return $scope.input.useBarcode || false;
+        }
       },
 
       link: function(scope, element, attrs) {
@@ -58,8 +73,9 @@ angular.module('os.biospecimen.specimen')
                 '      <span translate="specimens.use_barcode">Use Barcode</span>' +
                 '    </div>' +
                 '  </div>' +
-                '  <os-add-items on-add="addSpecimen(itemLabels)"' +
+                '  <os-add-items ctrl="input" on-add="addSpecimen(itemLabels)"' +
                 '    placeholder="' + tAttrs.placeholder + '">' +
+                '    <span ng-transclude></span>' +
                 '  </os-add-items>' +
                 '</div>';
       }

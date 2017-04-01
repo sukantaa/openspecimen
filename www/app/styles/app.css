@@ -1166,3 +1166,8 @@ h4.os-sub-section-title, h5.os-sub-section-title, h6.os-sub-section-title {
 .os-clear-4 > div:nth-child(4n + 1) {
   clear: both;
 }
+
+.input-group .input-group-btn .btn:last-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}

@@ -7,6 +7,7 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
     var ignoreQtyWarning = false;
 
     function init() {
+      $scope.input = {};
       $scope.order = order;
 
       order.request = spmnRequest;
@@ -203,6 +204,19 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
       }
     }
 
+    function getValidationMsgKeys(useBarcode) {
+      return {
+        title:         'orders.specimen_validation.title',
+        foundCount:    'orders.specimen_validation.found_count',
+        notFoundCount: 'orders.specimen_validation.not_found_count',
+        notFoundError: 'orders.specimen_validation.not_found_error',
+        extraCount:    'orders.specimen_validation.extra_count',
+        extraError:    'orders.specimen_validation.extra_error',
+        itemLabel:     useBarcode ? 'specimens.barcode' : 'specimens.label',
+        error:         'common.error'
+      }
+    }
+
     $scope.onDpSelect = function() {
       if (!!spmnRequest) {
         return;
@@ -315,6 +329,12 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
       }
 
       $scope.setStatus(item);
+    }
+
+    $scope.validateSpecimens = function(ctrl) {
+      var prop = ctrl.useBarcode() ? 'specimen.barcode' : 'specimen.label';
+      var result = Util.validateItems($scope.order.orderItems, ctrl.getLabels(), prop);
+      Util.showItemsValidationResult(getValidationMsgKeys(ctrl.useBarcode()), result);
     }
     
     init();

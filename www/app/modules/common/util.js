@@ -1,6 +1,6 @@
 
 angular.module('openspecimen')
-  .factory('Util', function($rootScope, $timeout, $document, $q, $parse, $modal, QueryExecutor, Alerts) {
+  .factory('Util', function($rootScope, $timeout, $document, $q, $parse, $modal, $translate, QueryExecutor, Alerts) {
     var isoDateRe = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
     function clear(input) {
       input.splice(0, input.length);
@@ -301,6 +301,95 @@ angular.module('openspecimen')
       );
     }
 
+    function validateItems(items, itemLabels, labelProp) {
+      var labelGetter = $parse(labelProp);
+
+      // for checking presence of element, using map is faster than list
+      var labelsMap = {};
+      angular.forEach(items,
+        function(item) {
+          labelsMap[labelGetter(item)] = true;
+        }
+      );
+
+      var found = [], notFound = [], extra = [];
+      angular.forEach(itemLabels,
+        function(label) {
+          if (labelsMap[label]) {
+            found.push(label);
+            delete labelsMap[label];
+          } else {
+            notFound.push(label);
+          }
+        }
+      );
+
+      angular.forEach(labelsMap,
+        function(value, label) {
+          extra.push(label);
+        }
+      );
+
+      return {found: found, notFound: notFound, extra: extra};
+    }
+
+    function showItemsValidationResult(msgKeys, data) {
+      return $modal.open({
+        templateUrl: 'modules/common/item-validation-result.html',
+        controller: function($scope, $modalInstance) {
+          $scope.ctx = {msgKeys: msgKeys, data: data};
+
+          $scope.ok = function() {
+            $modalInstance.close(true);
+          }
+
+          $scope.generateReport = function() {
+            generateValidationReport(msgKeys, data);
+          }
+        }
+      });
+    }
+
+    function generateValidationReport(msgKeys, data) {
+      var msg = $translate.instant;
+      $translate(msgKeys.label).then(
+        function() {
+          var report = '';
+          report = msg(msgKeys.itemLabel) + ',' + msg(msgKeys.error) + '\n';
+
+          var notFound = msg(msgKeys.notFoundError);
+          angular.forEach(data.notFound,
+            function(label) {
+              report += label + ',' + notFound + '\n';
+            }
+          );
+
+          var extra = msg(msgKeys.extraError);
+          angular.forEach(data.extra,
+            function(label) {
+              report += label + ',' + extra + '\n';
+            }
+          );
+
+          copyToClipboard(report);
+        }
+      );
+    }
+
+    function copyToClipboard(text) {
+      var textarea = angular.element('<textarea/>').val(text).css('opacity', 0);
+      angular.element(document.body).append(textarea);
+      textarea.select();
+
+      try {
+        document.execCommand('copy');
+      } catch (e) {
+        console.log("Error copying text to clipboard");
+      }
+
+      textarea.remove();
+    }
+
     return {
       clear: clear,
 
@@ -332,6 +421,12 @@ angular.module('openspecimen')
 
       addIfAbsent: addIfAbsent,
 
-      showConfirm: showConfirm
+      showConfirm: showConfirm,
+
+      validateItems: validateItems,
+
+      showItemsValidationResult: showItemsValidationResult,
+
+      copyToClipboard: copyToClipboard
     };
   });

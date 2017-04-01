@@ -7,6 +7,7 @@ angular.module('os.administrative.shipment.addedit', ['os.administrative.models'
     function init() {
       $scope.shipment = shipment;
       $scope.spmnOpts = {filters: {}, error: {}};
+      $scope.input = {};
 
       shipment.request = spmnRequest;
       if (!!spmnRequest) {
@@ -196,6 +197,19 @@ angular.module('os.administrative.shipment.addedit', ['os.administrative.models'
       );
     };
 
+    function getValidationMsgKeys(useBarcode) {
+      return {
+        title:         'shipments.specimen_validation.title',
+        foundCount:    'shipments.specimen_validation.found_count',
+        notFoundCount: 'shipments.specimen_validation.not_found_count',
+        notFoundError: 'shipments.specimen_validation.not_found_error',
+        extraCount:    'shipments.specimen_validation.extra_count',
+        extraError:    'shipments.specimen_validation.extra_error',
+        itemLabel:     useBarcode ? 'specimens.barcode' : 'specimens.label',
+        error:         'common.error'
+      }
+    }
+
     $scope.loadSendingSites = loadSendingSites;
 
     $scope.loadRecvSites = loadRecvSites;
@@ -275,6 +289,12 @@ angular.module('os.administrative.shipment.addedit', ['os.administrative.models'
       );
 
       $scope.input.allSelected = !allNotSelected;
+    }
+
+    $scope.validateSpecimens = function(ctrl) {
+      var prop = ctrl.useBarcode() ? 'specimen.barcode' : 'specimen.label';
+      var result = Util.validateItems($scope.shipment.shipmentItems, ctrl.getLabels(), prop);
+      Util.showItemsValidationResult(getValidationMsgKeys(ctrl.useBarcode()), result);
     }
 
     init();

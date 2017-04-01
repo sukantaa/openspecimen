@@ -159,8 +159,11 @@
     </div>
 
     <div ng-if="!order.request">
-      <os-add-specimens on-add="addSpecimens(specimens)"
+      <os-add-specimens ctrl="input" on-add="addSpecimens(specimens)"
         placeholder="{{'orders.enter_specimen_label' | translate}}">
+        <button class="btn btn-primary" ng-click="validateSpecimens(input.ctrl)">
+          <span translate="common.buttons.validate">Validate</span>
+        </button>
       </os-add-specimens>
     </div>
 

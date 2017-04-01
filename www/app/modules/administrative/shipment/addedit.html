@@ -207,8 +207,11 @@
     </div>
 
     <os-add-specimens ng-if="!shipment.request && shipment.status != 'Shipped'"
-      on-add="addSpecimens(specimens)" filter-opts="spmnOpts.filters" error-opts="spmnOpts.error"
+      on-add="addSpecimens(specimens)" ctrl="input" filter-opts="spmnOpts.filters" error-opts="spmnOpts.error"
       placeholder="{{'shipments.enter_specimen_label' | translate}}">
+      <button class="btn btn-primary" ng-click="validateSpecimens(input.ctrl)">
+        <span translate="common.buttons.validate">Validate</span>
+      </button>
     </os-add-specimens>
 
     <table class="os-table os-dist-spmns-table bulk-edit os-border os-table-muted-hdr"
