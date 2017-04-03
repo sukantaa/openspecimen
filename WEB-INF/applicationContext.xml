@@ -109,7 +109,12 @@
   <bean id="defaultParticipantLookupFlow" class="com.krishagni.catissueplus.core.biospecimen.matching.DefaultParticipantLookupFlow">
     <property name="localDbLookup" ref="localDbParticipantLookup"/>
   </bean>
-  
+
+  <bean id="stagedParticipantsDbLookup" class="com.krishagni.catissueplus.core.biospecimen.matching.StagedParticipantsDbLookup">
+    <property name="osDbLookup" ref="localDbParticipantLookup"/>
+    <property name="daoFactory" ref="biospecimenDaoFactory"/>
+  </bean>
+
   <bean id="rbacSvc" class="com.krishagni.rbac.service.impl.RbacServiceImpl">
     <property name="daoFactory" ref="rbacDaoFactory"/>
     <property name="userDao" ref="userDao"/>
@@ -219,6 +224,10 @@
     <property name="participantFactory" ref="participantFactory"/>
     <property name="defaultParticipantLookupFlow" ref="defaultParticipantLookupFlow"/>
     <property name="cfgSvc" ref="cfgSvc"/>
+  </bean>
+
+  <bean id="stagedParticipantSvc" class="com.krishagni.catissueplus.core.biospecimen.services.impl.StagedParticipantServiceImpl">
+    <property name="daoFactory" ref="biospecimenDaoFactory"/>
   </bean>
 
   <bean id="participantAnonymizer" class="com.krishagni.catissueplus.core.biospecimen.services.impl.ParticipantAnonymizer">

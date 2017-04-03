@@ -23,63 +23,65 @@ import com.krishagni.catissueplus.core.common.repository.UniqueIdGenerator;
 import com.krishagni.catissueplus.core.common.repository.UpgradeLogDao;
 
 public interface DaoFactory {
-	public CollectionProtocolDao getCollectionProtocolDao();
+	CollectionProtocolDao getCollectionProtocolDao();
 
-	public ParticipantDao getParticipantDao();
+	ParticipantDao getParticipantDao();
 
-	public CollectionProtocolRegistrationDao getCprDao();
+	StagedParticipantDao getStagedParticipantDao();
 
-	public AnonymizeEventDao getAnonymizeEventDao();
+	CollectionProtocolRegistrationDao getCprDao();
 
-	public SiteDao getSiteDao();
+	AnonymizeEventDao getAnonymizeEventDao();
 
-	public SpecimenDao getSpecimenDao();
+	SiteDao getSiteDao();
+
+	SpecimenDao getSpecimenDao();
 	
-	public SpecimenRequirementDao getSpecimenRequirementDao();
+	SpecimenRequirementDao getSpecimenRequirementDao();
 
-	public VisitsDao getVisitsDao();
+	VisitsDao getVisitsDao();
 
-	public UserDao getUserDao();
+	UserDao getUserDao();
 	
-	public AuthDao getAuthDao();
+	AuthDao getAuthDao();
 
-	public UniqueIdGenerator getUniqueIdGenerator();
+	UniqueIdGenerator getUniqueIdGenerator();
 
-	public InstituteDao getInstituteDao();
+	InstituteDao getInstituteDao();
 
-	public StorageContainerDao getStorageContainerDao();
+	StorageContainerDao getStorageContainerDao();
 	
-	public ContainerTypeDao getContainerTypeDao();
+	ContainerTypeDao getContainerTypeDao();
 
-	public DistributionProtocolDao getDistributionProtocolDao();
+	DistributionProtocolDao getDistributionProtocolDao();
 
-	public SpecimenListDao getSpecimenListDao();
+	SpecimenListDao getSpecimenListDao();
 
-	public SpecimenKitDao getSpecimenKitDao();
+	SpecimenKitDao getSpecimenKitDao();
 
-	public PermissibleValueDao getPermissibleValueDao();
+	PermissibleValueDao getPermissibleValueDao();
 	
-	public ScheduledJobDao getScheduledJobDao();
+	ScheduledJobDao getScheduledJobDao();
 	
-	public DistributionOrderDao getDistributionOrderDao();
+	DistributionOrderDao getDistributionOrderDao();
 	
-	public ConfigSettingDao getConfigSettingDao();
+	ConfigSettingDao getConfigSettingDao();
 	
-	public LabelPrintJobDao getLabelPrintJobDao();
+	LabelPrintJobDao getLabelPrintJobDao();
 	
-	public AuditDao getAuditDao();
+	AuditDao getAuditDao();
 
-	public DpRequirementDao getDistributionProtocolRequirementDao();
+	DpRequirementDao getDistributionProtocolRequirementDao();
 	
-	public ShipmentDao getShipmentDao();
+	ShipmentDao getShipmentDao();
 
-	public SpecimenRequestDao getSpecimenRequestDao();
+	SpecimenRequestDao getSpecimenRequestDao();
 	
-	public UpgradeLogDao getUpgradeLogDao();
+	UpgradeLogDao getUpgradeLogDao();
 
-	public CpReportSettingsDao getCpReportSettingsDao();
+	CpReportSettingsDao getCpReportSettingsDao();
 	
-	public UnhandledExceptionDao getUnhandledExceptionDao();
+	UnhandledExceptionDao getUnhandledExceptionDao();
 
 	ConsentStatementDao getConsentStatementDao();
 

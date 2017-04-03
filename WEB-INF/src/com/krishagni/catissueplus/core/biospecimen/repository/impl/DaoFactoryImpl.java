@@ -47,6 +47,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenKitDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenRequirementDao;
+import com.krishagni.catissueplus.core.biospecimen.repository.StagedParticipantDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.VisitsDao;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.ConfigSettingDao;
@@ -77,6 +78,13 @@ public class DaoFactoryImpl implements DaoFactory {
 	@Override
 	public ParticipantDao getParticipantDao() {
 		ParticipantDaoImpl dao = new ParticipantDaoImpl();
+		setSessionFactory(dao);
+		return dao;
+	}
+
+	@Override
+	public StagedParticipantDao getStagedParticipantDao() {
+		StagedParticipantDaoImpl dao = new StagedParticipantDaoImpl();
 		setSessionFactory(dao);
 		return dao;
 	}

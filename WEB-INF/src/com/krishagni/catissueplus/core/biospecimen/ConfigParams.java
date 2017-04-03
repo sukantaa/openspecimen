@@ -59,6 +59,8 @@ public class ConfigParams {
 
 	public static final String REL_SORTING_MAX_SPMNS     = "rel_sorting_max_spmns";
 
+	public static final String STAGED_PART_CLEANUP_INT   = "staged_part_cleanup_int";
+
 	public static String getConsentsDirPath() {
 		String path = ConfigUtil.getInstance().getStrSetting(MODULE, CONSENTS_DIR, null);
 		if (StringUtils.isBlank(path)) {

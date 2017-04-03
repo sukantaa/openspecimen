@@ -441,4 +441,66 @@
       baseTableName="OS_AUTO_FREEZER_PROVIDER_PROPS" baseColumnNames="PROVIDER_ID"
       referencedTableName="OS_AUTO_FREEZER_PROVIDERS" referencedColumnNames="IDENTIFIER"/>
   </changeSet>
+
+  <changeSet author="vpawar" id="Table to stage participants details received from external sources">
+    <createTable tableName="OS_STAGED_PARTICIPANTS">
+      <column autoIncrement="${autoIncrement}" name="IDENTIFIER" type="${int.type}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="LAST_NAME" type="${text.type}(255)"/>
+      <column name="FIRST_NAME" type="${text.type}(255)"/>
+      <column name="MIDDLE_NAME" type="${text.type}(255)"/>
+      <column name="BIRTH_DATE" type="${date.type}"/>
+      <column name="GENDER" type="${text.type}(20)"/>
+      <column name="GENOTYPE" type="${text.type}(50)"/>
+      <column name="ETHNICITY" type="${text.type}(50)"/>
+      <column name="UID" type="${text.type}(50)"/>
+      <column name="ACTIVITY_STATUS" type="${text.type}(50)"/>
+      <column name="DEATH_DATE" type="${date.type}"/>
+      <column name="VITAL_STATUS" type="${text.type}(50)"/>
+      <column name="EMPI_ID" type="${text.type}(50)"/>
+      <column name="UPDATED_TIME" type="${timestamp.type}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="SOURCE" type="${text.type}(16)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Table to stage participant race details received from external sources">
+    <createTable tableName="OS_STAGED_PARTICIPANT_RACES">
+      <column name="RACE_NAME" type="${text.type}(50)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="PARTICIPANT_ID" type="${int.type}"/>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="FK on staged participant ID of races table">
+    <addForeignKeyConstraint constraintName="FK_OS_STG_RACES_PID"
+      baseTableName="OS_STAGED_PARTICIPANT_RACES" baseColumnNames="PARTICIPANT_ID"
+      referencedTableName="OS_STAGED_PARTICIPANTS" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Table to stage participant MRN details received from external sources">
+    <createTable tableName="OS_STAGED_PART_MEDICAL_IDS">
+      <column autoIncrement="${autoIncrement}" name="IDENTIFIER" type="${int.type}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="MEDICAL_RECORD_NUMBER" type="${text.type}(255)"/>
+      <column name="SITE_NAME" type="${text.type}(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="PARTICIPANT_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="FK on staged particiapnt ID of MRNs">
+    <addForeignKeyConstraint constraintName="FK_OS_STG_PMIS_PID"
+      baseTableName="OS_STAGED_PART_MEDICAL_IDS" baseColumnNames="PARTICIPANT_ID"
+      referencedTableName="OS_STAGED_PARTICIPANTS" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
 </databaseChangeLog>
