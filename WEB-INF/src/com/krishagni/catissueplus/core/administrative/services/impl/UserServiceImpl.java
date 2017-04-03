@@ -1,13 +1,14 @@
 
 package com.krishagni.catissueplus.core.administrative.services.impl;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.opensaml.saml2.core.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserFactory;
 import com.krishagni.catissueplus.core.administrative.events.AnnouncementDetail;
+import com.krishagni.catissueplus.core.administrative.events.BulkUpdateUserDetail;
 import com.krishagni.catissueplus.core.administrative.events.InstituteDetail;
 import com.krishagni.catissueplus.core.administrative.events.PasswordDetails;
 import com.krishagni.catissueplus.core.administrative.events.UserDetail;
@@ -212,13 +214,25 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@PlusTransactional
 	public ResponseEvent<UserDetail> updateUser(RequestEvent<UserDetail> req) {
-		return updateUser(req, false);
+		try {
+			return ResponseEvent.response(updateUser(req.getPayload(), false));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
 	}
 	
 	@Override
 	@PlusTransactional
 	public ResponseEvent<UserDetail> patchUser(RequestEvent<UserDetail> req) {
-		return updateUser(req, true);
+		try {
+			return ResponseEvent.response(updateUser(req.getPayload(), true));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
 	}
 
 	@Override
@@ -286,20 +300,20 @@ public class UserServiceImpl implements UserService {
 			AccessCtrlMgr.getInstance().ensureDeleteUserRights(existing);
 
 			/*
-			 * Appending timestamp to email address, loginName of user while deleting user. 
+			 * Appending timestamp to email address, loginName of user while deleting user.
 			 * To send request reject mail, need original user object.
 			 * So creating user object clone.
 			 */
 			User user = new User();
 			user.update(existing);
-			existing.delete(deleteEntityOp.isClose());
+			existing.delete();
 
 			boolean sendRequestRejectedMail = user.getActivityStatus().equals(Status.ACTIVITY_STATUS_PENDING.getStatus());
 			if (sendRequestRejectedMail) {
 				sendUserRequestRejectedEmail(user);
 			}
 
-			return ResponseEvent.response(UserDetail.from(existing)); 
+			return ResponseEvent.response(UserDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -404,7 +418,35 @@ public class UserServiceImpl implements UserService {
 			return ResponseEvent.serverError(e);
 		}
 	}
-	
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<UserDetail>> bulkUpdateUsers(RequestEvent<BulkUpdateUserDetail> req) {
+		try {
+			List<UserDetail> users = new ArrayList<>();
+
+			BulkUpdateUserDetail buDetail = req.getPayload();
+
+			UserDetail detail = buDetail.getDetail();
+			for (Long userId : buDetail.getUserIds()) {
+				detail.setId(userId);
+				users.add(updateUser(detail, true));
+			}
+
+			detail.setId(null);
+			for (String emailAddress : buDetail.getEmailAddresses()) {
+				detail.setEmailAddress(emailAddress);
+				users.add(updateUser(detail,true));
+			}
+
+			return ResponseEvent.response(users);
+		} catch(OpenSpecimenException ose){
+			return ResponseEvent.error(ose);
+		} catch(Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<SubjectRoleDetail>> getCurrentUserRoles() {
@@ -451,59 +493,64 @@ public class UserServiceImpl implements UserService {
 		return crit;
 	}
 
-	private ResponseEvent<UserDetail> updateUser(RequestEvent<UserDetail> req, boolean partial) {
-		try {
-			UserDetail detail = req.getPayload();
-			Long userId = detail.getId();
-			String emailAddress = detail.getEmailAddress();
-			
-			User existingUser = null; 
-			if (userId != null) {
-				existingUser = daoFactory.getUserDao().getById(userId); 
-			} else if (StringUtils.isNotBlank(emailAddress)) {
-				existingUser = daoFactory.getUserDao().getUserByEmailAddress(emailAddress);
-			}
-			
-			if (existingUser == null) {
-				return ResponseEvent.userError(UserErrorCode.NOT_FOUND);
-			}
-			
+	private UserDetail updateUser(UserDetail detail, boolean partial) {
+		User existingUser = getUser(detail.getId(), detail.getEmailAddress());
+
+		if (Status.ACTIVITY_STATUS_DISABLED.getStatus().equals(detail.getActivityStatus())) {
+			AccessCtrlMgr.getInstance().ensureDeleteUserRights(existingUser);
+		} else {
 			AccessCtrlMgr.getInstance().ensureUpdateUserRights(existingUser);
-			
-			User user = null;
-			if (partial) {
-				user = userFactory.createUser(existingUser, detail);
-			} else {
-				user = userFactory.createUser(detail);
-			}
-			resetAttrs(existingUser, user);
+		}
 
-			AccessCtrlMgr.getInstance().ensureUpdateUserRights(user);
-			
-			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+		User user = null;
+		if (partial) {
+			user = userFactory.createUser(existingUser, detail);
+		} else {
+			user = userFactory.createUser(detail);
+		}
 
-			ensureUniqueEmail(existingUser, user, ose);
-			ensureUniqueLoginName(existingUser, user, ose);
-			ose.checkAndThrow();
+		resetAttrs(existingUser, user);
 
-			boolean wasInstituteAdmin = existingUser.isInstituteAdmin();
+		AccessCtrlMgr.getInstance().ensureUpdateUserRights(user);
 
-			existingUser.update(user);
-			
-			if (!wasInstituteAdmin && existingUser.isInstituteAdmin()) {
-				addDefaultSiteAdminRole(existingUser);
-			} else if (wasInstituteAdmin && !existingUser.isInstituteAdmin()) {
-				removeDefaultSiteAdminRole(existingUser);
-			}
+		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+		ensureUniqueEmail(existingUser, user, ose);
+		ensureUniqueLoginName(existingUser, user, ose);
+		ose.checkAndThrow();
 
-			return ResponseEvent.response(UserDetail.from(existingUser));
-		} catch (OpenSpecimenException ose) {
-			return ResponseEvent.error(ose);
-		} catch (Exception e) {
-			return ResponseEvent.serverError(e);
-		}		
+		boolean wasInstituteAdmin = existingUser.isInstituteAdmin();
+
+		existingUser.update(user);
+
+		if (!wasInstituteAdmin && existingUser.isInstituteAdmin()) {
+			addDefaultSiteAdminRole(existingUser);
+		} else if (wasInstituteAdmin && !existingUser.isInstituteAdmin()) {
+			removeDefaultSiteAdminRole(existingUser);
+		}
+
+		return UserDetail.from(existingUser);
 	}
-	
+
+	private User getUser(Long id, String emailAddress) {
+		User user = null;
+		Object key = null;
+		if (id != null) {
+			user = daoFactory.getUserDao().getById(id);
+			key = id;
+		} else if (StringUtils.isNotBlank(emailAddress)) {
+			user = daoFactory.getUserDao().getUserByEmailAddress(emailAddress);
+			key = emailAddress;
+		}
+
+		if (key == null) {
+			throw OpenSpecimenException.userError(UserErrorCode.EMAIL_REQUIRED);
+		} else if (user == null) {
+			throw OpenSpecimenException.userError(UserErrorCode.NOT_FOUND, key);
+		}
+
+		return user;
+	}
+
 	private void addDefaultSiteAdminRole(User user) {
 		rbacSvc.addSubjectRole(null, null, user, getDefaultSiteAdminRole());
 	}

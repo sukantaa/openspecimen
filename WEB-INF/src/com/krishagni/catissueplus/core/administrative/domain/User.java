@@ -266,10 +266,15 @@ public class User extends BaseEntity implements UserDetails {
 	}
 
 	public void update(User user) {
+		updateStatus(user.getActivityStatus());
+
+		if (isDisabled()) {
+			return;
+		}
+
 		setFirstName(user.getFirstName());
 		setLastName(user.getLastName());
 		setAuthDomain(user.getAuthDomain());
-		setActivityStatus(user.getActivityStatus());
 		setAddress(user.getAddress());
 		setInstitute(user.getInstitute());
 		setPrimarySite(user.getPrimarySite());
@@ -280,7 +285,7 @@ public class User extends BaseEntity implements UserDetails {
 		setType(user.getType());
 		setManageForms(user.canManageForms());
 	}
-	
+
 	public void changePassword(String newPassword) {
 		if (StringUtils.isBlank(newPassword) || !isValidPasswordPattern(newPassword)) {
 			throw OpenSpecimenException.userError(UserErrorCode.PASSWD_VIOLATES_RULES);
@@ -308,22 +313,17 @@ public class User extends BaseEntity implements UserDetails {
 		return daoFactory.getUserDao().getDependentEntities(getId());
 	}
 	
-	public void delete(boolean close) {
-		String activityStatus = Status.ACTIVITY_STATUS_CLOSED.getStatus();
-		if (!close) {
-			activityStatus = Status.ACTIVITY_STATUS_DISABLED.getStatus();
-			List<DependentEntityDetail> dependentEntities = getDependentEntities();
-			if (!dependentEntities.isEmpty()) {
-				throw OpenSpecimenException.userError(UserErrorCode.REF_ENTITY_FOUND);
-			}
-			
-			setLoginName(Utility.getDisabledValue(getLoginName(), 255));
-			setEmailAddress(Utility.getDisabledValue(getEmailAddress(), 255));
+	public void delete() {
+		List<DependentEntityDetail> dependentEntities = getDependentEntities();
+		if (!dependentEntities.isEmpty()) {
+			throw OpenSpecimenException.userError(UserErrorCode.REF_ENTITY_FOUND, formattedName());
 		}
-		
-		setActivityStatus(activityStatus);
+
+		setLoginName(Utility.getDisabledValue(getLoginName(), 255));
+		setEmailAddress(Utility.getDisabledValue(getEmailAddress(), 255));
+		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 	}
-	
+
 	public boolean isValidOldPassword(String oldPassword) {
 		if (StringUtils.isBlank(oldPassword)) {
 			throw OpenSpecimenException.userError(UserErrorCode.OLD_PASSWD_NOT_SPECIFIED);
@@ -373,6 +373,10 @@ public class User extends BaseEntity implements UserDetails {
 		return Status.ACTIVITY_STATUS_CLOSED.getStatus().equals(getActivityStatus());
 	}
 
+	public boolean isDisabled() {
+		return Status.ACTIVITY_STATUS_DISABLED.getStatus().equals(getActivityStatus());
+	}
+
 	private boolean isValidPasswordPattern(String password) {
 		if (StringUtils.isBlank(password)) {
 			return false;
@@ -409,6 +413,18 @@ public class User extends BaseEntity implements UserDetails {
 		}
 
 		return isSameAsLastN;
+	}
+
+	private void updateStatus(String activityStatus) {
+		if (this.activityStatus.equals(activityStatus)) {
+			return;
+		}
+
+		if (Status.ACTIVITY_STATUS_DISABLED.getStatus().equals(activityStatus)) {
+			delete();
+		} else {
+			setActivityStatus(activityStatus);
+		}
 	}
 	
 }

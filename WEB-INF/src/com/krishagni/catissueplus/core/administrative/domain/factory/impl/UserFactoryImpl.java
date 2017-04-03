@@ -16,6 +16,7 @@ import com.krishagni.catissueplus.core.administrative.events.UserDetail;
 import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.CommonValidator;
+import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Status;
@@ -193,25 +194,19 @@ public class UserFactoryImpl implements UserFactory {
 
 	private void setPrimarySite(UserDetail detail, User existing, User user, OpenSpecimenException ose) {
 		if (detail.isAttrModified("primarySite")) {
-			setInstitute(detail, user, ose);
+			setPrimarySite(detail, user, ose);
 		} else {
 			user.setPrimarySite(existing.getPrimarySite());
 		}
 	}
 
 	private void setActivityStatus(UserDetail detail, User user, OpenSpecimenException ose) {
-		String activityStatus = detail.getActivityStatus();
-		if (activityStatus == null) {
-			activityStatus =  Status.ACTIVITY_STATUS_ACTIVE.getStatus();
+		String status = detail.getActivityStatus();
+		if (StringUtils.isBlank(status)) {
+			status = Status.ACTIVITY_STATUS_ACTIVE.getStatus();
 		}
-		
-		if (activityStatus.equals(Status.ACTIVITY_STATUS_CLOSED.getStatus()) || 
-				activityStatus.equals(Status.ACTIVITY_STATUS_DISABLED)) {
-			ose.addError(UserErrorCode.STATUS_CHANGE_NOT_ALLOWED);
-			return;
-		}
-		
-		user.setActivityStatus(activityStatus);
+
+		user.setActivityStatus(status);
 	}
 
 	private void setActivityStatus(UserDetail detail, User existing, User user, OpenSpecimenException ose) {
