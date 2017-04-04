@@ -8,7 +8,7 @@
 
     <id name="id" column="IDENTIFIER">
       <generator class="native">
-        <param name="sequence">STAGING_PART_MEDICAL_ID_SEQ</param>
+        <param name="sequence">OS_STAGED_PART_MED_ID_SEQ</param>
       </generator>
     </id>
 

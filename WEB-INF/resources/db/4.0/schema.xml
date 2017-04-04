@@ -468,6 +468,10 @@
     </createTable>
   </changeSet>
 
+  <changeSet author="vpawar" id="Staged participants identifier sequence" dbms="oracle">
+    <createSequence sequenceName="OS_STAGED_PARTICIPANTS_SEQ" startValue="1" incrementBy="1" ordered="true"/>
+  </changeSet>
+
   <changeSet author="vpawar" id="Table to stage participant race details received from external sources">
     <createTable tableName="OS_STAGED_PARTICIPANT_RACES">
       <column name="RACE_NAME" type="${text.type}(50)">
@@ -496,6 +500,10 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Staged participants MRN identifier sequence" dbms="oracle">
+    <createSequence sequenceName="OS_STAGED_PART_MED_ID_SEQ" startValue="1" incrementBy="1" ordered="true"/>
   </changeSet>
 
   <changeSet author="vpawar" id="FK on staged particiapnt ID of MRNs">
