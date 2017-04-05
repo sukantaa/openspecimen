@@ -214,25 +214,13 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@PlusTransactional
 	public ResponseEvent<UserDetail> updateUser(RequestEvent<UserDetail> req) {
-		try {
-			return ResponseEvent.response(updateUser(req.getPayload(), false));
-		} catch (OpenSpecimenException ose) {
-			return ResponseEvent.error(ose);
-		} catch (Exception e) {
-			return ResponseEvent.serverError(e);
-		}
+		return updateUser(req, false);
 	}
 	
 	@Override
 	@PlusTransactional
 	public ResponseEvent<UserDetail> patchUser(RequestEvent<UserDetail> req) {
-		try {
-			return ResponseEvent.response(updateUser(req.getPayload(), true));
-		} catch (OpenSpecimenException ose) {
-			return ResponseEvent.error(ose);
-		} catch (Exception e) {
-			return ResponseEvent.serverError(e);
-		}
+		return updateUser(req, true);
 	}
 
 	@Override
@@ -423,23 +411,22 @@ public class UserServiceImpl implements UserService {
 	@PlusTransactional
 	public ResponseEvent<List<UserDetail>> bulkUpdateUsers(RequestEvent<BulkUpdateUserDetail> req) {
 		try {
-			List<UserDetail> users = new ArrayList<>();
+			List<UserDetail> updatedUsers = new ArrayList<>();
 
 			BulkUpdateUserDetail buDetail = req.getPayload();
-
 			UserDetail detail = buDetail.getDetail();
 			for (Long userId : buDetail.getUserIds()) {
 				detail.setId(userId);
-				users.add(updateUser(detail, true));
+				updatedUsers.add(updateUser(detail, true));
 			}
 
 			detail.setId(null);
 			for (String emailAddress : buDetail.getEmailAddresses()) {
 				detail.setEmailAddress(emailAddress);
-				users.add(updateUser(detail,true));
+				updatedUsers.add(updateUser(detail, true));
 			}
 
-			return ResponseEvent.response(users);
+			return ResponseEvent.response(updatedUsers);
 		} catch(OpenSpecimenException ose){
 			return ResponseEvent.error(ose);
 		} catch(Exception e) {
@@ -493,6 +480,16 @@ public class UserServiceImpl implements UserService {
 		return crit;
 	}
 
+	private ResponseEvent<UserDetail> updateUser(RequestEvent<UserDetail> req, boolean partial) {
+		try {
+			return ResponseEvent.response(updateUser(req.getPayload(), partial));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	private UserDetail updateUser(UserDetail detail, boolean partial) {
 		User existingUser = getUser(detail.getId(), detail.getEmailAddress());
 
@@ -511,15 +508,12 @@ public class UserServiceImpl implements UserService {
 
 		resetAttrs(existingUser, user);
 
-		AccessCtrlMgr.getInstance().ensureUpdateUserRights(user);
-
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 		ensureUniqueEmail(existingUser, user, ose);
 		ensureUniqueLoginName(existingUser, user, ose);
 		ose.checkAndThrow();
 
 		boolean wasInstituteAdmin = existingUser.isInstituteAdmin();
-
 		existingUser.update(user);
 
 		if (!wasInstituteAdmin && existingUser.isInstituteAdmin()) {
@@ -534,6 +528,7 @@ public class UserServiceImpl implements UserService {
 	private User getUser(Long id, String emailAddress) {
 		User user = null;
 		Object key = null;
+
 		if (id != null) {
 			user = daoFactory.getUserDao().getById(id);
 			key = id;

@@ -267,7 +267,6 @@ public class User extends BaseEntity implements UserDetails {
 
 	public void update(User user) {
 		updateStatus(user.getActivityStatus());
-
 		if (isDisabled()) {
 			return;
 		}
@@ -416,7 +415,7 @@ public class User extends BaseEntity implements UserDetails {
 	}
 
 	private void updateStatus(String activityStatus) {
-		if (this.activityStatus.equals(activityStatus)) {
+		if (getActivityStatus().equals(activityStatus)) {
 			return;
 		}
 
