@@ -22,9 +22,9 @@ public class StagedParticipantsCleanupTask implements ScheduledTask {
 	@PlusTransactional
 	public void doJob(ScheduledJobRun jobRun) throws Exception {
 		int olderThanDays = ConfigUtil.getInstance().getIntSetting(
-			ConfigParams.MODULE,
-			ConfigParams.STAGED_PART_CLEANUP_INT,
-			DEF_CLEANUP_INT);
-		daoFactory.getStagedParticipantDao().cleanupOldParticipants(olderThanDays);
+			ConfigParams.MODULE, ConfigParams.STAGED_PART_CLEANUP_INT, DEF_CLEANUP_INT);
+		if (olderThanDays > 0) {
+			daoFactory.getStagedParticipantDao().cleanupOldParticipants(olderThanDays);
+		}
 	}
 }
