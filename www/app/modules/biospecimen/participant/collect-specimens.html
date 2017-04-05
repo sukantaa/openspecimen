@@ -204,16 +204,20 @@
 
     <form name="collectionForm" os-form-validator="collectionForm" novalidate ng-if="customFieldGroups.length > 0">
       <div ng-repeat="group in customFieldGroups">
-        <div class="os-section os-line-section">
-          <strong class="key key-sm">
+        <div class="panel panel-default">
+          <div class="panel-heading">
             <span>{{group.title}}</span>
-            <span>&nbsp;</span>
-          </strong>
-          <span>
-            <sde-form-fields name="samples" table="group.multiple" static="true" show-copy-first-to-all="true"
+            <a ng-click="group.opts.$$sdeFormFields.copyFirstToAll()">
+              <span>(</span>
+              <span translate="specimens.copy_first_to_all">Copy First To All</span>
+              <span>)</span>
+            </a>
+          </div>
+          <div class="panel-body">
+            <sde-form-fields name="samples" table="group.multiple" opts="group.opts"
               base-fields="group.baseFields" fields="group.fields" obj="group.input">
             </sde-form-fields>
-          </span>
+          </div>
         </div>
       </div>
 

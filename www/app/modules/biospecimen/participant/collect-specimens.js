@@ -434,7 +434,8 @@ angular.module('os.biospecimen.participant.collect-specimens',
               title: group.title,
               fields: { table: group.fields },
               baseFields: cpDict,
-              input: selectedSpmns
+              input: selectedSpmns,
+              opts: { static: true }
             });
           }
         }
