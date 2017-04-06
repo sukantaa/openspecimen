@@ -175,7 +175,6 @@ public interface CollectionProtocolService {
 
 	public ResponseEvent<Collection<Object>> getListExprValues(RequestEvent<Map<String, Object>> req);
 
-
 	interface DataSource {
 		public Object getMetric(CollectionProtocol cp, Map<String, Object> input);
 
