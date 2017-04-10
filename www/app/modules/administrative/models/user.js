@@ -94,6 +94,19 @@ angular.module('os.administrative.models.user', ['os.common.models'])
       );
     }
 
+    User.bulkUpdate = function(detail) {
+      return $http.put(User.url() + 'bulk-update', detail).then(User.modelArrayRespTransform);
+    }
+
+    User.bulkDelete = function(userIds) {
+      var req = {
+        detail  : { activityStatus: 'Disabled' },
+        userIds : userIds
+      }
+
+      return User.bulkUpdate(req);
+    }
+
     return User;
   });
 

@@ -1,10 +1,10 @@
 
 angular.module('os.administrative.user.list', ['os.administrative.models'])
   .controller('UserListCtrl', function(
-    $scope, $state, $rootScope, $modal,
-    osRightDrawerSvc, Institute, User, PvManager, Util, Alerts, ListPagerOpts) {
+    $scope, $state, $modal, currentUser,
+    osRightDrawerSvc, Institute, User, PvManager, Util, DeleteUtil, Alerts, ListPagerOpts) {
 
-    var pagerOpts;    
+    var pagerOpts;
     var pvInit = false;
 
     function init() {
@@ -50,10 +50,10 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
 
     function loadInstitutes() {
       var q = undefined;
-      if ($rootScope.currentUser.admin) {
+      if (currentUser.admin) {
         q = Institute.query();
       } else {
-        q = $rootScope.currentUser.getInstitute();
+        q = currentUser.getInstitute();
       }
 
       return q.then(
@@ -80,8 +80,15 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
 
         $scope.users = result;
         pagerOpts.refreshOpts(result);
+        initCtx();
       });
     };
+
+    function initCtx() {
+      $scope.ctx = {
+        selection: {all: false, any: false, users: []}
+      }
+    }
 
     function getUsersCount() {
       return User.getCount($scope.userFilterOpts)
@@ -104,6 +111,60 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
           );
         }
       );
+    }
+
+    $scope.toggleSelectAll = function() {
+      $scope.ctx.selection.any = $scope.ctx.selection.all;
+
+      if (!$scope.ctx.selection.all) {
+        $scope.ctx.selection.users = [];
+      } else {
+        $scope.ctx.selection.users = [].concat($scope.users);
+      }
+
+      angular.forEach($scope.users,
+        function(user) {
+          user.selected = $scope.ctx.selection.all;
+        }
+      );
+    }
+
+    $scope.toggleSelect = function(user) {
+      var users = $scope.ctx.selection.users;
+      if (user.selected) {
+        users.push(user);
+      } else {
+        var idx = users.indexOf(user);
+        if (idx != -1) {
+          users.splice(idx, 1);
+        }
+      }
+
+      $scope.ctx.selection.all = (users.length == $scope.users.length);
+      $scope.ctx.selection.any = (users.length > 0);
+    };
+
+    $scope.deleteUsers = function() {
+      var users = $scope.ctx.selection.users;
+
+      if (!currentUser.admin) {
+        var admins = users.filter(function(user) { return !!user.admin; })
+          .map(function(user) { return user.getDisplayName(); });
+
+        if (admins.length > 0) {
+          Alerts.error('user.admin_access_req', {adminUsers: admins});
+          return;
+        }
+      }
+
+      var userIds = users.map(function(user) {return user.id; });
+      var opts = {
+        confirmDelete: 'user.delete_users',
+        successMessage: 'user.users_deleted',
+        onBulkDeletion: loadUsers
+      }
+
+      DeleteUtil.bulkDelete({bulkDelete: User.bulkDelete}, userIds, opts);
     }
 
     init();

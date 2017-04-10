@@ -978,6 +978,9 @@
     "user_unlocked": "User unlocked successfully",
     "cp_count": "Collection Protocols",
     "user_since": "User Since",
+    "delete_users":  "Are you sure you want to delete selected users?",
+    "users_deleted": "Selected users are deleted successfully",
+    "admin_access_req": "Super administrator rights required to delete admin users: {{adminUsers}}.",
 
     "user_roles": "User Roles",
     "bulk_import_users": "Import Users",
@@ -1018,6 +1021,7 @@
       "view_details": "Click to view User details",
       "add": "Click to add new User",
       "edit": "Click to edit User",
+      "delete_users": "Click to delete selected users",
       "email_address": "Email Address",
       "institute_name": "Institute",
       "cp_count": "Collection Protocol(s)",

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opensaml.saml2.core.Attribute;
 import org.slf4j.Logger;
@@ -415,13 +416,13 @@ public class UserServiceImpl implements UserService {
 
 			BulkUpdateUserDetail buDetail = req.getPayload();
 			UserDetail detail = buDetail.getDetail();
-			for (Long userId : buDetail.getUserIds()) {
+			for (Long userId : Utility.nullSafe(buDetail.getUserIds())) {
 				detail.setId(userId);
 				updatedUsers.add(updateUser(detail, true));
 			}
 
 			detail.setId(null);
-			for (String emailAddress : buDetail.getEmailAddresses()) {
+			for (String emailAddress : Utility.nullSafe(buDetail.getEmailAddresses())) {
 				detail.setEmailAddress(emailAddress);
 				updatedUsers.add(updateUser(detail, true));
 			}
