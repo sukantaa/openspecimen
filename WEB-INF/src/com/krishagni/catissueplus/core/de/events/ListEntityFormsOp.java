@@ -2,9 +2,9 @@ package com.krishagni.catissueplus.core.de.events;
 
 
 public class ListEntityFormsOp  {
-	public static enum EntityType {
+	public enum EntityType {
 		COLLECTION_PROTOCOL_REGISTRATION,
-		
+
 		SPECIMEN,
 		
 		SPECIMEN_EVENT,

@@ -3,30 +3,32 @@ package com.krishagni.rbac.repository;
 import com.krishagni.catissueplus.core.administrative.repository.SiteDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.CollectionProtocolDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.CollectionProtocolRegistrationDao;
+import com.krishagni.catissueplus.core.biospecimen.repository.ParticipantDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.VisitsDao;
 
 public interface DaoFactory {
-	public ResourceDao getResourceDao();
+	ResourceDao getResourceDao();
 	
-	public OperationDao getOperationDao();
+	OperationDao getOperationDao();
 	
-	public PermissionDao getPermissionDao();
+	PermissionDao getPermissionDao();
 	
-	public RoleDao getRoleDao();
+	RoleDao getRoleDao();
 	
-	public GroupDao getGroupDao();
+	GroupDao getGroupDao();
 	
-	public SubjectDao getSubjectDao();
+	SubjectDao getSubjectDao();
 		
-	public CollectionProtocolDao getCollectionProtocolDao();
+	CollectionProtocolDao getCollectionProtocolDao();
 	
-	public SiteDao getSiteDao();
+	SiteDao getSiteDao();
 	
-	public CollectionProtocolRegistrationDao getCprDao();
-	
-	public VisitsDao getVisitDao();
-	
-	public SpecimenDao getSpecimenDao();	
+	CollectionProtocolRegistrationDao getCprDao();
 
+	ParticipantDao getParticipantDao();
+	
+	VisitsDao getVisitDao();
+	
+	SpecimenDao getSpecimenDao();
 }

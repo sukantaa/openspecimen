@@ -511,4 +511,31 @@
       baseTableName="OS_STAGED_PART_MEDICAL_IDS" baseColumnNames="PARTICIPANT_ID"
       referencedTableName="OS_STAGED_PARTICIPANTS" referencedColumnNames="IDENTIFIER"/>
   </changeSet>
+
+  <changeSet author="vpawar" id="Updating registration extension records view to account for participant level form records">
+    <createView viewName="CPR_EXTENSION_RECORDS_VIEW" replaceIfExists="true">
+      select
+        re.object_id as cpr_id, re.record_id as record_id, fc.container_id as form_id
+      from
+        catissue_form_record_entry re
+        inner join catissue_form_context fc on re.form_ctxt_id = fc.identifier
+      where
+        fc.entity_type = 'Participant' and
+        fc.deleted_on is null and
+        re.activity_status = 'Active'
+
+      union all
+
+      select
+        cpr.identifier as cpr_id, re.record_id as record_id, fc.container_id as form_id
+      from
+        catissue_form_record_entry re
+        inner join catissue_form_context fc on re.form_ctxt_id = fc.identifier
+        inner join catissue_coll_prot_reg cpr on cpr.participant_id = re.object_id
+      where
+        fc.entity_type = 'CommonParticipant' and
+        fc.deleted_on is null and
+        re.activity_status = 'Active'
+    </createView>
+  </changeSet>
 </databaseChangeLog>

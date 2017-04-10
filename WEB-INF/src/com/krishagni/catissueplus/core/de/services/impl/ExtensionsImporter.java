@@ -99,7 +99,7 @@ public class ExtensionsImporter implements ObjectImporter<Map<String, Object>, M
 		Long objectId = null;
 		CollectionProtocol cp = null;
 
-		if (entityType.equals("Participant")) {
+		if (entityType.equals("Participant") || entityType.equals("CommonParticipant")) {
 			String ppid = (String)extnObj.get("ppid");
 			String cpShortTitle = (String)extnObj.get("cpShortTitle");
 			CollectionProtocolRegistration cpr = daoFactory.getCprDao().getCprByCpShortTitleAndPpid(cpShortTitle, ppid);

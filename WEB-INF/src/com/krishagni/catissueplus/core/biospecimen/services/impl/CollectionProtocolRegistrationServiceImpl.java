@@ -157,6 +157,20 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<CollectionProtocolRegistrationDetail> updateRegistration(RequestEvent<CollectionProtocolRegistrationDetail> req) {
+		try {
+			CollectionProtocolRegistrationDetail detail = req.getPayload();
+			CollectionProtocolRegistration existing = getCpr(detail.getId(), detail.getCpId(), detail.getCpShortTitle(), detail.getPpid());
+			return ResponseEvent.response(saveOrUpdateRegistration(detail, existing, true));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<List<CollectionProtocolRegistrationDetail>> bulkRegistration(RequestEvent<BulkRegistrationsDetail> req) {
 		try {
 			BulkRegistrationsDetail detail = req.getPayload();
@@ -189,20 +203,6 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			return ResponseEvent.error(ose);
 		} catch (Exception ex) {
 			return ResponseEvent.serverError(ex);
-		}
-	}
-
-	@Override
-	@PlusTransactional
-	public ResponseEvent<CollectionProtocolRegistrationDetail> updateRegistration(RequestEvent<CollectionProtocolRegistrationDetail> req) {
-		try {
-			CollectionProtocolRegistrationDetail detail = req.getPayload();
-			CollectionProtocolRegistration existing = getCpr(detail.getId(), detail.getCpId(), detail.getCpShortTitle(), detail.getPpid());
-			return ResponseEvent.response(saveOrUpdateRegistration(detail, existing, true));
-		} catch (OpenSpecimenException ose) {
-			return ResponseEvent.error(ose);
-		} catch (Exception e) {
-			return ResponseEvent.serverError(e);
 		}
 	}
 

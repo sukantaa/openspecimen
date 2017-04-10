@@ -2,14 +2,15 @@ angular.module('os.administrative.form.entities', ['os.common'])
   .factory('FormEntityReg', function(osDisplayList) {
     var list = osDisplayList();
 
-    list.addItem({name: 'Participant', key: 'entities.participant', caption: ''});
+    list.addItem({name: 'Participant', key: 'entities.participant_reg', caption: ''});
+    list.addItem({name: 'CommonParticipant', key: 'entities.participant', caption: '', allCps: true});
     list.addItem({name: 'SpecimenCollectionGroup', key: 'entities.visit', caption: ''});
     list.addItem({name: 'Specimen', key: 'entities.specimen', caption: ''});
-    list.addItem({name: 'SpecimenEvent', caption: '', key: 'entities.specimen_event', allCps: true});
+    list.addItem({name: 'SpecimenEvent', key: 'entities.specimen_event', caption: '', allCps: true});
 
     list.addItem({
       name: 'ParticipantExtension',
-      caption: '', key: 'entities.participant_extension',
+      caption: '', key: 'entities.part_reg_extension',
       multipleRecs: false
     });
 

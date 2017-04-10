@@ -46,6 +46,7 @@ angular.module('os.biospecimen.participant')
         }
       ]);
 
+      addForms(importTypes, group, 'CommonParticipant', entityForms['CommonParticipant']);
       return addForms(importTypes, group, 'Participant', entityForms['Participant']);
     } 
 

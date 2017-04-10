@@ -58,7 +58,7 @@ public class ExtensionSchemaBuilder implements ObjectSchemaBuilder {
 		List<Field> fields = new ArrayList<Field>();
 		fields.add(getField("recordId", "Record ID"));
 		
-		if (entityType.equals("Participant")) {
+		if (entityType.equals("Participant") || entityType.equals("CommonParticipant")) {
 			fields.add(getField("cpShortTitle", "Collection Protocol"));
 			fields.add(getField("ppid", "PPID"));
 		} else if (entityType.equals("SpecimenCollectionGroup")) {

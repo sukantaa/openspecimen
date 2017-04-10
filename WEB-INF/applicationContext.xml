@@ -370,6 +370,7 @@
   
   <bean id="formSvc" class="com.krishagni.catissueplus.core.de.services.impl.FormServiceImpl">
     <property name="formDao" ref="formDao"/>
+    <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="ctxtProcs">
       <map>
         <entry key="ParticipantExtension">

@@ -1,13 +1,13 @@
 package com.krishagni.catissueplus.core.de.repository;
 
 public interface DaoFactory {
-	public FormDao getFormDao();
+	FormDao getFormDao();
 	
-	public SavedQueryDao getSavedQueryDao();
+	SavedQueryDao getSavedQueryDao();
 	
-	public QueryFolderDao getQueryFolderDao();
+	QueryFolderDao getQueryFolderDao();
 	
-	public QueryAuditLogDao getQueryAuditLogDao();
+	QueryAuditLogDao getQueryAuditLogDao();
 
-	public CpCatalogSettingDao getCpCatalogSettingDao();
+	CpCatalogSettingDao getCpCatalogSettingDao();
 }

@@ -112,7 +112,7 @@ angular.module('os.biospecimen.cp',
           allowedEntityTypes: function(cpsCtx) {
             var entityTypes = [];
             if (cpsCtx.participantImportAllowed) {
-              entityTypes.push('Participant');
+              entityTypes = entityTypes.concat(['CommonParticipant', 'Participant']);
             }
 
             if (cpsCtx.visitSpecimenImportAllowed) {

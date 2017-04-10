@@ -427,18 +427,12 @@ public class AccessCtrlMgr {
 		}
 	}
 
+	public boolean ensureReadParticipantRights(Long participantId) {
+		return ensureParticipantObjectRights(participantId, Operation.READ);
+	}
+
 	public boolean ensureUpdateParticipantRights(Participant participant) {
-		for (CollectionProtocolRegistration cpr : participant.getCprs()) {
-			try {
-				if (ensureUpdateCprRights(cpr)) {
-					return true;
-				}
-			} catch (OpenSpecimenException ose) {
-
-			}
-		}
-
-		throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		return ensureParticipantObjectRights(participant, Operation.UPDATE);
 	}
 
 	public List<CollectionProtocolRegistration> getAccessibleCprs(Collection<CollectionProtocolRegistration> cprs) {
@@ -518,6 +512,23 @@ public class AccessCtrlMgr {
 		}
 
 		return allowed;
+	}
+
+	private boolean ensureParticipantObjectRights(Long participantId, Operation op) {
+		Participant participant = daoFactory.getParticipantDao().getById(participantId);
+		return ensureParticipantObjectRights(participant, op);
+	}
+
+	private boolean ensureParticipantObjectRights(Participant p, Operation op) {
+		for (CollectionProtocolRegistration cpr : p.getCprs()) {
+			try {
+				return ensureCprObjectRights(cpr, op);
+			} catch (OpenSpecimenException ose) {
+
+			}
+		}
+
+		throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 	}
 
 	private boolean ensureCprObjectRights(CollectionProtocolRegistration cpr, Operation op) {

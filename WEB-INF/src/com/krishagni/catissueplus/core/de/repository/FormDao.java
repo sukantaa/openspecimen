@@ -39,6 +39,8 @@ public interface FormDao extends Dao<FormContextBean> {
 	public List<FormContextDetail> getFormContexts(Long formId);
 	
 	public List<FormCtxtSummary> getCprForms(Long cprId);
+
+	public List<FormCtxtSummary> getParticipantForms(Long cprId);
 		
 	public List<FormCtxtSummary> getSpecimenForms(Long specimenId);
 	

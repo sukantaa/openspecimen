@@ -194,6 +194,12 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 		return getEntityForms(query.list());
 	}
 
+	public List<FormCtxtSummary> getParticipantForms(Long cprId) {
+		Query query = sessionFactory.getCurrentSession().getNamedQuery(GET_PARTICIPANT_FORMS);
+		query.setLong("cprId", cprId);
+		return getEntityForms(query.list());
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<FormCtxtSummary> getSpecimenForms(Long specimenId) {
@@ -846,6 +852,8 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	private static final String GET_FORM_CTXTS_BY_ID = FQN + ".getFormContextsById";
 	
 	private static final String GET_CPR_FORMS = FQN + ".getCprForms";
+
+	private static final String GET_PARTICIPANT_FORMS = FQN + ".getParticipantForms";
 	
 	private static final String GET_SPECIMEN_FORMS = FQN + ".getSpecimenForms";
 	

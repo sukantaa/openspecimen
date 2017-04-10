@@ -6,10 +6,12 @@ import com.krishagni.catissueplus.core.administrative.repository.SiteDao;
 import com.krishagni.catissueplus.core.administrative.repository.impl.SiteDaoImpl;
 import com.krishagni.catissueplus.core.biospecimen.repository.CollectionProtocolDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.CollectionProtocolRegistrationDao;
+import com.krishagni.catissueplus.core.biospecimen.repository.ParticipantDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.VisitsDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.impl.CollectionProtocolDaoImpl;
 import com.krishagni.catissueplus.core.biospecimen.repository.impl.CollectionProtocolRegistrationDaoImpl;
+import com.krishagni.catissueplus.core.biospecimen.repository.impl.ParticipantDaoImpl;
 import com.krishagni.catissueplus.core.biospecimen.repository.impl.SpecimenDaoImpl;
 import com.krishagni.catissueplus.core.biospecimen.repository.impl.VisitsDaoImpl;
 import com.krishagni.rbac.repository.DaoFactory;
@@ -90,6 +92,13 @@ public class DaoFactoryImpl implements DaoFactory {
 	@Override
 	public CollectionProtocolRegistrationDao getCprDao() {
 		CollectionProtocolRegistrationDaoImpl dao = new CollectionProtocolRegistrationDaoImpl();
+		dao.setSessionFactory(sessionFactory);
+		return dao;
+	}
+
+	@Override
+	public ParticipantDao getParticipantDao() {
+		ParticipantDaoImpl dao = new ParticipantDaoImpl();
 		dao.setSessionFactory(sessionFactory);
 		return dao;
 	}
