@@ -1,5 +1,5 @@
 angular.module('os.biospecimen.specimen')
-  .factory('SpecimenUtil', function($modal, $q, Specimen, PvManager, Alerts, Util) {
+  .factory('SpecimenUtil', function($modal, $q, $parse, Specimen, PvManager, Alerts, Util) {
 
     function collectAliquots(scope) {
       var spec = scope.aliquotSpec;
@@ -355,6 +355,56 @@ angular.module('os.biospecimen.specimen')
       });
     }
 
+    function sdeGroupSpecimens(baseFields, groups, specimens) {
+      var result = [];
+
+      for (var i = 0; i < groups.length; ++i) {
+        if (specimens.length == 0) {
+          break;
+        }
+
+        var group = groups[i];
+        var selectedSpmns = [];
+        if (!group.criteria) {
+          selectedSpmns = specimens.map(function(spmn) { return {specimen: spmn} });
+          specimens.length = 0;
+        } else {
+          var exprs = group.criteria.rules.map(
+            function(rule) {
+              if (rule.op == 'exists') {
+                return '!!' + rule.field;
+              } else if (rule.op == 'not_exist') {
+                return '!' + rule.field;
+              } else {
+                return rule.field + ' ' + rule.op + ' ' + rule.value;
+              }
+            }
+          );
+
+          var expr = $parse(exprs.join(group.criteria.op == 'AND' ? ' && ' : ' || '));
+          for (var j = specimens.length - 1; j >= 0; j--) {
+            if (expr({specimen: specimens[j]})) {
+              selectedSpmns.unshift({specimen: specimens[j]});
+              specimens.splice(j, 1);
+            }
+          }
+        }
+
+        if (selectedSpmns.length != 0) {
+          result.push({
+            multiple: true,
+            title: group.title,
+            fields: { table: group.fields },
+            baseFields: baseFields,
+            input: selectedSpmns,
+            opts: { static: true }
+          });
+        }
+      }
+
+      return result;
+    }
+
     return {
       collectAliquots: collectAliquots,
 
@@ -372,7 +422,9 @@ angular.module('os.biospecimen.specimen')
 
       resolveSpecimens: resolveSpecimens,
 
-      showInsufficientQtyWarning: showInsufficientQtyWarning
+      showInsufficientQtyWarning: showInsufficientQtyWarning,
+
+      sdeGroupSpecimens: sdeGroupSpecimens
     };
   })
   .controller('ResolveSpecimensCtrl', function($scope, $modalInstance, labels, Alerts) {

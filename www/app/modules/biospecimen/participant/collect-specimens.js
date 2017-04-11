@@ -393,56 +393,6 @@ angular.module('os.biospecimen.participant.collect-specimens',
         $scope.specimenStatuses = PvManager.getPvs('specimen-status');
       };
 
-      function getCustomFieldGroups(specimens) {
-        var result = [];
-
-        for (var i = 0; i < customFieldGroups.length; ++i) {
-          if (specimens.length == 0) {
-            break;
-          }
-
-          var group = customFieldGroups[i];
-          var selectedSpmns = [];
-          if (!group.criteria) {
-            selectedSpmns = specimens.map(function(spmn) { return {specimen: spmn} });
-            specimens.length = 0;
-          } else {
-            var exprs = group.criteria.rules.map(
-              function(rule) {
-                if (rule.op == 'exists') {
-                  return '!!' + rule.field;
-                } else if (rule.op == 'not_exist') {
-                  return '!' + rule.field;
-                } else {
-                  return rule.field + ' ' + rule.op + ' ' + rule.value;
-                }
-              }
-            );
-
-            var expr = $parse(exprs.join(group.criteria.op == 'AND' ? ' && ' : ' || '));
-            for (var j = specimens.length - 1; j >= 0; j--) {
-              if (expr({specimen: specimens[j]})) {
-                selectedSpmns.unshift({specimen: specimens[j]});
-                specimens.splice(j, 1);
-              }
-            }
-          }
-
-          if (selectedSpmns.length != 0) {
-            result.push({
-              multiple: true,
-              title: group.title,
-              fields: { table: group.fields },
-              baseFields: cpDict,
-              input: selectedSpmns,
-              opts: { static: true }
-            });
-          }
-        }
-
-        return result;
-      }
-
       function flatten(specimens, result) {
         angular.forEach(specimens,
           function(specimen) {
@@ -459,7 +409,7 @@ angular.module('os.biospecimen.participant.collect-specimens',
       }
 
       function displayCustomFieldGroups(specimens, navigateTo) {
-        $scope.customFieldGroups = getCustomFieldGroups(flatten(specimens, []));
+        $scope.customFieldGroups = SpecimenUtil.sdeGroupSpecimens(cpDict, customFieldGroups, flatten(specimens, []));
         if ($scope.customFieldGroups.length == 0) {
           navigateTo();
           return;
