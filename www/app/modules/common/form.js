@@ -4,7 +4,7 @@ function osRequired($timeout) {
     restrict: 'A',
     link: function(scope, element, attrs, ctrl) {
       var setDirty = function() {
-        ctrl[attrs.name].$setDirty(true);
+        ctrl[attrs.name] && ctrl[attrs.name].$setDirty(true);
       }
 
       if (element.hasClass('os-select-container') || element.children().first().is('ui-select')) {
