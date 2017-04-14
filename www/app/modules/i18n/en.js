@@ -644,6 +644,7 @@
     "select_protocol": "Following specimen labels are present in multiple protocols. Please select the right protocol before proceeding",
     "specimen_not_found": "Specimen {{label}} does not exist",
     "specimen_not_found_at_send_site": "Specimen {{label}} either does not exist or not stored at {{sendingSite}} site",
+    "too_many_specimens": "Too many specimen labels/barcodes provided. Please try by removing some labels/barcodes",
     "hide_pending":"Hide Pending",
     "show_pending": "Show Pending",
 

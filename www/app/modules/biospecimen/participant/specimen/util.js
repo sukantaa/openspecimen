@@ -1,5 +1,6 @@
 angular.module('os.biospecimen.specimen')
-  .factory('SpecimenUtil', function($modal, $q, $parse, Specimen, PvManager, Alerts, Util) {
+  .factory('SpecimenUtil', function($modal, $q, $parse, $location, Specimen, PvManager, Alerts, Util) {
+    var URL_LEN_LIMIT = 8192; // 8 KB
 
     function collectAliquots(scope) {
       var spec = scope.aliquotSpec;
@@ -206,11 +207,27 @@ angular.module('os.biospecimen.specimen')
       filterOpts = filterOpts || {};
       filterOpts.label = labels;
 
+      if (getUrlLength(filterOpts) >= URL_LEN_LIMIT) {
+        Alerts.error("specimens.too_many_specimens");
+        return deferred(undefined);
+      }
+
       return Specimen.query(filterOpts).then(
         function(specimens) {
           return resolveSpecimens(labels, filterOpts.barcode, specimens, errorOpts);
         }
       );
+    }
+
+    function getUrlLength(filterOpts) {
+      var url = Specimen.url();
+      if (url.indexOf('http') != 0) {
+        var viewUrl = $location.absUrl();
+        url = viewUrl.substr(0, viewUrl.indexOf('#')) + url;
+      }
+
+      url += jQuery.param(filterOpts);
+      return url.length;
     }
 
     function ensureAllBarcodesExist(barcodes, specimens, errorOpts) {
