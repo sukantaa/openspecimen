@@ -24,8 +24,6 @@
 
     <property name="sexGenotype" column="GENOTYPE" />
 
-    <property name="ethnicity" column="ETHNICITY" />
-
     <property name="uid" column="UID" unique="true" />
 
     <property name="activityStatus" column="ACTIVITY_STATUS" />
@@ -48,6 +46,11 @@
     <set name="races" table="OS_STAGED_PARTICIPANT_RACES" cascade="all-delete-orphan">
       <key column="PARTICIPANT_ID" />
       <element column="RACE_NAME" type="string" />
+    </set>
+
+    <set name="ethnicities" table="OS_STAGED_PARTICIPANT_ETHNICITIES" cascade="all-delete-orphan">
+      <key column="PARTICIPANT_ID" />
+      <element column="ETHNICITIES" type="string" />
     </set>
     
     <query name="getByEmpi">

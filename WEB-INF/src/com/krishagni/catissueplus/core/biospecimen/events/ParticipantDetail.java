@@ -46,7 +46,7 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 
 	private String sexGenotype;
 
-	private String ethnicity;
+	private Set<String> ethnicities;
 
 	private String uid;
 
@@ -179,12 +179,12 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 		this.sexGenotype = sexGenotype;
 	}
 
-	public String getEthnicity() {
-		return ethnicity;
+	public Set<String> getEthnicities() {
+		return ethnicities;
 	}
 
-	public void setEthnicity(String ethnicity) {
-		this.ethnicity = ethnicity;
+	public void setEthnicities(Set<String> ethnicities) {
+		this.ethnicities = ethnicities;
 	}
 
 	public String getUid() {
@@ -291,7 +291,7 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 		result.setActivityStatus(participant.getActivityStatus());
 		result.setBirthDate(excludePhi ? null : participant.getBirthDate());
 		result.setDeathDate(excludePhi ? null : participant.getDeathDate());
-		result.setEthnicity(participant.getEthnicity());
+		result.setEthnicities(new HashSet<>(participant.getEthnicities()));
 		result.setGender(participant.getGender());
 		result.setEmpi(excludePhi ? "###" : participant.getEmpi());
 		result.setPmis(PmiDetail.from(participant.getPmis(), excludePhi)); 

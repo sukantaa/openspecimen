@@ -78,7 +78,6 @@ public class StagedParticipantServiceImpl implements StagedParticipantService {
 		participant.setBirthDate(detail.getBirthDate());
 		participant.setGender(detail.getGender());
 		participant.setVitalStatus(detail.getVitalStatus());
-		participant.setEthnicity(detail.getEthnicity());
 		participant.setUpdatedTime(Calendar.getInstance().getTime());
 
 		if (StringUtils.isNotBlank(detail.getNewEmpi())) {
@@ -92,7 +91,12 @@ public class StagedParticipantServiceImpl implements StagedParticipantService {
 
 		Set<String> races = detail.getRaces();
 		if (CollectionUtils.isNotEmpty(races)) {
-			participant.setRaces(detail.getRaces());
+			participant.setRaces(races);
+		}
+
+		Set<String> ethnicities = detail.getEthnicities();
+		if (CollectionUtils.isNotEmpty(ethnicities)) {
+			participant.setEthnicities(ethnicities);
 		}
 	}
 

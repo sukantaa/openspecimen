@@ -42,8 +42,9 @@
 </field>
 
 <field>
+  <multiple>true</multiple>
   <caption>#getMessage("participant_ethnicity")</caption>
-  <attribute>ethnicity</attribute>
+  <attribute>ethnicities</attribute>
 </field>
 
 <field>

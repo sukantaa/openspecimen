@@ -47,7 +47,7 @@ public class Participant extends BaseExtensionEntity {
 
 	private Set<String> races = new HashSet<>();
 
-	private String ethnicity;
+	private Set<String> ethnicities = new HashSet<>();
 
 	private String uid;
 
@@ -129,12 +129,12 @@ public class Participant extends BaseExtensionEntity {
 		this.races = races;
 	}
 
-	public String getEthnicity() {
-		return ethnicity;
+	public Set<String> getEthnicities() {
+		return ethnicities;
 	}
 
-	public void setEthnicity(String ethnicity) {
-		this.ethnicity = ethnicity;
+	public void setEthnicities(Set<String> ethnicities) {
+		this.ethnicities = ethnicities;
 	}
 
 	public String getUid() {
@@ -216,10 +216,10 @@ public class Participant extends BaseExtensionEntity {
 		setSexGenotype(participant.getSexGenotype());
 		setVitalStatus(participant.getVitalStatus());
 		setGender(participant.getGender());
-		setEthnicity(participant.getEthnicity());
 		setBirthDate(participant.getBirthDate());
 		setDeathDate(participant.getDeathDate());
 		setExtension(participant.getExtension());
+		CollectionUpdater.update(getEthnicities(), participant.getEthnicities());
 		CollectionUpdater.update(getRaces(), participant.getRaces());
 		updatePmis(participant);
 	}

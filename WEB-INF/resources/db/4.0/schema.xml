@@ -538,4 +538,124 @@
         re.activity_status = 'Active'
     </createView>
   </changeSet>
+
+  <changeSet author="mdnasim" id="Multiple participant ethnicities">
+    <createTable tableName="OS_PARTICIPANT_ETHNICITIES">
+      <column name="PARTICIPANT_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="ETHNICITY" type="${text.type}(50)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Add FK to participant in ethnicity">
+    <addForeignKeyConstraint constraintName="FK_OS_PART_ETHNICITY_PART_ID"
+      baseTableName="OS_PARTICIPANT_ETHNICITIES" baseColumnNames="PARTICIPANT_ID"
+      referencedTableName="CATISSUE_PARTICIPANT" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Primary key of participant ethnicities">
+    <addPrimaryKey tableName="OS_PARTICIPANT_ETHNICITIES" columnNames="PARTICIPANT_ID, ETHNICITY"/>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Move ethnicity data from participant table to 1:m participant ethnicities table">
+    <sql>
+      insert into os_participant_ethnicities
+        (participant_id, ethnicity)
+      select
+        identifier, ethnicity
+      from
+        catissue_participant
+      where
+        ethnicity is not null
+    </sql>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Drop participant ethnicity column">
+    <dropColumn tableName="CATISSUE_PARTICIPANT" columnName="ETHNICITY"/>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Recreating CPR view to remove ethnicity column">
+    <createView viewName="cpr_view" replaceIfExists="true">
+      select
+        cpr.identifier as cpr_id, cpr.collection_protocol_id as cp_id,
+        cpr.participant_id as participant_id, p.first_name as first_name,
+        p.middle_name as middle_name, p.last_name as last_name,
+        p.birth_date as dob, p.social_security_number as ssn,
+        cpr.activity_status as activity_status, p.gender as gender,
+        p.genotype as genotype, cpr.registration_date as registration_date,
+        cpr.protocol_participant_id as ppid, p.vital_status as vital_status,
+        p.death_date as death_date, p.empi_id as empi_id, cpr.barcode as barcode,
+        cpr.consent_sign_date as consent_sign_date, cpr.consent_witness as consent_witness,
+        cpr.consent_comments as consent_comments
+      from
+        catissue_coll_prot_reg cpr
+        inner join catissue_participant p on cpr.participant_id = p.identifier
+    </createView>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Table to stage participant ethnicity details received from external sources">
+    <createTable tableName="OS_STAGED_PARTICIPANT_ETHNICITIES">
+      <column name="PARTICIPANT_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="ETHNICITY" type="${text.type}(50)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="FK on staged participant ID of ethnicities table">
+    <addForeignKeyConstraint constraintName="FK_OS_STG_ETHNICITIES_PID"
+      baseTableName="OS_STAGED_PARTICIPANT_ETHNICITIES" baseColumnNames="PARTICIPANT_ID"
+      referencedTableName="OS_STAGED_PARTICIPANTS" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Primary key of staged participant ethnicities">
+    <addPrimaryKey tableName="OS_STAGED_PARTICIPANT_ETHNICITIES" columnNames="PARTICIPANT_ID, ETHNICITY"/>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Drop staged participant ethnicity column">
+    <dropColumn tableName="OS_STAGED_PARTICIPANTS" columnName="ETHNICITY"/>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Multiple visit clinical diagnoses">
+    <createTable tableName="OS_VISIT_CLINICAL_DIAGNOSES">
+      <column name="VISIT_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="CLINICAL_DIAGNOSIS" type="${text.type}(255)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Add FK on visit ID of clinical diagnosis">
+    <addForeignKeyConstraint constraintName="FK_OS_VISIT_CDS_VISIT_ID"
+      baseTableName="OS_VISIT_CLINICAL_DIAGNOSES" baseColumnNames="VISIT_ID"
+      referencedTableName="CATISSUE_SPECIMEN_COLL_GROUP" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Primary key of visit clinical diagnoses">
+    <addPrimaryKey tableName="OS_VISIT_CLINICAL_DIAGNOSES" columnNames="VISIT_ID, CLINICAL_DIAGNOSIS"/>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Move clinical diagnosis data from visit table to 1:m visit clinical diagnoses table">
+    <sql>
+      insert into os_visit_clinical_diagnoses
+        (visit_id, clinical_diagnosis)
+      select
+        identifier, clinical_diagnosis
+      from
+        catissue_specimen_coll_group
+      where
+        clinical_diagnosis is not null
+    </sql>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Drop visit clinical diagnosis column">
+    <dropColumn tableName="CATISSUE_SPECIMEN_COLL_GROUP" columnName="CLINICAL_DIAGNOSIS"/>
+  </changeSet>
 </databaseChangeLog>

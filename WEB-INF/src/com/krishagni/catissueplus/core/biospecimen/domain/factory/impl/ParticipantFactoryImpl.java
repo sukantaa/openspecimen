@@ -268,17 +268,21 @@ public class ParticipantFactoryImpl implements ParticipantFactory {
 	}
 
 	private void setEthnicity(ParticipantDetail detail, Participant participant, boolean partial, OpenSpecimenException oce) {
-		if (partial && !detail.isAttrModified("ethnicity")) {
+		if (partial && !detail.isAttrModified("ethnicities")) {
 			return;
 		}
 		
-		String ethnicity = detail.getEthnicity();		
-		if (!isValid(ETHNICITY, ethnicity)) {
+		Set<String> ethnicities = detail.getEthnicities();
+		if (CollectionUtils.isEmpty(ethnicities)) {
+			return;
+		}
+
+		if (!areValid(ETHNICITY, ethnicities)) {
 			oce.addError(ParticipantErrorCode.INVALID_ETHNICITY);
 			return;
 		}
 		
-		participant.setEthnicity(ethnicity);
+		participant.setEthnicities(ethnicities);
 	}
 	
 	private void setPmi(

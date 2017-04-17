@@ -141,8 +141,8 @@
     </row>
     <row>
       <dropDown>
-        <name>clinicalDiagnosis</name>
-        <udn>clinicalDiagnosis</udn>
+        <name>clinicalDiagnoses</name>
+        <udn>clinicalDiagnoses</udn>
         <caption>#getMessage("visit_clinical_diagnosis")</caption>
         <column>CLINICAL_DIAGNOSIS</column>
         <options>
