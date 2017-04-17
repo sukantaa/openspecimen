@@ -419,6 +419,13 @@ angular.module('os.biospecimen.specimen')
         }
       }
 
+      if (specimens.length > 0) {
+        result.push({
+          input: specimens.map(function(specimen) { return {specimen: specimen}; }),
+          noMatch: true
+        });
+      }
+
       return result;
     }
 

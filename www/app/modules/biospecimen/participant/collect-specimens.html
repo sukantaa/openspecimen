@@ -203,7 +203,7 @@
     </form>
 
     <form name="collectionForm" os-form-validator="collectionForm" novalidate ng-if="customFieldGroups.length > 0">
-      <div ng-repeat="group in customFieldGroups">
+      <div ng-repeat="group in customFieldGroups" ng-if="!group.noMatch">
         <div class="panel panel-default">
           <div class="panel-heading">
             <span>{{group.title}}</span>

@@ -409,8 +409,9 @@ angular.module('os.biospecimen.participant.collect-specimens',
       }
 
       function displayCustomFieldGroups(specimens, navigateTo) {
-        $scope.customFieldGroups = SpecimenUtil.sdeGroupSpecimens(cpDict, customFieldGroups, flatten(specimens, []));
-        if ($scope.customFieldGroups.length == 0) {
+        var groups = $scope.customFieldGroups = SpecimenUtil.sdeGroupSpecimens(
+          cpDict, customFieldGroups, flatten(specimens, []));
+        if (groups.length == 0 || (groups.length == 1 && groups[0].noMatch)) {
           navigateTo();
           return;
         }
@@ -426,6 +427,10 @@ angular.module('os.biospecimen.participant.collect-specimens',
         var specimens = [];
         angular.forEach($scope.customFieldGroups,
           function(group) {
+            if (group.noMatch) {
+              return;
+            }
+
             specimens = specimens.concat(group.input);
           }
         );
