@@ -1,6 +1,6 @@
 angular.module('os.administrative.user.addedit', ['os.administrative.models'])
   .controller('UserAddEditCtrl', function($scope, $rootScope, $state, $stateParams,
-    user, User, Institute, AuthDomain) {
+    user, users, User, Institute, AuthDomain) {
 
     var instituteSites = {};
  
@@ -82,6 +82,15 @@ angular.module('os.administrative.user.addedit', ['os.administrative.models'])
         }
       )
     };
+
+    $scope.bulkUpdate = function() {
+      var userIds = users.map(function(user) { return user.id; });
+      User.bulkUpdate({detail: $scope.user, userIds: userIds}).then(
+        function(savedUsers) {
+          $state.go('user-list');
+        }
+      )
+    }
      
     init();
   });

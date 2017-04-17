@@ -2,7 +2,7 @@
 angular.module('os.administrative.user.list', ['os.administrative.models'])
   .controller('UserListCtrl', function(
     $scope, $state, $modal, currentUser,
-    osRightDrawerSvc, Institute, User, PvManager, Util, DeleteUtil, Alerts, ListPagerOpts) {
+    osRightDrawerSvc, Institute, User, ItemsHolder, PvManager, Util, DeleteUtil, Alerts, ListPagerOpts) {
 
     var pagerOpts;
     var pvInit = false;
@@ -11,6 +11,7 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
       pagerOpts = $scope.pagerOpts = new ListPagerOpts({listSizeGetter: getUsersCount});
       initPvsAndFilterOpts();
       loadUsers($scope.userFilterOpts);
+      ItemsHolder.setItems('users', undefined);
     }
   
     function initPvsAndFilterOpts() {
@@ -165,6 +166,12 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
       }
 
       DeleteUtil.bulkDelete({bulkDelete: User.bulkDelete}, userIds, opts);
+    }
+
+    $scope.editUsers = function() {
+       var users = $scope.ctx.selection.users;
+       ItemsHolder.setItems('users', users);
+       $state.go('user-bulk-edit');
     }
 
     init();

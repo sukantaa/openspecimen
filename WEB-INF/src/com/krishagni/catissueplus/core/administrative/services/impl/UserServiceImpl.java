@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opensaml.saml2.core.Attribute;
 import org.slf4j.Logger;
@@ -415,7 +414,7 @@ public class UserServiceImpl implements UserService {
 			List<UserDetail> updatedUsers = new ArrayList<>();
 
 			BulkUpdateUserDetail buDetail = req.getPayload();
-			UserDetail detail = buDetail.getDetail();
+			UserDetail detail = curateBulkUpdateFields(buDetail.getDetail());
 			for (Long userId : Utility.nullSafe(buDetail.getUserIds())) {
 				detail.setId(userId);
 				updatedUsers.add(updateUser(detail, true));
@@ -751,5 +750,30 @@ public class UserServiceImpl implements UserService {
 		log.setLogoutTime(log.getLoginTime());
 		log.setLoginSuccessful(true);
 		daoFactory.getAuthDao().saveLoginAuditLog(log);
+	}
+
+	private UserDetail curateBulkUpdateFields(UserDetail input) {
+		UserDetail detail = new UserDetail();
+		if (input.isAttrModified("instituteName")) {
+			detail.setInstituteName(input.getInstituteName());
+		}
+
+		if (input.isAttrModified("primarySite")) {
+			detail.setPrimarySite(input.getPrimarySite());
+		}
+
+		if (input.isAttrModified("type")) {
+			detail.setType(input.getType());
+		}
+
+		if (input.isAttrModified("manageForms")) {
+			detail.setManageForms(input.getManageForms());
+		}
+
+		if (input.isAttrModified("activityStatus")) {
+			detail.setActivityStatus(input.getActivityStatus());
+		}
+
+		return detail;
 	}
 }

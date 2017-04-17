@@ -986,6 +986,7 @@
     "bulk_import_users": "Import Users",
     "bulk_import_user_roles": "Import User Roles",
     "bulk_import_jobs": "Import Users Job List",
+    "bulk_update_users": "Bulk Update Users",
 
     "role": {
        "roles": "Roles",
@@ -1021,6 +1022,7 @@
       "view_details": "Click to view User details",
       "add": "Click to add new User",
       "edit": "Click to edit User",
+      "edit_users": "Click to edit selected users",
       "delete_users": "Click to delete selected users",
       "email_address": "Email Address",
       "institute_name": "Institute",

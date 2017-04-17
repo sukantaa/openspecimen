@@ -141,6 +141,11 @@
 
 <script type="text/ng-template" id="modules/administrative/user/bulk-user-ops.html">
   <div>
+    <button class="default" title="{{'user.tooltip.edit_users' | translate}}" ng-click="editUsers()">
+      <span class="fa fa-pencil"></span>
+      <span translate="common.buttons.edit">Edit</span>
+    </button>
+
     <button class="default" title="{{'user.tooltip.delete_users' | translate}}" ng-click="deleteUsers()">
       <span class="fa fa-trash"></span>
       <span translate="common.buttons.delete">Delete</span>
