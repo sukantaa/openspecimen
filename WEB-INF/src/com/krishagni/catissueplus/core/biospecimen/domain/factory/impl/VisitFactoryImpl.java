@@ -6,11 +6,14 @@ import static com.krishagni.catissueplus.core.common.PvAttributes.CLINICAL_STATU
 import static com.krishagni.catissueplus.core.common.PvAttributes.COHORT;
 import static com.krishagni.catissueplus.core.common.PvAttributes.MISSED_VISIT_REASON;
 import static com.krishagni.catissueplus.core.common.PvAttributes.VISIT_STATUS;
+import static com.krishagni.catissueplus.core.common.service.PvValidator.areValid;
 import static com.krishagni.catissueplus.core.common.service.PvValidator.isValid;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.Site;
@@ -244,20 +247,25 @@ public class VisitFactoryImpl implements VisitFactory {
 	}
 
 	private void setClinicalDiagnosis(VisitDetail visitDetail, Visit visit, OpenSpecimenException ose) {
-		String clinicalDiagnosis = visitDetail.getClinicalDiagnosis();
-		if (!isValid(CLINICAL_DIAG, clinicalDiagnosis)) {
+		Set<String> clinicalDiagnoses = visitDetail.getClinicalDiagnoses();
+
+		if (CollectionUtils.isEmpty(clinicalDiagnoses)) {
+			return;
+		}
+
+		if (!areValid(CLINICAL_DIAG, clinicalDiagnoses)) {
 			ose.addError(VisitErrorCode.INVALID_CLINICAL_DIAGNOSIS);
 			return;
 		}
 		
-		visit.setClinicalDiagnosis(clinicalDiagnosis);
+		visit.setClinicalDiagnoses(clinicalDiagnoses);
 	}
 	
 	private void setClinicalDiagnosis(VisitDetail detail, Visit existing, Visit visit, OpenSpecimenException ose) {
-		if (detail.isAttrModified("clinicalDiagnosis")) {
+		if (detail.isAttrModified("clinicalDiagnoses")) {
 			setClinicalDiagnosis(detail, visit, ose);
 		} else {
-			visit.setClinicalDiagnosis(existing.getClinicalDiagnosis());
+			visit.setClinicalDiagnoses(existing.getClinicalDiagnoses());
 		}
 	}
 	

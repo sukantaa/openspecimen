@@ -141,7 +141,7 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 		visitDetail.setEventLabel(getEventLabel(detail));
 		visitDetail.setVisitDate(detail.getVisitDate() == null ? detail.getCollectionDate() : detail.getVisitDate());
 		visitDetail.setSite(detail.getCollectionSite());
-		visitDetail.setClinicalDiagnosis(detail.getClinicalDiagnosis());
+		visitDetail.setClinicalDiagnoses(detail.getClinicalDiagnoses());
 		visitDetail.setClinicalStatus(detail.getClinicalStatus());
 		visitDetail.setSurgicalPathologyNumber(detail.getSurgicalPathologyNumber());
 		visitDetail.setComments(detail.getVisitComments());

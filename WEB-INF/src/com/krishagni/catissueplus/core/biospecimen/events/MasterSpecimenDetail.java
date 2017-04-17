@@ -52,7 +52,7 @@ public class MasterSpecimenDetail {
 	
 	private String status;
 	
-	private String clinicalDiagnosis;
+	private Set<String> clinicalDiagnoses;
 	
 	private String clinicalStatus;
 	
@@ -288,12 +288,12 @@ public class MasterSpecimenDetail {
 		this.status = status;
 	}
 
-	public String getClinicalDiagnosis() {
-		return clinicalDiagnosis;
+	public Set<String> getClinicalDiagnoses() {
+		return clinicalDiagnoses;
 	}
 
-	public void setClinicalDiagnosis(String clinicalDiagnosis) {
-		this.clinicalDiagnosis = clinicalDiagnosis;
+	public void setClinicalDiagnoses(Set<String> clinicalDiagnoses) {
+		this.clinicalDiagnoses = clinicalDiagnoses;
 	}
 
 	public String getClinicalStatus() {

@@ -140,7 +140,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
     function copyStaticFields(src, dest, lockedFields) {
       var primitiveFields = [
         'firstName', 'lastName', 'middleName', 'birthDate', 'deathDate',
-        'gender', 'vitalStatus', 'ethnicity', 'uid', 'empi'
+        'gender', 'vitalStatus', 'uid', 'empi'
       ];
       angular.forEach(primitiveFields,
         function(field) {
@@ -148,7 +148,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
         }
       );
 
-      var arrayFields = ['races', 'pmis'];
+      var arrayFields = ['races', 'ethnicities', 'pmis'];
       angular.forEach(arrayFields,
         function(field) {
           copyStaticField(src, dest, lockedFields, field, true);

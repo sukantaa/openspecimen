@@ -128,12 +128,19 @@
       </checkBox>
     </row>
     <row>
-      <textField>
+      <checkBox>
         <name>ethnicity</name>
         <udn>ethnicity</udn>
         <caption>#getMessage("participant_ethnicity")</caption>
+        <multiSelect>true</multiSelect>
+        <table>OS_PARTICIPANT_ETHNICITIES</table>
         <column>ETHNICITY</column>
-      </textField>
+        <foreignKey>PARTICIPANT_ID</foreignKey>
+        <parentKey>PARTICIPANT_ID</parentKey>
+        <options>
+          <sql>select value from catissue_permissible_value where public_id = 'ethnicity' order by value</sql>
+        </options>
+      </checkBox>
     </row>
     <row>
       <subForm>

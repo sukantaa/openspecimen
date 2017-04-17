@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.krishagni.catissueplus.core.common.CollectionUpdater;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.envers.AuditTable;
@@ -52,7 +53,7 @@ public class Visit extends BaseExtensionEntity {
 	
 	private Date visitDate;
 
-	private String clinicalDiagnosis;
+	private Set<String> clinicalDiagnoses = new HashSet<>();
 
 	private String clinicalStatus;
 
@@ -123,12 +124,12 @@ public class Visit extends BaseExtensionEntity {
 		this.visitDate = visitDate;
 	}
 
-	public String getClinicalDiagnosis() {
-		return clinicalDiagnosis;
+	public Set<String> getClinicalDiagnoses() {
+		return clinicalDiagnoses;
 	}
 
-	public void setClinicalDiagnosis(String clinicalDiagnosis) {
-		this.clinicalDiagnosis = clinicalDiagnosis;
+	public void setClinicalDiagnoses(Set<String> clinicalDiagnoses) {
+		this.clinicalDiagnoses = clinicalDiagnoses;
 	}
 
 	public String getClinicalStatus() {
@@ -346,7 +347,6 @@ public class Visit extends BaseExtensionEntity {
 		}
 		
 		setName(visit.getName());
-		setClinicalDiagnosis(visit.getClinicalDiagnosis());
 		setClinicalStatus(visit.getClinicalStatus());
 		setCpEvent(visit.getCpEvent());
 		setRegistration(visit.getRegistration());
@@ -360,6 +360,7 @@ public class Visit extends BaseExtensionEntity {
 		setCohort(visit.getCohort());
 		setDefNameTmpl(visit.getDefNameTmpl());
 		setExtension(visit.getExtension());
+		CollectionUpdater.update(getClinicalDiagnoses(), visit.getClinicalDiagnoses());
 	}
 
 	public void updateSprName(String sprName) {

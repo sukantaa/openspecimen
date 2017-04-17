@@ -40,7 +40,6 @@ public class StagedParticipantDetail extends ParticipantDetail {
 		result.setActivityStatus(participant.getActivityStatus());
 		result.setBirthDate(participant.getBirthDate());
 		result.setDeathDate(participant.getDeathDate());
-		result.setEthnicity(participant.getEthnicity());
 		result.setGender(participant.getGender());
 		result.setEmpi(participant.getEmpi());
 		result.setSexGenotype(participant.getSexGenotype());
@@ -57,6 +56,10 @@ public class StagedParticipantDetail extends ParticipantDetail {
 
 		if (CollectionUtils.isNotEmpty(participant.getRaces())) {
 			result.setRaces(new HashSet<>(participant.getRaces()));
+		}
+
+		if (CollectionUtils.isNotEmpty(participant.getEthnicities())) {
+			result.setEthnicities(new HashSet<>(participant.getEthnicities()));
 		}
 
 		result.setUpdatedTime(participant.getUpdatedTime());
