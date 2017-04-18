@@ -35,7 +35,7 @@
       </label>
       <div class="col-xs-6">
         <input type="text" name="numOfParticipants" ng-model="ctx.regCount" class="form-control"
-          placeholder="{{'participant.num_of_participants' | translate}}" ng-pattern="/^[1-9]+$/" required>
+          placeholder="{{'participant.num_of_participants' | translate}}" ng-pattern="/^[0-9]*[1-9]+[0-9]*$/" required>
         <div os-field-error field="pform.numOfParticipants"></div>
       </div>
     </div>
