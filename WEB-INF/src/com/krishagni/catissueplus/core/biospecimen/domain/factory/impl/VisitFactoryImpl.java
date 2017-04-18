@@ -248,11 +248,6 @@ public class VisitFactoryImpl implements VisitFactory {
 
 	private void setClinicalDiagnosis(VisitDetail visitDetail, Visit visit, OpenSpecimenException ose) {
 		Set<String> clinicalDiagnoses = visitDetail.getClinicalDiagnoses();
-
-		if (CollectionUtils.isEmpty(clinicalDiagnoses)) {
-			return;
-		}
-
 		if (!areValid(CLINICAL_DIAG, clinicalDiagnoses)) {
 			ose.addError(VisitErrorCode.INVALID_CLINICAL_DIAGNOSIS);
 			return;
