@@ -269,6 +269,10 @@ public class ParticipantFactoryImpl implements ParticipantFactory {
 		}
 		
 		Set<String> ethnicities = detail.getEthnicities();
+		if (ethnicities == null) {
+			return;
+		}
+
 		if (!areValid(ETHNICITY, ethnicities)) {
 			oce.addError(ParticipantErrorCode.INVALID_ETHNICITY);
 			return;
