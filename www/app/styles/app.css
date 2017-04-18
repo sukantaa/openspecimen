@@ -43,11 +43,6 @@ body {
   margin-left: 6px;
 }
 
-.os-navbar .logo .deploy-logo img {
-  height: 30px;
-  width: 40px;
-}
-
 .os-navbar .logo .deploy-env {
   font-size: 10px;
   color: #fff;
