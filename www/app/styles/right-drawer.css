@@ -46,3 +46,7 @@
 .os-right-drawer .os-md-input .ui-select-search {
   margin-top: 5px;
 }
+
+.os-detail-sublist .os-right-drawer {
+  top: 45px !important;
+}

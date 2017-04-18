@@ -32,6 +32,10 @@ public class SpecimenListCriteria extends AbstractListCriteria<SpecimenListCrite
 
 	private String container;
 
+	private Long containerId;
+
+	private Long ancestorContainerId;
+
 	private boolean available;
 
 	public SpecimenListCriteria() {
@@ -157,6 +161,24 @@ public class SpecimenListCriteria extends AbstractListCriteria<SpecimenListCrite
 
 	public SpecimenListCriteria container(String container) {
 		this.container = container;
+		return self();
+	}
+
+	public Long containerId() {
+		return containerId;
+	}
+
+	public SpecimenListCriteria containerId(Long containerId) {
+		this.containerId = containerId;
+		return self();
+	}
+
+	public Long ancestorContainerId() {
+		return ancestorContainerId;
+	}
+
+	public SpecimenListCriteria ancestorContainerId(Long ancestorContainerId) {
+		this.ancestorContainerId = ancestorContainerId;
 		return self();
 	}
 

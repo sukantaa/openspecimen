@@ -134,4 +134,14 @@
       //
     </sql>
   </changeSet>
+
+  <changeSet author="ckhilosiya" id="ID of saved query to use for container specimens report">
+    <sql>
+      call add_cfg_prop(
+        'common', 'cont_spmns_report_query',
+        'cont_spmns_report_query', 'cont_spmns_report_query_desc',
+        'INT', ''
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

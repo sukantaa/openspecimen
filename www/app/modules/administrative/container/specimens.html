@@ -1,0 +1,103 @@
+<div class="os-detail-sublist">
+  <div class="os-page-commands">
+    <div class="left">
+      <button class="default" ng-click="downloadReport()" title="{{'common.buttons.download_report' | translate}}">
+        <span class="fa fa-download"></span>
+        <span translate="common.buttons.download_report">Download Report</span>
+      </button>
+    </div>
+
+    <div class="right">
+      <button class="default" os-right-drawer-toggle ng-click="toggleSearch()" title="{{'common.buttons.search' | translate}}">
+        <span class="fa fa-search"></span>
+        <span translate="common.buttons.search">Search</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="container">
+    <table class="os-table">
+      <thead class="os-table-head">
+        <tr class="row">
+          <th class="col">
+            <span translate="specimens.ppid">PPID</span>
+          </th>
+          <th class="col">
+            <span translate="specimens.label">Label</span>
+          </th>
+          <th class="col">
+            <span translate="specimens.description">Description</span>
+          </th>
+          <th class="col" ng-if="!ctx.dimless">
+            <span translate="specimens.container">Container</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="os-table-body os-border">
+        <tr class="row" ng-repeat="spmn in lctx.specimens">
+          <td class="col">
+            <span>{{spmn.ppid}}</span>
+          </td>
+          <td class="col">
+            <a ui-sref="specimen({specimenId: spmn.id})">
+              <span>{{spmn.label}}</span>
+              <span ng-if="!!spmn.barcode">({{spmn.barcode}})</span>
+            </a>
+          </td>
+          <td class="col">
+            <os-specimen-desc specimen="spmn" detailed="true"></os-specimen-desc>
+          </td>
+          <td class="col" ng-if="!ctx.dimless">
+            <span>{{spmn.storageLocation.name}}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div os-right-drawer ng-include="'modules/administrative/container/specimens-search'"></div>
+</div>
+
+  
+<script type="text/ng-template" id="modules/administrative/container/specimens-search">
+  <div class="os-search">
+    <div class="os-head">
+      <h3 class="os-title" translate="common.filters.title">
+        Filters
+      </h3>
+    </div>
+    <div class="os-body">
+      <div class="form-group">
+        <os-pvs ng-model="lctx.filterOpts.specimenType" attribute="specimen_type" show-only-leaf-values="true"
+          os-md-input placeholder="{{'specimens.type' | translate}}">
+        </os-pvs>
+      </div>
+
+      <div class="form-group">
+        <os-pvs ng-model="lctx.filterOpts.anatomicSite" attribute="anatomic_site" show-only-leaf-values="true"
+          os-md-input placeholder="{{'specimens.anatomic_site' | translate}}">
+        </os-pvs>
+      </div>
+
+      <div class="form-group">
+        <input type="text" ng-model="lctx.filterOpts.ppid"
+          os-md-input placeholder="{{'specimens.ppid' | translate}}">
+      </div>
+
+      <div class="form-group">
+        <os-select list="lctx.cps" display-prop="shortTitle" select-prop="id" ng-model="lctx.filterOpts.cpId"
+          os-md-input refresh="loadCps" placeholder="{{'specimens.cp' | translate}}">
+        </os-select>
+      </div>
+
+      <div class="form-group" ng-if="!ctx.dimless">
+        <os-select list="lctx.containers" display-prop="name" select-prop="name" ng-model="lctx.filterOpts.container"
+          os-md-input refresh="loadContainers" placeholder="{{'specimens.container' | translate}}">
+        </os-select>
+      </div>
+
+      <os-clear-filters opts="lctx.filterOpts"></os-clear-filters>
+    </div>
+  </div>
+</script>
+

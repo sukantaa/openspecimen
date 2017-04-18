@@ -338,6 +338,26 @@
             </row>
           </subForm>
         </row>
+
+        <row>
+          <subForm>
+            <name>allAncestors</name>
+            <udn>allAncestors</udn>
+            <caption>#getMessage("specimen_spec_position_container_all_ancestors")</caption>
+            <table>OS_CONTAINERS_HIERARCHY</table>
+            <foreignKey>DESCENDENT_ID</foreignKey>
+            <parentKey>CONTAINER_IDENTIFIER</parentKey>
+            <pathLink>true</pathLink>
+            <row>
+              <numberField>
+                <name>ancestorId</name>
+                <udn>ancestorId</udn>
+                <caption>#getMessage("specimen_spec_position_container_ancestor_id")</caption>
+                <column>ANCESTOR_ID</column>
+              </numberField>
+            </row>
+          </subForm>
+        </row>
       </subForm>
     </row>
 

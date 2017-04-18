@@ -173,6 +173,12 @@ angular.module('os.administrative.container',
         },
         controller: 'ContainerLocationsCtrl',
         parent: 'container-detail'
+      })
+      .state('container-detail.specimens', {
+        url: '/specimens',
+        templateUrl: 'modules/administrative/container/specimens.html',
+        controller: 'ContainerSpecimensCtrl',
+        parent: 'container-detail'
       });
   })
 

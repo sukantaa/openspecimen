@@ -20,6 +20,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
@@ -36,6 +37,8 @@ import com.krishagni.catissueplus.core.administrative.repository.ContainerRestri
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerDao;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolSite;
+import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.util.Status;
@@ -193,6 +196,55 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	}
 
 	@Override
+	public List<Specimen> getSpecimens(SpecimenListCriteria crit, boolean orderByLocation) {
+		Criteria query = getCurrentSession().createCriteria(Specimen.class, "specimen")
+			.createAlias("position", "pos")
+			.createAlias("pos.container", "container")
+			.createAlias("container.ancestorContainers", "ansc")
+			.add(Restrictions.eq("ansc.id", crit.ancestorContainerId()))
+			.setFirstResult(crit.startAt())
+			.setMaxResults(crit.maxResults());
+
+		if (crit.containerId() != null) {
+			query.add(Restrictions.eq("container.id", crit.containerId()));
+		} else if (StringUtils.isNotBlank(crit.container())) {
+			query.add(Restrictions.eq("container.name", crit.container()));
+		}
+
+		if (StringUtils.isNotBlank(crit.type())) {
+			query.add(Restrictions.eq("specimen.specimenType", crit.type()));
+		}
+
+		if (StringUtils.isNotBlank(crit.anatomicSite())) {
+			query.add(Restrictions.eq("specimen.tissueSite", crit.anatomicSite()));
+		}
+
+		if (StringUtils.isNotBlank(crit.ppid()) || crit.cpId() != null) {
+			query.createAlias("specimen.visit", "visit")
+				.createAlias("visit.registration", "cpr");
+
+			if (StringUtils.isNotBlank(crit.ppid())) {
+				query.add(Restrictions.ilike("cpr.ppid", crit.ppid(), crit.matchMode()));
+			}
+
+			if (crit.cpId() != null) {
+				query.createAlias("cpr.collectionProtocol", "cp")
+					.add(Restrictions.eq("cp.id", crit.cpId()));
+			}
+		}
+
+		if (orderByLocation) {
+			query.addOrder(Order.asc("pos.container"))
+				.addOrder(Order.asc("pos.posTwoOrdinal"))
+				.addOrder(Order.asc("pos.posOneOrdinal"));
+		} else {
+			query.addOrder(Order.asc("pos.id"));
+		}
+
+		return query.list();
+	}
+
+	@Override
 	@SuppressWarnings(value = "unchecked")
 	public Map<Long, Integer> getRootContainerSpecimensCount(Collection<Long> containerIds) {
 		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_ROOT_CONT_SPMNS_COUNT)
@@ -250,6 +302,22 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 		return rows.stream().map(row -> createContainer(row, noOfColumns))
 			.sorted(this::comparePositions).collect(Collectors.toList());
+	}
+
+	@Override
+	@SuppressWarnings(value = "unchecked")
+	public List<StorageContainer> getDescendantContainers(StorageContainerListCriteria crit) {
+		Criteria query = getCurrentSession().createCriteria(StorageContainer.class, "cont")
+			.createAlias("cont.ancestorContainers", "ancestors")
+			.add(Restrictions.eq("ancestors.id", crit.parentContainerId()))
+			.setFirstResult(crit.startAt())
+			.setMaxResults(crit.maxResults());
+
+		if (StringUtils.isNotBlank(crit.query())) {
+			query.add(Restrictions.ilike("cont.name", crit.query(), crit.matchMode()));
+		}
+
+		return query.list();
 	}
 
 	@Override

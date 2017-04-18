@@ -473,12 +473,20 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	}
 
 	private void addStorageLocationCond(Criteria query, SpecimenListCriteria crit) {
-		if (StringUtils.isBlank(crit.storageLocationSite()) && StringUtils.isBlank(crit.container())) {
+		if (StringUtils.isBlank(crit.storageLocationSite()) &&
+			StringUtils.isBlank(crit.container()) &&
+			crit.containerId() == null &&
+			crit.ancestorContainerId() == null) {
 			return;
 		}
 
 		query.createAlias("specimen.position", "pos", JoinType.LEFT_OUTER_JOIN)
 			.createAlias("pos.container", "cont", JoinType.LEFT_OUTER_JOIN);
+
+		if (crit.ancestorContainerId() != null) {
+			query.createAlias("cont.ancestorContainers", "ancestor")
+					.add(Restrictions.eq("ancestor.id", crit.ancestorContainerId()));
+		}
 
 		if (StringUtils.isNotBlank(crit.storageLocationSite())) {
 			query.createAlias("cont.site", "contSite", JoinType.LEFT_OUTER_JOIN)
@@ -490,6 +498,8 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 		if (StringUtils.isNotBlank(crit.container())) {
 			query.add(Restrictions.eq("cont.name", crit.container()));
+		} else if (crit.containerId() != null) {
+			query.add(Restrictions.eq("cont.id", crit.containerId()));
 		}
 	}
 

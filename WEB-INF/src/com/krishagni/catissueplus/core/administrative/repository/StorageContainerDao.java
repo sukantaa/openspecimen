@@ -10,6 +10,8 @@ import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
 import com.krishagni.catissueplus.core.administrative.events.ContainerSelectorCriteria;
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerSummary;
+import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.common.repository.Dao;
 
 public interface StorageContainerDao extends Dao<StorageContainer> {
@@ -31,6 +33,8 @@ public interface StorageContainerDao extends Dao<StorageContainer> {
 
 	public int getSpecimensCount(Long containerId);
 
+	List<Specimen> getSpecimens(SpecimenListCriteria crit, boolean orderByLocation);
+
 	public Map<Long, Integer> getRootContainerSpecimensCount(Collection<Long> containerIds);
 
 	public Map<String, Integer> getSpecimensCountByType(Long containerId);
@@ -38,6 +42,8 @@ public interface StorageContainerDao extends Dao<StorageContainer> {
 	public StorageContainerSummary getAncestorsHierarchy(Long containerId);
 
 	public List<StorageContainerSummary> getChildContainers(Long containerId, int noOfColumns);
+
+	List<StorageContainer> getDescendantContainers(StorageContainerListCriteria crit);
 
 	public List<Long> getLeastEmptyContainerId(ContainerSelectorCriteria crit);
 

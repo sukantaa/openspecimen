@@ -1,11 +1,13 @@
 package com.krishagni.catissueplus.core.administrative.services.impl;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +46,9 @@ import com.krishagni.catissueplus.core.administrative.services.StorageContainerS
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenResolver;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
@@ -60,12 +64,25 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.LabelGenerator;
 import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.domain.Filter;
+import com.krishagni.catissueplus.core.de.domain.SavedQuery;
+import com.krishagni.catissueplus.core.de.events.ExecuteQueryEventOp;
+import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
+import com.krishagni.catissueplus.core.de.services.QueryService;
+import com.krishagni.catissueplus.core.de.services.SavedQueryErrorCode;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
+
+import edu.common.dynamicextensions.query.WideRowMode;
 
 public class StorageContainerServiceImpl implements StorageContainerService, ObjectStateParamsResolver, InitializingBean {
 	private static final Log logger = LogFactory.getLog(StorageContainerServiceImpl.class);
 
 	private DaoFactory daoFactory;
+
+	private com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory;
 	
 	private StorageContainerFactory containerFactory;
 	
@@ -79,12 +96,18 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 	private ScheduledTaskManager taskManager;
 
+	private QueryService querySvc;
+
 	public DaoFactory getDaoFactory() {
 		return daoFactory;
 	}
 
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
+	}
+
+	public void setDeDaoFactory(com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory) {
+		this.deDaoFactory = deDaoFactory;
 	}
 
 	public StorageContainerFactory getContainerFactory() {
@@ -113,6 +136,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 	public void setTaskManager(ScheduledTaskManager taskManager) {
 		this.taskManager = taskManager;
+	}
+
+	public void setQuerySvc(QueryService querySvc) {
+		this.querySvc = querySvc;
 	}
 
 	@Override
@@ -176,6 +203,36 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<SpecimenInfo>> getSpecimens(RequestEvent<SpecimenListCriteria> req) {
+		SpecimenListCriteria crit = req.getPayload();
+		StorageContainer container = getContainer(crit.ancestorContainerId(), null);
+		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
+		List<Specimen> specimens = daoFactory.getStorageContainerDao().getSpecimens(crit, !container.isDimensionless());
+		return ResponseEvent.response(SpecimenInfo.from(specimens));
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<QueryDataExportResult> getSpecimensReport(RequestEvent<ContainerQueryCriteria> req) {
+		ContainerQueryCriteria crit = req.getPayload();
+		StorageContainer container = getContainer(crit.getId(), crit.getName());
+		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
+
+		Integer queryId = ConfigUtil.getInstance().getIntSetting("common", "cont_spmns_report_query", -1);
+		if (queryId == -1) {
+			return ResponseEvent.userError(StorageContainerErrorCode.SPMNS_RPT_NOT_CONFIGURED);
+		}
+
+		SavedQuery query = deDaoFactory.getSavedQueryDao().getQuery(queryId.longValue());
+		if (query == null) {
+			return ResponseEvent.userError(SavedQueryErrorCode.NOT_FOUND, queryId);
+		}
+
+		return new ResponseEvent<>(exportResult(container, query));
 	}
 	
 	@Override
@@ -542,6 +599,15 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<StorageContainerSummary>> getDescendantContainers(RequestEvent<StorageContainerListCriteria> req) {
+		StorageContainer container = getContainer(req.getPayload().parentContainerId(), null);
+		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
+		List<StorageContainer> containers = daoFactory.getStorageContainerDao().getDescendantContainers(req.getPayload());
+		return ResponseEvent.response(StorageContainerSummary.from(containers));
 	}
 
 	@Override
@@ -974,5 +1040,50 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		copy.setStoreSpecimenEnabled(source.isStoreSpecimenEnabled());
 		copy.setCreatedBy(AuthUtil.getCurrentUser());
 		return copy;
+	}
+
+	private QueryDataExportResult exportResult(final StorageContainer container, SavedQuery query) {
+		Filter filter = new Filter();
+		filter.setField("Specimen.specimenPosition.allAncestors.ancestorId");
+		filter.setOp(Filter.Op.EQ);
+		filter.setValues(new String[] { container.getId().toString() });
+
+		ExecuteQueryEventOp execReportOp = new ExecuteQueryEventOp();
+		execReportOp.setDrivingForm("Participant");
+		execReportOp.setAql(query.getAql(new Filter[] { filter }));
+		execReportOp.setWideRowMode(WideRowMode.DEEP.name());
+		execReportOp.setRunType("Export");
+		return querySvc.exportQueryData(execReportOp, new QueryService.ExportProcessor() {
+			@Override
+			public String filename() {
+				return "container_" + container.getId() + "_" + UUID.randomUUID().toString();
+			}
+
+			@Override
+			public void headers(OutputStream out) {
+				Map<String, String> headers = new LinkedHashMap<String, String>() {{
+					String notSpecified = msg("common_not_specified");
+
+					put(msg("container_name"), container.getName());
+					put(msg("container_site"), container.getSite().getName());
+
+					if (container.getParentContainer() != null) {
+						put(msg("container_parent_container"), container.getParentContainer().getName());
+					}
+
+					if (container.getType() != null) {
+						put(msg("container_type"), container.getType().getName());
+					}
+
+					put("", ""); // blank line
+				}};
+
+				Utility.writeKeyValuesToCsv(out, headers);
+			}
+		});
+	}
+
+	private String msg(String code) {
+		return MessageUtil.getInstance().getMessage(code);
 	}
 }

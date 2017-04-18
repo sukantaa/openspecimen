@@ -39,6 +39,10 @@
           <span translate="container.no_dimless_map">The map view is not available for dimensionless container</span>
         </div>
       </div>
+      <button class="btn btn-primary" ui-sref="container-detail.specimens({containerId: ctx.container.id})">
+        <span class="fa fa-flask"></span>
+        <span translate="container.view_specimens">View Specimens</span>
+      </button>
     </div>
 
     <div class="map" ng-switch on='lctx.mapState' ng-if="!ctx.dimless">
@@ -204,3 +208,4 @@
     </li>
   </ul>
 </script>
+

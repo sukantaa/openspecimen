@@ -68,7 +68,9 @@ public enum StorageContainerErrorCode implements ErrorCode {
 
 	INVALID_CAPACITY,
 
-	AUTOMATED_NOT_DIMENSIONLESS;
+	AUTOMATED_NOT_DIMENSIONLESS,
+
+	SPMNS_RPT_NOT_CONFIGURED;
 
 	@Override
 	public String code() {

@@ -114,6 +114,7 @@
       "add_new": "Add New",
       "add_another": "Add Another",
       "download": "Download",
+      "download_report": "Download Report",
       "reset_password": "Reset Password",
       "skip": "Skip",
       "back": "Back",
@@ -1125,6 +1126,7 @@
     "assign_positions": "Assign Positions",
     "vacate_positions": "Vacate existing specimens",
     "no_dimless_map": "The map view is not available for dimensionless container",
+    "view_specimens": "View Specimens",
     "paste_specimen_labels": "Paste or input specimen labels or barcodes separated by comma, tab, or newline",
     "no_free_locs": "Container does not have enough free locations to accommodate input specimen labels",
     "replicated_successfully": "Container {{name}} replicated successfully",
@@ -1145,6 +1147,12 @@
       "SPECIMEN_LABEL": "Specimen Label",
       "SPECIMEN_BARCODE": "Specimen Barcode",
       "SPECIMEN_PPID" : "PPID"
+    },
+
+    "specimens" : {
+      "report_gen_initiated": "Generating container specimens report...",
+      "downloading_report": "Downloading container specimens report...",
+      "report_will_be_emailed": "Generating container specimens report is taking more time than anticipated. Link to download report will be sent to you by email"
     },
 
     "replication_count": "Enter number of containers to create",
@@ -1182,7 +1190,8 @@
 
     "menu": {
       "overview": "Overview",
-      "locations": "Locations"
+      "locations": "Locations",
+      "specimens": "Specimens"
     },
 
     "filter": {
@@ -2153,7 +2162,9 @@
         "deployment_site_logo": "Deployment Site Logo",
         "deployment_site_logo_desc": "Image file of the deployment site logo to be displayed on OpenSpecimen navigation bar. File size should be between 20 to 40 KB.",
         "deployment_site_url": "Deployment Site URL",
-        "deployment_site_url_desc": "Website URL to navigate users on clicking deployment site logo"
+        "deployment_site_url_desc": "Website URL to navigate users on clicking deployment site logo",
+        "cont_spmns_report_query": "Container Specimens Report",
+        "cont_spmns_report_query_desc": "Saved query to use for generating container specimens report"
       },
 
       "email": {

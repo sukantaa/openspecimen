@@ -488,12 +488,14 @@
 
   <bean id="storageContainerSvc" class="com.krishagni.catissueplus.core.administrative.services.impl.StorageContainerServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="deDaoFactory" ref="deDaoFactory"/>
     <property name="containerFactory" ref="storageContainerFactory"/>
     <property name="mapExporter" ref="containerMapExporter"/>
     <property name="nameGenerator" ref="containerNameGenerator"/>
     <property name="specimenResolver" ref="specimenResolver"/>
     <property name="selectionStrategyFactory" ref="containerSelectionStrategyFactory"/>
     <property name="taskManager" ref="scheduledTaskMgr"/>
+    <property name="querySvc" ref="querySvc"/>
   </bean>
 
   <bean id="containerTypeFactory" class="com.krishagni.catissueplus.core.administrative.domain.factory.impl.ContainerTypeFactoryImpl">

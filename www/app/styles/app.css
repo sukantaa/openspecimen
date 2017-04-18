@@ -280,6 +280,26 @@ h4 + .btn-group {
   top: 25px;
 }
 
+.os-detail-sublist .container {
+  position: absolute;
+  top: 45px !important;
+  padding-top: 0px;
+  bottom: 0px;
+  height: auto;
+  overflow: auto;
+  width: 100%;
+}
+
+.os-detail-sublist {
+  margin-left: -15px;
+  margin-right: -15px;
+}
+
+.os-detail-sublist .os-page-commands {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
 .os-inline-btn {
   display: inline-block;
   position: relative;

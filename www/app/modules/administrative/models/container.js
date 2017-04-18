@@ -26,6 +26,11 @@ angular.module('os.administrative.models.container', ['os.common.models'])
       return $http.get(Container.url() + this.$id() + '/child-containers').then(Container.modelArrayRespTransform);
     }
 
+    Container.prototype.getDescendantContainers = function(filterOpts) {
+      return $http.get(Container.url() + this.$id() + '/descendant-containers', {params: filterOpts})
+        .then(Container.modelArrayRespTransform);
+    }
+
     Container.prototype.getOccupiedPositions = function() {
       return $http.get(Container.url() + '/' + this.$id() + '/occupied-positions').then(
         function(result) {
@@ -33,6 +38,22 @@ angular.module('os.administrative.models.container', ['os.common.models'])
         }
       );
     };
+
+    Container.prototype.getSpecimens = function(filterOpts) {
+      return $http.get(Container.url() + '/' + this.$id() + '/specimens', {params: filterOpts}).then(
+        function(result) {
+          return result.data;
+        }
+      );
+    };
+
+    Container.prototype.generateReport = function() {
+      return $http.get(Container.url() + this.$id() + '/report').then(
+        function(resp) {
+          return resp.data;
+        }
+      );
+    }
 
     Container.prototype.isSpecimenAllowed = function(cpId, specimenClass, specimenType) {
       var params = {cpId: cpId, specimenClass: specimenClass, specimenType: specimenType};

@@ -103,6 +103,8 @@ public class ImportDefaultQueries implements InitializingBean {
 						configureShipmentReportQuery(query);
 					} else if (resource.getFilename().equals(SPECIMEN_KIT_REPORT_QUERY)) {
 						configureKitReportQuery(query);
+					} else if (resource.getFilename().equals(CONTAINER_SPECIMENS_REPORT_QUERY)) {
+						configureContainerSpecimensReportQuery(query);
 					}
 				}
 			} else {
@@ -182,6 +184,10 @@ public class ImportDefaultQueries implements InitializingBean {
 		saveDefaultQuerySetting(query, "common", "specimen_kit_export_report");
 	}
 
+	private void configureContainerSpecimensReportQuery(SavedQuery query) {
+		saveDefaultQuerySetting(query, "common", "cont_spmns_report_query");
+	}
+
 	private void saveDefaultQuerySetting(SavedQuery query, String module, String name) {
 		try {
 			AuthUtil.setCurrentUser(sysUser);
@@ -215,4 +221,6 @@ public class ImportDefaultQueries implements InitializingBean {
 	private static final String SHIPMENT_REPORT_QUERY = "ShipmentReport.json";
 
 	private static final String SPECIMEN_KIT_REPORT_QUERY = "SpecimenKitReport.json";
+
+	private static final String CONTAINER_SPECIMENS_REPORT_QUERY = "ContainerSpecimensReport.json";
 }
