@@ -255,10 +255,6 @@ public class ParticipantFactoryImpl implements ParticipantFactory {
 		}
 		
 		Set<String> races = detail.getRaces();		
-		if (CollectionUtils.isEmpty(races)) {
-			return;
-		}
-
 		if (!areValid(RACE, races)) {
 			oce.addError(ParticipantErrorCode.INVALID_RACE);
 			return;
@@ -273,10 +269,6 @@ public class ParticipantFactoryImpl implements ParticipantFactory {
 		}
 		
 		Set<String> ethnicities = detail.getEthnicities();
-		if (CollectionUtils.isEmpty(ethnicities)) {
-			return;
-		}
-
 		if (!areValid(ETHNICITY, ethnicities)) {
 			oce.addError(ParticipantErrorCode.INVALID_ETHNICITY);
 			return;
