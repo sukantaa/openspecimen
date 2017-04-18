@@ -94,6 +94,22 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
     function getUsersCount() {
       return User.getCount($scope.userFilterOpts)
     }
+
+    function activateUsers(msgKey) {
+      var users = $scope.ctx.selection.users;
+      User.bulkUpdate({detail: {activityStatus: 'Active'}, userIds: getUserIds(users)}).then(
+        function(savedUsers) {
+          Alerts.success(msgKey);
+
+          angular.forEach(users, function(user) { user.selected = false; });
+          initCtx();
+        }
+      );
+    }
+
+    function getUserIds(users) {
+      return users.map(function(user) { return user.id; });
+    }
     
     $scope.showUserOverview = function(user) {
       $state.go('user-detail.overview', {userId:user.id});
@@ -158,14 +174,27 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
         }
       }
 
-      var userIds = users.map(function(user) {return user.id; });
       var opts = {
         confirmDelete: 'user.delete_users',
         successMessage: 'user.users_deleted',
         onBulkDeletion: loadUsers
       }
 
-      DeleteUtil.bulkDelete({bulkDelete: User.bulkDelete}, userIds, opts);
+      DeleteUtil.bulkDelete({bulkDelete: User.bulkDelete}, getUserIds(users), opts);
+    }
+
+    $scope.editUsers = function() {
+       var users = $scope.ctx.selection.users;
+       ItemsHolder.setItems('users', users);
+       $state.go('user-bulk-edit');
+    }
+
+    $scope.unlockUsers = function() {
+      activateUsers('user.users_unlocked');
+    }
+
+    $scope.approveUsers = function() {
+      activateUsers('user.users_approved');
     }
 
     $scope.editUsers = function() {

@@ -53,6 +53,9 @@ angular.module('openspecimen')
         resolve: {
           user: function(User) {
             return new User();
+          },
+          users: function() {
+            return [];
           }
         },
         controller: 'UserAddEditCtrl',

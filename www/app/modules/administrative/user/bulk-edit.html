@@ -48,19 +48,22 @@
             <span translate="user.inst_admin">Institute Administrator</span>
           </label>
           <label class="radio-inline">
-            <input type="radio" name="type" ng-model="user.type" ng-value="'NONE'"
-              ng-change="user.manageForms = false">
+            <input type="radio" name="type" ng-model="user.type" ng-value="'NONE'">
             <span translate="common.none">None</span>
           </label>
         </div>
       </div>
 
-      <div show-if-admin="institute" class="form-group" ng-if="user.type == 'NONE'">
-        <label class="col-xs-3 control-label">Manage Forms?</label>
+      <div show-if-admin="institute" class="form-group">
+        <label class="col-xs-3 control-label" translate="user.manage_forms">Manage Forms?</label>
         <div class="col-xs-6">
-          <label class="checkbox-inline">
-            <input type="checkbox" ng-model="user.manageForms">
-            <span translate="common.yes"></span>
+          <label class="radio-inline">
+            <input type="radio" name="manageForms" ng-model="user.manageForms" ng-value="true">
+            <span translate="common.yes">Yes</span>
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="manageForms" ng-model="user.manageForms" ng-value="false">
+            <span translate="common.no">No</span>
           </label>
         </div>
       </div>

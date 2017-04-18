@@ -514,7 +514,12 @@ public class UserServiceImpl implements UserService {
 		ose.checkAndThrow();
 
 		boolean wasInstituteAdmin = existingUser.isInstituteAdmin();
+		String prevStatus = existingUser.getActivityStatus();
 		existingUser.update(user);
+
+		if (isActivated(prevStatus, user.getActivityStatus())) {
+			onAccountActivation(user, prevStatus);
+		}
 
 		if (!wasInstituteAdmin && existingUser.isInstituteAdmin()) {
 			addDefaultSiteAdminRole(existingUser);
