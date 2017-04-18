@@ -41,6 +41,11 @@
     </field>
 
     <field>
+      <caption>#getMessage("user_primary_site")</caption>
+      <attribute>primarySite</attribute>
+    </field>
+
+    <field>
       <caption>#getMessage("user_type")</caption>
       <attribute>type</attribute>
     </field>
