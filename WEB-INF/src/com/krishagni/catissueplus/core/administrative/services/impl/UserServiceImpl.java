@@ -619,7 +619,7 @@ public class UserServiceImpl implements UserService {
 		// their earlier value or default value
 		//
 		newUser.setType(existingUser != null ? existingUser.getType() : User.Type.NONE);
-		newUser.setManageForms(existingUser != null ? existingUser.canManageForms() : false);
+		newUser.setManageForms(existingUser != null && existingUser.canManageForms());
 	}
 	
 	private void ensureUniqueEmail(User existingUser, User newUser, OpenSpecimenException ose) {
