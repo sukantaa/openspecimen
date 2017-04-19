@@ -477,7 +477,7 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 		}
 
 		String posOne = location.getPositionX(), posTwo = location.getPositionY();
-		if (parentContainer.usesLinearLabelingMode() && location.getPosition() != 0) {
+		if (parentContainer.usesLinearLabelingMode() && location.getPosition() != null && location.getPosition() != 0) {
 			posTwo = String.valueOf((location.getPosition() - 1) / parentContainer.getNoOfColumns() + 1);
 			posOne = String.valueOf((location.getPosition() - 1) % parentContainer.getNoOfColumns() + 1);
 		}
