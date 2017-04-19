@@ -891,6 +891,7 @@
     "consent_tiers": "Consent Tiers",
     "add_consent_tier": "Add Consent Tier ...",
     "delete_consent_tier": "{{entityType}} {{entityName}} of {{entity.dpShortTitle}} will be deleted forever. Are you sure you want to proceed?",
+    "select_dist_site": "Please select at least one distributing site",
 
     "tooltip": {
       "view_details": "Click to view Distribution Protocol details",
