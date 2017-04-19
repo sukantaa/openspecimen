@@ -19,9 +19,13 @@ import org.springframework.web.multipart.MultipartFile;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.repository.FormListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CprErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.impl.SystemFormUpdatePreventer;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
@@ -785,14 +789,36 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		String entityType = formContext.getEntityType();
 		Container form = formData.getContainer();
 		if (entityType.equals("Participant")) {
-			AccessCtrlMgr.getInstance().ensureUpdateCprRights(objectId);
+			CollectionProtocolRegistration cpr = daoFactory.getCprDao().getById(objectId);
+			if (cpr == null) {
+				throw OpenSpecimenException.userError(CprErrorCode.NOT_FOUND, objectId);
+			}
+
+			AccessCtrlMgr.getInstance().ensureUpdateCprRights(cpr);
 		} else if (entityType.equals("CommonParticipant")) {
-			AccessCtrlMgr.getInstance().ensureUpdateCprRights(objectId);
-			objectId = daoFactory.getCprDao().getById(objectId).getParticipant().getId();
+			CollectionProtocolRegistration cpr = daoFactory.getCprDao().getById(objectId);
+			if (cpr == null) {
+				throw OpenSpecimenException.userError(CprErrorCode.NOT_FOUND, objectId);
+			}
+
+			AccessCtrlMgr.getInstance().ensureUpdateCprRights(cpr);
+			objectId = cpr.getParticipant().getId();
 		} else if (entityType.equals("SpecimenCollectionGroup")) {
-			AccessCtrlMgr.getInstance().ensureCreateOrUpdateVisitRights(objectId, form.hasPhiFields());
+			Visit visit = daoFactory.getVisitsDao().getById(objectId);
+			if (visit == null) {
+				throw OpenSpecimenException.userError(VisitErrorCode.NOT_FOUND, objectId);
+			}
+
+			AccessCtrlMgr.getInstance().ensureCreateOrUpdateVisitRights(visit, form.hasPhiFields());
 		} else if (entityType.equals("Specimen") || entityType.equals("SpecimenEvent")) {
-			AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(objectId, form.hasPhiFields());
+			Specimen specimen = daoFactory.getSpecimenDao().getById(objectId);
+			if (specimen == null) {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.NOT_FOUND, objectId);
+			} else if (!specimen.isActive()) {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.EDIT_NOT_ALLOWED, specimen.getLabel());
+			}
+
+			AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(specimen, form.hasPhiFields());
 		}
 
 		formData.setRecordId(recordId);

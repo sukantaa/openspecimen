@@ -77,7 +77,8 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
     function getOrderItems(specimens) {
       return specimens.filter(
         function(specimen) {
-          return specimen.availableQty == undefined || specimen.availableQty > 0;
+          return (specimen.availableQty == undefined || specimen.availableQty > 0) &&
+                 specimen.activityStatus == 'Active';
         }
       ).map(
         function(specimen) {

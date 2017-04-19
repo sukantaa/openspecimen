@@ -377,6 +377,14 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 			return;
 		}
 
+		List<String> closedSpmns = specimens.stream()
+			.filter(spmn -> !spmn.isActive()).map(Specimen::getLabel)
+			.collect(Collectors.toList());
+		if (!closedSpmns.isEmpty()) {
+			ose.addError(DistributionOrderErrorCode.CLOSED_SPECIMENS, closedSpmns);
+			return;
+		}
+
 		Map<Long, Specimen> specimenMap = specimens.stream().collect(Collectors.toMap(Specimen::getId, specimen -> specimen));
 		if (specimens.size() != specimenIds.size()) {
 			String notFoundLabels = order.getOrderItems().stream()

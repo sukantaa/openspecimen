@@ -591,7 +591,11 @@ public class AccessCtrlMgr {
 	}
 
 	public void ensureCreateOrUpdateVisitRights(Visit visit) {
-		ensureVisitAndSpecimenObjectRights(visit.getRegistration(), Operation.UPDATE, visit.hasPhiFields());
+		ensureCreateOrUpdateVisitRights(visit, visit.hasPhiFields());
+	}
+
+	public void ensureCreateOrUpdateVisitRights(Visit visit, boolean checkPhiAccess) {
+		ensureVisitAndSpecimenObjectRights(visit.getRegistration(), Operation.UPDATE, checkPhiAccess);
 		ensureVisitAndSpecimenImportRights(visit.getRegistration());
 	}
 
@@ -670,25 +674,7 @@ public class AccessCtrlMgr {
 		String[] ops = {Operation.READ.getName()};
 		Set<Pair<Long, Long>> siteCpPairs = getVisitAndSpecimenSiteCps(cpId, ops);
 		siteCpPairs.addAll(getDistributionOrderSiteCps(ops));
-
-		Set<Long> sitesOfAllCps = new HashSet<Long>();
-		List<Pair<Long, Long>> result = new ArrayList<Pair<Long, Long>>();
-		for (Pair<Long, Long> siteCp : siteCpPairs) {
-			if (siteCp.second() == null) {
-				sitesOfAllCps.add(siteCp.first());
-				result.add(siteCp);
-			}
-		}
-
-		for (Pair<Long, Long> siteCp : siteCpPairs) {
-			if (sitesOfAllCps.contains(siteCp.first())) {
-				continue;
-			}
-
-			result.add(siteCp);
-		}
-
-		return result;
+		return deDupSiteCpPairs(siteCpPairs);
 	}
 
 	private boolean ensureVisitObjectRights(Long visitId, Operation op, boolean checkPhiAccess) {
@@ -1377,6 +1363,27 @@ public class AccessCtrlMgr {
 		}
 
 		return siteCpPairs;
+	}
+
+	private List<Pair<Long, Long>> deDupSiteCpPairs(Set<Pair<Long, Long>> siteCpPairs) {
+		Set<Long> sitesOfAllCps = new HashSet<>();
+		List<Pair<Long, Long>> result = new ArrayList<>();
+		for (Pair<Long, Long> siteCp : siteCpPairs) {
+			if (siteCp.second() == null) {
+				sitesOfAllCps.add(siteCp.first());
+				result.add(siteCp);
+			}
+		}
+
+		for (Pair<Long, Long> siteCp : siteCpPairs) {
+			if (sitesOfAllCps.contains(siteCp.first())) {
+				continue;
+			}
+
+			result.add(siteCp);
+		}
+
+		return result;
 	}
 
 	private boolean isAccessAllowedOnAnySite(List<SubjectAccess> accessList, Set<Site> sites, Long userId) {

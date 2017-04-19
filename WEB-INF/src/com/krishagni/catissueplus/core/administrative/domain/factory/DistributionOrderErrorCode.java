@@ -41,6 +41,8 @@ public enum DistributionOrderErrorCode implements ErrorCode {
 	
 	SPECIMEN_DOES_NOT_EXIST,
 
+	CLOSED_SPECIMENS,
+
 	SPECIMEN_NOT_IN_REQ,
 	
 	INVALID_REQUESTER_RECV_SITE_INST,
