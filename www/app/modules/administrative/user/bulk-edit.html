@@ -21,9 +21,8 @@
         <label class="col-xs-3 control-label" translate="user.institute">Institute</label>
         <div class="col-xs-6">
           <os-select ng-model="user.instituteName" list="institutes" on-select="onInstituteSelect($item)"
-            name="institute" placeholder="{{'user.institute' | translate}}" required>
+            name="institute" placeholder="{{'user.institute' | translate}}">
           </os-select>
-          <div os-field-error field="userForm.institute"></div>
         </div>
       </div>
 
@@ -31,8 +30,9 @@
         <label class="col-xs-3 control-label" translate="user.primary_site">Primary Site</label>
         <div class="col-xs-6">
           <os-select ng-model="user.primarySite" list="sites" refresh="searchSites($select.search)"
-            name="primarySite" placeholder="{{'user.primary_site' | translate}}">
+            name="primarySite" placeholder="{{'user.primary_site' | translate}}" ng-required="!!user.instituteName">
           </os-select>
+          <div os-field-error field="userForm.primarySite"></div>
         </div>
       </div>
 
