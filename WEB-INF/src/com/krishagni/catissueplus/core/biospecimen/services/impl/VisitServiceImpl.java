@@ -494,14 +494,9 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 
 	private Visit saveOrUpdateVisit0(VisitDetail input, boolean update, boolean partial) {
 		Visit existing = null;
-
-		if (update && (input.getId() != null || StringUtils.isNotBlank(input.getName()))) {
+		if (update) {
 			existing = getVisit(input.getId(), input.getName());
 			AccessCtrlMgr.getInstance().ensureCreateOrUpdateVisitRights(existing);
-		}
-
-		if (update && existing == null) {
-			throw OpenSpecimenException.userError(VisitErrorCode.NOT_FOUND);
 		}
 
 		Visit visit = null;
@@ -543,15 +538,20 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 
 	private Visit getVisit(Long visitId, String visitName) {
 		Visit visit = null;
+		Object key = null;
 		
 		if (visitId != null) {
 			visit = daoFactory.getVisitsDao().getById(visitId);
+			key = visitId;
 		} else if (StringUtils.isNotBlank(visitName)) {
 			visit = daoFactory.getVisitsDao().getByName(visitName);
+			key = visitName;
 		}
-		
-		if (visit == null) {
-			throw OpenSpecimenException.userError(VisitErrorCode.NOT_FOUND);
+
+		if (key == null) {
+			throw OpenSpecimenException.userError(VisitErrorCode.NAME_REQUIRED);
+		} else if (visit == null) {
+			throw OpenSpecimenException.userError(VisitErrorCode.NOT_FOUND, key);
 		}
 		
 		return visit;

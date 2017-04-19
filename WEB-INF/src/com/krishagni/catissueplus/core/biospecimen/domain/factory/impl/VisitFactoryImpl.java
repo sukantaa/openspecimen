@@ -1,11 +1,7 @@
 
 package com.krishagni.catissueplus.core.biospecimen.domain.factory.impl;
 
-import static com.krishagni.catissueplus.core.common.PvAttributes.CLINICAL_DIAG;
-import static com.krishagni.catissueplus.core.common.PvAttributes.CLINICAL_STATUS;
-import static com.krishagni.catissueplus.core.common.PvAttributes.COHORT;
-import static com.krishagni.catissueplus.core.common.PvAttributes.MISSED_VISIT_REASON;
-import static com.krishagni.catissueplus.core.common.PvAttributes.VISIT_STATUS;
+import static com.krishagni.catissueplus.core.common.PvAttributes.*;
 import static com.krishagni.catissueplus.core.common.service.PvValidator.areValid;
 import static com.krishagni.catissueplus.core.common.service.PvValidator.isValid;
 
@@ -13,8 +9,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -159,13 +154,12 @@ public class VisitFactoryImpl implements VisitFactory {
 	}
 
 	private void setCpr(VisitDetail visitDetail, Visit visit, OpenSpecimenException ose) {
-		CollectionProtocolRegistration cpr = null;
-
 		Long cprId = visitDetail.getCprId(), cpId = visitDetail.getCpId();
 		String cpTitle = visitDetail.getCpTitle(),
-				cpShortTitle = visitDetail.getCpShortTitle(),
-				ppid = visitDetail.getPpid();
-		
+			cpShortTitle = visitDetail.getCpShortTitle(),
+			ppid = visitDetail.getPpid();
+
+		CollectionProtocolRegistration cpr = null;
 		if (cprId != null) {
 			cpr = daoFactory.getCprDao().getById(cprId);
 		} else if (cpId != null && StringUtils.isNotBlank(ppid)) {
@@ -174,6 +168,9 @@ public class VisitFactoryImpl implements VisitFactory {
 			cpr = daoFactory.getCprDao().getCprByPpid(cpTitle, ppid);
 		} else if (StringUtils.isNotBlank(cpShortTitle) && StringUtils.isNotBlank(ppid)) {
 			cpr = daoFactory.getCprDao().getCprByCpShortTitleAndPpid(cpShortTitle, ppid);
+		} else {
+			ose.addError(StringUtils.isBlank(ppid) ? CprErrorCode.PPID_REQUIRED : CprErrorCode.CP_REQUIRED);
+			return;
 		}
 
 		if (cpr == null) {
