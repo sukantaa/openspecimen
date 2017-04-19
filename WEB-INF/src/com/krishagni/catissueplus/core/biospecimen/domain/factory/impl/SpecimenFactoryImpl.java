@@ -310,7 +310,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 	}
 	
 	private void setParentSpecimen(SpecimenDetail detail, Specimen parent, Specimen specimen, OpenSpecimenException ose) {
-		if (specimen.getLineage().equals(Specimen.NEW)) {
+		if (StringUtils.isBlank(specimen.getLineage()) || specimen.getLineage().equals(Specimen.NEW)) {
 			return;
 		}
 		
