@@ -157,17 +157,15 @@
         </div>
       </div>
 
-      <!-- TODO: A single multi-select widget to select multiple sites of institute to which the insitute admin
-           is affliated to -->
       <div ng-if="!currentUser.admin">
         <div class="form-group clearfix">
           <label class="control-label col-xs-3" translate="dp.distributing_sites">Distributing Sites</label>
           
           <div class="col-xs-6">
-            <os-select multiple name="distSites" ng-model="distributionProtocol.distributingSites[0].sites" placeholder="{{'dp.sites' | translate}}"
-              list="instSiteMap[distributionProtocol.distributingSites[0].instituteName]" on-select="onDistSiteSelect(0)"
-              on-remove="onDistSiteRemove(0)" required>
-            </os-select>
+            <os-sites multiple name="distSites" ng-model="distributionProtocol.distributingSites[0].sites"
+              resource="DistributionProtocol" operation="{{op}}" placeholder="{{'dp.sites' | translate}}"
+              on-select="onDistSiteSelect(0)" on-remove="onDistSiteRemove(0)" ng-required="!currentUser.instituteAdmin">
+            </os-sites>
             <div os-field-error field="dpSitesForm.distSites"></div>
           </div>
         </div>
