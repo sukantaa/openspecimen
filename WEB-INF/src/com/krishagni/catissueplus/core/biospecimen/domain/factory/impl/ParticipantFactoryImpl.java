@@ -254,7 +254,11 @@ public class ParticipantFactoryImpl implements ParticipantFactory {
 			return;
 		}
 		
-		Set<String> races = detail.getRaces();		
+		Set<String> races = detail.getRaces();
+		if (races == null) {
+			return;
+		}
+
 		if (!areValid(RACE, races)) {
 			oce.addError(ParticipantErrorCode.INVALID_RACE);
 			return;
