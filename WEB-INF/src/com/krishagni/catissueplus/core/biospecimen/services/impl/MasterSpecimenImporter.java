@@ -1,7 +1,5 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
-import java.util.Date;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.BeanUtils;
@@ -86,57 +84,49 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 		if (!isPrimarySpecimen(detail)) {
 			return;
 		}
-		
-		String cpShortTitle = detail.getCpShortTitle();
-		if (StringUtils.isBlank(cpShortTitle)) {
+
+		if (StringUtils.isBlank(detail.getCpShortTitle())) {
 			throw OpenSpecimenException.userError(CpErrorCode.SHORT_TITLE_REQUIRED);
 		}
-		
-		Date collectionDate = detail.getCollectionDate();
-		if (collectionDate == null) {
+
+		if (detail.getCollectionDate() == null) {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.COLL_DATE_REQUIRED);
 		}
-		
+
 		CollectionProtocolRegistration cpr = null;
-		String ppid = detail.getPpid();
-		if (StringUtils.isNotBlank(ppid)) {
-			cpr = daoFactory.getCprDao().getCprByCpShortTitleAndPpid(cpShortTitle, ppid);
+		if (StringUtils.isNotBlank(detail.getPpid())) {
+			cpr = daoFactory.getCprDao().getCprByCpShortTitleAndPpid(detail.getCpShortTitle(), detail.getPpid());
 		}
-		
+
 		if (cpr != null) {
 			Visit matchedVisit = cpr.getVisits().stream()
 				.filter(visit -> isVisitOfSameEvent(visit, detail.getEventLabel()))
-				.filter(visit -> DateUtils.isSameDay(visit.getVisitDate(), collectionDate))
+				.filter(visit -> DateUtils.isSameDay(visit.getVisitDate(), detail.getVisitDate()))
 				.findAny().orElse(null);
-			
+
 			if (matchedVisit != null) {
 				detail.setVisitId(matchedVisit.getId());
 			}
 
 			return;
 		}
-		
+
 		CollectionProtocolRegistrationDetail cprDetail = new CollectionProtocolRegistrationDetail();
-		cprDetail.setPpid(ppid);
-		cprDetail.setCpShortTitle(cpShortTitle);
-		cprDetail.setRegistrationDate(detail.getRegistrationDate() == null ? collectionDate : detail.getRegistrationDate());
-		
+		cprDetail.setPpid(detail.getPpid());
+		cprDetail.setCpShortTitle(detail.getCpShortTitle());
+		cprDetail.setRegistrationDate(detail.getRegistrationDate());
 		setParticipant(detail, cprDetail);
 		
-		ResponseEvent<CollectionProtocolRegistrationDetail> resp = cprSvc.createRegistration(getRequest(cprDetail));
+		ResponseEvent<CollectionProtocolRegistrationDetail> resp = cprSvc.createRegistration(request(cprDetail));
 		resp.throwErrorIfUnsuccessful();
 		
 		detail.setPpid(resp.getPayload().getPpid());
 	}
 
 	private boolean isVisitOfSameEvent(Visit visit, String eventLabel) {
-		if (StringUtils.isBlank(eventLabel)) {
-			return true;
-		}
-
-		return visit.getCpEvent() != null && visit.getCpEvent().getEventLabel().equals(eventLabel);
+		return StringUtils.isBlank(eventLabel) || visit.isOfEvent(eventLabel);
 	}
-	
+
 	private void createVisit(MasterSpecimenDetail detail) {
 		if (detail.getVisitId() != null || !isPrimarySpecimen(detail)) {
 			return;
@@ -155,7 +145,7 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 		visitDetail.setComments(detail.getVisitComments());
 		visitDetail.setStatus(StringUtils.isBlank(detail.getStatus()) ? Visit.VISIT_STATUS_COMPLETED : detail.getStatus());
 		
-		ResponseEvent<VisitDetail> resp = visitSvc.addVisit(getRequest(visitDetail));
+		ResponseEvent<VisitDetail> resp = visitSvc.addVisit(request(visitDetail));
 		resp.throwErrorIfUnsuccessful();
 		
 		detail.setVisitId(resp.getPayload().getId());
@@ -186,7 +176,7 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 		setCollectionDetail(detail, specimenDetail);
 		setReceiveDetail(detail, specimenDetail);
 		
-		ResponseEvent<SpecimenDetail> resp = specimenSvc.createSpecimen(getRequest(specimenDetail));
+		ResponseEvent<SpecimenDetail> resp = specimenSvc.createSpecimen(request(specimenDetail));
 		resp.throwErrorIfUnsuccessful();
 		
 		detail.setLabel(resp.getPayload().getLabel());
@@ -276,7 +266,7 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 		return StringUtils.isBlank(detail.getLineage()) || detail.getLineage().equals(Specimen.NEW);
 	}
 	
-	private <T> RequestEvent<T> getRequest(T payload) {
-		return new RequestEvent<T>(payload);
+	private <T> RequestEvent<T> request(T payload) {
+		return new RequestEvent<>(payload);
 	}
 }

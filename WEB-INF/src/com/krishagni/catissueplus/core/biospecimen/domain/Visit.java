@@ -308,6 +308,10 @@ public class Visit extends BaseExtensionEntity {
 		return getCpEvent() == null;
 	}
 
+	public boolean isOfEvent(String eventLabel) {
+		return !isUnplanned() && getCpEvent().getEventLabel().equals(eventLabel);
+	}
+
 	public List<DependentEntityDetail> getDependentEntities() {
 		return DependentEntityDetail.singletonList(Specimen.getEntityName(), getActiveSpecimens()); 
 	}

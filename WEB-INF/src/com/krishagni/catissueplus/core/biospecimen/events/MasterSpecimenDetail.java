@@ -129,7 +129,13 @@ public class MasterSpecimenDetail {
 	}
 
 	public Date getRegistrationDate() {
-		return registrationDate;
+		if (registrationDate != null) {
+			return registrationDate;
+		} else if (visitDate != null) {
+			return visitDate;
+		} else {
+			return collectionDate;
+		}
 	}
 
 	public void setRegistrationDate(Date registrationDate) {
@@ -265,7 +271,11 @@ public class MasterSpecimenDetail {
 	}
 
 	public Date getVisitDate() {
-		return visitDate;
+		if (visitDate != null) {
+			return visitDate;
+		} else {
+			return collectionDate;
+		}
 	}
 
 	public void setVisitDate(Date visitDate) {
