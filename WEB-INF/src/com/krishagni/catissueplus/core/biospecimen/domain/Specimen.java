@@ -658,7 +658,13 @@ public class Specimen extends BaseExtensionEntity {
 
 	public void update(Specimen specimen) {
 		setForceDelete(specimen.isForceDelete());
-		updateStatus(specimen.getActivityStatus(), null);
+
+		String reason = null;
+		if (!StringUtils.equals(getComment(), specimen.getComment())) {
+			reason = specimen.getComment();
+		}
+
+		updateStatus(specimen.getActivityStatus(), reason);
 		if (!isActive()) {
 			return;
 		}
