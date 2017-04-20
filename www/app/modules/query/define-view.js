@@ -1,5 +1,5 @@
 angular.module('os.query.defineview', ['os.query.models']) 
-  .controller('DefineViewCtrl', function($scope, $modalInstance, $q, queryCtx, $translate, Form, Alerts) {
+  .controller('DefineViewCtrl', function($scope, $modalInstance, $q, queryCtx, $translate, Form, Alerts, QueryUtil) {
     var aggFns = { // TODO: Translate labels
       count:   {name: 'count',   label: 'Count'},
       sum:     {name: 'sum',     label: 'Sum'},
@@ -238,7 +238,12 @@ angular.module('os.query.defineview', ['os.query.models'])
  
       angular.forEach(queryCtx.filters,
         function(filter) {
-          if (filter.expr) {
+          if (!filter.expr) {
+            return;
+          }
+
+          var tObj = QueryUtil.getTemporalExprObj(filter.expr);
+          if (tObj.op) {
             forms.push({type: 'temporal', val: filter.desc, form: filter, children: []});
           }
         }
