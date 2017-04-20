@@ -1153,7 +1153,8 @@
     "specimens" : {
       "report_gen_initiated": "Generating container specimens report...",
       "downloading_report": "Downloading container specimens report...",
-      "report_will_be_emailed": "Generating container specimens report is taking more time than anticipated. Link to download report will be sent to you by email"
+      "report_will_be_emailed": "Generating container specimens report is taking more time than anticipated. Link to download report will be sent to you by email",
+      "no_specimens_for_specimen_list": "Please select atleast one specimen to add to cart"
     },
 
     "replication_count": "Enter number of containers to create",

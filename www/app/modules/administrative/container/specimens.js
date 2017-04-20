@@ -1,5 +1,8 @@
 angular.module('os.administrative.container')
-  .controller('ContainerSpecimensCtrl', function($scope, container, Util, CollectionProtocol, Container) {
+  .controller('ContainerSpecimensCtrl', function(
+    $scope, $state, container, currentUser, Util, CollectionProtocol,
+    Container, SpecimensHolder, Alerts, CheckList) {
+
     function init() {
       $scope.ctx.showTree = true;
       $scope.ctx.viewState = 'container-detail.specimens';
@@ -8,7 +11,8 @@ angular.module('os.administrative.container')
         filterOpts: {},
         specimens: [],
         cps: [],
-        containers: []
+        containers: [],
+        checkList: new CheckList([])
       };
 
       loadSpecimens($scope.lctx.filterOpts);
@@ -19,6 +23,7 @@ angular.module('os.administrative.container')
       container.getSpecimens(filterOpts).then(
         function(specimens) {
           $scope.lctx.specimens = specimens;
+          $scope.lctx.checkList = new CheckList(specimens);
         }
       );
     }
@@ -40,6 +45,11 @@ angular.module('os.administrative.container')
       );
     }
 
+    function createNewList(spmns) {
+      SpecimensHolder.setSpecimens(spmns);
+      $state.go('specimen-list-addedit', {listId: ''});
+    }
+
     $scope.toggleSearch = function() {
       $scope.ctx.showTree = !$scope.ctx.showTree;
     }
@@ -51,6 +61,26 @@ angular.module('os.administrative.container')
     $scope.loadCps = loadCps;
 
     $scope.loadContainers = loadContainers;
+
+    $scope.addSpecimensToList = function(list) {
+      var items = $scope.lctx.checkList.getSelectedItems();
+      if (!items || items.length == 0) {
+        Alerts.error('container.specimens.no_specimens_for_specimen_list');
+        return;
+      }
+
+      var spmns = items.map(function(item) { return {id: item.id}; });
+      if (!list) {
+        createNewList(spmns);
+      } else {
+        list.addSpecimens(spmns).then(
+          function() {
+            var type = list.getListType(currentUser);
+            Alerts.success('specimen_list.specimens_added_to_' + type, list);
+          }
+        );
+      }
+    }
 
     init();
   });

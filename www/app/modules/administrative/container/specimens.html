@@ -7,8 +7,11 @@
       </button>
     </div>
 
+    <os-assign-to-spmn-list on-add-to-list="addSpecimensToList(list)"></os-assign-to-spmn-list>
+
     <div class="right">
-      <button class="default" os-right-drawer-toggle ng-click="toggleSearch()" title="{{'common.buttons.search' | translate}}">
+      <button class="default" os-right-drawer-toggle ng-click="toggleSearch()"
+        title="{{'common.buttons.search' | translate}}">
         <span class="fa fa-search"></span>
         <span translate="common.buttons.search">Search</span>
       </button>
@@ -19,6 +22,11 @@
     <table class="os-table">
       <thead class="os-table-head">
         <tr class="row">
+          <th class="col">
+            <os-checkbox ng-change="lctx.checkList.toggleSelectAll()"
+              ng-model="lctx.checkList.allSelected">
+            </os-checkbox>
+          </th>
           <th class="col">
             <span translate="specimens.ppid">PPID</span>
           </th>
@@ -35,6 +43,11 @@
       </thead>
       <tbody class="os-table-body os-border">
         <tr class="row" ng-repeat="spmn in lctx.specimens">
+          <td class="col">
+            <os-checkbox ng-change="lctx.checkList.toggleSelectItem($index)"
+              ng-model="lctx.checkList.items[$index].selected">
+            </os-checkbox>
+          </td>
           <td class="col">
             <span>{{spmn.ppid}}</span>
           </td>
@@ -58,7 +71,6 @@
   <div os-right-drawer ng-include="'modules/administrative/container/specimens-search'"></div>
 </div>
 
-  
 <script type="text/ng-template" id="modules/administrative/container/specimens-search">
   <div class="os-search">
     <div class="os-head">
@@ -100,4 +112,3 @@
     </div>
   </div>
 </script>
-
