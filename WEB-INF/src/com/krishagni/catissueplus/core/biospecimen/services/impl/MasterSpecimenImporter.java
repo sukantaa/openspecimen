@@ -104,15 +104,15 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 		}
 		
 		if (cpr != null) {
-			Visit matchedVisit = cpr.getVisits()
-					.stream()
-					.filter(visit -> DateUtils.isSameDay(visit.getVisitDate(), collectionDate))
-					.findAny()
-					.orElse(null);
+			Visit matchedVisit = cpr.getVisits().stream()
+				.filter(visit -> isVisitOfSameEvent(visit, detail.getEventLabel()))
+				.filter(visit -> DateUtils.isSameDay(visit.getVisitDate(), collectionDate))
+				.findAny().orElse(null);
 			
 			if (matchedVisit != null) {
 				detail.setVisitId(matchedVisit.getId());
 			}
+
 			return;
 		}
 		
@@ -127,6 +127,14 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 		resp.throwErrorIfUnsuccessful();
 		
 		detail.setPpid(resp.getPayload().getPpid());
+	}
+
+	private boolean isVisitOfSameEvent(Visit visit, String eventLabel) {
+		if (StringUtils.isBlank(eventLabel)) {
+			return true;
+		}
+
+		return visit.getCpEvent() != null && visit.getCpEvent().getEventLabel().equals(eventLabel);
 	}
 	
 	private void createVisit(MasterSpecimenDetail detail) {
