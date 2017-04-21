@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +49,8 @@ import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.MergeCpDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolService;
-import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
+import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
+import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityResp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.EntityDeleteResp;
 import com.krishagni.catissueplus.core.common.events.Operation;
@@ -65,7 +67,6 @@ import com.krishagni.catissueplus.core.query.Column;
 import com.krishagni.catissueplus.core.query.ListConfig;
 import com.krishagni.catissueplus.core.query.ListDetail;
 import com.krishagni.catissueplus.core.query.ListGenerator;
-
 import edu.common.dynamicextensions.nutility.IoUtil;
 
 @Controller
@@ -305,21 +306,42 @@ public class CollectionProtocolsController {
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}
-	
+
 	@RequestMapping(method = RequestMethod.DELETE, value="/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public EntityDeleteResp<CollectionProtocolDetail> deleteCollectionProtocol(
-			@PathVariable Long id,
+			@PathVariable
+			Long id,
+
+			@RequestParam(value = "forceDelete", required = false, defaultValue = "false")
+			boolean forceDelete) {
+
+		BulkDeleteEntityOp crit = new BulkDeleteEntityOp();
+		crit.setIds(Collections.singleton(id));
+		crit.setForceDelete(forceDelete);
+
+		ResponseEvent<BulkDeleteEntityResp<CollectionProtocolDetail>> resp = cpSvc.deleteCollectionProtocols(getRequest(crit));
+		resp.throwErrorIfUnsuccessful();
+		BulkDeleteEntityResp<CollectionProtocolDetail> payload = resp.getPayload();
+		return new EntityDeleteResp<>(payload.getEntities().get(0), payload.isCompleted());
+	}
+	
+	@RequestMapping(method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public BulkDeleteEntityResp<CollectionProtocolDetail> deleteCollectionProtocols(
+			@RequestParam(value = "id")
+			Long[] ids,
 			
 			@RequestParam(value = "forceDelete", required = false, defaultValue = "false") 
 			boolean forceDelete) {
-		
-		DeleteEntityOp crit = new DeleteEntityOp();
-		crit.setId(id);
+
+		BulkDeleteEntityOp crit = new BulkDeleteEntityOp();
+		crit.setIds(new HashSet<>(Arrays.asList(ids)));
 		crit.setForceDelete(forceDelete);
-		
-		ResponseEvent<EntityDeleteResp<CollectionProtocolDetail>> resp = cpSvc.deleteCollectionProtocol(getRequest(crit));
+
+		ResponseEvent<BulkDeleteEntityResp<CollectionProtocolDetail>> resp = cpSvc.deleteCollectionProtocols(getRequest(crit));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}

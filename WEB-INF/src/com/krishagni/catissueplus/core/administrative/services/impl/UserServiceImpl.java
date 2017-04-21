@@ -22,7 +22,6 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserFactory;
 import com.krishagni.catissueplus.core.administrative.events.AnnouncementDetail;
-import com.krishagni.catissueplus.core.administrative.events.BulkUpdateUserDetail;
 import com.krishagni.catissueplus.core.administrative.events.InstituteDetail;
 import com.krishagni.catissueplus.core.administrative.events.PasswordDetails;
 import com.krishagni.catissueplus.core.administrative.events.UserDetail;
@@ -37,6 +36,7 @@ import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.events.BulkEntityDetail;
 import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -409,19 +409,19 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<List<UserDetail>> bulkUpdateUsers(RequestEvent<BulkUpdateUserDetail> req) {
+	public ResponseEvent<List<UserDetail>> bulkUpdateUsers(RequestEvent<BulkEntityDetail<UserDetail>> req) {
 		try {
 			List<UserDetail> updatedUsers = new ArrayList<>();
 
-			BulkUpdateUserDetail buDetail = req.getPayload();
-			UserDetail detail = buDetail.getDetail();
-			for (Long userId : buDetail.getUserIds()) {
+			BulkEntityDetail<UserDetail> buDetail = req.getPayload();
+			UserDetail detail = curateBulkUpdateFields(buDetail.getDetail());
+			for (Long userId : Utility.nullSafe(buDetail.getIds())) {
 				detail.setId(userId);
 				updatedUsers.add(updateUser(detail, true));
 			}
 
 			detail.setId(null);
-			for (String emailAddress : buDetail.getEmailAddresses()) {
+			for (String emailAddress : Utility.nullSafe(buDetail.getNames())) {
 				detail.setEmailAddress(emailAddress);
 				updatedUsers.add(updateUser(detail, true));
 			}
@@ -514,7 +514,12 @@ public class UserServiceImpl implements UserService {
 		ose.checkAndThrow();
 
 		boolean wasInstituteAdmin = existingUser.isInstituteAdmin();
+		String prevStatus = existingUser.getActivityStatus();
 		existingUser.update(user);
+
+		if (isActivated(prevStatus, user.getActivityStatus())) {
+			onAccountActivation(user, prevStatus);
+		}
 
 		if (!wasInstituteAdmin && existingUser.isInstituteAdmin()) {
 			addDefaultSiteAdminRole(existingUser);
@@ -750,5 +755,30 @@ public class UserServiceImpl implements UserService {
 		log.setLogoutTime(log.getLoginTime());
 		log.setLoginSuccessful(true);
 		daoFactory.getAuthDao().saveLoginAuditLog(log);
+	}
+
+	private UserDetail curateBulkUpdateFields(UserDetail input) {
+		UserDetail detail = new UserDetail();
+		if (input.isAttrModified("instituteName")) {
+			detail.setInstituteName(input.getInstituteName());
+		}
+
+		if (input.isAttrModified("primarySite")) {
+			detail.setPrimarySite(input.getPrimarySite());
+		}
+
+		if (input.isAttrModified("type")) {
+			detail.setType(input.getType());
+		}
+
+		if (input.isAttrModified("manageForms")) {
+			detail.setManageForms(input.getManageForms());
+		}
+
+		if (input.isAttrModified("activityStatus")) {
+			detail.setActivityStatus(input.getActivityStatus());
+		}
+
+		return detail;
 	}
 }

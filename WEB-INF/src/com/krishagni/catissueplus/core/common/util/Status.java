@@ -60,6 +60,10 @@ public final class Status {
 		return ACTIVITY_STATUS_DISABLED.equals(status);
 	}
 
+	public static boolean isClosedOrDisabledStatus(String status) {
+		return isClosedStatus(status) || isDisabledStatus(status);
+	}
+
 	public static boolean isValidActivityStatus(String status) {
 		return status.equals(ACTIVITY_STATUS_ACTIVE.statusName) || 
 				status.equals(ACTIVITY_STATUS_DISABLED.statusName) ||

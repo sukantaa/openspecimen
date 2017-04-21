@@ -87,9 +87,9 @@ import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr.ParticipantReadAccess;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
-import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
+import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
+import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityResp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
-import com.krishagni.catissueplus.core.common.events.EntityDeleteResp;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.EmailService;
@@ -404,21 +404,26 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	
 	@Override
 	@PlusTransactional
-	public ResponseEvent<EntityDeleteResp<CollectionProtocolDetail>> deleteCollectionProtocol(RequestEvent<DeleteEntityOp> req) {
+	public ResponseEvent<BulkDeleteEntityResp<CollectionProtocolDetail>> deleteCollectionProtocols(RequestEvent<BulkDeleteEntityOp> req) {
 		try {
-			DeleteEntityOp crit = req.getPayload();
+			BulkDeleteEntityOp crit = req.getPayload();
 
-			CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(crit.getId());
-			if (cp == null) {
-				return ResponseEvent.userError(CpErrorCode.NOT_FOUND, crit.getId());
+			Set<Long> cpIds = crit.getIds();
+			List<CollectionProtocol> cps = daoFactory.getCollectionProtocolDao().getByIds(cpIds);
+			if (crit.getIds().size() != cps.size()) {
+				cps.forEach(cp -> cpIds.remove(cp.getId()));
+				throw OpenSpecimenException.userError(CpErrorCode.DOES_NOT_EXIST, cpIds);
 			}
 
-			AccessCtrlMgr.getInstance().ensureDeleteCpRights(cp);
-			boolean completed = crit.isForceDelete() ? forceDeleteCp(cp) : deleteCp(cp);
+			for (CollectionProtocol cp : cps) {
+				AccessCtrlMgr.getInstance().ensureDeleteCpRights(cp);
+			}
 
-			EntityDeleteResp<CollectionProtocolDetail> resp = new EntityDeleteResp<>();
+			boolean completed = crit.isForceDelete() ? forceDeleteCps(cps) : deleteCps(cps);
+
+			BulkDeleteEntityResp<CollectionProtocolDetail> resp = new BulkDeleteEntityResp<>();
 			resp.setCompleted(completed);
-			resp.setEntity(CollectionProtocolDetail.from(cp));
+			resp.setEntities(CollectionProtocolDetail.from(cps));
 			return ResponseEvent.response(resp);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -1688,8 +1693,8 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			notSameLabels.add(getMsg(labelKey));
 		}
 	}
-	
-	private boolean forceDeleteCp(final CollectionProtocol cp)
+
+	private boolean forceDeleteCps(final List<CollectionProtocol> cps)
 	throws Exception {
 		final Authentication auth = AuthUtil.getAuth();
 
@@ -1697,25 +1702,11 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			@Override
 			public Boolean call() throws Exception {
 				SecurityContextHolder.getContext().setAuthentication(auth);
-
-				boolean success = false;
-				String stackTrace = null;
-				try {
-					while (deleteRegistrations(cp));
-					deleteCp(cp);
-					success = true;
-				} catch (Exception ex) {
-					success = false;
-					stackTrace = ExceptionUtils.getStackTrace(ex);
-					throw OpenSpecimenException.serverError(ex);
-				} finally {
-					sendEmail(cp, success, stackTrace);
-				}
-
+				cps.forEach(cp -> forceDeleteCp(cp));
 				return true;
 			}
 		});
-			
+
 		boolean completed = false;
 		try {
 			completed = result.get(30, TimeUnit.SECONDS);
@@ -1724,6 +1715,32 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		}
 
 		return completed;
+	}
+
+	private void forceDeleteCp(final CollectionProtocol cp) {
+		boolean success = false;
+		String stackTrace = null;
+		try {
+			while (deleteRegistrations(cp));
+			deleteCp(cp);
+			success = true;
+		} catch (Exception ex) {
+			success = false;
+			stackTrace = ExceptionUtils.getStackTrace(ex);
+
+			if (ex instanceof OpenSpecimenException) {
+				throw ex;
+			} else {
+				throw OpenSpecimenException.serverError(ex);
+			}
+		} finally {
+			sendEmail(cp, success, stackTrace);
+		}
+	}
+
+	private boolean deleteCps(List<CollectionProtocol> cps) {
+		cps.forEach(cp -> deleteCp(cp));
+		return true;
 	}
 	
 	@PlusTransactional

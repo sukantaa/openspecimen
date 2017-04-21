@@ -300,6 +300,10 @@ public class Utility {
 		return collect(collection, propertyName, false);
     }
 
+    public static <T> List<T> nullSafe(List<T> iterable) {
+		return iterable == null ? Collections.emptyList() : iterable;
+	}
+
 	public static <T> boolean isEmptyOrSameAs(Collection<T> collection, T element) {
 		int size = collection.size();
 		if (size > 1) {

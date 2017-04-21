@@ -13,46 +13,13 @@
 
   <div class="os-page-commands">
     <div class="left">
-      <button show-if-allowed="userResource.createOpts" class="default" title="{{'user.tooltip.add' | translate}}"
-        ui-sref="user-addedit({userId: ''})">
-        <span class="fa fa-plus"></span>
-        <span translate="common.buttons.create">Create</span>
-      </button>
-
-      <button show-if-admin class="default" title="{{'user.announcement.tooltip' | translate}}"
-        ng-click="broadcastAnnouncement()">
-        <span translate="user.announcement.new">New Announcement</span>
-      </button>
-
-      <div show-if-allowed="userResource.importOpts" dropdown class="os-inline-btn">
-        <button class="default dropdown-toggle">
-          <span translate="common.buttons.import">Import</span>
-          <span class="fa fa-caret-down"></span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-right">
-          <li>
-            <a ui-sref="user-import({objectType: 'user'})">
-              <span class="fa fa-user"></span>
-              <span translate="user.list">Users</span>
-            </a>
-          </li>
-          <li>
-            <a ui-sref="user-import({objectType: 'userRoles'})">
-              <span class="fa fa-lock"></span>
-              <span translate="user.user_roles">User Roles</span>
-            </a>
-          </li>
-          <li>
-            <a ui-sref="user-import-jobs">
-              <span class="fa fa-list-alt"></span>
-              <span translate="bulk_imports.view_jobs">View Jobs</span>
-            </a>
-          </li>
-        </ul>
+      <div ng-if="!ctx.checkList.anySelected">
+        <div ng-include="'modules/administrative/user/single-user-ops.html'"></div>
       </div>
 
-      <os-plugin-hooks view-name="'user-list'" sec-name="'page-header'"></os-plugin-hooks>
-      <os-help class="os-btns btn default" link="user_help_link"></os-help>
+      <div ng-if="ctx.checkList.anySelected">
+        <div ng-include="'modules/administrative/user/bulk-user-ops.html'"></div>
+      </div>
     </div>
    
     <div class="right">
@@ -67,6 +34,12 @@
     <table class="os-table os-table-hover">
       <thead class="os-table-head">
         <tr class="row">
+          <th show-if-allowed="userResource.updateOpts" class="col">
+            <div class="os-select-specimen-cb os-click-esc">
+              <os-checkbox ng-change="ctx.checkList.toggleSelectAll()" ng-model="ctx.checkList.allSelected">
+              </os-checkbox>
+            </div>
+          </th>
           <th class="col">
             <span translate="user.name">Name</span>
           </th>
@@ -86,6 +59,13 @@
       </thead>
       <tbody class="os-table-body">
         <tr class="row" ng-repeat="user in users" os-row-click="showUserOverview(user)">
+          <td show-if-allowed="userResource.updateOpts" class="col">
+            <div class="os-select-specimen-cb os-click-esc">
+              <os-checkbox ng-change="ctx.checkList.toggleSelectItem($index)"
+                ng-model="ctx.checkList.items[$index].selected">
+              </os-checkbox>
+            </div>
+          </td>
           <td class="col">
             <a ui-sref="user-detail.overview({userId: user.id})">
               <span>{{user | osUserDisplayName}}</span>
@@ -115,3 +95,73 @@
 
   <div os-right-drawer ng-include="'modules/administrative/user/search.html'"></div>
 </div>
+
+<script type="text/ng-template" id="modules/administrative/user/single-user-ops.html">
+  <div>
+    <button show-if-allowed="userResource.createOpts" class="default" title="{{'user.tooltip.add' | translate}}"
+      ui-sref="user-addedit({userId: ''})">
+      <span class="fa fa-plus"></span>
+      <span translate="common.buttons.create">Create</span>
+    </button>
+
+    <button show-if-admin class="default" title="{{'user.announcement.tooltip' | translate}}"
+      ng-click="broadcastAnnouncement()">
+      <span translate="user.announcement.new">New Announcement</span>
+    </button>
+
+    <div show-if-allowed="userResource.importOpts" dropdown class="os-inline-btn">
+      <button class="default dropdown-toggle">
+        <span translate="common.buttons.import">Import</span>
+        <span class="fa fa-caret-down"></span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right">
+        <li>
+          <a ui-sref="user-import({objectType: 'user'})">
+            <span class="fa fa-user"></span>
+            <span translate="user.list">Users</span>
+          </a>
+        </li>
+        <li>
+          <a ui-sref="user-import({objectType: 'userRoles'})">
+            <span class="fa fa-lock"></span>
+            <span translate="user.user_roles">User Roles</span>
+          </a>
+        </li>
+        <li>
+          <a ui-sref="user-import-jobs">
+            <span class="fa fa-list-alt"></span>
+            <span translate="bulk_imports.view_jobs">View Jobs</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <os-plugin-hooks view-name="'user-list'" sec-name="'page-header'"></os-plugin-hooks>
+
+    <os-help class="os-btns btn default" link="user_help_link"></os-help>
+  </div>
+</script>
+
+<script type="text/ng-template" id="modules/administrative/user/bulk-user-ops.html">
+  <div>
+    <button class="default" title="{{'user.tooltip.edit_users' | translate}}" ng-click="editUsers()">
+      <span class="fa fa-pencil"></span>
+      <span translate="common.buttons.edit">Edit</span>
+    </button>
+
+    <button class="default" title="{{'user.tooltip.delete_users' | translate}}" ng-click="deleteUsers()">
+      <span class="fa fa-trash"></span>
+      <span translate="common.buttons.delete">Delete</span>
+    </button>
+
+    <button class="default" title="{{'user.tooltip.unlock_users' | translate}}" ng-click="unlockUsers()">
+      <span class="fa fa-unlock"></span>
+      <span translate="user.unlock_users">Unlock</span>
+    </button>
+
+    <button class="default" title="{{'user.tooltip.approve_users' | translate}}" ng-click="approveUsers()">
+      <span class="fa fa-check"></span>
+      <span translate="user.approve_users">Approve</span>
+    </button>
+  </div>
+</script>

@@ -245,8 +245,21 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 		userSummary.setLastName((String)row[idx++]);
 		userSummary.setLoginName((String)row[idx++]);
 		userSummary.setEmailAddress((String)row[idx++]);
+		setUserType(userSummary, (User.Type)row[idx++]);
 		userSummary.setCreationDate((Date)row[idx++]);
 		return userSummary;
+	}
+
+	private void setUserType(UserSummary user, User.Type type) {
+		switch (type) {
+			case SUPER:
+				user.setAdmin(true);
+				break;
+
+			case INSTITUTE:
+				user.setInstituteAdmin(true);
+				break;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -350,6 +363,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 				.add(Projections.property("u.lastName"), "lastName")
 				.add(Projections.property("u.loginName"), "loginName")
 				.add(Projections.property("u.emailAddress"), "emailAddress")
+				.add(Projections.property("u.type"), "type")
 				.add(Projections.property("u.creationDate"), "creationDate")
 		));
 	}

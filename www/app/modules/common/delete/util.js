@@ -78,6 +78,7 @@ angular.module('os.common.delete')
     function bulkDelete(object, entityIds, props) {
       var confirmDelete = props.confirmDelete || 'delete_entity.confirm_delete';
       var successMessage = props.successMessage || 'delete_entity.entity_deleted';
+      var pendingMessage = props.pendingMessage || 'delete_entity.delete_pending';
       var modalInstance = $modal.open({
         templateUrl: 'modules/common/delete/modal.html',
         controller: 'EntityDeleteCtrl',
@@ -88,6 +89,7 @@ angular.module('os.common.delete')
               entityIds: entityIds,
               confirmDelete: confirmDelete,
               successMessage: successMessage,
+              pendingMessage: pendingMessage,
               bulkDelete: true
             }
           },

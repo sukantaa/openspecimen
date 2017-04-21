@@ -1,8 +1,8 @@
 package com.krishagni.catissueplus.rest.controller;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,11 +20,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.krishagni.catissueplus.core.administrative.events.AnnouncementDetail;
 import com.krishagni.catissueplus.core.administrative.events.InstituteDetail;
 import com.krishagni.catissueplus.core.administrative.events.PasswordDetails;
-import com.krishagni.catissueplus.core.administrative.events.BulkUpdateUserDetail;
 import com.krishagni.catissueplus.core.administrative.events.UserDetail;
 import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.UserService;
 import com.krishagni.catissueplus.core.auth.services.UserAuthenticationService;
+import com.krishagni.catissueplus.core.common.events.BulkEntityDetail;
 import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -215,7 +215,7 @@ public class UserController {
 	@RequestMapping(method = RequestMethod.PUT, value = "/bulk-update")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public List<UserDetail> bulkUpdateUsers(@RequestBody BulkUpdateUserDetail detail) {
+	public List<UserDetail> bulkUpdateUsers(@RequestBody BulkEntityDetail<UserDetail> detail) {
 		ResponseEvent<List<UserDetail>> resp = userService.bulkUpdateUsers(new RequestEvent<>(detail));
 		resp.throwErrorIfUnsuccessful();
 

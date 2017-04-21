@@ -66,6 +66,14 @@ angular.module('os.biospecimen.models.cp', ['os.common.models'])
       )
     }
 
+    CollectionProtocol.bulkDelete = function(cpIds) {
+      return $http.delete(CollectionProtocol.url(), {params: {id: cpIds, forceDelete: true}}).then(
+        function(result) {
+          return result.data;
+        }
+      );
+    }
+
     CollectionProtocol.prototype.getType = function() {
       return 'collection_protocol';
     }

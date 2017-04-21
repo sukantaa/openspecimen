@@ -22,6 +22,7 @@ import com.krishagni.catissueplus.core.administrative.events.SiteQueryCriteria;
 import com.krishagni.catissueplus.core.administrative.events.SiteSummary;
 import com.krishagni.catissueplus.core.administrative.repository.SiteListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.SiteService;
+import com.krishagni.catissueplus.core.common.events.BulkEntityDetail;
 import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -179,6 +180,17 @@ public class SitesController {
 		RequestEvent<SiteDetail> req = new RequestEvent<>(siteDetail);
 		ResponseEvent<SiteDetail> resp = siteService.patchSite(req);
 		resp.throwErrorIfUnsuccessful();
+		return resp.getPayload();
+	}
+
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/bulk-update")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public List<SiteDetail> bulkUpdateSites(@RequestBody BulkEntityDetail<SiteDetail> detail) {
+		ResponseEvent<List<SiteDetail>> resp = siteService.bulkUpdateSites(new RequestEvent<>(detail));
+		resp.throwErrorIfUnsuccessful();
+
 		return resp.getPayload();
 	}
 		

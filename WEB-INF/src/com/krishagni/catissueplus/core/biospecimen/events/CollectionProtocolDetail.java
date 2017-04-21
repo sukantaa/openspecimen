@@ -1,6 +1,8 @@
 package com.krishagni.catissueplus.core.biospecimen.events;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -338,5 +340,8 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		
 		return result;
 	}
-	
+
+	public static List<CollectionProtocolDetail> from(Collection<CollectionProtocol> cps) {
+		return cps.stream().map(CollectionProtocolDetail::from).collect(Collectors.toList());
+	}
 }

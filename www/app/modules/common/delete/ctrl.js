@@ -24,7 +24,12 @@ angular.module('os.common.delete', [])
 
     function onBulkDeletion(entity) {
       if (!!entity) {
-        Alerts.success(entityProps.successMessage);
+        if (entity.completed != false) {
+          Alerts.success(entityProps.successMessage);
+        } else {
+          Alerts.info(entityProps.pendingMessage)
+        }
+
         $modalInstance.close(entity);
       }
     }

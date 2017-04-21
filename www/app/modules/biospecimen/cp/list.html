@@ -10,33 +10,13 @@
 
   <div class="os-page-commands">
     <div class="left">
-      <div dropdown class="os-inline-btn">
-        <button show-if-allowed="cpResource.createOpts" class="default dropdown-toggle" title="{{'cp.tooltip.add' | translate}}"
-          ui-sref="cp-addedit({cpId: ''})">
-          <span class="fa fa-plus"></span>
-          <span translate="common.buttons.create">Create</span>
-        </button>
-        <ul class="dropdown-menu">
-          <li>
-            <a ui-sref="cp-addedit">
-              <i class="fa fa-plus"></i>
-              <span translate="common.buttons.create">Create</span>
-            </a>
-          </li>
-          <li>
-            <a ui-sref="cp-import">
-              <i class="fa fa-upload"></i>
-              <span translate="common.buttons.import">Import</span>
-            </a>
-          </li>
-        </ul>
+      <div ng-if="!ctx.checkList.anySelected">
+        <div ng-include="'modules/biospecimen/cp/single-cp-ops.html'"></div>
       </div>
 
-      <os-plugin-hooks view-name="'cp-list'" sec-name="'page-header'"></os-plugin-hooks>
-
-      <ng-include src="'modules/biospecimen/cp/more-menu.html'"></ng-include>
-
-      <os-help class="os-btns btn default" link="cp_help_link"></os-help>
+      <div ng-if="ctx.checkList.anySelected">
+        <div ng-include="'modules/biospecimen/cp/bulk-cp-ops.html'"></div>
+      </div>
     </div>
     <div class="right">
       <button class="default" os-right-drawer-toggle title="{{'cp.tooltip.search' | translate}}">
@@ -47,10 +27,15 @@
   </div>
    
   <div class="container">
-
     <table class="os-table os-table-hover">
       <thead class="os-table-head">
         <tr class="row">
+          <th show-if-allowed="cpResource.deleteOpts" class="col os-click-esc">
+            <div class="os-select-specimen-cb">
+              <os-checkbox ng-change="ctx.checkList.toggleSelectAll()" ng-model="ctx.checkList.allSelected">
+              </os-checkbox>
+            </div>
+          </th>
           <th class="col">
             <span translate="cp.short_title">Short Title</span>
           </th>
@@ -76,6 +61,13 @@
       </thead>
       <tbody class="os-table-body">
         <tr class="row" ng-repeat="cp in cpList" os-row-click="showCpSummary(cp)">
+          <td show-if-allowed="cpResource.deleteOpts" class="col os-click-esc">
+            <div class="os-select-specimen-cb">
+              <os-checkbox ng-change="ctx.checkList.toggleSelectItem($index)"
+                ng-model="ctx.checkList.items[$index].selected">
+              </os-checkbox>
+            </div>
+          </td>
           <td class="col">
             <a ui-sref="cp-summary-view({cpId: cp.id})">
               <span>{{cp.shortTitle}}</span>
@@ -150,3 +142,44 @@
   <div os-right-drawer ng-include="'modules/biospecimen/cp/search.html'"></div>
 
 </div>
+
+<script type="text/ng-template" id="modules/biospecimen/cp/single-cp-ops.html">
+  <div>
+    <div dropdown class="os-inline-btn">
+      <button show-if-allowed="cpResource.createOpts" class="default dropdown-toggle"
+        title="{{'cp.tooltip.add' | translate}}" ui-sref="cp-addedit({cpId: ''})">
+        <span class="fa fa-plus"></span>
+        <span translate="common.buttons.create">Create</span>
+      </button>
+      <ul class="dropdown-menu">
+        <li>
+          <a ui-sref="cp-addedit">
+            <span class="fa fa-plus"></span>
+            <span translate="common.buttons.create">Create</span>
+          </a>
+        </li>
+        <li>
+          <a ui-sref="cp-import">
+            <span class="fa fa-upload"></span>
+            <span translate="common.buttons.import">Import</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <os-plugin-hooks view-name="'cp-list'" sec-name="'page-header'"></os-plugin-hooks>
+
+    <ng-include src="'modules/biospecimen/cp/more-menu.html'"></ng-include>
+
+    <os-help class="os-btns btn default" link="cp_help_link"></os-help>
+  </div>
+</script>
+
+<script type="text/ng-template" id="modules/biospecimen/cp/bulk-cp-ops.html">
+  <div>
+    <button class="default" title="{{'user.tooltip.delete_cps' | translate}}" ng-click="deleteCps()">
+      <span class="fa fa-trash"></span>
+      <span translate="common.buttons.delete">Delete</span>
+    </button>
+  </div>
+</script>

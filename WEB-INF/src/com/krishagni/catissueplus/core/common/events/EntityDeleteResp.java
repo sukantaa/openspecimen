@@ -5,6 +5,11 @@ public class EntityDeleteResp<T> {
 	
 	private T entity;
 
+	public EntityDeleteResp(T entity, boolean completed) {
+		this.entity = entity;
+		this.completed = completed;
+	}
+
 	public boolean isCompleted() {
 		return completed;
 	}

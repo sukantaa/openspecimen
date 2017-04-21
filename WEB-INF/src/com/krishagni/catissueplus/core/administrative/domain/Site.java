@@ -199,9 +199,7 @@ public class Site extends BaseExtensionEntity {
 			ensureFreeOfDependencies();
 			
 			setName(Utility.getDisabledValue(getName(), 255));
-			if (getCode() != null) {
-				setCode(Utility.getDisabledValue(getCode(), 50));
-			}
+			setCode(Utility.getDisabledValue(getCode(), 50));
 		}
 		
 		setActivityStatus(activityStatus);
@@ -217,17 +215,17 @@ public class Site extends BaseExtensionEntity {
 			return;
 		}
 		
-		if (newActivityStatus.equals(Status.ACTIVITY_STATUS_DISABLED.getStatus())) {
-			ensureFreeOfDependencies();
+		if (Status.isClosedOrDisabledStatus(newActivityStatus)) {
+			delete(Status.isClosedStatus(newActivityStatus));
+		} else {
+			setActivityStatus(newActivityStatus);
 		}
-		
-		this.setActivityStatus(newActivityStatus);
 	}
 	
 	private void ensureFreeOfDependencies() {
 		List<DependentEntityDetail> dependentEntities = getDependentEntities();
 		if (!dependentEntities.isEmpty()) {
-			throw new OpenSpecimenException(ErrorType.USER_ERROR, SiteErrorCode.REF_ENTITY_FOUND);
+			throw OpenSpecimenException.userError(SiteErrorCode.REF_ENTITY_FOUND, getName());
 		}
 	}
 }

@@ -183,19 +183,22 @@ public class UserFactoryImpl implements UserFactory {
 			return;
 		}
 
-		if (!primarySite.getInstitute().equals(user.getInstitute())) {
-			ose.addError(SiteErrorCode.INVALID_SITE_INSTITUTE, primarySite.getName(), user.getInstitute().getName());
-			return;
-		}
-
+		ensurePrimarySiteBelongsToInstitute(primarySite, user.getInstitute(), ose);
 		user.setPrimarySite(primarySite);
 	}
 
 	private void setPrimarySite(UserDetail detail, User existing, User user, OpenSpecimenException ose) {
 		if (detail.isAttrModified("primarySite")) {
 			setPrimarySite(detail, user, ose);
-		} else {
+		} else if (existing.getPrimarySite() != null) {
+			ensurePrimarySiteBelongsToInstitute(existing.getPrimarySite(), user.getInstitute(), ose);
 			user.setPrimarySite(existing.getPrimarySite());
+		}
+	}
+
+	private void ensurePrimarySiteBelongsToInstitute(Site primarySite, Institute institute, OpenSpecimenException ose) {
+		if (!primarySite.getInstitute().equals(institute)) {
+			ose.addError(SiteErrorCode.INVALID_SITE_INSTITUTE, primarySite.getName(), institute.getName());
 		}
 	}
 
