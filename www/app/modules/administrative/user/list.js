@@ -2,7 +2,8 @@
 angular.module('os.administrative.user.list', ['os.administrative.models'])
   .controller('UserListCtrl', function(
     $scope, $state, $modal, currentUser,
-    osRightDrawerSvc, Institute, User, ItemsHolder, PvManager, Util, DeleteUtil, Alerts, ListPagerOpts) {
+    osRightDrawerSvc, Institute, User, ItemsHolder, PvManager,
+    Util, DeleteUtil, CheckList, Alerts, ListPagerOpts) {
 
     var pagerOpts;
     var pvInit = false;
@@ -86,9 +87,7 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
     };
 
     function initCtx() {
-      $scope.ctx = {
-        selection: {all: false, any: false, users: []}
-      }
+      $scope.ctx = {checkList: new CheckList($scope.users)};
     }
 
     function getUsersCount() {
@@ -96,7 +95,7 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
     }
 
     function activateUsers(msgKey) {
-      var users = $scope.ctx.selection.users;
+      var users = $scope.ctx.checkList.getSelectedItems();
       User.bulkUpdate({detail: {activityStatus: 'Active'}, ids: getUserIds(users)}).then(
         function(savedUsers) {
           Alerts.success(msgKey);
@@ -130,39 +129,8 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
       );
     }
 
-    $scope.toggleSelectAll = function() {
-      $scope.ctx.selection.any = $scope.ctx.selection.all;
-
-      if (!$scope.ctx.selection.all) {
-        $scope.ctx.selection.users = [];
-      } else {
-        $scope.ctx.selection.users = [].concat($scope.users);
-      }
-
-      angular.forEach($scope.users,
-        function(user) {
-          user.selected = $scope.ctx.selection.all;
-        }
-      );
-    }
-
-    $scope.toggleSelect = function(user) {
-      var users = $scope.ctx.selection.users;
-      if (user.selected) {
-        users.push(user);
-      } else {
-        var idx = users.indexOf(user);
-        if (idx != -1) {
-          users.splice(idx, 1);
-        }
-      }
-
-      $scope.ctx.selection.all = (users.length == $scope.users.length);
-      $scope.ctx.selection.any = (users.length > 0);
-    };
-
     $scope.deleteUsers = function() {
-      var users = $scope.ctx.selection.users;
+      var users = $scope.ctx.checkList.getSelectedItems();
 
       if (!currentUser.admin) {
         var admins = users.filter(function(user) { return !!user.admin; })
@@ -184,7 +152,7 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
     }
 
     $scope.editUsers = function() {
-       var users = $scope.ctx.selection.users;
+       var users = $scope.ctx.checkList.getSelectedItems();
        ItemsHolder.setItems('users', users);
        $state.go('user-bulk-edit');
     }
@@ -195,12 +163,6 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
 
     $scope.approveUsers = function() {
       activateUsers('user.users_approved');
-    }
-
-    $scope.editUsers = function() {
-       var users = $scope.ctx.selection.users;
-       ItemsHolder.setItems('users', users);
-       $state.go('user-bulk-edit');
     }
 
     init();
