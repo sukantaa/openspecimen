@@ -26,9 +26,9 @@ import com.krishagni.catissueplus.core.biospecimen.events.SpecimenPoolRequiremen
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenRequirementDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.CprListCriteria;
-import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
+import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
+import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityResp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
-import com.krishagni.catissueplus.core.common.events.EntityDeleteResp;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.query.ListConfig;
@@ -60,7 +60,7 @@ public interface CollectionProtocolService {
 
 	public ResponseEvent<List<DependentEntityDetail>> getCpDependentEntities(RequestEvent<Long> req);
 
-	public ResponseEvent<EntityDeleteResp<CollectionProtocolDetail>> deleteCollectionProtocol(RequestEvent<DeleteEntityOp> crit);
+	public ResponseEvent<BulkDeleteEntityResp<CollectionProtocolDetail>> deleteCollectionProtocols(RequestEvent<BulkDeleteEntityOp> crit);
 
 	public ResponseEvent<File> getSopDocument(RequestEvent<Long> req);
 

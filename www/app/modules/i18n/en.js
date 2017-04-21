@@ -202,6 +202,9 @@
     "spmn_print_settings": "Specimen Print Settings",
     "when_to_print": "When to Print",
     "copies": "Copies",
+    "delete_cps":  "Are you sure you want to delete selected collection protocols?",
+    "cps_deleted": "Collection protocols deleted successfully",
+    "cps_delete_pending": "Collection protocols deletion taking longer time than anticipated. You'll receive emails when it gets completed",
     "delete_consent_tier": "{{entityType}} {{entityName}} of {{entity.cpShortTitle}} will be deleted forever. Are you sure you want to proceed?",
 
     "consents_waived": "Consent waived?",
