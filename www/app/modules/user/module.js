@@ -24,6 +24,20 @@ angular.module('openspecimen')
         parent: 'default-nav-buttons',
         data: {
           redirect: false
+        },
+        resolve: {
+          defCatalogId: function($injector) {
+            if (!$injector.has('scCatalog')) {
+              return null;
+            }
+
+            var scCatalog = $injector.get('scCatalog');
+            return scCatalog.loadDefCatalogId().then(
+              function(catalogId) {
+                return scCatalog.defCatalogId;
+              }
+            );
+          }
         }
       })
       .state('forgot-password', {
