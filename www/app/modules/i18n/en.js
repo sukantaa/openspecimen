@@ -834,6 +834,8 @@
     "address": "Address",
     "cp_count": "Collection Protocols",
     "all_sites": "All current and future sites",
+    "delete_sites":  "Are you sure you want to delete selected sites?",
+    "sites_deleted": "Sites deleted successfully",
 
     "bulk_import": "Import Sites",
     "bulk_import_jobs": "Import Sites Job List",
@@ -842,6 +844,7 @@
       "view_details": "Click to view Site details",
       "add": "Click to add new Site",
       "edit": "Click to edit site",
+      "delete_sites": "Click to delete selected sites",
       "cp_count": "Count of Collection Protocols",
       "search": "Click to search Sites"
     },

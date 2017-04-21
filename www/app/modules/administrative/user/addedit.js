@@ -90,7 +90,7 @@ angular.module('os.administrative.user.addedit', ['os.administrative.models'])
 
     $scope.bulkUpdate = function() {
       var userIds = users.map(function(user) { return user.id; });
-      User.bulkUpdate({detail: $scope.user, userIds: userIds}).then(
+      User.bulkUpdate({detail: $scope.user, ids: userIds}).then(
         function(savedUsers) {
           $state.go('user-list');
         }

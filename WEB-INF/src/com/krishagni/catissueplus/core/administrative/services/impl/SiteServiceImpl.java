@@ -1,6 +1,7 @@
 
 package com.krishagni.catissueplus.core.administrative.services.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,7 @@ import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.events.BulkEntityDetail;
 import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.Operation;
@@ -33,6 +35,8 @@ import com.krishagni.catissueplus.core.common.events.Resource;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 import com.krishagni.rbac.service.RbacService;
 
@@ -141,7 +145,34 @@ public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver {
 	public ResponseEvent<SiteDetail> patchSite(RequestEvent<SiteDetail> req) {
 		return updateSite(req, true);
 	}
-	
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<SiteDetail>> bulkUpdateSites(RequestEvent<BulkEntityDetail<SiteDetail>> req) {
+		try {
+			BulkEntityDetail<SiteDetail> buDetail = req.getPayload();
+
+			List<SiteDetail> updatedSites = new ArrayList<>();
+			SiteDetail detail = curateBulkUpdateFields(buDetail.getDetail());
+			for (Long siteId : Utility.nullSafe(buDetail.getIds())) {
+				detail.setId(siteId);
+				updatedSites.add(updateSite(detail, true));
+			}
+
+			detail.setId(null);
+			for (String name : Utility.nullSafe(buDetail.getNames())) {
+				detail.setName(name);
+				updatedSites.add(updateSite(detail, true));
+			}
+
+			return ResponseEvent.response(updatedSites);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<DependentEntityDetail>> getDependentEntities(RequestEvent<Long> req) {
@@ -218,48 +249,65 @@ public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver {
 
 	private ResponseEvent<SiteDetail> updateSite(RequestEvent<SiteDetail> req, boolean partial) {
 		try {
-			SiteDetail detail = req.getPayload();
-			
-			Site existing = null;			
-			if (detail.getId() != null) {
-				existing = daoFactory.getSiteDao().getById(detail.getId()); 
-			} else if (StringUtils.isNotBlank(detail.getName())) {
-				existing = daoFactory.getSiteDao().getSiteByName(detail.getName());
-			}
-			
-			if (existing == null) {
-				return ResponseEvent.userError(SiteErrorCode.NOT_FOUND);
-			}
-
-			AccessCtrlMgr.getInstance().ensureCreateUpdateDeleteSiteRights(existing);
-
-			Site site = partial ? siteFactory.createSite(existing, detail) : siteFactory.createSite(detail);
-			AccessCtrlMgr.getInstance().ensureCreateUpdateDeleteSiteRights(site);
-
-			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
-			ensureUniqueConstraint(site, existing, ose);
-			ose.checkAndThrow();
-			
-			Collection<User> addedCoordinators = 
-				CollectionUtils.subtract(site.getCoordinators(), existing.getCoordinators());
-			Collection<User> removedCoordinators = 
-				CollectionUtils.subtract(existing.getCoordinators(), site.getCoordinators());
-			
-			existing.update(site);			
-			daoFactory.getSiteDao().saveOrUpdate(existing);
-			existing.addOrUpdateExtension();
-			
-			removeDefaultCoordinatorRoles(existing, removedCoordinators);
-			addDefaultCoordinatorRoles(existing, addedCoordinators);
-			
-			return ResponseEvent.response(SiteDetail.from(existing));
+			return ResponseEvent.response(updateSite(req.getPayload(), partial));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
-		}		
+		}
 	}
-	
+
+	private SiteDetail updateSite(SiteDetail detail, boolean partial) {
+		Site existing = getSite(detail.getId(), detail.getName());
+		AccessCtrlMgr.getInstance().ensureCreateUpdateDeleteSiteRights(existing);
+
+		Site site = partial ? siteFactory.createSite(existing, detail) : siteFactory.createSite(detail);
+		AccessCtrlMgr.getInstance().ensureCreateUpdateDeleteSiteRights(site);
+
+		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+		ensureUniqueConstraint(site, existing, ose);
+		ose.checkAndThrow();
+
+		Collection<User> addedCoordinators =
+			CollectionUtils.subtract(site.getCoordinators(), existing.getCoordinators());
+		Collection<User> removedCoordinators =
+			CollectionUtils.subtract(existing.getCoordinators(), site.getCoordinators());
+
+		existing.update(site);
+		daoFactory.getSiteDao().saveOrUpdate(existing);
+		existing.addOrUpdateExtension();
+
+		if (Status.isClosedOrDisabledStatus(existing.getActivityStatus())) {
+			removeDefaultCoordinatorRoles(existing, existing.getCoordinators());
+		} else {
+			removeDefaultCoordinatorRoles(existing, removedCoordinators);
+			addDefaultCoordinatorRoles(existing, addedCoordinators);
+		}
+
+		return SiteDetail.from(existing);
+	}
+
+	private Site getSite(Long siteId, String name) {
+		Site site = null;
+		Object key = null;
+
+		if (siteId != null) {
+			site = daoFactory.getSiteDao().getById(siteId);
+			key = siteId;
+		} else if (StringUtils.isNotBlank(name)) {
+			site = daoFactory.getSiteDao().getSiteByName(name);
+			key = name;
+		}
+
+		if (key == null) {
+			throw  OpenSpecimenException.userError(SiteErrorCode.NAME_REQUIRED);
+		} else if (site == null) {
+			throw  OpenSpecimenException.userError(SiteErrorCode.NOT_FOUND, key);
+		}
+
+		return site;
+	}
+
 	private void addDefaultCoordinatorRoles(Site site, Collection<User> users) {
 		for (User user: users) {
 			rbacSvc.addSubjectRole(site, null, user, getDefaultCoordinatorRoles());
@@ -383,5 +431,30 @@ public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver {
 		
 		return result;
 	}
-	
+
+	private SiteDetail curateBulkUpdateFields(SiteDetail input) {
+		SiteDetail detail = new SiteDetail();
+
+		if (input.isAttrModified("instituteName")) {
+			detail.setInstituteName(input.getInstituteName());
+		}
+
+		if (input.isAttrModified("coordinators")) {
+			detail.setCoordinators(input.getCoordinators());
+		}
+
+		if (input.isAttrModified("type")) {
+			detail.setType(input.getType());
+		}
+
+		if (input.isAttrModified("activityStatus")) {
+			detail.setActivityStatus(input.getActivityStatus());
+		}
+
+		//
+		// TODO: need to handle custom site fields
+		//
+
+		return detail;
+	}
 }

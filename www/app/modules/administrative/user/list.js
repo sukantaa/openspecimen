@@ -97,7 +97,7 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
 
     function activateUsers(msgKey) {
       var users = $scope.ctx.selection.users;
-      User.bulkUpdate({detail: {activityStatus: 'Active'}, userIds: getUserIds(users)}).then(
+      User.bulkUpdate({detail: {activityStatus: 'Active'}, ids: getUserIds(users)}).then(
         function(savedUsers) {
           Alerts.success(msgKey);
 

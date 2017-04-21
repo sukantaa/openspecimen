@@ -48,6 +48,14 @@ angular.module('os.administrative.models.site', ['os.common.models'])
       return getSites(opts);
     }
 
+    Site.bulkUpdate = function(detail) {
+      return $http.put(Site.url() + 'bulk-update', detail).then(Site.modelArrayRespTransform);
+    }
+
+    Site.bulkDelete = function(siteIds) {
+      return Site.bulkUpdate({detail: {activityStatus: 'Disabled'}, ids: siteIds});
+    }
+
     function getSites(opts) {
       return Site.query(opts).then(
         function(sites) {

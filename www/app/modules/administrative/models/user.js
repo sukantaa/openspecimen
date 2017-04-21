@@ -99,12 +99,7 @@ angular.module('os.administrative.models.user', ['os.common.models'])
     }
 
     User.bulkDelete = function(userIds) {
-      var req = {
-        detail  : { activityStatus: 'Disabled' },
-        userIds : userIds
-      }
-
-      return User.bulkUpdate(req);
+      return User.bulkUpdate({detail: {activityStatus: 'Disabled'}, ids: userIds});
     }
 
     return User;

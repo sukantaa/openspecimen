@@ -7,6 +7,7 @@ import com.krishagni.catissueplus.core.administrative.events.SiteDetail;
 import com.krishagni.catissueplus.core.administrative.events.SiteQueryCriteria;
 import com.krishagni.catissueplus.core.administrative.events.SiteSummary;
 import com.krishagni.catissueplus.core.administrative.repository.SiteListCriteria;
+import com.krishagni.catissueplus.core.common.events.BulkEntityDetail;
 import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -24,6 +25,8 @@ public interface SiteService {
 	public ResponseEvent<SiteDetail> updateSite(RequestEvent<SiteDetail> req);
 	
 	public ResponseEvent<SiteDetail> patchSite(RequestEvent<SiteDetail> req);
+
+	public ResponseEvent<List<SiteDetail>> bulkUpdateSites(RequestEvent<BulkEntityDetail<SiteDetail>> req);
 	
 	public ResponseEvent<List<DependentEntityDetail>> getDependentEntities(RequestEvent<Long> req);
 
