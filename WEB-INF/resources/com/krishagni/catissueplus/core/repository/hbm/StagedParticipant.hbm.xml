@@ -48,9 +48,9 @@
       <element column="RACE_NAME" type="string" />
     </set>
 
-    <set name="ethnicities" table="OS_STAGED_PARTICIPANT_ETHNICITIES" cascade="all-delete-orphan">
+    <set name="ethnicities" table="OS_STAGED_PART_ETHNICITIES" cascade="all-delete-orphan">
       <key column="PARTICIPANT_ID" />
-      <element column="ETHNICITIES" type="string" />
+      <element column="ETHNICITY" type="string" />
     </set>
     
     <query name="getByEmpi">

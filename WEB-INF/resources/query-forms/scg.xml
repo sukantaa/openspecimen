@@ -145,13 +145,13 @@
         <udn>clinicalDiagnosis</udn>
         <caption>#getMessage("visit_clinical_diagnosis")</caption>
         <multiSelect>true</multiSelect>
-        <table>OS_VISIT_CLINICAL_DIAGNOSES</table>
+        <table>OS_VISIT_CLIN_DIAGNOSES</table>
         <column>CLINICAL_DIAGNOSIS</column>
         <foreignKey>VISIT_ID</foreignKey>
         <parentKey>IDENTIFIER</parentKey>
         <options>
           <!-- sql>select value from catissue_permissible_value where public_id = 'Clinical_Diagnosis_PID' order by sortorder, value</sql -->
-          <sql>select distinct CLINICAL_DIAGNOSIS from OS_VISIT_CLINICAL_DIAGNOSES order by CLINICAL_DIAGNOSIS</sql>
+          <sql>select distinct CLINICAL_DIAGNOSIS from OS_VISIT_CLIN_DIAGNOSES order by CLINICAL_DIAGNOSIS</sql>
         </options>
       </listBox>
     </row>

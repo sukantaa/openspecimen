@@ -135,7 +135,7 @@
   </changeSet>
 
   <changeSet author="mdnasim" id="Track and audit changes to visit clinical diagnoses">
-    <createTable tableName="OS_VISIT_CLINICAL_DIAGNOSES_AUD">
+    <createTable tableName="OS_VISIT_CLIN_DIAGNOSES_AUD">
       <column name="REV" type="${int.type}">
         <constraints nullable="false"/>
       </column>
@@ -151,7 +151,7 @@
 
   <changeSet author="mdnasim" id="Move audit data of clinical diagnosis field from visit table to 1:m clinical diagnoses audit table">
     <sql>
-      insert into os_visit_clinical_diagnoses_aud
+      insert into os_visit_clin_diagnoses_aud
         (rev, revtype, visit_id, clinical_diagnosis)
       select
         rev, revtype, identifier, clinical_diagnosis

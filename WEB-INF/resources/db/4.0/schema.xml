@@ -570,7 +570,7 @@
   </changeSet>
 
   <changeSet author="mdnasim" id="Table to stage participant ethnicity details received from external sources">
-    <createTable tableName="OS_STAGED_PARTICIPANT_ETHNICITIES">
+    <createTable tableName="OS_STAGED_PART_ETHNICITIES">
       <column name="PARTICIPANT_ID" type="${int.type}">
         <constraints nullable="false"/>
       </column>
@@ -582,12 +582,12 @@
 
   <changeSet author="mdnasim" id="FK on staged participant ID of ethnicities table">
     <addForeignKeyConstraint constraintName="FK_OS_STG_ETHNICITIES_PID"
-      baseTableName="OS_STAGED_PARTICIPANT_ETHNICITIES" baseColumnNames="PARTICIPANT_ID"
+      baseTableName="OS_STAGED_PART_ETHNICITIES" baseColumnNames="PARTICIPANT_ID"
       referencedTableName="OS_STAGED_PARTICIPANTS" referencedColumnNames="IDENTIFIER"/>
   </changeSet>
 
   <changeSet author="mdnasim" id="Primary key of staged participant ethnicities">
-    <addPrimaryKey tableName="OS_STAGED_PARTICIPANT_ETHNICITIES" columnNames="PARTICIPANT_ID, ETHNICITY"/>
+    <addPrimaryKey tableName="OS_STAGED_PART_ETHNICITIES" columnNames="PARTICIPANT_ID, ETHNICITY"/>
   </changeSet>
 
   <changeSet author="mdnasim" id="Drop staged participant ethnicity column">
@@ -595,7 +595,7 @@
   </changeSet>
 
   <changeSet author="mdnasim" id="Multiple visit clinical diagnoses">
-    <createTable tableName="OS_VISIT_CLINICAL_DIAGNOSES">
+    <createTable tableName="OS_VISIT_CLIN_DIAGNOSES">
       <column name="VISIT_ID" type="${int.type}">
         <constraints nullable="false"/>
       </column>
@@ -607,17 +607,17 @@
 
   <changeSet author="mdnasim" id="Add FK on visit ID of clinical diagnosis">
     <addForeignKeyConstraint constraintName="FK_OS_VISIT_CDS_VISIT_ID"
-      baseTableName="OS_VISIT_CLINICAL_DIAGNOSES" baseColumnNames="VISIT_ID"
+      baseTableName="OS_VISIT_CLIN_DIAGNOSES" baseColumnNames="VISIT_ID"
       referencedTableName="CATISSUE_SPECIMEN_COLL_GROUP" referencedColumnNames="IDENTIFIER"/>
   </changeSet>
 
   <changeSet author="mdnasim" id="Primary key of visit clinical diagnoses">
-    <addPrimaryKey tableName="OS_VISIT_CLINICAL_DIAGNOSES" columnNames="VISIT_ID, CLINICAL_DIAGNOSIS"/>
+    <addPrimaryKey tableName="OS_VISIT_CLIN_DIAGNOSES" columnNames="VISIT_ID, CLINICAL_DIAGNOSIS"/>
   </changeSet>
 
   <changeSet author="mdnasim" id="Move clinical diagnosis data from visit table to 1:m visit clinical diagnoses table">
     <sql>
-      insert into os_visit_clinical_diagnoses
+      insert into os_visit_clin_diagnoses
         (visit_id, clinical_diagnosis)
       select
         identifier, clinical_diagnosis
