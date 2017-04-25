@@ -33,7 +33,7 @@
 
     <property name="missedReason" column="MISSED_REASON" />
 
-    <set name="clinicalDiagnoses" table="OS_VISIT_CLINICAL_DIAGNOSES" cascade="all-delete-orphan">
+    <set name="clinicalDiagnoses" table="OS_VISIT_CLIN_DIAGNOSES" cascade="all-delete-orphan">
       <key column="VISIT_ID"/>
       <element column="CLINICAL_DIAGNOSIS" type="string"/>
     </set>

@@ -293,6 +293,7 @@ public class UserServiceImpl implements UserService {
 			 * So creating user object clone.
 			 */
 			User user = new User();
+			user.setActivityStatus(existing.getActivityStatus());
 			user.update(existing);
 			existing.delete();
 

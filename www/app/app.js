@@ -110,7 +110,7 @@ osApp.config(function(
     }
   })
   .factory('httpRespInterceptor', function(
-    $rootScope, $q, $injector, $window, $templateCache,
+    $rootScope, $q, $injector, $window, $templateCache, $cookieStore,
     Alerts, LocationChangeListener) {
 
     var qp = '?_buildVersion=' + ui.os.appProps.build_version + '&_buildDate=' + ui.os.appProps.build_date;
@@ -152,6 +152,8 @@ osApp.config(function(
           Alerts.error("common.server_connect_error");
         } else if (rejection.status == 401) {
           $rootScope.loggedIn = false;
+
+          $cookieStore.remove('osAuthToken');
           delete $window.localStorage['osAuthToken'];
           delete $injector.get("$http").defaults.headers.common['X-OS-API-TOKEN'];
           $injector.get('$state').go('login'); // using injector to get rid of circular dependencies
@@ -240,6 +242,10 @@ osApp.config(function(
       return !st.data || st.data.redirect !== false;
     }
 
+    function isLandingView(st) {
+      return st.data && (st.data.landingView === true);
+    }
+
     if (!angular.merge) {
       angular.merge = function(dst, src) {
         return Util.merge(src, dst);
@@ -271,7 +277,7 @@ osApp.config(function(
       function(event, toState, toParams, fromState, fromParams) {
         LocationChangeListener.onChange(event);
 
-        if (toState.parent != 'default-nav-buttons') {
+        if (toState.parent != 'default-nav-buttons' && !isLandingView(toState)) {
           $rootScope.reqState = {
             name: toState.name,
             params: toParams
