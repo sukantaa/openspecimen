@@ -242,6 +242,10 @@ osApp.config(function(
       return !st.data || st.data.redirect !== false;
     }
 
+    function isLandingView(st) {
+      return st.data && (st.data.landingView === true);
+    }
+
     if (!angular.merge) {
       angular.merge = function(dst, src) {
         return Util.merge(src, dst);
@@ -273,7 +277,7 @@ osApp.config(function(
       function(event, toState, toParams, fromState, fromParams) {
         LocationChangeListener.onChange(event);
 
-        if (toState.parent != 'default-nav-buttons') {
+        if (toState.parent != 'default-nav-buttons' && !isLandingView(toState)) {
           $rootScope.reqState = {
             name: toState.name,
             params: toParams
