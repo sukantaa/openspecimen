@@ -1,6 +1,6 @@
 angular.module('os.biospecimen.participant')
   .controller('SpecimensListViewCtrl', function(
-    $scope, $state, currentUser, cp, spmnListCfg, reqBasedDistOrShip,
+    $scope, $state, currentUser, cp, spmnListCfg,
     Util, Specimen, SpecimensHolder, DeleteUtil, Alerts, ListPagerOpts) {
 
     var ctrl = this;
@@ -12,11 +12,16 @@ angular.module('os.biospecimen.participant')
       listParams = {listName: 'specimen-list-view', maxResults: pagerOpts.recordsPerPage + 1};
 
       $scope.ctx = {
-        reqBasedDistOrShip: reqBasedDistOrShip,
         filtersCfg: angular.copy(spmnListCfg.filters),
         filters: {},
         specimens: {},
-        listSize: -1
+        listSize: -1,
+        resourceOpts: {
+          orderCreateOpts:    $scope.orderCreateOpts,
+          shipmentCreateOpts: $scope.shipmentCreateOpts,
+          specimenUpdateOpts: $scope.specimenUpdateOpts,
+          specimenDeleteOpts: $scope.specimenDeleteOpts
+        }
       };
 
       angular.extend($scope.listViewCtx, {
@@ -105,41 +110,16 @@ angular.module('os.biospecimen.participant')
       $scope.ctx.$listFilters = $listFilters;
     }
 
-    this.deleteSpecimens = function() {
-      var spmns = $scope.ctx.$list.getSelectedItems();
-      if (!spmns || spmns.length == 0) {
-        Alerts.error('specimens.no_specimens_for_delete');
-        return;
+    this.getSelectedSpecimens = function() {
+      var selectedSpmns = $scope.ctx.$list.getSelectedItems();
+      if (!selectedSpmns || selectedSpmns.length == 0) {
+        return [];
       }
 
-      var specimenIds = spmns.map(function(spmn) { return spmn.hidden.specimenId; });
-      var opts = {
-        confirmDelete: 'specimens.delete_specimens_heirarchy',
-        successMessage: 'specimens.specimens_hierarchy_deleted',
-        onBulkDeletion: loadSpecimens
-      }
-      DeleteUtil.bulkDelete({bulkDelete: Specimen.bulkDelete}, specimenIds, opts);
+      return selectedSpmns.map(function(spmn) { return {id: spmn.hidden.specimenId}; });
     }
 
-    this.distributeSpecimens = function() {
-      gotoView('order-addedit', {orderId: ''}, 'no_specimens_for_distribution');
-    }
-
-    this.shipSpecimens = function() {
-      gotoView('shipment-addedit', {shipmentId: ''}, 'no_specimens_for_shipment');
-    }
-
-    this.createAliquots = function() {
-      gotoView('specimen-bulk-create-aliquots', {}, 'no_specimens_to_create_aliquots');
-    }
-
-    this.createDerivatives = function() {
-      gotoView('specimen-bulk-create-derivatives', {}, 'no_specimens_to_create_derivatives');
-    }
-
-    this.addEvent = function() {
-      gotoView('bulk-add-event', {}, 'no_specimens_to_add_event');
-    }
+    this.loadSpecimens = loadSpecimens;
 
     this.pagerOpts = function() {
       return pagerOpts;

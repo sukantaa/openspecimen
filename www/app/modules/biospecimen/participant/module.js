@@ -64,14 +64,6 @@ angular.module('os.biospecimen.participant',
             return CpConfigSvc.getListView(cp.id, defListViewState);
           },
 
-          reqBasedDistOrShip: function($injector) {
-            if ($injector.has('spmnReqCfgUtil')) {
-              return $injector.get('spmnReqCfgUtil').isReqBasedDistOrShippingEnabled();
-            } else {
-              return {value: false};
-            }
-          },
-
           twoStepReg: function(SettingUtil) {
             return SettingUtil.getSetting('biospecimen', 'two_step_patient_reg').then(
               function(setting) {

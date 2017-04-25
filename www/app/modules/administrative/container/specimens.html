@@ -1,13 +1,15 @@
 <div class="os-detail-sublist">
   <div class="os-page-commands">
     <div class="left">
+      <os-specimen-ops specimens="getSelectedSpecimens()" init-list="loadSpecimens()"></os-specimen-ops>
+
+      <os-assign-to-spmn-list on-add-to-list="addSpecimensToList(list)"></os-assign-to-spmn-list>
+
       <button class="default" ng-click="downloadReport()" title="{{'common.buttons.download_report' | translate}}">
         <span class="fa fa-download"></span>
         <span translate="common.buttons.download_report">Download Report</span>
       </button>
     </div>
-
-    <os-assign-to-spmn-list on-add-to-list="addSpecimensToList(list)"></os-assign-to-spmn-list>
 
     <div class="right">
       <button class="default" os-right-drawer-toggle ng-click="toggleSearch()"

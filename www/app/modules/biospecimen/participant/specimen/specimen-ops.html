@@ -1,0 +1,45 @@
+<div os-show-if-menu-items-present dropdown class="os-inline-btn">
+  <button class="default dropdown-toggle">
+    <span translate="specimens.ops">Specimen Ops</span>
+    <span class="fa fa-caret-down"></span>
+  </button>
+
+  <ul class="dropdown-menu">
+    <li show-if-allowed="resourceOpts.specimenDeleteOpts">
+      <a ng-click="deleteSpecimens()">
+        <span class="fa fa-trash"></span>
+        <span translate="common.buttons.delete">Delete</span>
+      </a>
+    </li>
+    <li show-if-allowed="resourceOpts.orderCreateOpts" ng-if="!reqBasedDistOrShip.value">
+      <a ng-click="distributeSpecimens()">
+        <span class="fa fa-share"></span>
+        <span translate="specimen_list.distribute">Distribute</span>
+      </a>
+    </li>
+    <li show-if-allowed="resourceOpts.shipmentCreateOpts" ng-if="!reqBasedDistOrShip.value">
+      <a ng-click="shipSpecimens()">
+        <span class="fa fa-paper-plane-o"></span>
+        <span translate="specimen_list.ship">Ship</span>
+      </a>
+    </li>
+    <li show-if-allowed="resourceOpts.specimenUpdateOpts">
+      <a ng-click="createAliquots()">
+        <span class="fa fa-share-alt"></span>
+        <span translate="specimen_list.create_aliquots">Create Aliquots</span>
+      </a>
+    </li>
+    <li show-if-allowed="resourceOpts.specimenUpdateOpts">
+      <a ng-click="createDerivatives()">
+        <span class="fa fa-flask"></span>
+        <span translate="specimen_list.create_derivatives">Create Derivatives</span>
+      </a>
+    </li>
+    <li show-if-allowed="resourceOpts.specimenUpdateOpts">
+      <a ng-click="addEvent()">
+        <span class="fa fa-calendar-o"></span>
+        <span translate="specimen_list.add_event">Add Event</span>
+      </a>
+    </li>
+  </ul>
+</div>

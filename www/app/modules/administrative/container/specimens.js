@@ -58,9 +58,17 @@ angular.module('os.administrative.container')
       Util.downloadReport(container, "container.specimens");
     }
 
+    $scope.loadSpecimens = function() {
+      loadSpecimens($scope.lctx.filterOpts);
+    };
+
     $scope.loadCps = loadCps;
 
     $scope.loadContainers = loadContainers;
+
+    $scope.getSelectedSpecimens = function() {
+      return $scope.lctx.checkList.getSelectedItems();
+    }
 
     $scope.addSpecimensToList = function(list) {
       var items = $scope.lctx.checkList.getSelectedItems();
