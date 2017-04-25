@@ -18,7 +18,7 @@ angular.module('openspecimen')
         parent: 'default'
       })
       .state('login', {
-        url: '/?logout',
+        url: '/?logout&directVisit',
         templateUrl: 'modules/user/signin.html',
         controller: 'LoginCtrl',
         parent: 'default-nav-buttons',

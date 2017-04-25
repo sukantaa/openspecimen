@@ -9,7 +9,9 @@
       <div class="os-body">
         <div class="link">
           <span translate="user.already_have_an_openspecimen_id">Already have an OpenSpecimen ID?</span> 
-          <a ui-sref="login" translate="user.sign_in_here">Sign In here </a>
+          <a ui-sref="login({directVisit: true})">
+            <span translate="user.sign_in_here">Sign In here </span>
+          </a>
         </div>
         <div class="form-group">
           <div class="col-xs-6">
@@ -91,7 +93,9 @@
       </strong>
     </p>
     <p>
-      <a ui-sref="login" translate="user.return_to_signin">Return to Sign in</a>
+      <a ui-sref="login({directVisit: true})">
+        <span translate="user.return_to_signin">Return to Sign in</span>
+      </a>
     </p>
   </div>
 </div>

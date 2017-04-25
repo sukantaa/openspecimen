@@ -34,7 +34,9 @@ angular.module('openspecimen')
       }
     }
   })
-  .controller('LoginCtrl', function($scope, $rootScope, $state, $http, $location, $injector, AuthDomain, AuthService) {
+  .controller('LoginCtrl', function(
+    $scope, $rootScope, $state, $stateParams, $http, $location, $injector,
+    AuthDomain, AuthService) {
 
     function init() {
       $scope.loginData = {};
@@ -50,7 +52,7 @@ angular.module('openspecimen')
           $state.go('home');
         }
         //return;
-      } else if ($injector.has('scCatalog')) {
+      } else if (!$stateParams.directVisit && $injector.has('scCatalog')) {
         //
         // User not logged in
         //
@@ -58,6 +60,10 @@ angular.module('openspecimen')
         if (catalogId) {
           $state.go('sc-catalog-dashboard', {catalogId: catalogId}, {location: 'replace'});
         }
+      }
+
+      if ($stateParams.directVisit == 'true') {
+        $rootScope.reqState = undefined;
       }
 
       loadDomains();
