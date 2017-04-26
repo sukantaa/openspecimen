@@ -182,7 +182,7 @@
         <udn>initialQty</udn>
         <caption>#getMessage("specimen_initial_quantity")</caption>
         <column>INITIAL_QUANTITY</column>
-        <noOfDigitsAfterDecimal>4</noOfDigitsAfterDecimal>
+        <noOfDigitsAfterDecimal>2</noOfDigitsAfterDecimal>
       </numberField>
     </row>
 
@@ -192,7 +192,7 @@
         <udn>availableQty</udn>
         <caption>#getMessage("specimen_available_quantity")</caption>
         <column>AVAILABLE_QUANTITY</column>
-        <noOfDigitsAfterDecimal>4</noOfDigitsAfterDecimal>
+        <noOfDigitsAfterDecimal>2</noOfDigitsAfterDecimal>
       </numberField>
     </row>
 
@@ -202,7 +202,7 @@
         <udn>concentration</udn>
         <caption>#getMessage("specimen_concentration")</caption>
         <column>CONCENTRATION</column>
-        <noOfDigitsAfterDecimal>4</noOfDigitsAfterDecimal>
+        <noOfDigitsAfterDecimal>2</noOfDigitsAfterDecimal>
       </numberField>
     </row>
 
@@ -543,7 +543,7 @@
             <udn>quantity</udn>
             <caption>#getMessage("specimen_distribution_quantity")</caption>
             <column>QUANTITY</column>
-            <noOfDigitsAfterDecimal>4</noOfDigitsAfterDecimal>
+            <noOfDigitsAfterDecimal>2</noOfDigitsAfterDecimal>
           </numberField>
         </row>
  
