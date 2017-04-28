@@ -39,6 +39,7 @@ import com.krishagni.catissueplus.core.administrative.repository.StorageContaine
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolSite;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
+import com.krishagni.catissueplus.core.biospecimen.repository.impl.SpecimenDaoHelper;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.util.Status;
@@ -219,9 +220,12 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			query.add(Restrictions.eq("specimen.tissueSite", crit.anatomicSite()));
 		}
 
+		String startAlias = "visit";
 		if (StringUtils.isNotBlank(crit.ppid()) || crit.cpId() != null) {
 			query.createAlias("specimen.visit", "visit")
 				.createAlias("visit.registration", "cpr");
+
+			startAlias = "cp";
 
 			if (StringUtils.isNotBlank(crit.ppid())) {
 				query.add(Restrictions.ilike("cpr.ppid", crit.ppid(), crit.matchMode()));
@@ -230,8 +234,12 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			if (crit.cpId() != null) {
 				query.createAlias("cpr.collectionProtocol", "cp")
 					.add(Restrictions.eq("cp.id", crit.cpId()));
+
+				startAlias = "cpSite";
 			}
 		}
+
+		SpecimenDaoHelper.getInstance().addSiteCpsCond(query, crit, startAlias);
 
 		if (orderByLocation) {
 			query.addOrder(Order.asc("pos.container"))

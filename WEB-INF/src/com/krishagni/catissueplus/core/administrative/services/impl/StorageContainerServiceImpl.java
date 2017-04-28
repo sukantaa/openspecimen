@@ -210,7 +210,17 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	public ResponseEvent<List<SpecimenInfo>> getSpecimens(RequestEvent<SpecimenListCriteria> req) {
 		SpecimenListCriteria crit = req.getPayload();
 		StorageContainer container = getContainer(crit.ancestorContainerId(), null);
+
 		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
+		Set<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessContainerSiteCps();
+		if (siteCps != null) {
+			List<Pair<Long, Long>> contSiteCps = siteCps.stream()
+				.filter(siteCp -> siteCp.first().equals(container.getSite().getId()))
+				.collect(Collectors.toList());
+
+			crit.siteCps(contSiteCps);
+		}
+
 		List<Specimen> specimens = daoFactory.getStorageContainerDao().getSpecimens(crit, !container.isDimensionless());
 		return ResponseEvent.response(SpecimenInfo.from(specimens));
 	}

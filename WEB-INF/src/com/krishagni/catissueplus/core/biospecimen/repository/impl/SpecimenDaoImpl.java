@@ -29,7 +29,6 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
-import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 
 public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDao {
@@ -370,63 +369,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	}
 
 	private void addSiteCpsCond(Criteria query, SpecimenListCriteria crit) {
-		if (CollectionUtils.isEmpty(crit.siteCps())) {
-			return;
-		}
-
-		if (!query.getAlias().equals("visit")) {
-			query.createAlias("specimen.visit", "visit");
-		}
-
-		query.createAlias("visit.registration", "cpr")
-			.createAlias("cpr.collectionProtocol", "cp")
-			.createAlias("cp.sites", "cpSite")
-			.createAlias("cpSite.site", "site")
-			.createAlias("cpr.participant", "participant")
-			.createAlias("participant.pmis", "pmi", JoinType.LEFT_OUTER_JOIN)
-			.createAlias("pmi.site", "mrnSite", JoinType.LEFT_OUTER_JOIN);
-
-		Disjunction cpSitesCond = Restrictions.disjunction();
-		for (Pair<Long, Long> siteCp : crit.siteCps()) {
-			Long siteId = siteCp.first();
-			Long cpId = siteCp.second();
-
-
-			Junction siteCond = Restrictions.disjunction();
-			if (crit.useMrnSites()) {
-				//
-				// When MRNs exist, site ID should be one of the MRN site
-				//
-				Junction mrnSite = Restrictions.conjunction()
-					.add(Restrictions.isNotEmpty("participant.pmis"))
-					.add(Restrictions.eq("mrnSite.id", siteId));
-
-				//
-				// When no MRNs exist, site ID should be one of CP site
-				//
-				Junction cpSite = Restrictions.conjunction()
-					.add(Restrictions.isEmpty("participant.pmis"))
-					.add(Restrictions.eq("site.id", siteId));
-
-				siteCond.add(mrnSite).add(cpSite);
-			} else {
-				//
-				// Site ID should be either MRN site or CP site
-				//
-				siteCond
-					.add(Restrictions.eq("mrnSite.id", siteId))
-					.add(Restrictions.eq("site.id", siteId));
-			}
-
-			Junction cond = Restrictions.conjunction().add(siteCond);
-			if (cpId != null) {
-				cond.add(Restrictions.eq("cp.id", cpId));
-			}
-		
-			cpSitesCond.add(cond);
-		}
-		
-		query.add(cpSitesCond);
+		SpecimenDaoHelper.getInstance().addSiteCpsCond(query, crit);
 	}
 
 	private void addCpCond(Criteria query, SpecimenListCriteria crit) {
