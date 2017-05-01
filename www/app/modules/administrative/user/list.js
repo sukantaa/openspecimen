@@ -10,6 +10,9 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
 
     function init() {
       pagerOpts = $scope.pagerOpts = new ListPagerOpts({listSizeGetter: getUsersCount});
+      $scope.ctx = {
+        exportDetail: {objectType: 'user'}
+      };
       initPvsAndFilterOpts();
       loadUsers($scope.userFilterOpts);
       ItemsHolder.setItems('users', undefined);
@@ -82,13 +85,9 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
 
         $scope.users = result;
         pagerOpts.refreshOpts(result);
-        initCtx();
+        $scope.ctx.checkList = new CheckList($scope.users);
       });
     };
-
-    function initCtx() {
-      $scope.ctx = {checkList: new CheckList($scope.users)};
-    }
 
     function getUsersCount() {
       return User.getCount($scope.userFilterOpts)
@@ -101,7 +100,7 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
           Alerts.success(msgKey);
 
           angular.forEach(users, function(user) { user.selected = false; });
-          initCtx();
+          $scope.ctx.checkList = new CheckList($scope.users);
         }
       );
     }

@@ -1,9 +1,13 @@
 package com.krishagni.catissueplus.core.de.events;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.domain.DeObject.Attr;
@@ -14,6 +18,8 @@ public class ExtensionDetail {
 	private Long objectId;
 	
 	private Long formId;
+
+	private String formCaption;
 	
 	private List<AttrDetail> attrs = new ArrayList<AttrDetail>();
 	
@@ -41,6 +47,14 @@ public class ExtensionDetail {
 		this.formId = formId;
 	}
 
+	public String getFormCaption() {
+		return formCaption;
+	}
+
+	public void setFormCaption(String formCaption) {
+		this.formCaption = formCaption;
+	}
+
 	public List<AttrDetail> getAttrs() {
 		return attrs;
 	}
@@ -59,6 +73,11 @@ public class ExtensionDetail {
 			attrs.add(attr);
 		}
 	}
+
+	@JsonIgnore
+	public Map<String, Object> getAttrsMap() {
+		return getAttrsMap(attrs);
+	}
 	
 	public static ExtensionDetail from(DeObject extension) {
 		return from(extension, true);
@@ -73,8 +92,39 @@ public class ExtensionDetail {
 		detail.setId(extension.getId());
 		detail.setObjectId(extension.getObjectId());
 		detail.setFormId(extension.getFormId());
+		detail.setFormCaption(extension.getFormCaption());
 		detail.setAttrs(AttrDetail.from(extension.getAttrs(), excludePhi));	
 		return detail;
+	}
+
+	private static Map<String, Object> getAttrsMap(List<AttrDetail> attrs) {
+		Map<String, Object> attrsMap = new HashMap<>();
+		for (AttrDetail attr : attrs) {
+			if ("subForm".equals(attr.getType())) {
+				List value = (List) attr.getValue();
+				if (CollectionUtils.isEmpty(value)) {
+					continue;
+				}
+
+				if (value.get(0) instanceof AttrDetail) {
+					attrsMap.put(attr.getName(), getAttrsMap((List<AttrDetail>) value));
+				} else if (value.get(0) instanceof List) {
+					List<Map<String, Object>> sfAttrsMap = ((List<List<AttrDetail>>) value).stream()
+							.map(ExtensionDetail::getAttrsMap).collect(Collectors.toList());
+					attrsMap.put(attr.getName(), sfAttrsMap);
+				}
+			} else if (attr.getValue() instanceof List) {
+				attrsMap.put(attr.getName(), attr.getValue());
+			} else {
+				Object value = attr.getDisplayValue();
+				if (value == null) {
+					value = attr.getValue();
+				}
+				attrsMap.put(attr.getName(), value);
+			}
+		}
+
+		return attrsMap;
 	}
 	
 	public static class AttrDetail {

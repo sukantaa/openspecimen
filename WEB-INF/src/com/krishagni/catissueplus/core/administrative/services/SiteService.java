@@ -31,5 +31,4 @@ public interface SiteService {
 	public ResponseEvent<List<DependentEntityDetail>> getDependentEntities(RequestEvent<Long> req);
 
 	public ResponseEvent<SiteDetail> deleteSite(RequestEvent<DeleteEntityOp> req);
-	
 }

@@ -272,6 +272,7 @@
     <property name="userFactory" ref="userFact"/>
     <property name="emailService" ref="emailService"/>
     <property name="rbacSvc" ref="rbacSvc"/>
+    <property name="exportSvc" ref="exportSvc"/>
   </bean>
 
   <bean id="domainFact" class="com.krishagni.catissueplus.core.auth.domain.factory.impl.DomainRegistrationFactoryImpl">
@@ -441,6 +442,7 @@
   <bean id="instSvc" class="com.krishagni.catissueplus.core.administrative.services.impl.InstituteServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="instituteFactory" ref="instituteFact"/>
+    <property name="exportSvc" ref="exportSvc"/>
   </bean>
 
   <bean id="siteFactory" class="com.krishagni.catissueplus.core.administrative.domain.factory.impl.SiteFactoryImpl">
@@ -451,6 +453,7 @@
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="siteFactory" ref="siteFactory" />
     <property name="rbacSvc" ref="rbacSvc"/>
+    <property name="exportSvc" ref="exportSvc"/>
   </bean>
 
   <bean id="containerTokenRegistrar" class="com.krishagni.catissueplus.core.common.domain.DefaultLabelTmplTokenRegistrar">
@@ -496,6 +499,7 @@
     <property name="selectionStrategyFactory" ref="containerSelectionStrategyFactory"/>
     <property name="taskManager" ref="scheduledTaskMgr"/>
     <property name="querySvc" ref="querySvc"/>
+    <property name="exportSvc" ref="exportSvc"/>
   </bean>
 
   <bean id="containerTypeFactory" class="com.krishagni.catissueplus.core.administrative.domain.factory.impl.ContainerTypeFactoryImpl">
@@ -1004,6 +1008,17 @@
     <property name="daoFactory" ref="deDaoFactory"/>
     <property name="userDao" ref="userDao"/>
     <property name="cfgService" ref="cfgSvc"/>
+  </bean>
+
+  <!-- export service and allied beans -->
+  <bean id="exportSvc" class="com.krishagni.catissueplus.core.exporter.services.impl.ExportServiceImpl">
+    <property name="exportJobDao">
+      <bean class="com.krishagni.catissueplus.core.exporter.repository.impl.ExportJobDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory"/>
+      </bean>
+    </property>
+    <property name="taskExecutor" ref="taskExecutor"/>
+    <property name="schemaFactory" ref="objectSchemaFactory"/>
   </bean>
   
   <bean id="supportService" class="com.krishagni.catissueplus.core.support.services.impl.SupportServiceImpl">

@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -73,6 +75,7 @@ import com.krishagni.catissueplus.core.de.events.ExecuteQueryEventOp;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
 import com.krishagni.catissueplus.core.de.services.QueryService;
 import com.krishagni.catissueplus.core.de.services.SavedQueryErrorCode;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 import edu.common.dynamicextensions.query.WideRowMode;
@@ -97,6 +100,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	private ScheduledTaskManager taskManager;
 
 	private QueryService querySvc;
+
+	private ExportService exportSvc;
 
 	public DaoFactory getDaoFactory() {
 		return daoFactory;
@@ -140,6 +145,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 	public void setQuerySvc(QueryService querySvc) {
 		this.querySvc = querySvc;
+	}
+
+	public void setExportSvc(ExportService exportSvc) {
+		this.exportSvc = exportSvc;
 	}
 
 	@Override
@@ -721,6 +730,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				}
 			}, 5
 		);
+
+		exportSvc.registerObjectsGenerator("storageContainer", this::getContainersGenerator);
 	}
 
 	private StorageContainerListCriteria addContainerListCriteria(StorageContainerListCriteria crit) {
@@ -1091,6 +1102,99 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				Utility.writeKeyValuesToCsv(out, headers);
 			}
 		});
+	}
+
+	private Supplier<List<? extends Object>> getContainersGenerator() {
+		return new Supplier<List<? extends Object>>() {
+			private boolean endOfContainers;
+
+			private int startAt;
+
+			private StorageContainerListCriteria topLevelCrit;
+
+			private StorageContainerListCriteria descendantsCrit;
+
+			private List<StorageContainerDetail> topLevelContainers = new ArrayList<>();
+
+			@Override
+			public List<StorageContainerDetail> get() {
+				if (endOfContainers) {
+					return Collections.emptyList();
+				}
+
+				if (topLevelContainers.isEmpty()) {
+					if (topLevelCrit == null) {
+						topLevelCrit = new StorageContainerListCriteria().topLevelContainers(true);
+						addContainerListCriteria(topLevelCrit);
+					}
+
+					topLevelContainers = getContainers(topLevelCrit.startAt(startAt));
+					startAt += topLevelContainers.size();
+				}
+
+				if (topLevelContainers.isEmpty()) {
+					endOfContainers = true;
+					return Collections.emptyList();
+				}
+
+				if (descendantsCrit == null) {
+					descendantsCrit = new StorageContainerListCriteria()
+						.siteCps(topLevelCrit.siteCps()).maxResults(100000);
+				}
+
+				StorageContainerDetail topLevelContainer = topLevelContainers.remove(0);
+				descendantsCrit.parentContainerId(topLevelContainer.getId());
+				List<StorageContainer> descendants = daoFactory.getStorageContainerDao().getDescendantContainers(descendantsCrit);
+
+				Map<Long, List<StorageContainer>> childContainersMap = new HashMap<>();
+				for (StorageContainer container : descendants) {
+					Long parentId = container.getParentContainer() == null ? null : container.getParentContainer().getId();
+					List<StorageContainer> childContainers = childContainersMap.get(parentId);
+					if (childContainers == null) {
+						childContainers = new ArrayList<>();
+						childContainersMap.put(parentId, childContainers);
+					}
+
+					childContainers.add(container);
+				}
+
+				List<StorageContainerDetail> workList = new ArrayList<>();
+				workList.addAll(toDetailList(childContainersMap.get(null)));
+
+				List<StorageContainerDetail> result = new ArrayList<>();
+				while (!workList.isEmpty()) {
+					StorageContainerDetail containerDetail = workList.remove(0);
+					result.add(containerDetail);
+
+					List<StorageContainer> childContainers = childContainersMap.get(containerDetail.getId());
+					if (childContainers != null) {
+						workList.addAll(0, toDetailList(childContainers));
+					}
+				}
+
+				return result;
+			}
+
+			private List<StorageContainerDetail> getContainers(StorageContainerListCriteria crit) {
+				return toDetailList(daoFactory.getStorageContainerDao().getStorageContainers(crit));
+			}
+
+			private List<StorageContainerDetail> toDetailList(List<StorageContainer> containers) {
+				return containers.stream()
+					.sorted((c1, c2) -> {
+						if (c1.getPosition() == null && c2.getPosition() == null) {
+							return c1.getId().intValue() - c2.getId().intValue();
+						} else if (c1.getPosition() == null) {
+							return -1;
+						} else if (c2.getPosition() == null) {
+							return 1;
+						} else {
+							return c1.getPosition().getPosition() - c2.getPosition().getPosition();
+						}
+					})
+					.map(StorageContainerDetail::from).collect(Collectors.toList());
+			}
+		};
 	}
 
 	private String msg(String code) {

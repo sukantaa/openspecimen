@@ -321,6 +321,24 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			.setFirstResult(crit.startAt())
 			.setMaxResults(crit.maxResults());
 
+		if (crit.siteCps() != null && !crit.siteCps().isEmpty()) {
+			query.createAlias("cont.site", "site")
+				.createAlias("cont.allowedCps", "cp", JoinType.LEFT_OUTER_JOIN);
+
+			Disjunction siteCpsCond = Restrictions.disjunction();
+			for (Pair<Long, Long> siteCp : crit.siteCps()) {
+				siteCpsCond.add(Restrictions.and(
+					Restrictions.eq("site.id", siteCp.first()),
+					Restrictions.or(
+						Restrictions.isNull("cp.id"),
+						Restrictions.eq("cp.id", siteCp.second())
+					)
+				));
+			}
+
+			query.add(siteCpsCond);
+		}
+
 		if (StringUtils.isNotBlank(crit.query())) {
 			query.add(Restrictions.ilike("cont.name", crit.query(), crit.matchMode()));
 		}

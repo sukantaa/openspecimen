@@ -1,24 +1,25 @@
 
 package com.krishagni.catissueplus.core.administrative.repository;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.krishagni.catissueplus.core.administrative.domain.ForgotPasswordToken;
 import com.krishagni.catissueplus.core.administrative.domain.Password;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
-import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.repository.Dao;
 
 public interface UserDao extends Dao<User> {
-	public List<UserSummary> getUsers(UserListCriteria criteria);
+	public List<User> getUsers(UserListCriteria criteria);
 	
 	public Long getUsersCount(UserListCriteria criteria);
+
+	public List<User> getUsersByIds(Collection<Long> userIds);
 	
-	public List<User> getUsersByIds(List<Long> userIds);
-	
-	public List<User> getUsersByIdsAndInstitute(List<Long> userIds, Long instituteId);
+	public List<User> getUsersByIdsAndInstitute(Collection<Long> userIds, Long instituteId);
 	
 	public User getUser(String loginName, String domain);
 	
@@ -47,4 +48,6 @@ public interface UserDao extends Dao<User> {
 	public List<User> getInactiveUsers(Date lastLoginTime);
 	
 	public int updateStatus(List<User> users, String status);
+
+	public Map<Long, Integer> getCpCount(Collection<Long> userIds);
 }

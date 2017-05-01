@@ -1,8 +1,11 @@
 package com.krishagni.catissueplus.core.administrative.services.impl;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.factory.InstituteErrorCode;
@@ -22,11 +25,14 @@ import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
 
-public class InstituteServiceImpl implements InstituteService {
+public class InstituteServiceImpl implements InstituteService, InitializingBean {
 	private DaoFactory daoFactory;
 
 	private InstituteFactory instituteFactory;
+
+	private ExportService exportSvc;
 	
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
@@ -35,7 +41,11 @@ public class InstituteServiceImpl implements InstituteService {
 	public void setInstituteFactory(InstituteFactory instituteFactory) {
 		this.instituteFactory = instituteFactory;
 	}
-	
+
+	public void setExportSvc(ExportService exportSvc) {
+		this.exportSvc = exportSvc;
+	}
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<InstituteDetail>> getInstitutes(RequestEvent<InstituteListCriteria> req) {
@@ -209,10 +219,39 @@ public class InstituteServiceImpl implements InstituteService {
 		}
 	}
 
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		exportSvc.registerObjectsGenerator("institute", this::getInstitutesGenerator);
+	}
+
 	private void ensureUniqueName(String name, OpenSpecimenException ose) {
 		Institute institute = daoFactory.getInstituteDao().getInstituteByName(name);
 		if (institute != null) {
 			ose.addError(InstituteErrorCode.DUP_NAME);
 		}
-	}	
+	}
+
+	private Supplier<List<? extends Object>> getInstitutesGenerator() {
+		return new Supplier<List<? extends Object>>() {
+			private boolean endOfInstitutes;
+
+			private int startAt;
+
+			@Override
+			public List<? extends Object> get() {
+				if (endOfInstitutes) {
+					return Collections.emptyList();
+				}
+
+				InstituteListCriteria listCrit = new InstituteListCriteria().startAt(startAt);
+				List<InstituteDetail> institutes = daoFactory.getInstituteDao().getInstitutes(listCrit);
+				startAt += institutes.size();
+				if (institutes.isEmpty()) {
+					endOfInstitutes = true;
+				}
+
+				return institutes;
+			}
+		};
+	}
 }

@@ -6,6 +6,9 @@ angular.module('os.administrative.institute.list', ['os.administrative.models'])
     function init() {
       pagerOpts = $scope.pagerOpts = new ListPagerOpts({listSizeGetter: getInstitutesCount});
       $scope.instituteFilterOpts = {includeStats: true, maxResults: pagerOpts.recordsPerPage + 1};
+      $scope.ctx = {
+        exportDetail: {objectType: 'institute'}
+      };
       loadInstitutes($scope.instituteFilterOpts);
       Util.filter($scope, 'instituteFilterOpts', loadInstitutes);
     }

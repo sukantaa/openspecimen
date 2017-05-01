@@ -6,7 +6,9 @@ angular.module('os.administrative.site.list', ['os.administrative.models'])
     function init() {
       pagerOpts = $scope.pagerOpts = new ListPagerOpts({listSizeGetter: getSitesCount});
       $scope.siteFilterOpts = {includeStats: true, maxResults: pagerOpts.recordsPerPage + 1};
-      $scope.ctx = {};
+      $scope.ctx = {
+        exportDetail: {objectType: 'site'}
+      };
       loadSites($scope.siteFilterOpts);
       Util.filter($scope, 'siteFilterOpts', loadSites);
     }

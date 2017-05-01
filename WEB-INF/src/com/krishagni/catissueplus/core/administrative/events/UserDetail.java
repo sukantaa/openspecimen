@@ -164,9 +164,9 @@ public class UserDetail extends AttributeModifiedSupport {
 		detail.setEmailAddress(user.getEmailAddress());
 		detail.setDomainName(user.getAuthDomain().getName());
 		detail.setLoginName(user.getLoginName());
-		detail.setInstituteName(user.getInstitute().getName());
+		detail.setInstituteName(user.getInstitute() != null ? user.getInstitute().getName() : null);
 		detail.setPrimarySite(user.getPrimarySite() != null ? user.getPrimarySite().getName() : null);
-		detail.setType(user.getType().name());
+		detail.setType(user.getType() != null ? user.getType().name() : null);
 		detail.setPhoneNumber(user.getPhoneNumber());
 		detail.setManageForms(user.getManageForms());
 		detail.setAddress(user.getAddress());

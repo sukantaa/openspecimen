@@ -11,6 +11,10 @@ angular.module('os.administrative.container.list', ['os.administrative.models'])
         topLevelContainers: true
       };
 
+      $scope.ctx = {
+        exportDetail: { objectType: 'storageContainer' }
+      }
+
       loadContainers($scope.containerFilterOpts);
       Util.filter($scope, 'containerFilterOpts', loadContainers);
     }

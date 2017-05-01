@@ -1662,6 +1662,10 @@
     }
   },
 
+  "export": {
+    "job_submitted": "Export job {{id}} submitted. Link to download records file will be sent by email."
+  },
+
   "specimen_kit": {
     "title": "Specimen Kit",
     "list": "Specimen Kits",

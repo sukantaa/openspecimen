@@ -3,14 +3,17 @@ package com.krishagni.catissueplus.core.administrative.services.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -37,16 +40,19 @@ import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 import com.krishagni.rbac.service.RbacService;
 
 
-public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver {
+public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver, InitializingBean {
 	private SiteFactory siteFactory;
 
 	private DaoFactory daoFactory;
 	
 	private RbacService rbacSvc;
+
+	private ExportService exportSvc;
 	
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
@@ -59,7 +65,11 @@ public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver {
 	public void setRbacSvc(RbacService rbacSvc) {
 		this.rbacSvc = rbacSvc;
 	}
-	
+
+	public void setExportSvc(ExportService exportSvc) {
+		this.exportSvc = exportSvc;
+	}
+
 	@Override
 	@PlusTransactional	
 	public ResponseEvent<List<SiteSummary>> getSites(RequestEvent<SiteListCriteria> req) {
@@ -223,6 +233,11 @@ public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver {
 		}
 
 		return daoFactory.getSiteDao().getSiteIds(key, value);
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		exportSvc.registerObjectsGenerator("site", this::getSitesGenerator);
 	}
 
 	private boolean isAllSitesAllowed() {
@@ -456,5 +471,35 @@ public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver {
 		//
 
 		return detail;
+	}
+
+	private Supplier<List<? extends Object>> getSitesGenerator() {
+		return new Supplier<List<? extends Object>>() {
+			private boolean endOfSites;
+
+			private int startAt;
+
+			@Override
+			public List<? extends Object> get() {
+				if (endOfSites) {
+					return Collections.emptyList();
+				}
+
+				Collection<Site> sites;
+				if (AuthUtil.isAdmin()) {
+					sites = daoFactory.getSiteDao().getSites(new SiteListCriteria().startAt(startAt));
+					startAt += sites.size();
+
+					if (sites.isEmpty()) {
+						endOfSites = true;
+					}
+				} else {
+					sites = getAccessibleSites(new SiteListCriteria());
+					endOfSites = true;
+				}
+
+				return SiteDetail.from(sites);
+			}
+		};
 	}
 }

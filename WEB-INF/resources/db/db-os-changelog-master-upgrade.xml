@@ -74,4 +74,6 @@
   <include file="db/4.0/config.xml"/>
   <include file="db/4.0/seed-data.xml"/>
   <include file="db/4.0/audit.xml"/>
+
+  <include file="db/4.1/schema.xml"/>
 </databaseChangeLog>

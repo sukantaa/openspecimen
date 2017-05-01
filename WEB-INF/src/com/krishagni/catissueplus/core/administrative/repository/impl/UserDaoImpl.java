@@ -1,14 +1,12 @@
 
 package com.krishagni.catissueplus.core.administrative.repository.impl;
 
-import static com.krishagni.catissueplus.core.common.util.Utility.numberToLong;
-
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -25,7 +23,6 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
-import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 
 public class UserDaoImpl extends AbstractDao<User> implements UserDao {
@@ -36,15 +33,13 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<UserSummary> getUsers(UserListCriteria listCrit) {
-		Criteria query = getUsersListQuery(listCrit)
+	public List<User> getUsers(UserListCriteria listCrit) {
+		return getUsersListQuery(listCrit)
 			.setFirstResult(listCrit.startAt())
 			.setMaxResults(listCrit.maxResults())
 			.addOrder(Order.asc("u.lastName"))
-			.addOrder(Order.asc("u.firstName"));
-		
-		addProjectionFields(query);
-		return getUsers(query.list(), listCrit);
+			.addOrder(Order.asc("u.firstName"))
+			.list();
 	}
 	
 	public Long getUsersCount(UserListCriteria listCrit) {
@@ -54,12 +49,12 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 		return count.longValue();
 	}
 
-	public List<User> getUsersByIds(List<Long> userIds) {
+	public List<User> getUsersByIds(Collection<Long> userIds) {
 		return getUsersByIdsAndInstitute(userIds, null);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<User> getUsersByIdsAndInstitute(List<Long> userIds, Long instituteId) {
+	public List<User> getUsersByIdsAndInstitute(Collection<Long> userIds, Long instituteId) {
 		Criteria criteria = sessionFactory.getCurrentSession()
 			.createCriteria(User.class, "u")
 			.add(Restrictions.in("u.id", userIds));
@@ -142,19 +137,6 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 		getCurrentSession().delete(token);
 	}
 
-	private Criteria getUsersListQuery(UserListCriteria crit) {
-		Criteria criteria = sessionFactory.getCurrentSession()
-			.createCriteria(User.class, "u")
-			.add( // not system user
-				Restrictions.not(Restrictions.conjunction()
-					.add(Restrictions.eq("u.loginName", User.SYS_USER))
-					.add(Restrictions.eq("u.authDomain.name", User.DEFAULT_AUTH_DOMAIN))
-				)
-			);
-		
-		return addSearchConditions(criteria, crit);
-	}
-
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<String> getActiveUsersEmailIds(Date startDate, Date endDate) {
@@ -209,66 +191,41 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 			.setParameterList("userIds", users.stream().map(u -> u.getId()).collect(Collectors.toList()))
 			.executeUpdate();
 	}
-	
-	private List<UserSummary> getUsers(List<Object[]> rows, UserListCriteria listCrit) {		
-		Map<Long, UserSummary> userSummaryMap = new HashMap<Long, UserSummary>();
-
-		List<UserSummary> result = new ArrayList<UserSummary>();
-		for (Object[] row : rows) {
-			UserSummary userSummary = getUserSummary(row);
-			if (listCrit.includeStat()) {
-				userSummaryMap.put(userSummary.getId(), userSummary);
-			}
-			
-			result.add(userSummary);
-		}
-
-		if (!listCrit.includeStat() || result.isEmpty()) {
-			return result;
-		}
-
-		List<Object[]> countRows  = getCpCount(userSummaryMap.keySet());
-		for (Object[] row : countRows) {
-			UserSummary userSummary = userSummaryMap.get((Long)row[0]);
-			userSummary.setCpCount((Integer)row[1]);
-		}
-		
-		return result;		
-	}
-
-	private UserSummary getUserSummary(Object[] row) {
-		int idx = 0;
-
-		UserSummary userSummary = new UserSummary();
-		userSummary.setId(numberToLong(row[idx++]));
-		userSummary.setFirstName((String)row[idx++]);
-		userSummary.setLastName((String)row[idx++]);
-		userSummary.setLoginName((String)row[idx++]);
-		userSummary.setEmailAddress((String)row[idx++]);
-		setUserType(userSummary, (User.Type)row[idx++]);
-		userSummary.setCreationDate((Date)row[idx++]);
-		return userSummary;
-	}
-
-	private void setUserType(UserSummary user, User.Type type) {
-		switch (type) {
-			case SUPER:
-				user.setAdmin(true);
-				break;
-
-			case INSTITUTE:
-				user.setInstituteAdmin(true);
-				break;
-		}
-	}
 
 	@SuppressWarnings("unchecked")
-	private List<Object[]> getCpCount(Set<Long> userIds) {
-		return sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_CP_COUNT_BY_USERS)
-				.setParameterList("userIds", userIds)
-				.list();
+	public Map<Long, Integer> getCpCount(Collection<Long> userIds) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CP_COUNT_BY_USERS)
+			.setParameterList("userIds", userIds)
+			.list();
 
+		Map<Long, Integer> result = new HashMap<>();
+		for (Object[] row : rows) {
+			result.put((Long)row[0], (Integer)row[1]);
+		}
+
+		return result;
+	}
+
+	private Criteria getUsersListQuery(UserListCriteria crit) {
+		Criteria criteria = sessionFactory.getCurrentSession()
+			.createCriteria(User.class, "u")
+			.add( // not system user
+				Restrictions.not(Restrictions.conjunction()
+					.add(Restrictions.in("u.loginName", excludeUsersList()))
+					.add(Restrictions.eq("u.authDomain.name", User.DEFAULT_AUTH_DOMAIN))
+				)
+			);
+
+		return addSearchConditions(criteria, crit);
+	}
+
+
+	private String[] excludeUsersList() {
+		return new String[] {
+			User.SYS_USER,
+			"public_catalog_user",
+			"public_dashboard_user"
+		};
 	}
 
 	@SuppressWarnings("unchecked")
@@ -355,19 +312,6 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 			.add(Restrictions.eq("domain.name", domainName));
 	}
 
-	private void addProjectionFields(Criteria criteria) {
-		criteria.setProjection(Projections.distinct(
-			Projections.projectionList()
-				.add(Projections.property("u.id"), "id")
-				.add(Projections.property("u.firstName"), "firstName")
-				.add(Projections.property("u.lastName"), "lastName")
-				.add(Projections.property("u.loginName"), "loginName")
-				.add(Projections.property("u.emailAddress"), "emailAddress")
-				.add(Projections.property("u.type"), "type")
-				.add(Projections.property("u.creationDate"), "creationDate")
-		));
-	}
-	
 	private List<DependentEntityDetail> getDependentEntities(List<Object[]> rows) {
 		List<DependentEntityDetail> dependentEntities = new ArrayList<DependentEntityDetail>();
 		

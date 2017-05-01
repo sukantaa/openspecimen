@@ -3,15 +3,21 @@ package com.krishagni.catissueplus.core.administrative.services.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opensaml.saml2.core.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.saml.SAMLCredential;
@@ -48,10 +54,11 @@ import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.events.SubjectRoleDetail;
 import com.krishagni.rbac.service.RbacService;
 
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, InitializingBean {
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	private static final String DEFAULT_AUTH_DOMAIN = "openspecimen";
@@ -82,6 +89,8 @@ public class UserServiceImpl implements UserService {
 	
 	private RbacService rbacSvc;
 
+	private ExportService exportSvc;
+
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
 	}
@@ -98,11 +107,28 @@ public class UserServiceImpl implements UserService {
 		this.rbacSvc = rbacSvc;
 	}
 
+	public void setExportSvc(ExportService exportSvc) {
+		this.exportSvc = exportSvc;
+	}
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<UserSummary>> getUsers(RequestEvent<UserListCriteria> req) {
-		List<UserSummary> users = daoFactory.getUserDao().getUsers(addUserListCriteria(req.getPayload()));
-		return ResponseEvent.response(users);
+		List<User> users = daoFactory.getUserDao().getUsers(addUserListCriteria(req.getPayload()));
+		List<UserSummary> result = UserSummary.from(users);
+
+		if (req.getPayload().includeStat() && CollectionUtils.isNotEmpty(result)) {
+			Collection<Long> userIds = users.stream().map(User::getId).collect(Collectors.toList());
+			Map<Long, Integer> cpCount = daoFactory.getUserDao().getCpCount(userIds);
+			for (UserSummary user : result) {
+				Integer count = cpCount.get(user.getId());
+				if (count != null) {
+					user.setCpCount(count);
+				}
+			}
+		}
+
+		return ResponseEvent.response(result);
 	}
 	
 	@Override
@@ -473,6 +499,11 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		exportSvc.registerObjectsGenerator("user", this::getUsersGenerator);
+	}
+
 	private UserListCriteria addUserListCriteria(UserListCriteria crit) {
 		if (!AuthUtil.isAdmin() && !crit.listAll()) {
 			crit.instituteName(getCurrUserInstitute().getName());
@@ -781,5 +812,29 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return detail;
+	}
+
+	private Supplier<List<? extends Object>> getUsersGenerator() {
+		return new Supplier<List<? extends Object>>() {
+			private boolean endOfUsers;
+
+			private int startAt;
+
+			@Override
+			public List<? extends Object> get() {
+				if (endOfUsers) {
+					return Collections.emptyList();
+				}
+
+				UserListCriteria listCrit = addUserListCriteria(new UserListCriteria().startAt(startAt));
+				List<User> users = daoFactory.getUserDao().getUsers(listCrit);
+				startAt += users.size();
+				if (users.isEmpty()) {
+					endOfUsers = true;
+				}
+
+				return UserDetail.from(users);
+			}
+		};
 	}
 }

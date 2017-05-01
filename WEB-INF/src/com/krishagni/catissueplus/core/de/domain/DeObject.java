@@ -99,6 +99,10 @@ public abstract class DeObject {
 		return getForm().getId(); 
 	}
 
+	public String getFormCaption() {
+		return getForm().getCaption();
+	}
+
 	public void saveOrUpdate() {
 		try {
 			Container form = getForm();
