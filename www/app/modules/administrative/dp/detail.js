@@ -58,7 +58,7 @@ angular.module('os.administrative.dp.detail', ['os.administrative.models'])
           var allowedSites = Site.list({resource: 'DistributionProtocol', operation: op});
           return $q.all([dpSites, allowedSites]).then(
             function(result) {
-              return !(result[0].some(function(site) { return result[1].indexOf(site) == -1; }));
+              return result[0].every(function(site) { return result[1].indexOf(site) >= 0; });
             }
           );
         }

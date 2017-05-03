@@ -8,7 +8,6 @@ angular.module('os.administrative.dp.consents', ['os.administrative.models'])
 
     function init() {
       $scope.consentCtx = {
-        allowEdit: currentUser.admin || currentUser.instituteAdmin,
         tiers: initConsentTiers(consentTiers),
         stmts: []
       };
