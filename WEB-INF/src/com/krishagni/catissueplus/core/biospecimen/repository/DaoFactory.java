@@ -14,6 +14,7 @@ import com.krishagni.catissueplus.core.administrative.repository.ShipmentDao;
 import com.krishagni.catissueplus.core.administrative.repository.SiteDao;
 import com.krishagni.catissueplus.core.administrative.repository.SpecimenRequestDao;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerDao;
+import com.krishagni.catissueplus.core.administrative.repository.StorageContainerPositionDao;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.audit.repository.AuditDao;
 import com.krishagni.catissueplus.core.auth.repository.AuthDao;
@@ -50,6 +51,8 @@ public interface DaoFactory {
 	InstituteDao getInstituteDao();
 
 	StorageContainerDao getStorageContainerDao();
+
+	StorageContainerPositionDao getStorageContainerPositionDao();
 	
 	ContainerTypeDao getContainerTypeDao();
 
