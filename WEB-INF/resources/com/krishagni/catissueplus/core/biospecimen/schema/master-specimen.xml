@@ -53,7 +53,7 @@
     <field>
       <multiple>true</multiple>
       <caption>#getMessage("visit_clinical_diagnosis")</caption>
-      <attribute>clinicalDiagnosis</attribute>
+      <attribute>clinicalDiagnoses</attribute>
     </field>
 
     <field>
