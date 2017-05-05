@@ -541,18 +541,34 @@ public class StorageContainer extends BaseEntity {
 	}
 	
 	public void removePosition(StorageContainerPosition position) {
-		Iterator<StorageContainerPosition> iter = getOccupiedPositions().iterator();
-		while (iter.hasNext()) {
-			if (iter.next().getId().equals(position.getId())) {
-				iter.remove();
-				break;
+		if (isDimensionless()) {
+			getDaoFactory().getStorageContainerPositionDao().delete(position);
+		} else {
+			Iterator<StorageContainerPosition> iter = getOccupiedPositions().iterator();
+			while (iter.hasNext()) {
+				if (iter.next().getId().equals(position.getId())) {
+					iter.remove();
+					break;
+				}
 			}
-		}		
+		}
 	}
 	
 	public void addPosition(StorageContainerPosition position) {
 		position.setContainer(this);
-		getOccupiedPositions().add(position);
+		if (isDimensionless()) {
+			//
+			// For dimensionless containers we directly update DB as the container might
+			// contain large no. of specimens. Further occupiedPositions is not used
+			// for allocating next available position in case of dimensionless container
+			//
+			getDaoFactory().getStorageContainerPositionDao().saveOrUpdate(position);
+		} else {
+			//
+			// Update in-memory set as it is used for assigning next available position
+			//
+			getOccupiedPositions().add(position);
+		}
 	}
 
 	public StorageContainerPosition nextAvailablePosition() {
@@ -937,15 +953,11 @@ public class StorageContainer extends BaseEntity {
 	}
 
 	private void deleteWithoutCheck() {
-		for (StorageContainer child: getChildContainers()) {
-			child.deleteWithoutCheck();
-		}
-		
+		getChildContainers().forEach(StorageContainer::deleteWithoutCheck);
+
 		setName(Utility.getDisabledValue(getName(), 64));
-		if (getBarcode() != null) {
-			setBarcode(Utility.getDisabledValue(getBarcode(), 64));
-		}
-		
+		setBarcode(Utility.getDisabledValue(getBarcode(), 64));
+
 		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 		if (getParentContainer() != null) {
 			getParentContainer().removePosition(getPosition());
