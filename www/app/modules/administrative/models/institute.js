@@ -39,6 +39,11 @@ angular.module('os.administrative.models.institute', ['os.common.models'])
       );
     }
 
+    Institute.bulkDelete = function(instituteIds) {
+      return $http.delete(Institute.url(), {params: {id: instituteIds}})
+        .then(Institute.modelArrayRespTransform);
+    }
+
     return Institute;
   });
 

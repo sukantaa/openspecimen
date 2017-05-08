@@ -4,12 +4,12 @@
       <ul os-breadcrumbs>
         <li>
           <a ui-sref="institute-list">
-            <span translate="institutes.list">Institutes</span>
+            <span translate="institute.list">Institutes</span>
           </a>
         </li>
       </ul>
       <h3>
-        <span ng-if="!institute.id" translate="institutes.create_institute"> Create Institute </span>
+        <span ng-if="!institute.id" translate="institute.create_institute"> Create Institute </span>
         <span ng-if="!!institute.id">{{institute.name}}</span>
       </h3>
     </div>
@@ -18,10 +18,10 @@
   <div class="container">
     <form name="iform" class="form-horizontal" os-form-validator="iform" validator="iformValidator" novalidate>
       <div class="form-group">
-        <label class="col-xs-3 control-label" translate="institutes.name">Name</label>
+        <label class="col-xs-3 control-label" translate="institute.name">Name</label>
         <div class="col-xs-6">
           <input type="text" name="instituteName" ng-model="institute.name" class="form-control"
-            required placeholder="{{'institutes.name' | translate}}" ng-maxlength="255">
+            required placeholder="{{'institute.name' | translate}}" ng-maxlength="255">
 
           <div os-field-error field="iform.instituteName"></div>
         </div>

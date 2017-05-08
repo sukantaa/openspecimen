@@ -1,7 +1,9 @@
 package com.krishagni.catissueplus.core.administrative.services.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang.StringUtils;
@@ -21,7 +23,7 @@ import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
-import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
+import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -178,19 +180,24 @@ public class InstituteServiceImpl implements InstituteService, InitializingBean 
 	
 	@Override
 	@PlusTransactional
-	public ResponseEvent<InstituteDetail> deleteInstitute(RequestEvent<DeleteEntityOp> req) {
+	public ResponseEvent<List<InstituteDetail>> deleteInstitutes(RequestEvent<BulkDeleteEntityOp> req) {
 		try {
 			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
 			
-			DeleteEntityOp deleteOp = req.getPayload();
-			Long instituteId = deleteOp.getId();
-			Institute existing = daoFactory.getInstituteDao().getById(instituteId);
-			if (existing == null) {
-				return ResponseEvent.userError(InstituteErrorCode.NOT_FOUND, instituteId);
+			Set<Long> instituteIds = req.getPayload().getIds();
+			List<Institute> institutes = daoFactory.getInstituteDao().getByIds(instituteIds);
+			if (instituteIds.size() != institutes.size()) {
+				institutes.forEach(institute -> instituteIds.remove(institute.getId()));
+				throw OpenSpecimenException.userError(InstituteErrorCode.NOT_FOUND, instituteIds, instituteIds.size());
 			}
-			
-			existing.delete(deleteOp.isClose());
-			return ResponseEvent.response(InstituteDetail.from(existing));
+
+			List<InstituteDetail> deletedInstitutes = new ArrayList<>();
+			for (Institute institute : institutes) {
+				institute.delete(req.getPayload().isClose());
+				deletedInstitutes.add(InstituteDetail.from(institute));
+			}
+
+			return ResponseEvent.response(deletedInstitutes);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {

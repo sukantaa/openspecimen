@@ -794,12 +794,14 @@
     }
   },
 
-  "institutes": {
+  "institute": {
     "list": "Institutes",
     "create_institute": "Create Institute",
     "update_institute": "Update Institute",
     "name": "Name",
     "users_count": "Users",
+    "delete_institutes":  "Are you sure you want to delete selected institutes?",
+    "institutes_deleted": "Institutes deleted successfully",
 
     "bulk_import": "Import Institutes",
     "bulk_import_jobs": "Import Institutes Job List",
@@ -808,6 +810,7 @@
       "view_details": "Click to view Institute details",
       "add": "Click to add new Institute",
       "edit": "Click to edit institute",
+      "delete_institutes": "Click to delete selected institutes",
       "user_count": "Count of Users in Institute",
       "search": "Click to search Institutes"
     },

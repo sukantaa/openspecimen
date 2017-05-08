@@ -1,6 +1,8 @@
 package com.krishagni.catissueplus.rest.controller;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +25,7 @@ import com.krishagni.catissueplus.core.administrative.events.SiteSummary;
 import com.krishagni.catissueplus.core.administrative.repository.InstituteListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.SiteListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.InstituteService;
-import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
+import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -163,10 +165,35 @@ public class InstitutesController {
 		@RequestParam(value = "close", required = false, defaultValue = "false")
 		boolean close) {
 
-		DeleteEntityOp deleteEntityOp = new DeleteEntityOp(id, close);
-		RequestEvent<DeleteEntityOp> req = new RequestEvent<DeleteEntityOp>(deleteEntityOp);
-		ResponseEvent<InstituteDetail> resp = instituteSvc.deleteInstitute(req);
+		BulkDeleteEntityOp op = new BulkDeleteEntityOp();
+		op.setIds(Collections.singleton(id));
+		op.setClose(close);
+
+		RequestEvent<BulkDeleteEntityOp> req = new RequestEvent<>(op);
+		ResponseEvent<List<InstituteDetail>> resp = instituteSvc.deleteInstitutes(req);
 		resp.throwErrorIfUnsuccessful();
+
+		return resp.getPayload().get(0);
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public List<InstituteDetail> deleteInstitutes(
+		@RequestParam(value = "id")
+		Long[] ids,
+
+		@RequestParam(value = "close", required = false, defaultValue = "false")
+		boolean close) {
+
+		BulkDeleteEntityOp op = new BulkDeleteEntityOp();
+		op.setIds(new HashSet<>(Arrays.asList(ids)));
+		op.setClose(close);
+
+		RequestEvent<BulkDeleteEntityOp> req = new RequestEvent<>(op);
+		ResponseEvent<List<InstituteDetail>> resp = instituteSvc.deleteInstitutes(req);
+		resp.throwErrorIfUnsuccessful();
+
 		return resp.getPayload();
 	}
 

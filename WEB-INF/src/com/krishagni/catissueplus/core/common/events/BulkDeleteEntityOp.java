@@ -5,6 +5,8 @@ import java.util.Set;
 public class BulkDeleteEntityOp {
 	private Set<Long> ids;
 
+	private boolean close;
+
 	private boolean forceDelete;
 
 	public Set<Long> getIds() {
@@ -13,6 +15,14 @@ public class BulkDeleteEntityOp {
 
 	public void setIds(Set<Long> ids) {
 		this.ids = ids;
+	}
+
+	public boolean isClose() {
+		return close;
+	}
+
+	public void setClose(boolean close) {
+		this.close = close;
 	}
 
 	public boolean isForceDelete() {
