@@ -3,8 +3,10 @@ package com.krishagni.catissueplus.rest.controller;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,13 +41,13 @@ import com.krishagni.catissueplus.core.administrative.services.ContainerSelectio
 import com.krishagni.catissueplus.core.administrative.services.StorageContainerService;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
+import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.ExportedFileDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
-
 import edu.common.dynamicextensions.nutility.IoUtil;
 
 @Controller
@@ -428,11 +430,21 @@ public class StorageContainersController {
 	@RequestMapping(method = RequestMethod.DELETE, value="/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public StorageContainerDetail deleteStorageContainer(@PathVariable Long id) {
-		RequestEvent<Long> req = new RequestEvent<Long>(id);
-		ResponseEvent<StorageContainerDetail> resp = storageContainerSvc.deleteStorageContainer(req);
+	public StorageContainerSummary deleteStorageContainer(@PathVariable Long id) {
+		return deleteStorageContainers(new Long[] { id }).get(0);
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<StorageContainerSummary> deleteStorageContainers(@RequestParam(value = "id") Long[] ids) {
+		BulkDeleteEntityOp op = new BulkDeleteEntityOp();
+		op.setIds(new HashSet<>(Arrays.asList(ids)));
+
+		RequestEvent<BulkDeleteEntityOp> req = new RequestEvent<>(op);
+		ResponseEvent<List<StorageContainerSummary>> resp = storageContainerSvc.deleteStorageContainers(req);
 		resp.throwErrorIfUnsuccessful();
-		
+
 		return resp.getPayload();
 	}
 	

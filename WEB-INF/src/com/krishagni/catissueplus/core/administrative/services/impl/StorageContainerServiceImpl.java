@@ -59,6 +59,7 @@ import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.ErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.ExportedFileDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -358,12 +359,23 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	
 	@Override
 	@PlusTransactional
-	public ResponseEvent<StorageContainerDetail> deleteStorageContainer(RequestEvent<Long> req) {
+	public ResponseEvent<List<StorageContainerSummary>> deleteStorageContainers(RequestEvent<BulkDeleteEntityOp> req) {
 		try {
-			StorageContainer existing = getContainer(req.getPayload(), null);
-			AccessCtrlMgr.getInstance().ensureDeleteContainerRights(existing);
-			existing.delete();
-			return ResponseEvent.response(StorageContainerDetail.from(existing));
+			Set<Long> containerIds = req.getPayload().getIds();
+			List<StorageContainer> containers = daoFactory.getStorageContainerDao().getByIds(containerIds);
+			if (containerIds.size() != containers.size()) {
+				containers.forEach(container -> containerIds.remove(container.getId()));
+				throw OpenSpecimenException.userError(StorageContainerErrorCode.NOT_FOUND, containerIds, containerIds.size());
+			}
+
+			List<StorageContainer> ancestors = getAncestors(containers);
+			ancestors.forEach(AccessCtrlMgr.getInstance()::ensureDeleteContainerRights);
+			ancestors.forEach(StorageContainer::delete);
+
+			//
+			// returning summary of all containers given by user instead of only ancestor containers
+			//
+			return ResponseEvent.response(StorageContainerSummary.from(containers));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -1014,6 +1026,17 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 			createContainerHierarchy(containerType.getCanHold(), cloned);
 		}
+	}
+
+	private List<StorageContainer> getAncestors(List<StorageContainer> containers) {
+		Set<Long> descContIds = containers.stream()
+			.flatMap(c -> c.getDescendentContainers().stream().filter(d -> !d.equals(c)))
+			.map(StorageContainer::getId)
+			.collect(Collectors.toSet());
+
+		return containers.stream()
+			.filter(c -> !descContIds.contains(c.getId()))
+			.collect(Collectors.toList());
 	}
 
 	private void generateName(StorageContainer container) {

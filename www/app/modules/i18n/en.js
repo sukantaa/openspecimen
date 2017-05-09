@@ -1154,6 +1154,8 @@
     "replicated_successfully": "Container {{name}} replicated successfully",
     "multiple_containers_created": "Successfully created {{count}} containers",
     "search": "Type storage container name to filter containers",
+    "delete_containers":  "Are you sure you want to delete selected containers?",
+    "containers_deleted": "Containers deleted successfully",
     "no_containers_match_search": "No containers match search criteria to store specimen/s",
     "created_by": "Created By",
     "loading_map": "Loading container map. Please wait for a moment...",
@@ -1206,6 +1208,7 @@
       "view_details": "Click to view Container details",
       "add": "Click to add new Container",
       "edit": "Click to edit Container",
+      "delete_containers": "Click to delete selected containers",
       "count_free_locations": "Count of free locations",
       "search": "Click to search Storage Containers",
       "select": "Click to select Storage Containers"

@@ -11,37 +11,13 @@
   </div>
   <div class="os-page-commands">
     <div class="left">
-      <button show-if-allowed="containerResource.createOpts" class="default"
-        title="{{'container.tooltip.add' | translate}}" ui-sref="container-addedit({containerId: ''})">
-        <span class="fa fa-plus"></span>
-        <span translate="common.buttons.create">Create</span>
-      </button>
-      <button class="default" ui-sref="container-type-list">
-        <span class="fa fa-cubes"></span>
-        <span translate="container_type.list">Container Types</span>
-      </button>
-      <div show-if-allowed="containerResource.importOpts" dropdown class="os-inline-btn">
-        <button class="default dropdown-toggle">
-          <span translate="common.buttons.import">Import</span>
-          <span class="fa fa-caret-down"></span>
-        </button>
-        <ul class="dropdown-menu">
-          <li>
-            <a ui-sref="container-import">
-              <span class="fa fa-dropbox"></span>
-              <span translate="container.list">Containers</span>
-            </a>
-          </li>
-          <li>
-            <a ui-sref="container-import-jobs">
-              <span class="fa fa-list-alt"></span>
-              <span translate="bulk_imports.view_jobs">View Past Imports</span>
-            </a>
-          </li>
-        </ul>
+      <div ng-if="!ctx.checkList.anySelected">
+        <div ng-include="'modules/administrative/container/single-container-ops.html'"></div>
       </div>
-      <os-export show-if-admin="institute" class="default" detail="ctx.exportDetail"></os-export>
-      <os-help class="os-btns btn default" link="container_help_link"></os-help>
+
+      <div ng-if="ctx.checkList.anySelected">
+        <div ng-include="'modules/administrative/container/bulk-container-ops.html'"></div>
+      </div>
     </div>
     <div class="right">
       <button class="default" os-right-drawer-toggle title="{{'container.tooltip.search' | translate}}">
@@ -55,6 +31,12 @@
     <table class="os-table os-table-hover">
       <thead class="os-table-head">
         <tr class="row">
+          <th show-if-allowed="containerResource.deleteOpts" class="col os-click-esc">
+            <div class="os-select-specimen-cb">
+              <os-checkbox ng-change="ctx.checkList.toggleSelectAll()" ng-model="ctx.checkList.allSelected">
+              </os-checkbox>
+            </div>
+          </th>
           <th class="col">
             <span translate="container.name">Name</span>
           </th>
@@ -80,6 +62,13 @@
       </thead>
       <tbody class="os-table-body">
         <tr class="row" ng-repeat="container in containerList" os-row-click="showContainerDetail(container)">
+          <td show-if-allowed="containerResource.deleteOpts" class="col os-click-esc">
+            <div class="os-select-specimen-cb">
+              <os-checkbox ng-change="ctx.checkList.toggleSelectItem($index)"
+                ng-model="ctx.checkList.items[$index].selected">
+              </os-checkbox>
+            </div>
+          </td>
           <td class="col">
             <a ui-sref="container-detail.locations({containerId: container.id})">
               <span>{{container.name}}</span>
@@ -119,3 +108,48 @@
   <div os-right-drawer ng-include="'modules/administrative/container/search.html'"></div>
 
 </div>
+
+<script type="text/ng-template" id="modules/administrative/container/single-container-ops.html">
+  <div>
+    <button show-if-allowed="containerResource.createOpts" class="default"
+      title="{{'container.tooltip.add' | translate}}" ui-sref="container-addedit({containerId: ''})">
+      <span class="fa fa-plus"></span>
+      <span translate="common.buttons.create">Create</span>
+    </button>
+    <button class="default" ui-sref="container-type-list">
+      <span class="fa fa-cubes"></span>
+      <span translate="container_type.list">Container Types</span>
+    </button>
+    <div show-if-allowed="containerResource.importOpts" dropdown class="os-inline-btn">
+      <button class="default dropdown-toggle">
+        <span translate="common.buttons.import">Import</span>
+        <span class="fa fa-caret-down"></span>
+      </button>
+      <ul class="dropdown-menu">
+        <li>
+          <a ui-sref="container-import">
+            <span class="fa fa-dropbox"></span>
+            <span translate="container.list">Containers</span>
+          </a>
+        </li>
+        <li>
+          <a ui-sref="container-import-jobs">
+            <span class="fa fa-list-alt"></span>
+            <span translate="bulk_imports.view_jobs">View Past Imports</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <os-export show-if-admin="institute" class="default" detail="ctx.exportDetail"></os-export>
+    <os-help class="os-btns btn default" link="container_help_link"></os-help>
+  </div>
+</script>
+
+<script type="text/ng-template" id="modules/administrative/container/bulk-container-ops.html">
+  <div>
+    <button class="default" title="{{'container.tooltip.delete_containers' | translate}}" ng-click="deleteContainers()">
+      <span class="fa fa-trash"></span>
+      <span translate="common.buttons.delete">Delete</span>
+    </button>
+  </div>
+</script>

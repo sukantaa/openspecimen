@@ -1,5 +1,5 @@
 angular.module('os.administrative.container.list', ['os.administrative.models'])
-  .controller('ContainerListCtrl', function($scope, $state, Container, Util, ListPagerOpts) {
+  .controller('ContainerListCtrl', function($scope, $state, Container, Util, DeleteUtil, ListPagerOpts, CheckList) {
 
     var pagerOpts;
 
@@ -31,9 +31,14 @@ angular.module('os.administrative.container.list', ['os.administrative.models'])
           );
 
           $scope.containerList = containers;
+          $scope.ctx.checkList = new CheckList(containers);
           pagerOpts.refreshOpts(containers);
         }
       );
+    }
+
+    function getContainerIds(containers) {
+      return containers.map(function(container) { return container.id; });
     }
 
     function getContainersCount() {
@@ -43,6 +48,18 @@ angular.module('os.administrative.container.list', ['os.administrative.models'])
     $scope.showContainerDetail = function(container) {
       $state.go('container-detail.locations', {containerId: container.id});
     };
+
+    $scope.deleteContainers = function() {
+      var containers = $scope.ctx.checkList.getSelectedItems();
+
+      var opts = {
+        confirmDelete:  'container.delete_containers',
+        successMessage: 'container.containers_deleted',
+        onBulkDeletion: loadContainers
+      }
+
+      DeleteUtil.bulkDelete({bulkDelete: Container.bulkDelete}, getContainerIds(containers), opts);
+    }
 
     init();
   });
