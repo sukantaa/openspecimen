@@ -31,11 +31,13 @@ import com.krishagni.catissueplus.core.biospecimen.services.impl.SystemFormUpdat
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
+import com.krishagni.catissueplus.core.de.domain.Form;
 import com.krishagni.catissueplus.core.de.domain.FormErrorCode;
 import com.krishagni.catissueplus.core.de.events.AddRecordEntryOp;
 import com.krishagni.catissueplus.core.de.events.EntityFormRecords;
@@ -60,7 +62,6 @@ import com.krishagni.catissueplus.core.de.repository.FormDao;
 import com.krishagni.catissueplus.core.de.services.FormContextProcessor;
 import com.krishagni.catissueplus.core.de.services.FormService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
-
 import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.Control;
 import edu.common.dynamicextensions.domain.nui.DataType;
@@ -179,17 +180,21 @@ public class FormServiceImpl implements FormService, InitializingBean {
     
 	@Override
 	@PlusTransactional
-	public ResponseEvent<Boolean> deleteForm(RequestEvent<Long> req) {
+	public ResponseEvent<Boolean> deleteForms(RequestEvent<BulkDeleteEntityOp> req) {
 		try {
 			AccessCtrlMgr.getInstance().ensureFormUpdateRights();
-			
-			Long formId = req.getPayload();
-			if (Container.softDeleteContainer(formId)) {
-				formDao.deleteFormContexts(formId);
-				return ResponseEvent.response(true);
-			} else {
-				return ResponseEvent.userError(FormErrorCode.NOT_FOUND);
+
+			Set<Long> formIds = req.getPayload().getIds();
+			List<Form> forms = formDao.getFormsByIds(formIds);
+			if (formIds.size() != forms.size()) {
+				forms.forEach(form -> formIds.remove(form.getId()));
+				throw OpenSpecimenException.userError(FormErrorCode.NOT_FOUND, formIds, formIds.size());
 			}
+
+			formIds.forEach(Container::softDeleteContainer);
+			formDao.deleteFormContexts(formIds);
+
+			return ResponseEvent.response(true);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -242,7 +247,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		} else if (formName.equals(SPECIMEN_FORM)) {
 			extendedFormIds.addAll(formDao.getFormIds(cpId, SPECIMEN_EVENT_FORM));
 		}
-		
+
 		FormFieldSummary field = getExtensionField("extensions", "Extensions", extendedFormIds);
 		fields.add(field);
 		return ResponseEvent.response(fields);

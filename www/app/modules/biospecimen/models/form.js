@@ -115,6 +115,11 @@ angular.module('os.biospecimen.models.form', ['os.common.models'])
       return fieldName == 'extensions' || fieldName == 'customFields';
     }
 
+    Form.bulkDelete = function(formIds) {
+      return $http.delete(Form.url(), {params: {id: formIds}})
+        .then(Form.modelArrayRespTransform);
+    }
+
     Form.prototype.getRecords = function() {
       var result = [];
       var params = {objectId: this.objectId, entityType: this.entityType};

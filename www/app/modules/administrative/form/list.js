@@ -2,7 +2,7 @@
 angular.module('os.administrative.form.list', ['os.administrative.models'])
   .controller('FormListCtrl', function(
     $scope, $state, $modal, $translate, Form, FormEntityReg,
-    CollectionProtocol, Util, DeleteUtil, Alerts, ListPagerOpts) {
+    CollectionProtocol, Util, DeleteUtil, Alerts, ListPagerOpts, CheckList) {
 
     var cpListQ = undefined;
     var pagerOpts;
@@ -11,6 +11,7 @@ angular.module('os.administrative.form.list', ['os.administrative.models'])
       pagerOpts = $scope.pagerOpts = new ListPagerOpts({listSizeGetter: getFormsCount});
       $scope.formFilterOpts = {maxResults: pagerOpts.recordsPerPage + 1, excludeSysForms: true};
       $scope.formsList = [];
+      $scope.ctx = {};
       loadForms($scope.formFilterOpts);
       Util.filter($scope, 'formFilterOpts', loadForms);
     }
@@ -18,6 +19,7 @@ angular.module('os.administrative.form.list', ['os.administrative.models'])
     function loadForms(filterOpts) {
       Form.query(filterOpts).then(function(result) {
         $scope.formsList = result;
+        $scope.ctx.checkList = new CheckList(result);
         pagerOpts.refreshOpts(result);
       })
     }
@@ -45,6 +47,10 @@ angular.module('os.administrative.form.list', ['os.administrative.models'])
 
     function getFormsCount() {
       return Form.getCount($scope.formFilterOpts);
+    }
+
+    function getFormIds(forms) {
+      return forms.map(function(form) { return form.formId; });
     }
 
     $scope.openForm = function(form) {
@@ -112,6 +118,18 @@ angular.module('os.administrative.form.list', ['os.administrative.models'])
         delete: function () { deleteForm(form); }
       });
 
+    }
+
+    $scope.deleteForms = function() {
+      var forms = $scope.ctx.checkList.getSelectedItems();
+
+      var opts = {
+        confirmDelete:  'form.delete_forms',
+        successMessage: 'form.forms_deleted',
+        onBulkDeletion: loadForms
+      }
+
+      DeleteUtil.bulkDelete({bulkDelete: Form.bulkDelete}, getFormIds(forms), opts);
     }
 
     init();

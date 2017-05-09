@@ -9,6 +9,12 @@ public class BulkDeleteEntityOp {
 
 	private boolean forceDelete;
 
+	public BulkDeleteEntityOp() {}
+
+	public BulkDeleteEntityOp(Set<Long> ids) {
+		this.ids = ids;
+	}
+
 	public Set<Long> getIds() {
 		return ids;
 	}

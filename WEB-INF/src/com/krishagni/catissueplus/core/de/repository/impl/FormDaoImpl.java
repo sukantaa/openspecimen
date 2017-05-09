@@ -63,6 +63,15 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 
 	@SuppressWarnings("unchecked")
 	@Override
+	public List<Form> getFormsByIds(Collection<Long> formIds) {
+		return getCurrentSession().createCriteria(Form.class)
+			.add(Restrictions.in("id", formIds))
+			.add(Restrictions.isNull("deletedOn"))
+			.list();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
 	public List<FormSummary> getAllFormsSummary(FormListCriteria crit) {
 		return getForms(getAllFormsQuery(crit, false).list());
 	}
@@ -569,11 +578,11 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	}
 	
 	@Override
-	public void deleteFormContexts(Long formId) {
+	public void deleteFormContexts(Collection<Long> formIds) {
 		sessionFactory.getCurrentSession()
 			.createSQLQuery(SOFT_DELETE_FORM_CONTEXTS_SQL)
 			.setTimestamp("deletedOn", Calendar.getInstance().getTime())
-			.setLong("formId", formId)
+			.setParameterList("formIds", formIds)
 			.executeUpdate(); 
 	}
 
@@ -930,7 +939,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 			"   (:filename, :formId, :digest, :executedOn) ";
 	
 	private static final String SOFT_DELETE_FORM_CONTEXTS_SQL = 
-			"update catissue_form_context set deleted_on = :deletedOn where container_id = :formId";
+			"update catissue_form_context set deleted_on = :deletedOn where container_id in (:formIds)";
 
 	private static final String SOFT_DELETE_RECS_SQL =
 			"update catissue_form_record_entry " +

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.krishagni.catissueplus.core.administrative.repository.FormListCriteria;
+import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -22,12 +23,10 @@ import com.krishagni.catissueplus.core.de.events.FormSummary;
 import com.krishagni.catissueplus.core.de.events.GetEntityFormRecordsOp;
 import com.krishagni.catissueplus.core.de.events.GetFileDetailOp;
 import com.krishagni.catissueplus.core.de.events.GetFormFieldPvsOp;
-import com.krishagni.catissueplus.core.de.events.FormRecordCriteria;
 import com.krishagni.catissueplus.core.de.events.GetFormRecordsListOp;
 import com.krishagni.catissueplus.core.de.events.ListEntityFormsOp;
 import com.krishagni.catissueplus.core.de.events.ListFormFields;
 import com.krishagni.catissueplus.core.de.events.RemoveFormContextOp;
-
 import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.PermissibleValue;
 import edu.common.dynamicextensions.napi.FormData;
@@ -39,7 +38,7 @@ public interface FormService {
 	
 	public ResponseEvent<Container> getFormDefinition(RequestEvent<Long> req);
 	
-	public ResponseEvent<Boolean> deleteForm(RequestEvent<Long> req);
+	public ResponseEvent<Boolean> deleteForms(RequestEvent<BulkDeleteEntityOp> req);
 	
 	public ResponseEvent<List<FormFieldSummary>> getFormFields(RequestEvent<ListFormFields> req);
 	

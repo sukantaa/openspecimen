@@ -13,11 +13,13 @@
 
   <div class="os-page-commands">
     <div class="left">
-      <button class="default" title="{{'form.tooltip.add' | translate}}" ui-sref="form-addedit({formId: ''})">
-        <span class="fa fa-plus"></span>
-        <span translate="common.buttons.create">Create</span>
-      </button>
-      <os-help class="os-btns btn default" link="form_help_link"></os-help>
+      <div ng-if="!ctx.checkList.anySelected">
+        <div ng-include="'modules/administrative/form/single-form-ops.html'"></div>
+      </div>
+
+      <div ng-if="ctx.checkList.anySelected">
+        <div ng-include="'modules/administrative/form/bulk-form-ops.html'"></div>
+      </div>
     </div>
     <div class="right">
       <button class="default" os-right-drawer-toggle title="{{'form.tooltip.search' | translate}}">
@@ -31,6 +33,12 @@
     <table class="os-table os-table-hover">
       <thead class="os-table-head">
         <tr class="row">
+          <th class="col os-click-esc">
+            <div class="os-select-specimen-cb">
+              <os-checkbox ng-change="ctx.checkList.toggleSelectAll()" ng-model="ctx.checkList.allSelected">
+              </os-checkbox>
+            </div>
+          </th>
           <th class="col">
             <span translate="form.name">Form Name</span>
           </th>
@@ -50,6 +58,13 @@
       </thead>
       <tbody class="os-table-body">
         <tr class="row" ng-repeat="form in formsList | filter:searchFormName" os-row-click="openForm(form)">
+          <td class="col os-click-esc">
+            <div class="os-select-specimen-cb">
+              <os-checkbox ng-change="ctx.checkList.toggleSelectItem($index)"
+                ng-model="ctx.checkList.items[$index].selected">
+              </os-checkbox>
+            </div>
+          </td>
           <td class="col">
             <a ui-sref="form-addedit({formId: form.formId})" title="{{'form.tooltip.edit' | translate}}">
               <span>{{form.caption}}</span>
@@ -87,3 +102,22 @@
   <div os-right-drawer ng-include="'modules/administrative/form/search.html'"></div>
 
 </div>
+
+<script type="text/ng-template" id="modules/administrative/form/single-form-ops.html">
+  <div>
+    <button class="default" title="{{'form.tooltip.add' | translate}}" ui-sref="form-addedit({formId: ''})">
+      <span class="fa fa-plus"></span>
+      <span translate="common.buttons.create">Create</span>
+    </button>
+    <os-help class="os-btns btn default" link="form_help_link"></os-help>
+  </div>
+</script>
+
+<script type="text/ng-template" id="modules/administrative/form/bulk-form-ops.html">
+  <div>
+    <button class="default" title="{{'form.tooltip.delete_forms' | translate}}" ng-click="deleteForms()">
+      <span class="fa fa-trash"></span>
+      <span translate="common.buttons.delete">Delete</span>
+    </button>
+  </div>
+</script>

@@ -22,6 +22,8 @@ import com.krishagni.catissueplus.core.de.events.ObjectCpDetail;
 public interface FormDao extends Dao<FormContextBean> {
 	public Form getFormById(Long formId);
 
+	public List<Form> getFormsByIds(Collection<Long> formIds);
+
 	public List<FormSummary> getAllFormsSummary(FormListCriteria crit);
 	
 	public Long getAllFormsCount(FormListCriteria crit);
@@ -92,7 +94,7 @@ public interface FormDao extends Dao<FormContextBean> {
 	
 	public void insertFormChangeLog(String file, String digest, Long formId);
 	
-	public void deleteFormContexts(Long formId);
+	public void deleteFormContexts(Collection<Long> formIds);
 
 	public void deleteRecords(Long formCtxtId, Collection<Long> recordIds);
 }
