@@ -128,7 +128,7 @@ public class ConsentStatementServiceImpl implements ConsentStatementService {
 		}
 
 		if (!isUniqueStatement(existingStmt, newStmt)) {
-			ose.addError(ConsentStatementErrorCode.DUP, newStmt.getStatement());
+			ose.addError(ConsentStatementErrorCode.DUP);
 		}
 	}
 	
