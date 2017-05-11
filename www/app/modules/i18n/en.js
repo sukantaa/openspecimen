@@ -1866,7 +1866,8 @@
       "not_found_count": "Failed: Specimens not present in the order",
       "not_found_error": "Failed: Specimen not present in the order",
       "extra_count": "Failed: Additional specimens present in the order",
-      "extra_error": "Failed: Additional specimen present in the order"
+      "extra_error": "Failed: Additional specimen present in the order",
+      "report_copied": "Specimen validation report copied to the clipboard"
     }
   },
 

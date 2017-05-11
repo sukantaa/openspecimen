@@ -214,7 +214,8 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
         extraCount:    'orders.specimen_validation.extra_count',
         extraError:    'orders.specimen_validation.extra_error',
         itemLabel:     useBarcode ? 'specimens.barcode' : 'specimens.label',
-        error:         'common.error'
+        error:         'common.error',
+        reportCopied:  'orders.specimen_validation.report_copied'
       }
     }
 

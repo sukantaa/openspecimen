@@ -371,7 +371,10 @@ angular.module('openspecimen')
             }
           );
 
-          copyToClipboard(report);
+          var success = copyToClipboard(report);
+          if (success) {
+            Alerts.info(msgKeys.reportCopied);
+          }
         }
       );
     }
@@ -381,13 +384,16 @@ angular.module('openspecimen')
       angular.element(document.body).append(textarea);
       textarea.select();
 
+      var success = false;
       try {
         document.execCommand('copy');
+        success = true;
       } catch (e) {
         console.log("Error copying text to clipboard");
       }
 
       textarea.remove();
+      return success;
     }
 
     return {
