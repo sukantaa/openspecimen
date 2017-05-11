@@ -212,7 +212,7 @@ public class DistributionProtocol extends BaseExtensionEntity {
 	public void delete() {
 		List<DependentEntityDetail> dependentEntities = getDependentEntities();
 		if (!dependentEntities.isEmpty()) {
-			throw OpenSpecimenException.userError(DistributionProtocolErrorCode.REF_ENTITY_FOUND);
+			throw OpenSpecimenException.userError(DistributionProtocolErrorCode.REF_ENTITY_FOUND, getShortTitle());
 		}
 		
 		setShortTitle(Utility.getDisabledValue(getShortTitle(), 50));

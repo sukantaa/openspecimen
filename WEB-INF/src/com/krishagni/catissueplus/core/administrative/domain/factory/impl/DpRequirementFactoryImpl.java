@@ -68,14 +68,17 @@ public class DpRequirementFactoryImpl implements DpRequirementFactory {
 		}
 		
 		DistributionProtocol dp = null;
+		Object key = null;
 		if (dpId != null) {
 			dp = daoFactory.getDistributionProtocolDao().getById(dpId);
+			key = dpId;
 		} else {
 			dp = daoFactory.getDistributionProtocolDao().getByShortTitle(dpShortTitle);
+			key = dpShortTitle;
 		}
 		
 		if (dp == null) {
-			ose.addError(DistributionProtocolErrorCode.NOT_FOUND);
+			ose.addError(DistributionProtocolErrorCode.NOT_FOUND, key, 1);
 			return;
 		}
 		

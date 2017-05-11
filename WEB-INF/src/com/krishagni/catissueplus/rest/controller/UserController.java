@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.rest.controller;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.rbac.events.SubjectRoleDetail;
 
 @Controller
@@ -241,7 +243,24 @@ public class UserController {
 		RequestEvent<DeleteEntityOp> req = new RequestEvent<DeleteEntityOp>(deleteEntityOp);
 		ResponseEvent<UserDetail> resp = userService.deleteUser(req);
 		resp.throwErrorIfUnsuccessful();
-		
+
+		return resp.getPayload();
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public List<UserDetail> deleteUsers(@RequestParam(value = "id") Long[] ids) {
+		UserDetail userDetail = new UserDetail();
+		userDetail.setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
+
+		BulkEntityDetail<UserDetail> detail = new BulkEntityDetail<>();
+		detail.setIds(Arrays.asList(ids));
+		detail.setDetail(userDetail);
+
+		ResponseEvent<List<UserDetail>> resp = userService.bulkUpdateUsers(new RequestEvent<>(detail));
+		resp.throwErrorIfUnsuccessful();
+
 		return resp.getPayload();
 	}
 	

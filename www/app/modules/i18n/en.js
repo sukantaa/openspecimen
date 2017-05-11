@@ -894,6 +894,8 @@
     "closed": "Closed",
     "confirm_close_title": "Closing {{shortTitle}} confirmation",
     "confirm_close": "Are you sure you want to close the distribution protocol {{shortTitle}} ?",
+    "delete_dps":  "Are you sure you want to delete selected distribution protocols?",
+    "dps_deleted": "Distribution protocols deleted successfully",
     "add_requirement": "Add Specimen Requirement",
     "dist_spmns_count": "Distributed Specimens",
     "all_sites": "All current and future sites",
@@ -906,6 +908,7 @@
       "view_details": "Click to view Distribution Protocol details",
       "add": "Click to add new Distribution Protocol",
       "edit": "Click to edit Distribution Protocol",
+      "delete_dps": "Click to delete selected distribution protocols",
       "pending_count": "Pending to distribute specimens count",
       "distributed_count": "Distributed specimens count",
       "search": "Click to search Distribution Protocols"

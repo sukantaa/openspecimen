@@ -2,7 +2,9 @@
 package com.krishagni.catissueplus.rest.controller;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +28,7 @@ import com.krishagni.catissueplus.core.administrative.events.DistributionProtoco
 import com.krishagni.catissueplus.core.administrative.events.DpConsentTierDetail;
 import com.krishagni.catissueplus.core.administrative.repository.DpListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.DistributionProtocolService;
+import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -164,7 +167,17 @@ public class DistributionProtocolController {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public DistributionProtocolDetail deleteDistributionProtocol(@PathVariable Long id) {
-		ResponseEvent<DistributionProtocolDetail> resp  = dpSvc.deleteDistributionProtocol(getRequest(id));
+		return deleteDistributionProtocols(new Long[]{id}).get(0);
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public List<DistributionProtocolDetail> deleteDistributionProtocols(@RequestParam(value = "id") Long[] ids) {
+		BulkDeleteEntityOp op = new BulkDeleteEntityOp();
+		op.setIds(new HashSet<>(Arrays.asList(ids)));
+
+		ResponseEvent<List<DistributionProtocolDetail>> resp = dpSvc.deleteDistributionProtocols(getRequest(op));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}

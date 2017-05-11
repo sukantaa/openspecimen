@@ -17,7 +17,8 @@ angular.module('os.administrative.dp',
         controller: function($scope) {
           // Distribution Protocol Authorization Options
           $scope.dpResource = {
-            createOpts: {resource: 'DistributionProtocol', operations: ['Create']}
+            createOpts: {resource: 'DistributionProtocol', operations: ['Create']},
+            deleteOpts: {resource: 'DistributionProtocol', operations: ['Delete']}
           }
         },
         parent: 'signed-in'

@@ -13,7 +13,7 @@ import java.util.function.Predicate;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.DpConsentTier;
@@ -39,6 +39,7 @@ import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -129,11 +130,7 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 	public ResponseEvent<DistributionProtocolDetail> getDistributionProtocol(RequestEvent<Long> req) {
 		try {
 			Long protocolId = req.getPayload();
-			DistributionProtocol existing = daoFactory.getDistributionProtocolDao().getById(protocolId);
-			if (existing == null) {
-				return ResponseEvent.userError(DistributionProtocolErrorCode.NOT_FOUND);
-			}
-			
+			DistributionProtocol existing = getDistributionProtocol(protocolId);
 			AccessCtrlMgr.getInstance().ensureReadDpRights(existing);
 			return ResponseEvent.response(DistributionProtocolDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
@@ -166,23 +163,11 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 	@PlusTransactional
 	public ResponseEvent<DistributionProtocolDetail> updateDistributionProtocol(RequestEvent<DistributionProtocolDetail> req) {
 		try {
-			Long protocolId = req.getPayload().getId();
-			String title = req.getPayload().getTitle();
-			
-			DistributionProtocol existing = null;
-			if (protocolId != null) {
-				existing = daoFactory.getDistributionProtocolDao().getById(protocolId);
-			} else {
-				existing = daoFactory.getDistributionProtocolDao().getDistributionProtocol(title);
-			}
-			
-			if (existing == null) {
-				return ResponseEvent.userError(DistributionProtocolErrorCode.NOT_FOUND);
-			}
-
+			DistributionProtocolDetail reqDetail = req.getPayload();
+			DistributionProtocol existing = getDistributionProtocol(reqDetail.getId(), reqDetail.getShortTitle(), reqDetail.getTitle());
 			AccessCtrlMgr.getInstance().ensureCreateUpdateDpRights(existing);
 
-			DistributionProtocol dp = distributionProtocolFactory.createDistributionProtocol(req.getPayload());
+			DistributionProtocol dp = distributionProtocolFactory.createDistributionProtocol(reqDetail);
 			AccessCtrlMgr.getInstance().ensureCreateUpdateDpRights(dp);
 			ensureUniqueConstraints(dp, existing);
 			ensurePiCoordNotSame(dp);
@@ -202,11 +187,7 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 	@PlusTransactional
 	public ResponseEvent<List<DependentEntityDetail>> getDependentEntities(RequestEvent<Long> req) {
 		try {
-			DistributionProtocol existing = daoFactory.getDistributionProtocolDao().getById(req.getPayload());
-			if (existing == null) {
-				return ResponseEvent.userError(DistributionProtocolErrorCode.NOT_FOUND);
-			}
-			
+			DistributionProtocol existing = getDistributionProtocol(req.getPayload());
 			return ResponseEvent.response(existing.getDependentEntities());
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
@@ -215,17 +196,22 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<DistributionProtocolDetail> deleteDistributionProtocol(RequestEvent<Long> req) {
+	public ResponseEvent<List<DistributionProtocolDetail>> deleteDistributionProtocols(RequestEvent<BulkDeleteEntityOp> req) {
+		//
+		// TODO: Force delete is not implemented
+		//
 		try {
-			DistributionProtocol existing = daoFactory.getDistributionProtocolDao().getById(req.getPayload());
-			if (existing == null) {
-				return ResponseEvent.userError(DistributionProtocolErrorCode.NOT_FOUND);
+			Set<Long> dpIds = req.getPayload().getIds();
+
+			List<DistributionProtocol> dps = daoFactory.getDistributionProtocolDao().getByIds(dpIds);
+			if (dpIds.size() != dps.size()) {
+				dps.forEach(dp -> dpIds.remove(dp.getId()));
+				throw OpenSpecimenException.userError(DistributionProtocolErrorCode.NOT_FOUND, dpIds, dpIds.size());
 			}
 
-			AccessCtrlMgr.getInstance().ensureDeleteDpRights(existing);
-			existing.delete();
-			daoFactory.getDistributionProtocolDao().saveOrUpdate(existing);
-			return ResponseEvent.response(DistributionProtocolDetail.from(existing));
+			dps.forEach(AccessCtrlMgr.getInstance()::ensureDeleteDpRights);
+			dps.forEach(DistributionProtocol::delete);
+			return ResponseEvent.response(DistributionProtocolDetail.from(dps));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -243,10 +229,7 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 				return ResponseEvent.userError(ActivityStatusErrorCode.INVALID);
 			}
 			
-			DistributionProtocol existing = daoFactory.getDistributionProtocolDao().getById(dpId);
-			if (existing == null) {
-				return ResponseEvent.userError(DistributionProtocolErrorCode.NOT_FOUND);
-			}
+			DistributionProtocol existing = getDistributionProtocol(dpId);
 
 			if (existing.getActivityStatus().equals(status)) {
 				return ResponseEvent.response(DistributionProtocolDetail.from(existing));
@@ -343,11 +326,7 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 	public ResponseEvent<List<DpRequirementDetail>> getRequirements(RequestEvent<Long> req) {
 		try {
 			Long dpId = req.getPayload();
-			DistributionProtocol dp = daoFactory.getDistributionProtocolDao().getById(dpId);
-			if (dp == null) {
-				return ResponseEvent.userError(DistributionProtocolErrorCode.NOT_FOUND);
-			}
-
+			DistributionProtocol dp = getDistributionProtocol(dpId);
 			AccessCtrlMgr.getInstance().ensureCreateUpdateDpRights(dp);
 			
 			List<DpRequirementDetail> reqDetails = DpRequirementDetail.from(dp.getRequirements());
@@ -649,11 +628,7 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 
 	private List<DistributionOrderStat> getOrderStats(DistributionOrderStatListCriteria crit) {
 		if (crit.dpId() != null) {
-			DistributionProtocol dp = daoFactory.getDistributionProtocolDao().getById(crit.dpId());
-			if (dp == null) {
-				throw OpenSpecimenException.userError(DistributionProtocolErrorCode.NOT_FOUND);
-			}
-			
+			DistributionProtocol dp = getDistributionProtocol(crit.dpId());
 			AccessCtrlMgr.getInstance().ensureReadDpRights(dp);
 		} else {
 			Set<Long> siteIds = AccessCtrlMgr.getInstance().getCreateUpdateAccessDistributionOrderSiteIds();
@@ -701,20 +676,30 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 		
 		return data.toArray(new String[0]);
 	}
+
+	private DistributionProtocol getDistributionProtocol(Long id) {
+		return getDistributionProtocol(id, null, null);
+	}
 	
 	private DistributionProtocol getDistributionProtocol(Long id, String dpShortTitle, String dpTitle) {
 		DistributionProtocol dp = null;
+		Object key = null;
 
 		if (id != null) {
 			dp = daoFactory.getDistributionProtocolDao().getById(id);
+			key = id;
 		} else if (StringUtils.isNotBlank(dpTitle)) {
 			dp = daoFactory.getDistributionProtocolDao().getDistributionProtocol(dpTitle);
+			key = dpTitle;
 		} else if (StringUtils.isNotBlank(dpShortTitle)) {
 			dp = daoFactory.getDistributionProtocolDao().getByShortTitle(dpShortTitle);
+			key = dpShortTitle;
 		}
-		
-		if (dp == null) {
-			throw OpenSpecimenException.userError(DistributionProtocolErrorCode.NOT_FOUND);
+
+		if (key == null) {
+			throw OpenSpecimenException.userError(DistributionProtocolErrorCode.DP_REQUIRED);
+		} else if (dp == null) {
+			throw OpenSpecimenException.userError(DistributionProtocolErrorCode.NOT_FOUND, key, 1);
 		}
 		
 		return dp;

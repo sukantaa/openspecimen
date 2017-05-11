@@ -1,6 +1,7 @@
 
 package com.krishagni.catissueplus.rest.controller;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.de.services.FormService;
 
 @Controller
@@ -208,13 +210,39 @@ public class SitesController {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public SiteDetail deleteSite(@PathVariable Long id, 
-			@RequestParam(value="close", required=false, defaultValue="false") boolean close) {
+	public SiteDetail deleteSite(
+		@PathVariable
+		Long id,
+
+		@RequestParam(value="close", required=false, defaultValue="false")
+		boolean close) {
+
 		DeleteEntityOp deleteOp = new DeleteEntityOp(id, close);
-		RequestEvent<DeleteEntityOp> req = new RequestEvent<>(deleteOp);
-		ResponseEvent<SiteDetail> resp = siteService.deleteSite(req);
+		ResponseEvent<SiteDetail> resp = siteService.deleteSite(new RequestEvent<>(deleteOp));
 		resp.throwErrorIfUnsuccessful();
-		
+		return resp.getPayload();
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public List<SiteDetail> deleteSites(
+		@RequestParam(value="id")
+		Long[] ids,
+
+		@RequestParam(value="close", required=false, defaultValue="false")
+		boolean close) {
+
+		Status status = close ? Status.ACTIVITY_STATUS_CLOSED : Status.ACTIVITY_STATUS_DISABLED;
+		SiteDetail siteDetail = new SiteDetail();
+		siteDetail.setActivityStatus(status.getStatus());
+
+		BulkEntityDetail<SiteDetail> detail = new BulkEntityDetail<>();
+		detail.setIds(Arrays.asList(ids));
+		detail.setDetail(siteDetail);
+
+		ResponseEvent<List<SiteDetail>> resp = siteService.bulkUpdateSites(new RequestEvent<>(detail));
+		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}
 

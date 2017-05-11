@@ -13,6 +13,8 @@ public enum DistributionProtocolErrorCode implements ErrorCode {
 
 	DUP_TITLE,
 
+	DP_REQUIRED,
+
 	NOT_FOUND,
 
 	PI_REQUIRED,

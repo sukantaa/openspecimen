@@ -1,12 +1,15 @@
 
 angular.module('os.administrative.dp.list', ['os.administrative.models'])
-  .controller('DpListCtrl', function($scope, $state, DistributionProtocol, Util, PvManager, ListPagerOpts) {
+  .controller('DpListCtrl', function(
+    $scope, $state, DistributionProtocol, Util, DeleteUtil,
+    PvManager, ListPagerOpts, CheckList) {
 
     var pagerOpts;
 
     function init() {
       pagerOpts = $scope.pagerOpts = new ListPagerOpts({listSizeGetter: getDpsCount});
       $scope.dpFilterOpts = {includeStats: true, maxResults: pagerOpts.recordsPerPage + 1};
+      $scope.ctx = {};
       loadDps($scope.dpFilterOpts);
       Util.filter($scope, 'dpFilterOpts', loadDps);
       loadActivityStatuses();
@@ -14,9 +17,10 @@ angular.module('os.administrative.dp.list', ['os.administrative.models'])
     
     function loadDps(filterOpts) {
       DistributionProtocol.query(filterOpts).then(
-        function(result) {
-          $scope.distributionProtocols = result;
-          pagerOpts.refreshOpts(result);
+        function(dps) {
+          $scope.distributionProtocols = dps;
+          $scope.ctx.checkList = new CheckList(dps);
+          pagerOpts.refreshOpts(dps);
         }
       );
     }
@@ -25,10 +29,6 @@ angular.module('os.administrative.dp.list', ['os.administrative.models'])
       return DistributionProtocol.getCount($scope.dpFilterOpts);
     }
 
-    $scope.showDpOverview = function(distributionProtocol) {
-      $state.go('dp-detail.overview', {dpId: distributionProtocol.id});
-    };
-    
     function loadActivityStatuses () {
       PvManager.loadPvs('activity-status').then(
         function (result) {
@@ -40,6 +40,25 @@ angular.module('os.administrative.dp.list', ['os.administrative.models'])
           });
         }
       );
+    }
+
+    function getDpIds(dps) {
+      return dps.map(function(dp) { return dp.id; });
+    }
+
+    $scope.showDpOverview = function(distributionProtocol) {
+      $state.go('dp-detail.overview', {dpId: distributionProtocol.id});
+    };
+
+    $scope.deleteDps = function() {
+      var dps = $scope.ctx.checkList.getSelectedItems();
+      var opts = {
+        confirmDelete:  'dp.delete_dps',
+        successMessage: 'dp.dps_deleted',
+        onBulkDeletion: loadDps
+      }
+
+      DeleteUtil.bulkDelete({bulkDelete: DistributionProtocol.bulkDelete}, getDpIds(dps), opts);
     }
 
     init();
