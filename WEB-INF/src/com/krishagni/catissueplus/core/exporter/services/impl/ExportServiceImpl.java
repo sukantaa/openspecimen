@@ -68,7 +68,7 @@ public class ExportServiceImpl implements ExportService {
 	@Override
 	@PlusTransactional
 	public ResponseEvent<ExportJobDetail> exportObjects(RequestEvent<ExportDetail> req) {
-		if (AuthUtil.isAdmin() || AuthUtil.isInstituteAdmin()) {
+		if (!AuthUtil.isAdmin() && !AuthUtil.isInstituteAdmin()) {
 			return ResponseEvent.userError(RbacErrorCode.INST_ADMIN_RIGHTS_REQ, AuthUtil.getCurrentUserInstitute().getName());
 		}
 
