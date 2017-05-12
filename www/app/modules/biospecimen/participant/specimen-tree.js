@@ -294,6 +294,20 @@ angular.module('os.biospecimen.participant.specimen-tree',
           );
         };
 
+        scope.distributeSpecimens = function() {
+          var specimens = getSelectedSpecimens(scope, 'specimens.no_specimens_for_distribution', false);
+          if (specimens.length == 0) {
+            return;
+          }
+
+          var specimensToDistribute = specimens.filter(function(spmn) {
+            return spmn.availableQty > 0;
+          });
+
+          SpecimensHolder.setSpecimens(specimensToDistribute);
+          $state.go('order-addedit', {orderId: ''});
+        }
+
         scope.addSpecimensToSpecimenList = function(list) {
           if (!scope.selection.any) {
             showSelectSpecimens('specimens.no_specimens_for_specimen_list');

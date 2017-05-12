@@ -618,6 +618,7 @@
     "no_specimens_for_specimen_list": "Please select at least one collected specimen to add specimen cart",
     "no_specimens_for_delete":"Please select at least one collected specimen to delete",
     "no_specimens_for_close":"Please select at least one collected specimen to close",
+    "no_specimens_for_distribution": "Please select at least one collected specimen to distribute",
 
     "pos_selector": "Specimen Position Selector",
 
@@ -691,7 +692,8 @@
       "assign_to": "Add to Cart",
       "reopen": "Reopen",
       "close": "Close",
-      "add_specimen": "Add Specimen"
+      "add_specimen": "Add Specimen",
+      "distribute": "Distribute"
     },
 
     "errors": {
