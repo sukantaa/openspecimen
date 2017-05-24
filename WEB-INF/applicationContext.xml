@@ -933,7 +933,10 @@
 
         <entry key="specimen">
           <bean class="com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenImporter">
+            <property name="daoFactory" ref="biospecimenDaoFactory"/>
             <property name="specimenSvc" ref="specimenSvc"/>
+            <property name="formSvc" ref="formSvc"/>
+            <property name="specimenResolver" ref="specimenResolver"/>
           </bean>
         </entry>
 
