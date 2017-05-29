@@ -116,6 +116,10 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 	@Override
 	public boolean sendEmail(Email mail) {
 		try {
+			if (!isEmailNotifEnabled()) {
+				return false;
+			}
+
 			final MimeMessage mimeMessage = mailSender.createMimeMessage();
 			final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, "UTF-8"); // true = multipart
 			message.setSubject(mail.getSubject());
@@ -149,6 +153,10 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 	}
 
 	private boolean sendEmail(String tmplKey, String tmplContent, String[] to, String[] bcc, File[] attachments, Map<String, Object> props) {
+		if (!isEmailNotifEnabled()) {
+			return false;
+		}
+
 		boolean emailEnabled = cfgSvc.getBoolSetting("notifications", "email_" + tmplKey, true);
 		if (!emailEnabled) {
 			return false;
@@ -261,5 +269,9 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 	
 	private String getAppUrl() {
 		return cfgSvc.getStrSetting("common", "app_url");
+	}
+
+	private boolean isEmailNotifEnabled() {
+		return cfgSvc.getBoolSetting("notifications", "all", true);
 	}
 }

@@ -2228,6 +2228,8 @@
 
       "notifications": {
         "title": "Notifications",
+        "all": "Email Notifications",
+        "all_desc": "Enable or disable email notifications sent by OpenSpecimen. When disabled, no email notifications are sent irrespective individual notification setting.",
         "email_order_distributed": "Order Distributed",
         "email_order_distributed_desc": "Send an email when specimens are distributed.",
         "email_query_export_data": "Query Data Exported",
