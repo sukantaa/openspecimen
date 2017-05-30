@@ -55,7 +55,9 @@ angular.module('os.administrative.container.list', ['os.administrative.models'])
       var opts = {
         confirmDelete:  'container.delete_containers',
         successMessage: 'container.containers_deleted',
-        onBulkDeletion: loadContainers
+        onBulkDeletion: function() {
+          loadContainers($scope.containerFilterOpts);
+        }
       }
 
       DeleteUtil.bulkDelete({bulkDelete: Container.bulkDelete}, getContainerIds(containers), opts);
