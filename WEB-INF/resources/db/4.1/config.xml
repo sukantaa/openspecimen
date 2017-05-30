@@ -15,4 +15,13 @@
     </sql>
   </changeSet>
   
+  <changeSet author="agosavi" id="Setting to enable or disable copying of import email notifications to admin email ID">
+    <sql>
+      call add_cfg_prop(
+        'notifications', 'cc_import_emails_to_admin',
+        'cc_import_emails_to_admin', 'cc_import_emails_to_admin_desc',
+        'BOOLEAN', 'false'
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

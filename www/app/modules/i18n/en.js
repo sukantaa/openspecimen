@@ -2259,7 +2259,9 @@
         "email_cp_expiring_notification": "Expiring CP",
         "email_cp_expiring_notification_desc": "Send reminder emails when collection protocol is about to expire.",
         "email_dp_expiring_notification": "Expiring DP",
-        "email_dp_expiring_notification_desc": "Send reminder emails when distribution protocol is about to expire."
+        "email_dp_expiring_notification_desc": "Send reminder emails when distribution protocol is about to expire.",
+        "cc_import_emails_to_admin": "Bulk Import Emails to Admin",
+        "cc_import_emails_to_admin_desc": "Copy bulk import emails to administrator email ID as well."
       },
 
       "catalog": {

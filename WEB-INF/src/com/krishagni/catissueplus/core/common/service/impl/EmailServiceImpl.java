@@ -10,6 +10,7 @@ import java.util.Properties;
 
 import javax.mail.internet.MimeMessage;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -183,9 +184,13 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 		email.setSubject(subject);
 		email.setBody(content);
 		email.setToAddress(to);
-		email.setCcAddress(new String[] {adminEmailId});
 		email.setBccAddress(bcc);
 		email.setAttachments(attachments);
+
+		boolean ccAdmin = BooleanUtils.toBooleanDefaultIfNull((Boolean) props.get("ccAdmin"), true);
+		if (ccAdmin) {
+			email.setCcAddress(new String[] { adminEmailId });
+		}
 
 		return sendEmail(email);
 	}

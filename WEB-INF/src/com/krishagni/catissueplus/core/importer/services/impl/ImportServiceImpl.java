@@ -836,6 +836,7 @@ public class ImportServiceImpl implements ImportService {
 			props.put("status", getMsg("bulk_import_statuses_" + job.getStatus()));
 			props.put("atomic", atomic);
 			props.put("$subject", subjParams);
+			props.put("ccAdmin", isCopyNotifToAdminEnabled());
 
 			String[] rcpts = {job.getCreatedBy().getEmailAddress()};
 			EmailUtil.getInstance().sendEmail(JOB_STATUS_EMAIL_TMPL, rcpts, null, props);
@@ -873,6 +874,10 @@ public class ImportServiceImpl implements ImportService {
 					logger.error("Error cleaning the database session", e);
 				}
 			}
+		}
+
+		private boolean isCopyNotifToAdminEnabled() {
+			return ConfigUtil.getInstance().getBoolSetting("notifications", "cc_import_emails_to_admin", false);
 		}
 
 		private String getMsg(String key, Object ... params) {
