@@ -145,10 +145,15 @@ angular.module('openspecimen')
 
       var params = {
         attribute: pvId,
-        searchString: srchTerm,
         includeOnlyLeafValue: incOnlyLeaf,
         maxResults: 100
       };
+
+      if (angular.isArray(srchTerm)) {
+        params.value = srchTerm
+      } else {
+        params.searchString = srchTerm
+      }
 
       return $http.get(url, {params: params}).then(
         function(result) {

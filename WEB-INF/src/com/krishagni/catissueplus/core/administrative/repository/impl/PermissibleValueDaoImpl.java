@@ -177,6 +177,10 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 	
 	private Criteria getPvQuery(ListPvCriteria crit) {
 		Criteria query = sessionFactory.getCurrentSession().createCriteria(PermissibleValue.class);
+		if (crit.values() != null) {
+			query.add(Restrictions.in("value", crit.values()));
+		}
+
 		if (StringUtils.isNotBlank(crit.parentAttribute()) || StringUtils.isNotBlank(crit.parentValue())) {
 			query.createAlias("parent", "p");
 		}

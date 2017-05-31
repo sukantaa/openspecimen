@@ -1,11 +1,15 @@
 
 package com.krishagni.catissueplus.core.administrative.events;
 
+import java.util.List;
+
 import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 
 public class ListPvCriteria extends AbstractListCriteria<ListPvCriteria> {
 
 	private String attribute;
+
+	private List<String> values;
 
 	private String parentValue;
 	
@@ -24,6 +28,14 @@ public class ListPvCriteria extends AbstractListCriteria<ListPvCriteria> {
 		return self();
 	}
 
+	public List<String> values() {
+		return values;
+	}
+
+	public ListPvCriteria values(List<String> values) {
+		this.values = values;
+		return self();
+	}
 
 	public String parentValue() {
 		return parentValue;

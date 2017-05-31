@@ -39,6 +39,9 @@ public class PermissibleValueController {
 			
 			@RequestParam(value = "searchString", required = false) 
 			String searchStr,
+
+			@RequestParam(value = "value", required = false)
+			List<String> values,
 			
 			@RequestParam(value = "includeParentValue", required = false, defaultValue="false")
 			boolean includeParentValue,
@@ -58,6 +61,7 @@ public class PermissibleValueController {
 		ListPvCriteria crit = new ListPvCriteria()
 			.attribute(attribute)
 			.query(searchStr)
+			.values(values)
 			.parentValue(parentValue)
 			.includeParentValue(includeParentValue)
 			.parentAttribute(parentAttribute)
