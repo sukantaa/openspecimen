@@ -21,6 +21,16 @@
         'notifications', 'cc_import_emails_to_admin',
         'cc_import_emails_to_admin', 'cc_import_emails_to_admin_desc',
         'BOOLEAN', 'false'
+       );
+    </sql>
+  </changeSet>
+
+  <changeSet author="agosavi" id="Setting to enable or disable system lockdown">
+    <sql>
+      call add_cfg_prop(
+        'administrative', 'system_lockdown',
+        'system_lockdown', 'system_lockdown_desc',
+        'BOOLEAN', 'false'
       );
     </sql>
   </changeSet>

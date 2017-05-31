@@ -13,8 +13,9 @@ public enum AuthErrorCode implements ErrorCode {
 	
 	IP_ADDRESS_CHANGED,
 
-	PASSWD_EXPIRED;
+	PASSWD_EXPIRED,
 
+	SYSTEM_LOCKDOWN;
 	@Override
 	public String code() {
 		return "AUTH_" + this.name();

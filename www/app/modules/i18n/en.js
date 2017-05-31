@@ -2093,7 +2093,9 @@
         "dp_expiry_rem_rept_inter": "Repeat DP Expiry Reminder",
         "dp_expiry_rem_rept_inter_desc": "Number of days after which email notification should be repeated for distribution protocol expiry.",
         "active_users_login_days": "Active User Login Days Criteria",
-        "active_users_login_days_desc": "Number of days elapsed since last login before user is considered as inactive"
+        "active_users_login_days_desc": "Number of days elapsed since last login before user is considered as inactive.",
+        "system_lockdown": "System Lockdown",
+        "system_lockdown_desc": "Stop all users from using OpenSpecimen except super administrators."
       },
 
       "biospecimen": {

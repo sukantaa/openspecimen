@@ -31,6 +31,7 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 
 public class UserAuthenticationServiceImpl implements UserAuthenticationService {
@@ -53,11 +54,14 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		User user = null;
 		try {
 			user = daoFactory.getUserDao().getUser(loginDetail.getLoginName(), loginDetail.getDomainName());
-			
 			if (user == null) {
 				throw OpenSpecimenException.userError(AuthErrorCode.INVALID_CREDENTIALS);
 			}
-			
+
+			if (!user.isAdmin() && isSystemLockedDown()) {
+				throw OpenSpecimenException.userError(AuthErrorCode.SYSTEM_LOCKDOWN);
+			}
+
 			if (user.getActivityStatus().equals(Status.ACTIVITY_STATUS_LOCKED.getStatus())) {
 				throw OpenSpecimenException.userError(AuthErrorCode.USER_LOCKED);
 			}
@@ -103,10 +107,14 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 			if (authToken == null) {
 				throw OpenSpecimenException.userError(AuthErrorCode.INVALID_TOKEN);
 			}
-			
+
 			User user = authToken.getUser();
 			long timeSinceLastApiCall = auditService.getTimeSinceLastApiCall(user.getId(), token);
 			int tokenInactiveInterval = AuthConfig.getInstance().getTokenInactiveIntervalInMinutes();
+			if (!user.isAdmin() && isSystemLockedDown()) {
+				throw OpenSpecimenException.userError(AuthErrorCode.SYSTEM_LOCKDOWN);
+			}
+
 			if (timeSinceLastApiCall > tokenInactiveInterval) {
 				daoFactory.getAuthDao().deleteAuthToken(authToken);
 				throw OpenSpecimenException.userError(AuthErrorCode.TOKEN_EXPIRED);
@@ -219,5 +227,9 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		userAuditLog.setCallEndTime(Calendar.getInstance().getTime());
 		userAuditLog.setLoginAuditLog(loginAuditLog);
 		auditService.insertApiCallLog(userAuditLog);
+	}
+
+	private boolean isSystemLockedDown() {
+		return ConfigUtil.getInstance().getBoolSetting("administrative", "system_lockdown", false);
 	}
 }
