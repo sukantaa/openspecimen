@@ -5,7 +5,7 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-  <changeSet author="vpawar" id="Updating registration extension records view to include participant level form records">
+  <changeSet author="vpawar" id="Update CPR extension records view to include participant level form records">
     <createView viewName="CPR_EXTENSION_RECORDS_VIEW" replaceIfExists="true">
       select
         re.object_id as cpr_id, re.record_id as record_id, fc.container_id as form_id
@@ -15,7 +15,7 @@
       where
         fc.entity_type = 'Participant' and
         fc.deleted_on is null and
-        re.activity_status = 'Active'
+        re.activity_status = 'ACTIVE'
 
       union all
 
@@ -28,7 +28,7 @@
       where
         fc.entity_type = 'CommonParticipant' and
         fc.deleted_on is null and
-        re.activity_status = 'Active'
+        re.activity_status = 'ACTIVE'
     </createView>
   </changeSet>
 
