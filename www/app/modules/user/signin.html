@@ -13,9 +13,9 @@
         <input type="password" class="form-control" ng-model="loginData.password"  placeholder="{{'user.password' | translate}}">
         <div ng-if="domains.length > 1">
           <os-select ng-model="loginData.domainName" list="domains" name="domain"
-            placeholder="{{'user.domain_name' | translate}}" required>
+            ng-click="$event.stopPropagation()" placeholder="{{'user.domain_name' | translate}}" required>
           </os-select>
-	</div>
+        </div>
       </div>
       <span class="os-error-msg" ng-if="loginError" translate="user.sign_in_failed">The username or password you entered is incorrect</span>
       <button type="submit" class="btn btn-block btn-primary" translate="user.sign_in">Sign in</button>
