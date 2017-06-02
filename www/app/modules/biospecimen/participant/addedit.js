@@ -26,6 +26,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
 
       $scope.cp = cp;
       $scope.cpr = angular.copy(cpr);
+      setBirthDate($scope.cpr);
 
       $scope.partCtx = {
         obj: {cpr: $scope.cpr, cp: cp},
@@ -156,6 +157,15 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
       );
     }
 
+    function setBirthDate(reg) {
+      if (!reg.participant.birthDateStr) {
+        return;
+      }
+
+      var parts = reg.participant.birthDateStr.split('-');
+      reg.participant.birthDate = new Date(parts[0], parseInt(parts[1]) - 1, parts[2]);
+    }
+
     $scope.pmiText = function(pmi) {
       return pmi.siteName + (pmi.mrn ? " (" + pmi.mrn + ")" : "");
     }
@@ -228,6 +238,11 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
     };
 
     $scope.lookupAgain = function() {
+      if (typeof inputParticipant.birthDate == 'string') {
+        var parts = inputParticipant.birthDate.split('-');
+        inputParticipant.birthDate = new Date(parts[0], parseInt(parts[1]) - 1, parts[2]);
+      }
+
       $scope.cpr.participant = inputParticipant;
       $scope.matchedParticipants = $scope.selectedParticipant = undefined;
       $scope.allowIgnoreMatches = true;

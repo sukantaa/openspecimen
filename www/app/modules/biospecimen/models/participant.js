@@ -1,6 +1,39 @@
 angular.module('os.biospecimen.models.participant', ['os.common.models'])
   .factory('Participant', function(osModel, $http) {
-    var Participant = osModel('participants');
+
+    function deserBirthDate(p) {
+      if (!p.birthDateStr) {
+        return;
+      }
+
+      var parts = p.birthDateStr.split('-');
+      p.birthDate = new Date(parts[0], parseInt(parts[1]) - 1, parts[2]);
+    }
+
+    function getDateStr(dateObj) {
+      var year = dateObj.getFullYear();
+
+      var month = dateObj.getMonth() + 1;
+      month = month > 9 ? month : '0' + month;
+
+      var day = dateObj.getDate();
+      day = day > 9 ? day : '0' + day;
+
+      return (year + '-' + month + '-' + day);
+    }
+
+    function serBirthDate(p) {
+      if (p.birthDate instanceof Date) {
+        p.birthDate = getDateStr(p.birthDate);
+      }
+    }
+
+    var Participant = osModel(
+      'participants',
+      function(p) {
+        deserBirthDate(p);
+      }
+    );
  
     Participant.prototype.newPmi = function() {
       return {siteName: '', mrn: ''};
@@ -52,7 +85,7 @@ angular.module('os.biospecimen.models.participant', ['os.common.models'])
     Participant.prototype.getMatchingCriteria = function() {
       return {
         lastName: this.lastName,
-        birthDate: this.birthDate,
+        birthDate: (this.birthDate instanceof Date) ? getDateStr(this.birthDate) : this.birthDate,
         empi: this.empi,
         uid : this.uid,
         pmis: this.getPmis()
@@ -80,6 +113,9 @@ angular.module('os.biospecimen.models.participant', ['os.common.models'])
     Participant.prototype.$saveProps = function() {
       var pmis = this.getPmis();
       this.pmis = pmis.length == 0 ? [] : pmis;
+
+      serBirthDate(this);
+
       return this;
     };
 
