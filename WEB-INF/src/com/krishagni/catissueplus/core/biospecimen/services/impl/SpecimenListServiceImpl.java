@@ -446,7 +446,7 @@ public class SpecimenListServiceImpl implements SpecimenListService {
 	}
 
 	private void ensureValidSpecimensAndUsers(SpecimenListDetail details, SpecimenList specimenList, List<Pair<Long, Long>> siteCpPairs) {
-		if (details.isAttrModified("specimens")) {
+		if (details.isAttrModified("specimenIds")) {
 			ensureValidSpecimens(details, siteCpPairs);
 		}
 		

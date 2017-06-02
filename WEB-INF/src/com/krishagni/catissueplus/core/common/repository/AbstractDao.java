@@ -100,18 +100,12 @@ public class AbstractDao<T> implements Dao<T> {
 		 * so the parameter item list needs to be chunked out.
 		 */
 		Junction or = Restrictions.disjunction();
-		if (ids.size() > 1000) {
-			while (ids.size() > 1000) {
-				List<?> subList = ids.subList(0, 1000);
-				or.add(Restrictions.in(attrName, subList));
-				ids.subList(0, 1000).clear();
-			}
+		int numValues = ids.size();
+		for (int i = 0; i < numValues; i += 500) {
+			List<Long> params = ids.subList(i, i + 500 > numValues ? numValues : i + 500);
+			or.add(Restrictions.in(attrName, params));
 		}
-		
-		if (ids.size() > 0) {
-			or.add(Restrictions.in(attrName, ids));
-		}
-		
+
 		criteria.add(or);
 	}
 

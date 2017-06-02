@@ -301,7 +301,6 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		for (int i = 0; i < numValues; i += 500) {
 			List<T> params = values.subList(i, i + 500 > numValues ? numValues : i + 500);
 			condition.add(Restrictions.in(property, params));
-			i += 500;
 		}
 	}
 
