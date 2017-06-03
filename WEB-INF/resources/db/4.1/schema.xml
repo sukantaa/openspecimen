@@ -83,4 +83,8 @@
       baseTableName="OS_EXPORT_JOB_PARAMS" baseColumnNames="JOB_ID"
       referencedTableName="OS_EXPORT_JOBS" referencedColumnNames="IDENTIFIER"/>
   </changeSet>
+
+  <changeSet author="vgaikwad" id="Increase width of clinical diagnosis">
+    <modifyDataType tableName="CATISSUE_COLL_PROT_EVENT" columnName="CLINICAL_DIAGNOSIS" newDataType="${text.type}(255)" />
+  </changeSet>
 </databaseChangeLog>
