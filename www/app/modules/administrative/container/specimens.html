@@ -102,10 +102,17 @@
           os-md-input placeholder="{{'specimens.ppid' | translate}}">
       </div>
 
-      <div class="form-group">
-        <os-select list="lctx.cps" display-prop="shortTitle" select-prop="id" ng-model="lctx.filterOpts.cpId"
-          os-md-input refresh="loadCps" placeholder="{{'specimens.cp' | translate}}">
-        </os-select>
+      <div class="form-group" ng-switch on="ctx.container.calcAllowedCollectionProtocols.length > 0">
+        <span ng-switch-when="true">
+          <os-select list="ctx.container.calcAllowedCollectionProtocols"
+            ng-model="lctx.filterOpts.cpShortTitle" os-md-input placeholder="{{'specimens.cp' | translate}}">
+          </os-select>
+        </span>
+        <span ng-switch-when="false">
+          <os-select list="lctx.cps" display-prop="shortTitle" select-prop="id"
+            ng-model="lctx.filterOpts.cpId" os-md-input refresh="loadCps" placeholder="{{'specimens.cp' | translate}}">
+          </os-select>
+        </span>
       </div>
 
       <div class="form-group" ng-if="!ctx.dimless">

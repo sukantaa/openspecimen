@@ -445,7 +445,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		}
 
 		String startAlias = "visit";
-		if (StringUtils.isNotBlank(crit.ppid()) || crit.cpId() != null) {
+		if (StringUtils.isNotBlank(crit.ppid()) || crit.cpId() != null || StringUtils.isNotBlank(crit.cpShortTitle())) {
 			query.createAlias("specimen.visit", "visit")
 				.createAlias("visit.registration", "cpr");
 
@@ -455,9 +455,14 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 				query.add(Restrictions.ilike("cpr.ppid", crit.ppid(), crit.matchMode()));
 			}
 
-			if (crit.cpId() != null) {
-				query.createAlias("cpr.collectionProtocol", "cp")
-					.add(Restrictions.eq("cp.id", crit.cpId()));
+			if (crit.cpId() != null || StringUtils.isNotBlank(crit.cpShortTitle())) {
+				query.createAlias("cpr.collectionProtocol", "cp");
+
+				if (crit.cpId() != null) {
+					query.add(Restrictions.eq("cp.id", crit.cpId()));
+				} else {
+					query.add(Restrictions.eq("cp.shortTitle", crit.cpShortTitle()));
+				}
 
 				startAlias = "cpSite";
 			}

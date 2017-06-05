@@ -342,6 +342,9 @@ public class StorageContainersController {
 		@RequestParam(value = "cpId", required = false)
 		Long cpId,
 
+		@RequestParam(value = "cpShortTitle", required = false)
+		String cpShortTitle,
+
 		@RequestParam(value = "startAt", required = false, defaultValue = "0")
 		int startAt,
 
@@ -354,6 +357,7 @@ public class StorageContainersController {
 			.anatomicSite(anatomicSite)
 			.ppid(ppid)
 			.cpId(cpId)
+			.cpShortTitle(cpShortTitle)
 			.startAt(startAt)
 			.maxResults(maxResults);
 
@@ -382,14 +386,18 @@ public class StorageContainersController {
 		String ppid,
 
 		@RequestParam(value = "cpId", required = false)
-		Long cpId) {
+		Long cpId,
+
+		@RequestParam(value = "cpShortTitle", required = false)
+		String cpShortTitle) {
 		SpecimenListCriteria crit = new SpecimenListCriteria()
 			.ancestorContainerId(id)
 			.container(container)
 			.type(specimenType)
 			.anatomicSite(anatomicSite)
 			.ppid(ppid)
-			.cpId(cpId);
+			.cpId(cpId)
+			.cpShortTitle(cpShortTitle);
 
 		ResponseEvent<Long> resp = storageContainerSvc.getSpecimensCount(new RequestEvent<>(crit));
 		resp.throwErrorIfUnsuccessful();
