@@ -147,7 +147,8 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 	@PlusTransactional
 	public ResponseEvent<VisitDetail> addVisit(RequestEvent<VisitDetail> req) {
 		try {
-			return ResponseEvent.response(saveOrUpdateVisit(req.getPayload(), false, false));
+			Visit visit = saveOrUpdateVisit(req.getPayload(), false, false);
+			return ResponseEvent.response(VisitDetail.from(visit, false, false));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -159,7 +160,8 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 	@PlusTransactional
 	public ResponseEvent<VisitDetail> updateVisit(RequestEvent<VisitDetail> req) {
 		try {
-			return ResponseEvent.response(saveOrUpdateVisit(req.getPayload(), true, false));
+			Visit visit = saveOrUpdateVisit(req.getPayload(), true, false);
+			return ResponseEvent.response(VisitDetail.from(visit, false, false));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -171,8 +173,8 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 	@PlusTransactional
 	public ResponseEvent<VisitDetail> patchVisit(RequestEvent<VisitDetail> req) {
 		try {
-			VisitDetail respPayload = saveOrUpdateVisit(req.getPayload(), true, true);
-			return ResponseEvent.response(respPayload);
+			Visit visit = saveOrUpdateVisit(req.getPayload(), true, true);
+			return ResponseEvent.response(VisitDetail.from(visit, false, false));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -220,7 +222,7 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 			// Step 1: Create visit
 			//
 			VisitDetail inputVisit = req.getPayload().getVisit();
-			VisitDetail savedVisit = saveOrUpdateVisit(inputVisit, inputVisit.getId() != null, false);			
+			VisitDetail savedVisit = VisitDetail.from(saveOrUpdateVisit(inputVisit, inputVisit.getId() != null, false));
 			
 			List<SpecimenDetail> specimens = req.getPayload().getSpecimens();
 			setVisitId(savedVisit.getId(), specimens);
@@ -467,7 +469,7 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 
 	public Visit addVisit(VisitDetail input, boolean checkPermission) {
 		if (checkPermission) {
-			return saveOrUpdateVisit0(input, false, false);
+			return saveOrUpdateVisit(input, false, false);
 		} else {
 			return saveOrUpdateVisit(visitFactory.createVisit(input), null);
 		}
@@ -488,11 +490,7 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 		return daoFactory.getVisitsDao().getCprVisitIds(key, value);
 	}
 
-	private VisitDetail saveOrUpdateVisit(VisitDetail input, boolean update, boolean partial) {
-		return VisitDetail.from(saveOrUpdateVisit0(input, update, partial));
-	}
-
-	private Visit saveOrUpdateVisit0(VisitDetail input, boolean update, boolean partial) {
+	private Visit saveOrUpdateVisit(VisitDetail input, boolean update, boolean partial) {
 		Visit existing = null;
 		if (update) {
 			existing = getVisit(input.getId(), input.getName());
