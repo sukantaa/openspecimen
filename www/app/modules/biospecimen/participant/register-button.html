@@ -1,4 +1,4 @@
-<div ng-if="!!cp.bulkPartRegEnabled" dropdown class="os-inline-btn">
+<div ng-if="!!cp.bulkPartRegEnabled" show-if-allowed="partRegOpts" dropdown class="os-inline-btn">
   <button class="default dropdown-toggle" title="{{'participant.tooltip.register' | translate}}"
     ui-sref="participant-addedit({cprId: -1, cpId: cp.id})">
     <span class="fa fa-plus"></span>
@@ -21,13 +21,14 @@
   </ul>
 </div>
 
-<button ng-if="!cp.bulkPartRegEnabled" class="default" title="{{'participant.tooltip.register' | translate}}"
-  ui-sref="participant-addedit({cprId: -1, cpId: cp.id})">
+<button ng-if="!cp.bulkPartRegEnabled" show-if-allowed="partRegOpts" class="default"
+  title="{{'participant.tooltip.register' | translate}}" ui-sref="participant-addedit({cprId: -1, cpId: cp.id})">
   <span class="fa fa-plus"></span>
   <span translate="participant.buttons.register">Register</span>
 </button>
 
-<button ng-if="listViewCtx.twoStepReg" class="default" ui-sref="participant-addedit({cprId: -1, cpId: cp.id, twoStep: true})">
+<button ng-if="listViewCtx.twoStepReg" show-if-allowed="partRegOpts" class="default"
+  ui-sref="participant-addedit({cprId: -1, cpId: cp.id, twoStep: true})">
   <span class="fa fa-plus"></span>
   <span translate="participant.buttons.lookup_add_part">Lookup and Add Participant</span>
 </button>
