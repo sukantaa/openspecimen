@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.exporter.domain;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -31,6 +32,8 @@ public class ExportJob extends BaseEntity {
 	private Map<String, String> params = new HashMap<>();
 
 	private transient ObjectSchema schema;
+
+	private transient List<Long> recordIds;
 
 	public String getName() {
 		return name;
@@ -94,6 +97,14 @@ public class ExportJob extends BaseEntity {
 
 	public void setSchema(ObjectSchema schema) {
 		this.schema = schema;
+	}
+
+	public List<Long> getRecordIds() {
+		return recordIds;
+	}
+
+	public void setRecordIds(List<Long> recordIds) {
+		this.recordIds = recordIds;
 	}
 
 	public ExportJob markCompleted() {

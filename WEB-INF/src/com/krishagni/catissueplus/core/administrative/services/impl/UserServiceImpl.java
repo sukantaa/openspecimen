@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -54,6 +54,7 @@ import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.events.SubjectRoleDetail;
 import com.krishagni.rbac.service.RbacService;
@@ -814,22 +815,22 @@ public class UserServiceImpl implements UserService, InitializingBean {
 		return detail;
 	}
 
-	private Supplier<List<? extends Object>> getUsersGenerator() {
-		return new Supplier<List<? extends Object>>() {
+	private Function<ExportJob, List<? extends Object>> getUsersGenerator() {
+		return new Function<ExportJob, List<? extends Object>>() {
 			private boolean endOfUsers;
 
 			private int startAt;
 
 			@Override
-			public List<? extends Object> get() {
+			public List<? extends Object> apply(ExportJob job) {
 				if (endOfUsers) {
 					return Collections.emptyList();
 				}
 
-				UserListCriteria listCrit = addUserListCriteria(new UserListCriteria().startAt(startAt));
+				UserListCriteria listCrit = addUserListCriteria(new UserListCriteria().startAt(startAt).ids(job.getRecordIds()));
 				List<User> users = daoFactory.getUserDao().getUsers(listCrit);
 				startAt += users.size();
-				if (users.isEmpty()) {
+				if (users.isEmpty() || CollectionUtils.isNotEmpty(job.getRecordIds())) {
 					endOfUsers = true;
 				}
 

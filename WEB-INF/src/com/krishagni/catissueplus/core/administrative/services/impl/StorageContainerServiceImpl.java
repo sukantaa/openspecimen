@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -76,6 +76,7 @@ import com.krishagni.catissueplus.core.de.events.ExecuteQueryEventOp;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
 import com.krishagni.catissueplus.core.de.services.QueryService;
 import com.krishagni.catissueplus.core.de.services.SavedQueryErrorCode;
+import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
@@ -1127,8 +1128,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		});
 	}
 
-	private Supplier<List<? extends Object>> getContainersGenerator() {
-		return new Supplier<List<? extends Object>>() {
+	private Function<ExportJob, List<? extends Object>> getContainersGenerator() {
+		return new Function<ExportJob, List<? extends Object>>() {
+			private boolean loadTopLevelContainers = true;
+
 			private boolean endOfContainers;
 
 			private int startAt;
@@ -1140,19 +1143,22 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			private List<StorageContainerDetail> topLevelContainers = new ArrayList<>();
 
 			@Override
-			public List<StorageContainerDetail> get() {
+			public List<StorageContainerDetail> apply(ExportJob job) {
 				if (endOfContainers) {
 					return Collections.emptyList();
 				}
 
 				if (topLevelContainers.isEmpty()) {
 					if (topLevelCrit == null) {
-						topLevelCrit = new StorageContainerListCriteria().topLevelContainers(true);
+						topLevelCrit = new StorageContainerListCriteria().topLevelContainers(true).ids(job.getRecordIds());
 						addContainerListCriteria(topLevelCrit);
 					}
 
-					topLevelContainers = getContainers(topLevelCrit.startAt(startAt));
-					startAt += topLevelContainers.size();
+					if (loadTopLevelContainers) {
+						topLevelContainers = getContainers(topLevelCrit.startAt(startAt));
+						startAt += topLevelContainers.size();
+						loadTopLevelContainers = CollectionUtils.isEmpty(job.getRecordIds());
+					}
 				}
 
 				if (topLevelContainers.isEmpty()) {

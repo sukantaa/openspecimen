@@ -472,7 +472,8 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			prepareQuery(crit, countReq);
 		}
 
-		public Query query() {						
+		public Query query() {
+			addIdsRestriction();
 			addNameRestriction();		
 			addSiteRestriction();
 					
@@ -525,6 +526,16 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			if (where.length() != 0) {
 				where.append(" and ");
 			}
+		}
+
+		private void addIdsRestriction() {
+			if (CollectionUtils.isEmpty(crit.ids())) {
+				return;
+			}
+
+			addAnd();
+			where.append("c.id in :ids");
+			params.put("ids", crit.ids());
 		}
 
 		private void addNameRestriction() {

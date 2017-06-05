@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.apache.commons.beanutils.BeanUtilsBean2;
@@ -45,7 +46,7 @@ import com.krishagni.rbac.common.errors.RbacErrorCode;
 public class ExportServiceImpl implements ExportService {
 	private final static Log logger = LogFactory.getLog(ExportServiceImpl.class);
 
-	private Map<String, Supplier<Supplier<List<? extends Object>>>> genFactories = new HashMap<>();
+	private Map<String, Supplier<Function<ExportJob, List<? extends Object>>>> genFactories = new HashMap<>();
 
 	private ExportJobDao exportJobDao;
 
@@ -79,7 +80,7 @@ public class ExportServiceImpl implements ExportService {
 			return ResponseEvent.userError(ExportErrorCode.INVALID_OBJECT_TYPE, detail.getObjectType());
 		}
 
-		Supplier<Supplier<List<? extends Object>>> generator = genFactories.get(detail.getObjectType());
+		Supplier<Function<ExportJob, List<? extends Object>>> generator = genFactories.get(detail.getObjectType());
 		if (generator == null) {
 			return ResponseEvent.userError(ExportErrorCode.NO_GEN_FOR_OBJECT_TYPE, detail.getObjectType());
 		}
@@ -89,6 +90,7 @@ public class ExportServiceImpl implements ExportService {
 		job.setCreatedBy(AuthUtil.getCurrentUser());
 		job.setCreationTime(Calendar.getInstance().getTime());
 		job.setSchema(schema);
+		job.setRecordIds(detail.getRecordIds());
 		exportJobDao.saveOrUpdate(job.markInProgress(), true);
 
 		taskExecutor.execute(new ExportTask(job));
@@ -112,14 +114,14 @@ public class ExportServiceImpl implements ExportService {
 	}
 
 	@Override
-	public void registerObjectsGenerator(String type, Supplier<Supplier<List<? extends Object>>> genFactory) {
+	public void registerObjectsGenerator(String type, Supplier<Function<ExportJob, List<? extends Object>>> genFactory) {
 		genFactories.put(type, genFactory);
 	}
 
 	private class ExportTask implements Runnable {
 		private ExportJob job;
 
-		private Supplier<List<? extends Object>> generator;
+		private Function<ExportJob, List<? extends Object>> generator;
 
 		private Map<String, Integer> fieldInstances = new HashMap<>();
 
@@ -451,7 +453,7 @@ public class ExportServiceImpl implements ExportService {
 
 		@PlusTransactional
 		private List<? extends Object> getObjects() {
-			return generator.get();
+			return generator.apply(job);
 		}
 
 		@PlusTransactional

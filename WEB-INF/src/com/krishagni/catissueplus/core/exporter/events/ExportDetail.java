@@ -1,11 +1,14 @@
 package com.krishagni.catissueplus.core.exporter.events;
 
+import java.util.List;
 import java.util.Map;
 
 public class ExportDetail {
 	private String objectType;
 
 	private Map<String, String> params;
+
+	private List<Long> recordIds;
 
 	public String getObjectType() {
 		return objectType;
@@ -21,5 +24,13 @@ public class ExportDetail {
 
 	public void setParams(Map<String, String> params) {
 		this.params = params;
+	}
+
+	public List<Long> getRecordIds() {
+		return recordIds;
+	}
+
+	public void setRecordIds(List<Long> recordIds) {
+		this.recordIds = recordIds;
 	}
 }

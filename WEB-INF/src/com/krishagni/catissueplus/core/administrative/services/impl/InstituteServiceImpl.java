@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -27,6 +28,7 @@ import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 
 public class InstituteServiceImpl implements InstituteService, InitializingBean {
@@ -238,19 +240,26 @@ public class InstituteServiceImpl implements InstituteService, InitializingBean 
 		}
 	}
 
-	private Supplier<List<? extends Object>> getInstitutesGenerator() {
-		return new Supplier<List<? extends Object>>() {
+	private Function<ExportJob, List<? extends Object>> getInstitutesGenerator() {
+		return new Function<ExportJob, List<? extends Object>>() {
 			private boolean endOfInstitutes;
 
 			private int startAt;
 
 			@Override
-			public List<? extends Object> get() {
+			public List<? extends Object> apply(ExportJob job) {
 				if (endOfInstitutes) {
 					return Collections.emptyList();
 				}
 
-				InstituteListCriteria listCrit = new InstituteListCriteria().startAt(startAt);
+				InstituteListCriteria listCrit = new InstituteListCriteria();
+				if (CollectionUtils.isNotEmpty(job.getRecordIds())) {
+					listCrit.ids(job.getRecordIds());
+					endOfInstitutes = true;
+				} else {
+					listCrit.startAt(startAt);
+				}
+
 				List<InstituteDetail> institutes = daoFactory.getInstituteDao().getInstitutes(listCrit);
 				startAt += institutes.size();
 				if (institutes.isEmpty()) {

@@ -104,6 +104,10 @@ public class SiteDaoImpl extends AbstractDao<Site> implements SiteDao {
 	}
 
 	private Criteria addSearchConditions(Criteria query, SiteListCriteria listCrit) {
+		if (CollectionUtils.isNotEmpty(listCrit.ids())) {
+			query.add(Restrictions.in("id", listCrit.ids()));
+		}
+
 		if (StringUtils.isNotBlank(listCrit.query())) {
 			query.add(Restrictions.ilike("name", listCrit.query(), listCrit.matchMode()));
 		}

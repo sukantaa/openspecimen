@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -40,6 +40,7 @@ import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 import com.krishagni.rbac.service.RbacService;
@@ -394,10 +395,12 @@ public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver, 
 			accessibleSites = AccessCtrlMgr.getInstance().getRoleAssignedSites();
 		}
 
+		boolean noIds = CollectionUtils.isEmpty(criteria.ids());
 		boolean noIncTypes = CollectionUtils.isEmpty(criteria.includeTypes());
 		boolean noExlTypes = CollectionUtils.isEmpty(criteria.excludeTypes());
 		boolean noSearchTerm = StringUtils.isBlank(criteria.query());
 		return accessibleSites.stream()
+			.filter(site -> noIds || criteria.ids().contains(site.getId()))
 			.filter(site -> noIncTypes || criteria.includeTypes().contains(site.getType()))
 			.filter(site -> noExlTypes || !criteria.excludeTypes().contains(site.getType()))
 			.filter(site -> noSearchTerm || StringUtils.containsIgnoreCase(site.getName(), criteria.query()))
@@ -473,28 +476,28 @@ public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver, 
 		return detail;
 	}
 
-	private Supplier<List<? extends Object>> getSitesGenerator() {
-		return new Supplier<List<? extends Object>>() {
+	private Function<ExportJob, List<? extends Object>> getSitesGenerator() {
+		return new Function<ExportJob, List<? extends Object>>() {
 			private boolean endOfSites;
 
 			private int startAt;
 
 			@Override
-			public List<? extends Object> get() {
+			public List<? extends Object> apply(ExportJob job) {
 				if (endOfSites) {
 					return Collections.emptyList();
 				}
 
 				Collection<Site> sites;
 				if (AuthUtil.isAdmin()) {
-					sites = daoFactory.getSiteDao().getSites(new SiteListCriteria().startAt(startAt));
+					sites = daoFactory.getSiteDao().getSites(new SiteListCriteria().startAt(startAt).ids(job.getRecordIds()));
 					startAt += sites.size();
 
-					if (sites.isEmpty()) {
+					if (sites.isEmpty() || CollectionUtils.isNotEmpty(job.getRecordIds())) {
 						endOfSites = true;
 					}
 				} else {
-					sites = getAccessibleSites(new SiteListCriteria());
+					sites = getAccessibleSites(new SiteListCriteria().ids(job.getRecordIds()));
 					endOfSites = true;
 				}
 

@@ -37,8 +37,8 @@ public class InstituteDaoImpl extends AbstractDao<Institute> implements Institut
 		addProjectionFields(query);
 		
 		List<Object[]> rows = query.list();
-		List<InstituteDetail> institutes = new ArrayList<InstituteDetail>();
-		Map<Long, InstituteDetail> instituteMap = new HashMap<Long, InstituteDetail>();
+		List<InstituteDetail> institutes = new ArrayList<>();
+		Map<Long, InstituteDetail> instituteMap = new HashMap<>();
 		
 		for (Object[] row : rows) {
 			InstituteDetail institute = new InstituteDetail();
@@ -93,6 +93,10 @@ public class InstituteDaoImpl extends AbstractDao<Institute> implements Institut
 	private Criteria addSearchConditions(Criteria query, InstituteListCriteria listCrit) {
 		if (StringUtils.isNotBlank(listCrit.query())) {
 			query.add(Restrictions.ilike("name", listCrit.query(), listCrit.matchMode()));
+		}
+
+		if (CollectionUtils.isNotEmpty(listCrit.ids())) {
+			query.add(Restrictions.in("id", listCrit.ids()));
 		}
 
 		return query;

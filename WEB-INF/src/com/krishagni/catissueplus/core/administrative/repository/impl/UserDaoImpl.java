@@ -259,6 +259,10 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 					.add(Restrictions.ilike("u.loginName", searchString, MatchMode.ANYWHERE))
 			);
 		}
+
+		if (CollectionUtils.isNotEmpty(listCrit.ids())) {
+			criteria.add(Restrictions.in("u.id", listCrit.ids()));
+		}
 		
 		addActivityStatusRestriction(criteria, listCrit.activityStatus());
 		addInstituteRestriction(criteria, listCrit.instituteName());
