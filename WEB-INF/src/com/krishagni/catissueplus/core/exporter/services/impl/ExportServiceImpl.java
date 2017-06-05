@@ -273,6 +273,10 @@ public class ExportServiceImpl implements ExportService {
 			List<String> row = new ArrayList<>();
 
 			for (ObjectSchema.Field field : record.getFields()) {
+				if (field.getAttribute().equals(ID_ATTR)) {
+					continue;
+				}
+
 				String caption = captionPrefix + field.getCaption();
 				if (field.isMultiple()) {
 					int count = getFieldCount(namePrefix + field.getAttribute());
@@ -308,6 +312,13 @@ public class ExportServiceImpl implements ExportService {
 			List<String> result = new ArrayList<>();
 
 			for (ObjectSchema.Field field : record.getFields()) {
+				if (field.getAttribute().equals(ID_ATTR)) {
+					//
+					// hack to exclude ID field from the exported file.
+					//
+					continue;
+				}
+
 				String caption = captionPrefix + field.getCaption();
 				if (field.isMultiple()) {
 					Integer count = getFieldCount(namePrefix + field.getAttribute());
@@ -501,4 +512,6 @@ public class ExportServiceImpl implements ExportService {
 	}
 
 	private static final String JOB_STATUS_EMAIL_TMPL = "export_job_status_notif";
+
+	private static final String ID_ATTR = "id";
 }
