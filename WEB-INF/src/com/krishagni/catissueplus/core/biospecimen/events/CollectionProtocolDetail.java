@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.krishagni.catissueplus.core.administrative.events.DistributionProtocolSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
@@ -61,6 +62,8 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 	private String spmnLabelPrePrintMode;
 	
 	private List<CpSpecimenLabelPrintSettingDetail> spmnLabelPrintSettings;
+
+	private List<DistributionProtocolSummary> distributionProtocols;
 
 	private String activityStatus;
 	
@@ -265,6 +268,14 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		this.spmnLabelPrintSettings = spmnLabelPrintSettings;
 	}
 
+	public List<DistributionProtocolSummary> getDistributionProtocols() {
+		return distributionProtocols;
+	}
+
+	public void setDistributionProtocols(List<DistributionProtocolSummary> distributionProtocols) {
+		this.distributionProtocols = distributionProtocols;
+	}
+
 	public String getActivityStatus() {
 		return activityStatus;
 	}
@@ -329,6 +340,7 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		result.setVisitNamePrintCopies(cp.getVisitNamePrintCopies());
 		result.setSpmnLabelPrePrintMode(cp.getSpmnLabelPrePrintMode().name());
 		result.setSpmnLabelPrintSettings(CpSpecimenLabelPrintSettingDetail.from(cp.getSpmnLabelPrintSettings()));
+		result.setDistributionProtocols(DistributionProtocolSummary.from(cp.getDistributionProtocols()));
 		result.setActivityStatus(cp.getActivityStatus());
 		result.setCpSites(CollectionProtocolSiteDetail.from(cp.getSites()));
 		result.setExtensionDetail(ExtensionDetail.from(cp.getExtension()));

@@ -5,9 +5,11 @@ angular.module('os.biospecimen.participant.specimen-tree',
     'os.biospecimen.participant.collect-specimens',
   ])
   .directive('osSpecimenTree', function(
-    $state, $stateParams, $modal, $timeout, $rootScope,
-    CollectSpecimensSvc, Specimen, SpecimenLabelPrinter, SpecimensHolder,
+    $state, $stateParams, $modal, $timeout, $rootScope, $q,
+    CollectSpecimensSvc, Specimen, SpecimenLabelPrinter, SpecimensHolder, DistributionOrder, DistributionProtocol,
     Alerts, Util, DeleteUtil, SpecimenUtil) {
+
+    var allowedDps = undefined;
 
     function openSpecimenTree(specimens) {
       angular.forEach(specimens, function(specimen) {
@@ -150,6 +152,62 @@ angular.module('os.biospecimen.participant.specimen-tree',
       );
     }
 
+    function initAllowDistribution(scope) {
+      scope.orderCreateOpts = {resource: 'Order', operations: ['Create']};
+
+      if (!!scope.cp.distributionProtocols && scope.cp.distributionProtocols.length > 0) {
+        scope.allowDistribution = true;
+        allowedDps = scope.cp.distributionProtocols;
+      } else {
+        DistributionProtocol.query({cp: scope.cp.shortTitle}).then(
+          function(dps) {
+            if (!!dps && dps.length > 0) {
+              scope.allowDistribution = true;
+              allowedDps = dps;
+            } else {
+              scope.allowDistribution = false;
+            }
+          }
+        );
+      }
+    }
+
+    function distributeSpmns(dp, specimens) {
+      new DistributionOrder({
+        name: dp.shortTitle + '_' + new Date().toLocaleString(),
+        distributionProtocol: dp,
+        requester: dp.principalInvestigator,
+        siteName: dp.defReceivingSiteName,
+        orderItems: getOrderItems(specimens),
+        status: 'EXECUTED'
+      }).$saveOrUpdate().then(
+        function(createdOrder) {
+          Alerts.success('orders.creation_success', createdOrder);
+          angular.forEach(specimens,
+            function(specimen) {
+              specimen.distributionStatus = 'Distributed';
+              specimen.availableQty = 0;
+              specimen.activityStatus = 'Closed';
+              specimen.selected = false;
+              specimen.storageLocation = {};
+            }
+          );
+        }
+      );
+    }
+
+    function getOrderItems(specimens) {
+      return specimens.map(
+        function(specimen) {
+          return {
+            specimen: specimen,
+            quantity: specimen.availableQty,
+            status: 'DISTRIBUTED_AND_CLOSED'
+          }
+        }
+      );
+    }
+
     return {
       restrict: 'E',
 
@@ -173,6 +231,8 @@ angular.module('os.biospecimen.participant.specimen-tree',
         scope.hidePendingSpmns = shouldHidePendingSpmns(scope.collectionDate, scope.pendingSpmnsDispInterval);
         scope.onlyPendingSpmns = onlyPendingSpmns(scope.specimenTree);
         scope.anyPendingSpmns  = anyPendingSpmnsInTree(scope.specimenTree);
+        initAllowDistribution(scope);
+
 
         scope.specimens = Specimen.flatten(scope.specimenTree);
         openSpecimenTree(scope.specimens);
@@ -300,12 +360,49 @@ angular.module('os.biospecimen.participant.specimen-tree',
             return;
           }
 
-          var specimensToDistribute = specimens.filter(function(spmn) {
-            return spmn.availableQty > 0;
-          });
+          var spmnsToDistribute = specimens.filter(
+            function(spmn) {
+              return (spmn.availableQty == undefined || spmn.availableQty > 0) &&
+                spmn.activityStatus == 'Active';
+            }
+          );
+          if (spmnsToDistribute.length == 0) {
+            return;
+          }
 
-          SpecimensHolder.setSpecimens(specimensToDistribute);
-          $state.go('order-addedit', {orderId: ''});
+          var dpQ;
+          if (scope.cp.distributionProtocols.length == 1) {
+            dpQ = $q.defer();
+            dpQ.resolve(scope.cp.distributionProtocols[0]);
+            dpQ = dpQ.promise;
+          } else {
+            dpQ = $modal.open({
+              templateUrl: 'modules/biospecimen/participant/specimen/distribute.html',
+              controller: function($scope, $modalInstance, distributionProtocols) {
+                function init() {
+                  $scope.ctx = {dps: distributionProtocols};
+                }
+
+                $scope.cancel = function() {
+                  $modalInstance.dismiss('cancel');
+                }
+
+                $scope.distribute = function() {
+                  $modalInstance.close($scope.ctx.dp);
+                }
+
+                init();
+              },
+
+              resolve: {
+                distributionProtocols: function() {
+                  return allowedDps;
+                }
+              }
+            }).result;
+          }
+
+          dpQ.then(function(selectedDp) { distributeSpmns(selectedDp, spmnsToDistribute); });
         }
 
         scope.addSpecimensToSpecimenList = function(list) {

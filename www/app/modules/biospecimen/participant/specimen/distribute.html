@@ -1,0 +1,26 @@
+
+<div class="os-modal">
+  <div class="os-modal-header">
+     <span translate="orders.select_dp">Select Distribution Protocol</span>
+  </div>
+  <form name="dpForm" class="form-horizontal" os-form-validator="dpForm" validator="dpFormValidator" novalidate>
+    <div class="os-modal-body">
+      <div class="form-group">
+        <div class="col-xs-12">
+          <os-select name="dp" ng-model="ctx.dp" list="ctx.dps" display-prop="shortTitle"
+            placeholder="{{'orders.dp' | translate}}" required>
+          </os-select>
+          <div os-field-error field="dpForm.dp"></div>
+        </div>
+      </div>
+    </div>
+    <div class="os-modal-footer">
+      <button class="btn os-btn-text" ng-click="cancel()">
+        <span translate="common.buttons.cancel">Cancel</span>
+      </button>
+      <button class="btn btn-primary" os-form-submit="distribute()">
+        <span translate="orders.buttons.distribute">Distribute</span>
+      </button>
+    </div>
+  </form>
+</div>

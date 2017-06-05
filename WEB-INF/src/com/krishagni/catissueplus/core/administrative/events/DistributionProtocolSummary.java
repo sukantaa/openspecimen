@@ -20,7 +20,9 @@ public class DistributionProtocolSummary {
 	private Date startDate;
 	
 	private Date endDate;
-	
+
+	private String defReceivingSiteName;
+
 	private int distributedSpecimensCount;
 
 	public Long getId() {
@@ -71,6 +73,14 @@ public class DistributionProtocolSummary {
 		this.endDate = endDate;
 	}
 
+	public String getDefReceivingSiteName() {
+		return defReceivingSiteName;
+	}
+
+	public void setDefReceivingSiteName(String defReceivingSiteName) {
+		this.defReceivingSiteName = defReceivingSiteName;
+	}
+
 	public int getDistributedSpecimensCount() {
 		return distributedSpecimensCount;
 	}
@@ -102,6 +112,9 @@ public class DistributionProtocolSummary {
 		detail.setPrincipalInvestigator(UserSummary.from(dp.getPrincipalInvestigator()));
 		detail.setStartDate(dp.getStartDate());
 		detail.setEndDate(dp.getEndDate());
+		if (dp.getDefReceivingSite() != null) {
+			detail.setDefReceivingSiteName(dp.getDefReceivingSite().getName());
+		}
 	}
 	
 }

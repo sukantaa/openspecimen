@@ -9,7 +9,8 @@ angular.module('os.biospecimen.cp',
     'os.biospecimen.cp.consents',
     'os.biospecimen.cp.events',
     'os.biospecimen.cp.specimens',
-    'os.biospecimen.cp.catalog'
+    'os.biospecimen.cp.catalog',
+    'os.biospecimen.cp.dp'
   ])
 
   .config(function($stateProvider) {
@@ -270,6 +271,12 @@ angular.module('os.biospecimen.cp',
           }
         },
         controller: 'CpReportSettingsCtrl'
+      })
+      .state('cp-detail.settings.dp', {
+        url: '/dp',
+        templateUrl: 'modules/biospecimen/cp/dp-settings.html',
+        parent: 'cp-detail.settings',
+        controller: 'CpDpSettingsCtrl'
       });
     });
   

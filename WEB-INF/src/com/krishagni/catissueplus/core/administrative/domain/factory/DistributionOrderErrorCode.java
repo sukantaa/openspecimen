@@ -38,6 +38,8 @@ public enum DistributionOrderErrorCode implements ErrorCode {
 	INVALID_DP_FOR_REQ,
 
 	INVALID_SPECIMENS_FOR_DP,
+
+	SPMN_RESV_FOR_OTH_DPS,
 	
 	SPECIMEN_DOES_NOT_EXIST,
 

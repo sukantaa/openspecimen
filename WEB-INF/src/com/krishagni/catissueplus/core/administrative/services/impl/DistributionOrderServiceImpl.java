@@ -396,16 +396,7 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 			return;
 		}
 
-		Set<Long> allowedSites = AccessCtrlMgr.getInstance().getDistributionOrderAllowedSites(order.getDistributionProtocol());
-		Map<Long, Set<Long>> spmnSitesMap = daoFactory.getSpecimenDao().getSpecimenSites(new HashSet<>(specimenIds));
-		String errorLabels = spmnSitesMap.entrySet().stream()
-			.filter(spmnSites -> CollectionUtils.intersection(spmnSites.getValue(), allowedSites).isEmpty())
-			.map(spmnSites -> specimenMap.get(spmnSites.getKey()).getLabel())
-			.collect(Collectors.joining(", "));
-
-		if (StringUtils.isNotBlank(errorLabels)) {
-			ose.addError(DistributionOrderErrorCode.INVALID_SPECIMENS_FOR_DP, errorLabels);
-		}
+		ensureDpValidity(specimens, specimenMap, order.getDistributionProtocol(), ose);
 
 		int stmtsCount = order.getDistributionProtocol().getConsentTiers().size();
 		if (stmtsCount > 0) {
@@ -414,6 +405,37 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 			if (!nonConsentingLabels.isEmpty()) {
 				ose.addError(DistributionOrderErrorCode.NON_CONSENTING_SPECIMENS, nonConsentingLabels);
 			}
+		}
+	}
+
+	private void ensureDpValidity(List<Specimen> specimens, Map<Long, Specimen> specimenMap, DistributionProtocol dp, OpenSpecimenException ose) {
+		List<Specimen> spmnWithDps = specimens.stream()
+			.filter(spmn -> !spmn.getDistributionProtocols().isEmpty())
+			.collect(Collectors.toList());
+
+		List<String> resvForOthDps = spmnWithDps.stream()
+			.filter(spmn -> !spmn.getDistributionProtocols().contains(dp))
+			.map(Specimen::getLabel)
+			.collect(Collectors.toList());
+
+		if (!resvForOthDps.isEmpty()) {
+			ose.addError(DistributionOrderErrorCode.SPMN_RESV_FOR_OTH_DPS, resvForOthDps, resvForOthDps.size());
+		}
+
+		List<Specimen> spmnWithoutDps = new ArrayList<>(CollectionUtils.removeAll(specimens, spmnWithDps));
+		if (spmnWithoutDps.isEmpty()) {
+			return;
+		}
+
+		Set<Long> allowedSites = AccessCtrlMgr.getInstance().getDistributionOrderAllowedSites(dp);
+		Map<Long, Set<Long>> spmnSitesMap = daoFactory.getSpecimenDao().getSpecimenSites(Utility.collect(spmnWithoutDps, "id", true));
+		String errorLabels = spmnSitesMap.entrySet().stream()
+			.filter(spmnSites -> CollectionUtils.intersection(spmnSites.getValue(), allowedSites).isEmpty())
+			.map(spmnSites -> specimenMap.get(spmnSites.getKey()).getLabel())
+			.collect(Collectors.joining(", "));
+
+		if (StringUtils.isNotBlank(errorLabels)) {
+			ose.addError(DistributionOrderErrorCode.INVALID_SPECIMENS_FOR_DP, errorLabels);
 		}
 	}
 

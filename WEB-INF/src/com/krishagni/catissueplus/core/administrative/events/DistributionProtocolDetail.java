@@ -19,8 +19,6 @@ public class DistributionProtocolDetail extends DistributionProtocolSummary {
 
 	private String instituteName;
 
-	private String defReceivingSiteName;
-	
 	private String irbId;
 
 	private String activityStatus;
@@ -47,14 +45,6 @@ public class DistributionProtocolDetail extends DistributionProtocolSummary {
 		this.instituteName = instituteName;
 	}
 	
-	public String getDefReceivingSiteName() {
-		return defReceivingSiteName;
-	}
-	
-	public void setDefReceivingSiteName(String defReceivingSiteName) {
-		this.defReceivingSiteName = defReceivingSiteName;
-	}
-
 	public String getIrbId() {
 		return irbId;
 	}
@@ -100,10 +90,6 @@ public class DistributionProtocolDetail extends DistributionProtocolSummary {
 		
 		copy(dp, detail);
 		detail.setInstituteName(dp.getInstitute().getName());
-		if (dp.getDefReceivingSite() != null) {
-			detail.setDefReceivingSiteName(dp.getDefReceivingSite().getName());
-		}
-		
 		detail.setIrbId(dp.getIrbId());
 		detail.setPrincipalInvestigator(UserSummary.from(dp.getPrincipalInvestigator()));
 		detail.setCoordinators(UserSummary.from(dp.getCoordinators()));

@@ -41,7 +41,7 @@
               <span ng-switch-when="true" translate="specimens.show_pending">Show Pending</span>
             </a>
           </li>
-          <li>
+          <li show-if-allowed="orderCreateOpts" ng-if="allowDistribution">
             <a ng-click="distributeSpecimens()">
               <span class="fa fa-share"></span>
               <span translate="specimens.buttons.distribute">Distribute</span>

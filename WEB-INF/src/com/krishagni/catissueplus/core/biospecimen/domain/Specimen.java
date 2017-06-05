@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrderItem;
+import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -508,6 +509,10 @@ public class Specimen extends BaseExtensionEntity {
 
 	public void setSpecimenListItems(Set<SpecimenListItem> specimenListItems) {
 		this.specimenListItems = specimenListItems;
+	}
+
+	public Set<DistributionProtocol> getDistributionProtocols() {
+		return getCollectionProtocol().getDistributionProtocols();
 	}
 
 	public LabelGenerator getLabelGenerator() {

@@ -31,6 +31,13 @@ angular.module('os.biospecimen.cp')
       caption: ''
     });
 
+    settings.addItem({
+      name: 'DpSettings',
+      state: 'cp-detail.settings.dp',
+      key: 'cp.dp.title',
+      caption: ''
+    });
+
     return {
       getSettings: settings.getItems,
 

@@ -312,6 +312,13 @@
       "Aliquot": "Aliquot"
     },
 
+    "dp": {
+      "title": "Distribution Settings",
+      "add_dp": "Add Distribution Protocol",
+      "dup_dp": "Distribution protocol already added to the collection protocol.",
+      "no_dp": "No distribution protocols can be assigned to collection protocol."
+    },
+
     "reporting": {
       "title": "Monthly Report Settings",
       "add": "Customise Report",
@@ -1819,7 +1826,9 @@
     "freeze_thaw_on_return": "Freeze/Thaw",
     "user": "User",
     "comments": "Comments",
-   
+    "select_dp": "Select Distribution Protocol",
+    "creation_success": "Distribution Order {{name}} successfully created",
+
     "menu": {
       "overview": "Overview"
     },

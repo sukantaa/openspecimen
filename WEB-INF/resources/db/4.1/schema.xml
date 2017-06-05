@@ -87,4 +87,34 @@
   <changeSet author="vgaikwad" id="Increase width of clinical diagnosis">
     <modifyDataType tableName="CATISSUE_COLL_PROT_EVENT" columnName="CLINICAL_DIAGNOSIS" newDataType="${text.type}(255)" />
   </changeSet>
+
+  <changeSet author="ckhilosiya" id="Table to maintain DPs allowed for particular CP">
+    <createTable tableName="OS_CP_ALLOWED_DPS">
+      <column name="CP_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="DP_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="ckhilosiya" id="FK on CP in CP allowed DPs">
+    <addForeignKeyConstraint constraintName="OS_FK_CP_ALLOWED_DPS_CP_ID"
+      baseTableName="OS_CP_ALLOWED_DPS" baseColumnNames="CP_ID"
+      referencedTableName="CATISSUE_COLLECTION_PROTOCOL" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
+  <changeSet author="ckhilosiya" id="FK on DP in CP allowed DPs">
+    <addForeignKeyConstraint constraintName="OS_FK_CP_ALLOWED_DPS_DP_ID"
+      baseTableName="OS_CP_ALLOWED_DPS" baseColumnNames="DP_ID"
+      referencedTableName="CATISSUE_DISTRIBUTION_PROTOCOL" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
+  <changeSet author="ckhilosiya" id="Make CP - DP link mapping unique">
+    <addUniqueConstraint
+      constraintName="OS_CP_DP_UQ"
+      tableName="OS_CP_ALLOWED_DPS"
+      columnNames="CP_ID, DP_ID"/>
+  </changeSet>
 </databaseChangeLog>

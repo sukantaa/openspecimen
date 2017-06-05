@@ -8,10 +8,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolErrorCode;
+import com.krishagni.catissueplus.core.administrative.events.DistributionProtocolSummary;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategyFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol.SpecimenLabelAutoPrintMode;
@@ -109,6 +112,7 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		cp.setVisitNamePrintCopies(input.getVisitNamePrintCopies());
 		setSpecimenLabelPrePrintMode(input, cp, ose);
 		setSpecimenLabelPrintSettings(input, cp, ose);
+		setDistributionProtocolSettings(input, cp, ose);
 		setActivityStatus(input, cp, ose);
 		setCollectionProtocolExtension(input, cp, ose);
 
@@ -153,6 +157,7 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		setDate(input, cp, ose);
 		cp.setSopDocumentUrl(input.getSopDocumentUrl());
 		cp.setSopDocumentName(input.getSopDocumentName());
+		setDistributionProtocolSettings(input, cp, ose);
 		ose.checkAndThrow();
 		return cp;
 	}
@@ -442,6 +447,40 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		setting.setCopies(settingDetail.getCopies());
 		setting.setCollectionProtocol(cp);
 		return setting;
+	}
+
+	private void setDistributionProtocolSettings(CollectionProtocolDetail input, CollectionProtocol result, OpenSpecimenException ose) {
+		if (input.getDistributionProtocols() == null) {
+			return;
+		}
+
+		Set<DistributionProtocol> dps = new HashSet<>();
+		for (DistributionProtocolSummary dpDetail : input.getDistributionProtocols()) {
+			dps.add(getDistributionProtocol(dpDetail.getId(), dpDetail.getShortTitle(), dpDetail.getTitle(), ose));
+		}
+
+		result.setDistributionProtocols(dps);
+	}
+
+	private DistributionProtocol getDistributionProtocol(Long id, String shortTitle, String title, OpenSpecimenException ose) {
+		Object key = null;
+		DistributionProtocol dp = null;
+		if (id != null) {
+			dp = daoFactory.getDistributionProtocolDao().getById(id);
+			key = id;
+		} else if (StringUtils.isNotBlank(shortTitle)) {
+			dp = daoFactory.getDistributionProtocolDao().getByShortTitle(shortTitle);
+			key = shortTitle;
+		} else if (StringUtils.isNotBlank(title)) {
+			dp = daoFactory.getDistributionProtocolDao().getDistributionProtocol(title);
+			key = title;
+		}
+
+		if (dp == null) {
+			ose.addError(DistributionProtocolErrorCode.NOT_FOUND, key);
+		}
+
+		return dp;
 	}
 
 	private void setCollectionProtocolExtension(CollectionProtocolDetail input, CollectionProtocol result, OpenSpecimenException ose) {

@@ -1,0 +1,9 @@
+<div class="clearfix">
+  <div class="col-xs-8">
+    <os-editable-item-list
+      items="dpCtx.savedDps" item-pvs="dpCtx.dps" text-attr="displayValue"
+      list-changed="listChanged" allow-edit="dpCtx.editAllowed" refresh="loadDps"
+      add-caption="{{'cp.dp.add_dp' | translate}}" list-title="{{'cp.dp.title' | translate}}">
+    </os-editable-item-list>
+  </div>
+</div>

@@ -5,7 +5,9 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +33,7 @@ import com.krishagni.catissueplus.core.administrative.events.DprStat;
 import com.krishagni.catissueplus.core.administrative.repository.DpListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.DpRequirementDao;
 import com.krishagni.catissueplus.core.administrative.services.DistributionProtocolService;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.ConsentStatement;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ConsentStatementErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
@@ -97,6 +100,10 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 	public ResponseEvent<List<DistributionProtocolDetail>> getDistributionProtocols(RequestEvent<DpListCriteria> req) {
 		try {
 			DpListCriteria crit = addDpListCriteria(req.getPayload());
+			if (crit == null) {
+				return ResponseEvent.response(Collections.emptyList());
+			}
+
 			List<DistributionProtocol> dps = daoFactory.getDistributionProtocolDao().getDistributionProtocols(crit);
 			List<DistributionProtocolDetail> result = DistributionProtocolDetail.from(dps);
 			
@@ -117,6 +124,10 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 	public ResponseEvent<Long> getDistributionProtocolsCount(RequestEvent<DpListCriteria> req) {
 		try {
 			DpListCriteria crit = addDpListCriteria(req.getPayload());
+			if (crit == null) {
+				return ResponseEvent.response(0L);
+			}
+
 			return ResponseEvent.response(daoFactory.getDistributionProtocolDao().getDistributionProtocolsCount(crit));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -533,7 +544,24 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 		if (siteIds != null && CollectionUtils.isEmpty(siteIds)) {
 			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 		}
-		
+
+		if (StringUtils.isNotBlank(crit.cpShortTitle())) {
+			CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getCpByShortTitle(crit.cpShortTitle());
+			if (cp == null) {
+				return null;
+			}
+
+			Set<Long> cpSiteIds = Utility.collect(cp.getSites(), "site.id", true);
+			if (siteIds != null) {
+				siteIds = new HashSet<>(CollectionUtils.intersection(siteIds, cpSiteIds));
+				if (siteIds.isEmpty()) {
+					return null;
+				}
+			} else {
+				siteIds = cpSiteIds;
+			}
+		}
+
 		if (siteIds != null) {
 			crit.siteIds(siteIds);
 		}
