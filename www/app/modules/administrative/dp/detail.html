@@ -39,7 +39,7 @@
           <span class="os-title" translate="dp.menu.history">History</span>
         </a>
       </li>
-      <li ng-class="{'active': includesState('req-root')}" ng-if="isEditAllowed">
+      <li ng-class="{'active': includesState('req-root')}" ng-if="permCtx.editAllowed">
         <a ui-sref="req-list">
           <span class="fa fa-list-ol"></span>
           <span class="os-title" translate="dp.menu.requirements">Requirements</span>
