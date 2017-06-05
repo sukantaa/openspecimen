@@ -297,13 +297,17 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 			Disjunction siteCpsCond = Restrictions.disjunction();
 			for (Pair<Long, Long> siteCp : crit.siteCps()) {
-				siteCpsCond.add(Restrictions.and(
-					Restrictions.eq("site.id", siteCp.first()),
-					Restrictions.or(
-						Restrictions.isNull("cp.id"),
-						Restrictions.eq("cp.id", siteCp.second())
-					)
-				));
+				if (siteCp.second() == null) {
+					siteCpsCond.add(Restrictions.eq("site.id", siteCp.first()));
+				} else {
+					siteCpsCond.add(Restrictions.and(
+						Restrictions.eq("site.id", siteCp.first()),
+						Restrictions.or(
+							Restrictions.isNull("cp.id"),
+							Restrictions.eq("cp.id", siteCp.second())
+						)
+					));
+				}
 			}
 
 			query.add(siteCpsCond);
