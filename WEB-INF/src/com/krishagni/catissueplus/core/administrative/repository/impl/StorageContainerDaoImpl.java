@@ -20,6 +20,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Property;
@@ -297,17 +298,15 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 			Disjunction siteCpsCond = Restrictions.disjunction();
 			for (Pair<Long, Long> siteCp : crit.siteCps()) {
-				if (siteCp.second() == null) {
-					siteCpsCond.add(Restrictions.eq("site.id", siteCp.first()));
-				} else {
-					siteCpsCond.add(Restrictions.and(
-						Restrictions.eq("site.id", siteCp.first()),
-						Restrictions.or(
-							Restrictions.isNull("cp.id"),
-							Restrictions.eq("cp.id", siteCp.second())
-						)
+				Junction siteCpCond = Restrictions.conjunction().add(Restrictions.eq("site.id", siteCp.first()));
+				if (siteCp.second() != null) {
+					siteCpCond.add(Restrictions.or(
+						Restrictions.isNull("cp.id"),
+						Restrictions.eq("cp.id", siteCp.second())
 					));
 				}
+
+				siteCpsCond.add(siteCpCond);
 			}
 
 			query.add(siteCpsCond);
