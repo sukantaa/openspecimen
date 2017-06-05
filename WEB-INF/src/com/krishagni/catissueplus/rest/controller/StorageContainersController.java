@@ -48,6 +48,7 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
+
 import edu.common.dynamicextensions.nutility.IoUtil;
 
 @Controller
@@ -359,6 +360,40 @@ public class StorageContainersController {
 		ResponseEvent<List<SpecimenInfo>> resp = storageContainerSvc.getSpecimens(new RequestEvent<>(crit));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "{id}/specimens-count")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Long> getContainerSpecimensCount(
+		@PathVariable("id")
+		Long id,
+
+		@RequestParam(value = "container", required = false)
+		String container,
+
+		@RequestParam(value = "specimenType", required = false)
+		String specimenType,
+
+		@RequestParam(value = "anatomicSite", required = false)
+		String anatomicSite,
+
+		@RequestParam(value = "ppid", required = false)
+		String ppid,
+
+		@RequestParam(value = "cpId", required = false)
+		Long cpId) {
+		SpecimenListCriteria crit = new SpecimenListCriteria()
+			.ancestorContainerId(id)
+			.container(container)
+			.type(specimenType)
+			.anatomicSite(anatomicSite)
+			.ppid(ppid)
+			.cpId(cpId);
+
+		ResponseEvent<Long> resp = storageContainerSvc.getSpecimensCount(new RequestEvent<>(crit));
+		resp.throwErrorIfUnsuccessful();
+		return Collections.singletonMap("count", resp.getPayload());
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "{id}/report")

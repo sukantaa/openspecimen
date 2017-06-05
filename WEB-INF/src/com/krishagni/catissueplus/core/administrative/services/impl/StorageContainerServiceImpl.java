@@ -219,21 +219,23 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<SpecimenInfo>> getSpecimens(RequestEvent<SpecimenListCriteria> req) {
-		SpecimenListCriteria crit = req.getPayload();
-		StorageContainer container = getContainer(crit.ancestorContainerId(), null);
-
+		StorageContainer container = getContainer(req.getPayload().ancestorContainerId(), null);
 		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
-		Set<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessContainerSiteCps();
-		if (siteCps != null) {
-			List<Pair<Long, Long>> contSiteCps = siteCps.stream()
-				.filter(siteCp -> siteCp.first().equals(container.getSite().getId()))
-				.collect(Collectors.toList());
-
-			crit.siteCps(contSiteCps);
-		}
+		SpecimenListCriteria crit = addSiteCpRestrictions(req.getPayload(), container);
 
 		List<Specimen> specimens = daoFactory.getStorageContainerDao().getSpecimens(crit, !container.isDimensionless());
 		return ResponseEvent.response(SpecimenInfo.from(specimens));
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Long> getSpecimensCount(RequestEvent<SpecimenListCriteria> req) {
+		StorageContainer container = getContainer(req.getPayload().ancestorContainerId(), null);
+		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
+		SpecimenListCriteria crit = addSiteCpRestrictions(req.getPayload(), container);
+
+		Long count = daoFactory.getStorageContainerDao().getSpecimensCount(crit);
+		return ResponseEvent.response(count);
 	}
 
 	@Override
@@ -960,6 +962,19 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			pos.getCpShortTitle(),
 			pos.getOccupyingEntityName()
 		);
+	}
+
+	private SpecimenListCriteria addSiteCpRestrictions(SpecimenListCriteria crit, StorageContainer container) {
+		Set<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessContainerSiteCps();
+		if (siteCps != null) {
+			List<Pair<Long, Long>> contSiteCps = siteCps.stream()
+				.filter(siteCp -> siteCp.first().equals(container.getSite().getId()))
+				.collect(Collectors.toList());
+
+			crit.siteCps(contSiteCps);
+		}
+
+		return crit;
 	}
 	
 	private StorageContainerPosition createChildContainerPosition(

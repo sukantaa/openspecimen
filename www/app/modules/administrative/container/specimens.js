@@ -1,18 +1,21 @@
 angular.module('os.administrative.container')
   .controller('ContainerSpecimensCtrl', function(
     $scope, $state, container, currentUser, Util, CollectionProtocol,
-    Container, SpecimensHolder, Alerts, CheckList) {
+    Container, SpecimensHolder, Alerts, CheckList, ListPagerOpts) {
 
     function init() {
       $scope.ctx.showTree = true;
       $scope.ctx.viewState = 'container-detail.specimens';
 
+      var pagerOpts = new ListPagerOpts({listSizeGetter: getSpecimensCount});
+
       $scope.lctx = {
-        filterOpts: {},
         specimens: [],
         cps: [],
         containers: [],
-        checkList: new CheckList([])
+        filterOpts: {maxResults: pagerOpts.recordsPerPage + 1},
+        checkList: new CheckList([]),
+        pagerOpts: pagerOpts
       };
 
       loadSpecimens($scope.lctx.filterOpts);
@@ -24,6 +27,7 @@ angular.module('os.administrative.container')
         function(specimens) {
           $scope.lctx.specimens = specimens;
           $scope.lctx.checkList = new CheckList(specimens);
+          $scope.lctx.pagerOpts.refreshOpts(specimens);
         }
       );
     }
@@ -48,6 +52,10 @@ angular.module('os.administrative.container')
     function createNewList(spmns) {
       SpecimensHolder.setSpecimens(spmns);
       $state.go('specimen-list-addedit', {listId: ''});
+    }
+
+    function getSpecimensCount() {
+      return container.getSpecimensCount($scope.lctx.filterOpts);
     }
 
     $scope.toggleSearch = function() {

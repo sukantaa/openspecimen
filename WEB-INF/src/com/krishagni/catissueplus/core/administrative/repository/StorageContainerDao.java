@@ -35,6 +35,8 @@ public interface StorageContainerDao extends Dao<StorageContainer> {
 
 	List<Specimen> getSpecimens(SpecimenListCriteria crit, boolean orderByLocation);
 
+	Long getSpecimensCount(SpecimenListCriteria crit);
+
 	public Map<Long, Integer> getRootContainerSpecimensCount(Collection<Long> containerIds);
 
 	public Map<String, Integer> getSpecimensCountByType(Long containerId);

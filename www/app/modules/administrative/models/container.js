@@ -47,6 +47,14 @@ angular.module('os.administrative.models.container', ['os.common.models'])
       );
     };
 
+    Container.prototype.getSpecimensCount = function(filterOpts) {
+      return $http.get(Container.url() + this.$id() + '/specimens-count', {params: filterOpts}).then(
+        function(resp) {
+          return resp.data;
+        }
+      );
+    }
+
     Container.prototype.generateReport = function() {
       return $http.get(Container.url() + this.$id() + '/report').then(
         function(resp) {

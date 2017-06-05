@@ -198,48 +198,9 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 	@Override
 	public List<Specimen> getSpecimens(SpecimenListCriteria crit, boolean orderByLocation) {
-		Criteria query = getCurrentSession().createCriteria(Specimen.class, "specimen")
-			.createAlias("position", "pos")
-			.createAlias("pos.container", "container")
-			.createAlias("container.ancestorContainers", "ansc")
-			.add(Restrictions.eq("ansc.id", crit.ancestorContainerId()))
+		Criteria query = getContainerSpecimensListQuery(crit)
 			.setFirstResult(crit.startAt())
 			.setMaxResults(crit.maxResults());
-
-		if (crit.containerId() != null) {
-			query.add(Restrictions.eq("container.id", crit.containerId()));
-		} else if (StringUtils.isNotBlank(crit.container())) {
-			query.add(Restrictions.eq("container.name", crit.container()));
-		}
-
-		if (StringUtils.isNotBlank(crit.type())) {
-			query.add(Restrictions.eq("specimen.specimenType", crit.type()));
-		}
-
-		if (StringUtils.isNotBlank(crit.anatomicSite())) {
-			query.add(Restrictions.eq("specimen.tissueSite", crit.anatomicSite()));
-		}
-
-		String startAlias = "visit";
-		if (StringUtils.isNotBlank(crit.ppid()) || crit.cpId() != null) {
-			query.createAlias("specimen.visit", "visit")
-				.createAlias("visit.registration", "cpr");
-
-			startAlias = "cp";
-
-			if (StringUtils.isNotBlank(crit.ppid())) {
-				query.add(Restrictions.ilike("cpr.ppid", crit.ppid(), crit.matchMode()));
-			}
-
-			if (crit.cpId() != null) {
-				query.createAlias("cpr.collectionProtocol", "cp")
-					.add(Restrictions.eq("cp.id", crit.cpId()));
-
-				startAlias = "cpSite";
-			}
-		}
-
-		SpecimenDaoHelper.getInstance().addSiteCpsCond(query, crit, startAlias);
 
 		if (orderByLocation) {
 			query.addOrder(Order.asc("pos.container"))
@@ -250,6 +211,15 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		}
 
 		return query.list();
+	}
+
+	@Override
+	public Long getSpecimensCount(SpecimenListCriteria crit) {
+		Number count = (Number) getContainerSpecimensListQuery(crit)
+			.setProjection(Projections.rowCount())
+			.uniqueResult();
+
+		return count.longValue();
 	}
 
 	@Override
@@ -451,6 +421,50 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 	private int comparePositions(StorageContainerSummary s1, StorageContainerSummary s2) {
 		return s1.getStorageLocation().getPosition() - s2.getStorageLocation().getPosition();
+	}
+
+	private Criteria getContainerSpecimensListQuery(SpecimenListCriteria crit) {
+		Criteria query = getCurrentSession().createCriteria(Specimen.class, "specimen")
+			.createAlias("position", "pos")
+			.createAlias("pos.container", "container")
+			.createAlias("container.ancestorContainers", "ansc")
+			.add(Restrictions.eq("ansc.id", crit.ancestorContainerId()));
+
+		if (crit.containerId() != null) {
+			query.add(Restrictions.eq("container.id", crit.containerId()));
+		} else if (StringUtils.isNotBlank(crit.container())) {
+			query.add(Restrictions.eq("container.name", crit.container()));
+		}
+
+		if (StringUtils.isNotBlank(crit.type())) {
+			query.add(Restrictions.eq("specimen.specimenType", crit.type()));
+		}
+
+		if (StringUtils.isNotBlank(crit.anatomicSite())) {
+			query.add(Restrictions.eq("specimen.tissueSite", crit.anatomicSite()));
+		}
+
+		String startAlias = "visit";
+		if (StringUtils.isNotBlank(crit.ppid()) || crit.cpId() != null) {
+			query.createAlias("specimen.visit", "visit")
+				.createAlias("visit.registration", "cpr");
+
+			startAlias = "cp";
+
+			if (StringUtils.isNotBlank(crit.ppid())) {
+				query.add(Restrictions.ilike("cpr.ppid", crit.ppid(), crit.matchMode()));
+			}
+
+			if (crit.cpId() != null) {
+				query.createAlias("cpr.collectionProtocol", "cp")
+					.add(Restrictions.eq("cp.id", crit.cpId()));
+
+				startAlias = "cpSite";
+			}
+		}
+
+		SpecimenDaoHelper.getInstance().addSiteCpsCond(query, crit, startAlias);
+		return query;
 	}
 
 	private class ListQueryBuilder {
