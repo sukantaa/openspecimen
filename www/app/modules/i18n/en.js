@@ -1129,7 +1129,7 @@
     "automated": "Automated",
     "dimension": "Dimension",
     "capacity": "Approximate Capacity",
-    "specimens": "specimens",
+    "capacity_unit": "specimens",
     "out_of": "out of",
     "stored": "Stored",
     "stored_spmns": "Stored Specimens",
