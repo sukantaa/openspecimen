@@ -286,14 +286,18 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	@Override
 	@SuppressWarnings(value = "unchecked")
 	public List<StorageContainer> getDescendantContainers(StorageContainerListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(StorageContainer.class, "cont")
+		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(StorageContainer.class, "cont")
+			.setProjection(Projections.distinct(Projections.property("cont.id")));
+
+		Criteria innerQuery = detachedCriteria.getExecutableCriteria(getCurrentSession())
 			.createAlias("cont.ancestorContainers", "ancestors")
 			.add(Restrictions.eq("ancestors.id", crit.parentContainerId()))
+			.addOrder(Order.asc("id"))
 			.setFirstResult(crit.startAt())
 			.setMaxResults(crit.maxResults());
 
 		if (crit.siteCps() != null && !crit.siteCps().isEmpty()) {
-			query.createAlias("cont.site", "site")
+			innerQuery.createAlias("cont.site", "site")
 				.createAlias("cont.allowedCps", "cp", JoinType.LEFT_OUTER_JOIN);
 
 			Disjunction siteCpsCond = Restrictions.disjunction();
@@ -309,14 +313,16 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 				siteCpsCond.add(siteCpCond);
 			}
 
-			query.add(siteCpsCond);
+			innerQuery.add(siteCpsCond);
 		}
 
 		if (StringUtils.isNotBlank(crit.query())) {
-			query.add(Restrictions.ilike("cont.name", crit.query(), crit.matchMode()));
+			innerQuery.add(Restrictions.ilike("cont.name", crit.query(), crit.matchMode()));
 		}
 
-		return query.list();
+		return getCurrentSession().createCriteria(StorageContainer.class, "cont")
+			.add(Subqueries.propertyIn("cont.id", detachedCriteria))
+			.list();
 	}
 
 	@Override
