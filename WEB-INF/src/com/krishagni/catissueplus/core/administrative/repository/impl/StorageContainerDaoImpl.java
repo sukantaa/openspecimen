@@ -291,10 +291,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 		Criteria innerQuery = detachedCriteria.getExecutableCriteria(getCurrentSession())
 			.createAlias("cont.ancestorContainers", "ancestors")
-			.add(Restrictions.eq("ancestors.id", crit.parentContainerId()))
-			.addOrder(Order.asc("id"))
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults());
+			.add(Restrictions.eq("ancestors.id", crit.parentContainerId()));
 
 		if (crit.siteCps() != null && !crit.siteCps().isEmpty()) {
 			innerQuery.createAlias("cont.site", "site")
@@ -322,6 +319,9 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 		return getCurrentSession().createCriteria(StorageContainer.class, "cont")
 			.add(Subqueries.propertyIn("cont.id", detachedCriteria))
+			.addOrder(Order.asc("cont.id"))
+			.setFirstResult(crit.startAt())
+			.setMaxResults(crit.maxResults())
 			.list();
 	}
 
