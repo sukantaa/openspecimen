@@ -32,13 +32,16 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 
 public class UserAuthenticationServiceImpl implements UserAuthenticationService {
+	private static final String ACCOUNT_LOCKED_NOTIF_TMPL = "account_locked_notification";
+
 	private DaoFactory daoFactory;
 	
 	private AuditService auditService;
-	
+
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
 	}
@@ -215,6 +218,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		}
 		
 		user.setActivityStatus(Status.ACTIVITY_STATUS_LOCKED.getStatus());
+		sendLockedAccountEmailNotif(user, failedLoginAttempts);
 	}
 	
 	private void insertApiCallLog(LoginDetail loginDetail, User user, LoginAuditLog loginAuditLog) {
@@ -231,5 +235,13 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 
 	private boolean isSystemLockedDown() {
 		return ConfigUtil.getInstance().getBoolSetting("administrative", "system_lockdown", false);
+	}
+
+	private void sendLockedAccountEmailNotif(User user, int failedLoginAttempts) {
+		Map<String, Object> emailProps = new HashMap<>();
+		emailProps.put("user", user);
+		emailProps.put("failedLoginAttempts", failedLoginAttempts);
+		String[] rcpts = {user.getEmailAddress()};
+		EmailUtil.getInstance().sendEmail(ACCOUNT_LOCKED_NOTIF_TMPL, rcpts, null, emailProps);
 	}
 }
