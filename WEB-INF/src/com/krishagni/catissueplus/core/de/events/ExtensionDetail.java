@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.domain.DeObject.Attr;
@@ -63,6 +64,7 @@ public class ExtensionDetail {
 		this.attrs = attrs;
 	}
 
+	@JsonProperty
 	public void setAttrsMap(Map<String, Object> attrsMap) {
 		attrs.clear();
 		
