@@ -126,7 +126,9 @@ angular.module('os.administrative.form.list', ['os.administrative.models'])
       var opts = {
         confirmDelete:  'form.delete_forms',
         successMessage: 'form.forms_deleted',
-        onBulkDeletion: loadForms
+        onBulkDeletion: function() {
+          loadForms($scope.formFilterOpts);
+        }
       }
 
       DeleteUtil.bulkDelete({bulkDelete: Form.bulkDelete}, getFormIds(forms), opts);

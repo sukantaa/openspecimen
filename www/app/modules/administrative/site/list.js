@@ -41,7 +41,9 @@ angular.module('os.administrative.site.list', ['os.administrative.models'])
       var opts = {
         confirmDelete:  'site.delete_sites',
         successMessage: 'site.sites_deleted',
-        onBulkDeletion: loadSites
+        onBulkDeletion: function() {
+          loadSites($scope.siteFilterOpts);
+        }
       }
 
       DeleteUtil.bulkDelete({bulkDelete: Site.bulkDelete}, getSiteIds(sites), opts);

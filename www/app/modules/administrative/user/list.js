@@ -144,7 +144,9 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
       var opts = {
         confirmDelete: 'user.delete_users',
         successMessage: 'user.users_deleted',
-        onBulkDeletion: loadUsers
+        onBulkDeletion: function() {
+          loadUsers($scope.userFilterOpts);
+        }
       }
 
       DeleteUtil.bulkDelete({bulkDelete: User.bulkDelete}, getUserIds(users), opts);

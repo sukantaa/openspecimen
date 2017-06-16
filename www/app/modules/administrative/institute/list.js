@@ -41,7 +41,9 @@ angular.module('os.administrative.institute.list', ['os.administrative.models'])
       var opts = {
         confirmDelete:  'institute.delete_institutes',
         successMessage: 'institute.institutes_deleted',
-        onBulkDeletion: loadInstitutes
+        onBulkDeletion: function() {
+          loadInstitutes($scope.instituteFilterOpts);
+        }
       }
 
       DeleteUtil.bulkDelete({bulkDelete: Institute.bulkDelete}, getInstituteIds(institutes), opts);

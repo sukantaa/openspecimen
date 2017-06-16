@@ -55,7 +55,9 @@ angular.module('os.administrative.dp.list', ['os.administrative.models'])
       var opts = {
         confirmDelete:  'dp.delete_dps',
         successMessage: 'dp.dps_deleted',
-        onBulkDeletion: loadDps
+        onBulkDeletion: function() {
+          loadDps($scope.dpFilterOpts);
+        }
       }
 
       DeleteUtil.bulkDelete({bulkDelete: DistributionProtocol.bulkDelete}, getDpIds(dps), opts);
