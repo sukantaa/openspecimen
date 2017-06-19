@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -102,11 +103,18 @@ public class CsvFileReader implements CsvReader {
 	public boolean next() {
 		try {
 			currentRow = csvReader.readNext();
+
+			boolean hasNext = currentRow != null && currentRow.length > 0;
+			if (hasNext) {
+				for (int i = 0; i < currentRow.length; i++) {
+					currentRow[i] = StringUtils.trim(currentRow[i]);
+				}
+			}
+
+			return hasNext;
 		} catch (IOException e) {
 			throw new CsvException("Error reading line from CSV file", e);
 		}
-
-		return (currentRow != null && currentRow.length > 0);
 	}
 
 	public void close() {
