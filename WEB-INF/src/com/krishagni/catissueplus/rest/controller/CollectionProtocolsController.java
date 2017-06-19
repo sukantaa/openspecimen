@@ -184,7 +184,8 @@ public class CollectionProtocolsController {
 		cp.setSopDocumentUrl(null);
 
 		ObjectMapper mapper = new ObjectMapper();
-		FilterProvider filters = new SimpleFilterProvider().addFilter("withoutId", SimpleBeanPropertyFilter.serializeAllExcept("id"));		
+		FilterProvider filters = new SimpleFilterProvider()
+			.addFilter("withoutId", SimpleBeanPropertyFilter.serializeAllExcept("id", "statementId"));
 		String def = mapper.writer(filters).withDefaultPrettyPrinter().writeValueAsString(cp);
 		
 		response.setContentType("application/json");
