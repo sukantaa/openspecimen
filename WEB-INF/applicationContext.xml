@@ -331,6 +331,7 @@
         <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.SpecimenPathologyStatusToken"/>
         <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.SrCodeLabelToken"/>
         <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.PpidUniqueIdLabelToken"/>
+        <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.CpPpidUniqueIdLabelToken"/>
         <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.SpecimenCpUniqueIdToken"/>
         <ref bean="extnPvLabelToken"/>
       </list>
@@ -667,6 +668,7 @@
         <bean class="com.krishagni.catissueplus.core.biospecimen.print.SpecimenLabelPrintToken"/>
         <bean class="com.krishagni.catissueplus.core.biospecimen.print.SpecimenLineagePrintToken"/>
         <bean class="com.krishagni.catissueplus.core.biospecimen.print.SpecimenLocationPrintToken"/>
+        <bean class="com.krishagni.catissueplus.core.biospecimen.print.SpecimenMpiPrintToken"/>
         <bean class="com.krishagni.catissueplus.core.biospecimen.print.SpecimenPathologyStatusPrintToken"/>
         <bean class="com.krishagni.catissueplus.core.biospecimen.print.SpecimenPpidPrintToken"/>
         <bean class="com.krishagni.catissueplus.core.biospecimen.print.SpecimenPrimaryLabelToken"/>
