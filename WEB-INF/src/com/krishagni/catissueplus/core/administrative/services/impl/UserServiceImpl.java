@@ -82,6 +82,8 @@ public class UserServiceImpl implements UserService, InitializingBean {
 
 	private static final String ACTIVE_USER_LOGIN_DAYS_CFG = "active_users_login_days";
 
+	private static final String USER_SIGN_UP = "user_sign_up";
+
 	private DaoFactory daoFactory;
 
 	private UserFactory userFactory;
@@ -198,9 +200,10 @@ public class UserServiceImpl implements UserService, InitializingBean {
 	public ResponseEvent<UserDetail> createUser(RequestEvent<UserDetail> req) {
 		try {
 			boolean isSignupReq = (AuthUtil.getCurrentUser() == null);
-			
+
 			UserDetail detail = req.getPayload();
 			if (isSignupReq) {
+				ensureSignupAllowed();
 				detail.setActivityStatus(Status.ACTIVITY_STATUS_PENDING.getStatus());
 			}
 			
@@ -237,7 +240,7 @@ public class UserServiceImpl implements UserService, InitializingBean {
 			return ResponseEvent.serverError(e);
 		}
 	}
-	
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<UserDetail> updateUser(RequestEvent<UserDetail> req) {
@@ -688,6 +691,14 @@ public class UserServiceImpl implements UserService, InitializingBean {
 			ose.addError(UserErrorCode.DUP_LOGIN_NAME);
 		}
 	}
+
+	private void ensureSignupAllowed() {
+		boolean signUpAllowed = ConfigUtil.getInstance().getBoolSetting(ADMIN_MOD, USER_SIGN_UP, false);
+		if (!signUpAllowed) {
+			throw OpenSpecimenException.userError(UserErrorCode.SIGN_UP_NOT_ALLOWED);
+		}
+	}
+
 
 	private boolean isStatusChangeAllowed(String newStatus) {
 		return newStatus.equals(Status.ACTIVITY_STATUS_ACTIVE.getStatus()) || 

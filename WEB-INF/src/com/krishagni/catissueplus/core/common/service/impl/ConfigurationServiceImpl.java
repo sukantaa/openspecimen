@@ -464,6 +464,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		props.put("feedback_enabled",        getBoolSetting("common", "feedback_enabled", true));
 		props.put("mrn_restriction_enabled", getBoolSetting("biospecimen", "mrn_restriction_enabled", false));
 		props.put("deploy_env",              getStrSetting("common", "deploy_env"));
+		props.put("user_sign_up",            getBoolSetting("administrative", "user_sign_up", false));
 		return props;
 	}
 
