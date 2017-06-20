@@ -374,17 +374,14 @@ angular.module('os.biospecimen.specimen')
 
     function sdeGroupSpecimens(baseFields, groups, specimens) {
       var result = [];
+      var unmatched = [].concat(specimens);
 
       for (var i = 0; i < groups.length; ++i) {
-        if (specimens.length == 0) {
-          break;
-        }
-
         var group = groups[i];
         var selectedSpmns = [];
         if (!group.criteria) {
           selectedSpmns = specimens.map(function(spmn) { return {specimen: spmn} });
-          specimens.length = 0;
+          unmatched.length = 0;
         } else {
           var exprs = group.criteria.rules.map(
             function(rule) {
@@ -402,7 +399,11 @@ angular.module('os.biospecimen.specimen')
           for (var j = specimens.length - 1; j >= 0; j--) {
             if (expr({specimen: specimens[j]})) {
               selectedSpmns.unshift({specimen: specimens[j]});
-              specimens.splice(j, 1);
+
+              var uidx = unmatched.indexOf(specimens[j]);
+              if (uidx > -1) {
+                unmatched.splice(uidx, 1);
+              }
             }
           }
         }
@@ -419,9 +420,9 @@ angular.module('os.biospecimen.specimen')
         }
       }
 
-      if (specimens.length > 0) {
+      if (unmatched.length > 0) {
         result.push({
-          input: specimens.map(function(specimen) { return {specimen: specimen}; }),
+          input: unmatched.map(function(specimen) { return {specimen: specimen}; }),
           noMatch: true
         });
       }
