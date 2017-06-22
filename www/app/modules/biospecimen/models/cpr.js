@@ -14,9 +14,25 @@ angular.module('os.biospecimen.models.cpr',
         }
       );
  
+    //
+    // overriding default query function
+    //
+    CollectionProtocolRegistration.query = function(queryParams) {
+      return $http.post(CollectionProtocolRegistration.url() + '/list', {params: queryParams})
+        .then(CollectionProtocolRegistration.modelArrayRespTransform);
+    }
+
+    //
+    // overriding default getCount function
+    //
+    CollectionProtocolRegistration.getCount = function(queryParams) {
+      return $http.post(CollectionProtocolRegistration.url() + 'count', {params: queryParams})
+        .then(CollectionProtocolRegistration.noTransform);
+    }
+
     CollectionProtocolRegistration.listForCp = function(cpId, includeStats, filterOpts) {
       return CollectionProtocolRegistration.query(prepareFilterOpts(cpId, includeStats, filterOpts));
-    };
+    }
 
     CollectionProtocolRegistration.getCprCount = function(cpId, includeStats, filterOpts) {
       return CollectionProtocolRegistration.getCount(prepareFilterOpts(cpId, includeStats, filterOpts));

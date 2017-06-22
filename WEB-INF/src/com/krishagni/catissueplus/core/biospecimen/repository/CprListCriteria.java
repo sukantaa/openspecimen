@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
@@ -42,38 +43,42 @@ public class CprListCriteria extends AbstractListCriteria<CprListCriteria> {
 	public CprListCriteria self() {
 		return this;
 	}
-	
+
 	public Long cpId() {
 		return cpId;
 	}
-	
-	public Date registrationDate() {
-		return registrationDate;
-	}
-	
-	public CprListCriteria registrationDate(Date registrationDate) {
-		this.registrationDate = registrationDate;
-		return self();
-	}
-	
+
+	@JsonProperty("cpId")
 	public CprListCriteria cpId(Long cpId) {
 		this.cpId = cpId;
 		return self();
 	}
-	
+
+	public Date registrationDate() {
+		return registrationDate;
+	}
+
+	@JsonProperty("registrationDate")
+	public CprListCriteria registrationDate(Date registrationDate) {
+		this.registrationDate = registrationDate;
+		return self();
+	}
+
 	public String ppid() {
 		return ppid;
 	}
-	
+
+	@JsonProperty("ppid")
 	public CprListCriteria ppid(String ppid) {
 		this.ppid = ppid;
 		return self();
 	}
-	
+
 	public String participantId() {
 		return participantId;
 	}
 
+	@JsonProperty("participantId")
 	public CprListCriteria participantId(String participantId) {
 		this.participantId = participantId;
 		return self();
@@ -83,7 +88,8 @@ public class CprListCriteria extends AbstractListCriteria<CprListCriteria> {
 		this.name = name;
 		return self();
 	}
-	
+
+	@JsonProperty("name")
 	public String name() {
 		return name;
 	}
@@ -92,7 +98,8 @@ public class CprListCriteria extends AbstractListCriteria<CprListCriteria> {
 		this.dob = dob;
 		return self();
 	}
-	
+
+	@JsonProperty("dob")
 	public Date dob() {
 		return dob;
 	}
@@ -101,6 +108,7 @@ public class CprListCriteria extends AbstractListCriteria<CprListCriteria> {
 		return uid;
 	}
 
+	@JsonProperty("uid")
 	public CprListCriteria uid(String uid) {
 		this.uid = uid;
 		return self();
@@ -111,6 +119,7 @@ public class CprListCriteria extends AbstractListCriteria<CprListCriteria> {
 		return self();
 	}
 
+	@JsonProperty("specimen")
 	public String specimen() {
 		return specimen;
 	}

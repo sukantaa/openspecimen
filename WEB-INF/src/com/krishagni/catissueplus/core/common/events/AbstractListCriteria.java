@@ -3,6 +3,7 @@ package com.krishagni.catissueplus.core.common.events;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.hibernate.criterion.MatchMode;
 
 
@@ -29,17 +30,19 @@ public abstract class AbstractListCriteria<T extends ListCriteria<T>> implements
 	}
 
 	@Override
+	@JsonProperty("startAt")
 	public T startAt(int startAt) {
 		this.startAt = startAt;
 		return self();
 	}
 
 	@Override
-	public int maxResults() {		
+	public int maxResults() {
 		return maxResults <= 0 ? 100 : maxResults;
 	}
 
 	@Override
+	@JsonProperty("maxResults")
 	public T maxResults(int maxResults) {
 		this.maxResults = maxResults;
 		return self();
@@ -73,6 +76,7 @@ public abstract class AbstractListCriteria<T extends ListCriteria<T>> implements
 	}
 
 	@Override
+	@JsonProperty("searchStr")
 	public T query(String query) {
 		this.query = query;
 		return self();
@@ -84,6 +88,7 @@ public abstract class AbstractListCriteria<T extends ListCriteria<T>> implements
 	}
 	
 	@Override
+	@JsonProperty("exactMatch")
 	public T exactMatch(boolean exactMatch) {
 		this.exactMatch = exactMatch;
 		return self();
@@ -94,6 +99,7 @@ public abstract class AbstractListCriteria<T extends ListCriteria<T>> implements
 	}
 
 	@Override
+	@JsonProperty("includeStats")
 	public boolean includeStat() {
 		return includeStat;
 	}

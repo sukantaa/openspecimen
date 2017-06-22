@@ -59,120 +59,20 @@ public class CollectionProtocolRegistrationsController {
 	@Autowired
 	private FormService formSvc;
 	
-	@RequestMapping(method = RequestMethod.GET)
+	@RequestMapping(method = RequestMethod.POST, value = "/list")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public List<CprSummary> getRegistrations(
-			@RequestParam(value = "cpId",             required = true)
-			Long cpId,
-			
-			@RequestParam(value = "registrationDate", required = false) 
-			@DateTimeFormat(pattern="yyyy-MM-dd")
-			Date registrationDate,
-			
-			@RequestParam(value = "query",            required = false)
-			String searchStr,
-			
-			@RequestParam(value = "name",             required = false)
-			String name,
-			
-			@RequestParam(value = "ppid",             required = false)
-			String ppid,
-
-			@RequestParam(value = "uid",             required = false)
-			String uid,
-			
-			@RequestParam(value = "participantId",    required = false)
-			String participantId,
-			
-			@RequestParam(value = "empi",             required = false)
-			String empi,
-			
-			@RequestParam(value = "dob",              required = false) 
-			@DateTimeFormat(pattern="yyyy-MM-dd")
-			Date dob,
-			
-			@RequestParam(value = "specimen",         required = false)
-			String specimen,
-			
-			@RequestParam(value = "startAt",          required = false, defaultValue = "0")
-			int startAt,
-			
-			@RequestParam(value = "maxResults",       required = false, defaultValue = "100")
-			int maxResults,
-			
-			@RequestParam(value = "includeStats",     required = false, defaultValue = "false") 
-			boolean includeStats,
-
-			@RequestParam(value = "exactMatch", required = false, defaultValue = "false")
-			Boolean exactMatch) {
-
-		CprListCriteria crit = new CprListCriteria()
-			.cpId(cpId)
-			.registrationDate(registrationDate)
-			.query(searchStr)
-			.name(name)
-			.ppid(ppid)
-			.uid(uid)
-			.participantId(participantId)
-			.dob(dob)
-			.specimen(specimen)
-			.startAt(startAt)
-			.maxResults(maxResults)
-			.includeStat(includeStats)
-			.exactMatch(exactMatch)
-			.includePhi(true);
-		
-		ResponseEvent<List<CprSummary>> resp = cpSvc.getRegisteredParticipants(getRequest(crit));
+	public List<CprSummary> getRegistrations(@RequestBody CprListCriteria crit) {
+		ResponseEvent<List<CprSummary>> resp = cpSvc.getRegisteredParticipants(getRequest(crit.includePhi(true)));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/count")
+	@RequestMapping(method = RequestMethod.POST, value = "/count")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public Map<String, Long> getRegistrationsCount(
-			@RequestParam(value = "cpId",             required = true)
-			Long cpId,
-			
-			@RequestParam(value = "registrationDate", required = false)
-			@DateTimeFormat(pattern="yyyy-MM-dd")
-			Date registrationDate,
-			
-			@RequestParam(value = "query",            required = false)
-			String searchStr,
-			
-			@RequestParam(value = "name",             required = false)
-			String name,
-			
-			@RequestParam(value = "ppid",             required = false)
-			String ppid,
-
-			@RequestParam(value = "uid",             required = false)
-			String uid,
-			
-			@RequestParam(value = "participantId",    required = false)
-			String participantId,
-			
-			@RequestParam(value = "empi",             required = false)
-			String empi,
-			
-			@RequestParam(value = "dob",              required = false) 
-			@DateTimeFormat(pattern="yyyy-MM-dd")
-			Date dob) {
-
-		CprListCriteria crit = new CprListCriteria()
-			.cpId(cpId)
-			.registrationDate(registrationDate)
-			.query(searchStr)
-			.name(name)
-			.ppid(ppid)
-			.uid(uid)
-			.participantId(participantId)
-			.dob(dob)
-			.includePhi(true);
-		
-		ResponseEvent<Long> resp = cpSvc.getRegisteredParticipantsCount(getRequest(crit));
+	public Map<String, Long> getRegistrationsCount(@RequestBody CprListCriteria crit) {
+		ResponseEvent<Long> resp = cpSvc.getRegisteredParticipantsCount(getRequest(crit.includePhi(true)));
 		resp.throwErrorIfUnsuccessful();
 		return Collections.singletonMap("count", resp.getPayload());
 	}
