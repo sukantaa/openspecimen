@@ -30,7 +30,7 @@ public class DbUtil {
 			separator = "/";
 
 		} else if (databaseType.equals("oracle")) {
-			driverClass = "oracle.jdbc.driver.OracleDriver";
+			driverClass = "oracle.jdbc.OracleDriver";
 			databaseType = databaseType + ":thin:@";
 			separator = ":";
 		}
