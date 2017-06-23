@@ -2092,7 +2092,9 @@
         "account_inactive_days": "Inactive Account",
         "account_inactive_days_desc": "Number of days of inactivity before user account is locked.",
         "password_rule": "Password Complexity Description",
-        "password_rule_desc": "User friendly description of password complexity requirements."
+        "password_rule_desc": "User friendly description of password complexity requirements.",
+        "forgot_password": "Forgot Password",
+        "forgot_password_desc": "Allow or prevent users who have forgotten their passwords to set new password by using 'Forgot Password' feature."
       },
       
       "administrative": {

@@ -19,7 +19,7 @@
       </div>
       <span class="os-error-msg" ng-if="loginError" translate="user.sign_in_failed">The username or password you entered is incorrect</span>
       <button type="submit" class="btn btn-block btn-primary" translate="user.sign_in">Sign in</button>
-      <div style="padding-top: 5px;">
+      <div style="padding-top: 5px;" ng-if="!!global.appProps.forgot_password">
         <a ui-sref="forgot-password" translate="user.forgot_password">Forgot password?</a>
       </div>
     </form>

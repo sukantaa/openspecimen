@@ -14,4 +14,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="mdnasim" id="Setting to enable or disable forgot password link">
+    <sql>
+      call add_cfg_prop(
+        'auth', 'forgot_password',
+        'forgot_password', 'forgot_password_desc',
+        'BOOLEAN', 'true'
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

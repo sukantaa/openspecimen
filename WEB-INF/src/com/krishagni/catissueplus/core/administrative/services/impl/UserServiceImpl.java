@@ -84,6 +84,10 @@ public class UserServiceImpl implements UserService, InitializingBean {
 
 	private static final String USER_SIGN_UP = "user_sign_up";
 
+	private static final String AUTH_MOD = "auth";
+
+	private static final String FORGOT_PASSWD = "forgot_password";
+
 	private DaoFactory daoFactory;
 
 	private UserFactory userFactory;
@@ -415,6 +419,11 @@ public class UserServiceImpl implements UserService, InitializingBean {
 	@PlusTransactional
 	public ResponseEvent<Boolean> forgotPassword(RequestEvent<String> req) {
 		try {
+			boolean forgotPasswdAllowed = ConfigUtil.getInstance().getBoolSetting(AUTH_MOD, FORGOT_PASSWD, true);
+			if (!forgotPasswdAllowed) {
+				throw OpenSpecimenException.userError(UserErrorCode.FORGOT_PASSWD_DISABLED);
+			}
+
 			UserDao userDao = daoFactory.getUserDao();
 
 			User user = userDao.getUser(req.getPayload(), DEFAULT_AUTH_DOMAIN);
@@ -428,11 +437,13 @@ public class UserServiceImpl implements UserService, InitializingBean {
 			if (oldToken != null) {
 				userDao.deleteFpToken(oldToken);
 			}
-			
+
 			ForgotPasswordToken token = new ForgotPasswordToken(user);
 			userDao.saveFpToken(token);
 			sendForgotPasswordLinkEmail(user, token.getToken());
 			return ResponseEvent.response(true);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}
