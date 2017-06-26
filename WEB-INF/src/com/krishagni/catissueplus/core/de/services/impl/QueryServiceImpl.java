@@ -229,8 +229,13 @@ public class QueryServiceImpl implements QueryService {
 			SavedQueryDetail queryDetail = req.getPayload();
 			queryDetail.setId(null);
 
+			WideRowMode mode = WideRowMode.DEEP;
+			if (StringUtils.isNotBlank(queryDetail.getWideRowMode())) {
+				mode = WideRowMode.valueOf(queryDetail.getWideRowMode());
+			}
+
 			Query.createQuery()
-				.wideRowMode(WideRowMode.DEEP)
+				.wideRowMode(mode)
 				.ic(true)
 				.dateFormat(ConfigUtil.getInstance().getDeDateFmt())
 				.timeFormat(ConfigUtil.getInstance().getTimeFmt())
@@ -928,6 +933,7 @@ public class QueryServiceImpl implements QueryService {
 		savedQuery.setLastUpdatedBy(AuthUtil.getCurrentUser());
 		savedQuery.setLastUpdated(Calendar.getInstance().getTime());
 		savedQuery.setReporting(detail.getReporting());
+		savedQuery.setWideRowMode(detail.getWideRowMode());
 		return savedQuery;
 	}
 
