@@ -24,6 +24,7 @@ import com.krishagni.catissueplus.core.auth.events.LoginDetail;
 import com.krishagni.catissueplus.core.auth.services.UserAuthenticationService;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.common.util.AuthUtil;
 
 @Controller
 @RequestMapping("/sessions")
@@ -34,39 +35,45 @@ public class AuthenticationController {
 
 	@Autowired
 	private HttpServletRequest httpReq;
-	
+
 	@RequestMapping(method=RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public Map<String, Object> authenticate(@RequestBody LoginDetail loginDetail) {
+	public Map<String, Object> authenticate(@RequestBody LoginDetail loginDetail, HttpServletResponse httpResp) {
 		loginDetail.setIpAddress(httpReq.getRemoteAddr());
 		loginDetail.setApiUrl(httpReq.getRequestURI());
 		loginDetail.setRequestMethod(RequestMethod.POST.name());
-		RequestEvent<LoginDetail> req = new RequestEvent<LoginDetail>(loginDetail);
-		ResponseEvent<Map<String, Object>> resp = userAuthService.authenticateUser(req);
+		ResponseEvent<Map<String, Object>> resp = userAuthService.authenticateUser(new RequestEvent<>(loginDetail));
 		resp.throwErrorIfUnsuccessful();
-		
+
+		String authToken = (String)resp.getPayload().get("token");
+		AuthUtil.setTokenCookie(httpReq, httpResp, authToken);
+
 		User user = (User) resp.getPayload().get("user");
-		Map<String, Object> detail = new HashMap<String, Object>();
+		Map<String, Object> detail = new HashMap<>();
 		detail.put("id", user.getId());
 		detail.put("firstName", user.getFirstName());
 		detail.put("lastName", user.getLastName());
 		detail.put("loginName", user.getLoginName());
-		detail.put("token", (String)resp.getPayload().get("token"));
+		detail.put("token", authToken);
 		detail.put("admin", user.isAdmin());
 		detail.put("instituteAdmin", user.isInstituteAdmin());
 		
 		return detail;
 	}
-	
+
 	@RequestMapping(method=RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public Map<String, String> delete(HttpServletResponse httpResp) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		RequestEvent<String> req = new RequestEvent<String>((String)auth.getCredentials());
+		RequestEvent<String> req = new RequestEvent<>((String)auth.getCredentials());
 		ResponseEvent<String> resp = userAuthService.removeToken(req);
-		resp.throwErrorIfUnsuccessful();
+
+		if (resp.isSuccessful()) {
+			AuthUtil.clearTokenCookie(httpReq, httpResp);
+			resp.throwErrorIfUnsuccessful();
+		}
 
 		return Collections.singletonMap("Status", resp.getPayload());
 	}

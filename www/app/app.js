@@ -110,7 +110,7 @@ osApp.config(function(
     }
   })
   .factory('httpRespInterceptor', function(
-    $rootScope, $q, $injector, $window, $templateCache, $cookieStore,
+    $rootScope, $q, $injector, $window, $templateCache,
     Alerts, LocationChangeListener) {
 
     var qp = '?_buildVersion=' + ui.os.appProps.build_version + '&_buildDate=' + ui.os.appProps.build_date;
@@ -153,7 +153,6 @@ osApp.config(function(
         } else if (rejection.status == 401) {
           $rootScope.loggedIn = false;
 
-          $cookieStore.remove('osAuthToken');
           delete $window.localStorage['osAuthToken'];
           delete $injector.get("$http").defaults.headers.common['X-OS-API-TOKEN'];
           $injector.get('$state').go('login'); // using injector to get rid of circular dependencies

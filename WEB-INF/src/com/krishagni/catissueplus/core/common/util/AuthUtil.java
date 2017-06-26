@@ -2,7 +2,9 @@ package com.krishagni.catissueplus.core.common.util;
 
 import java.net.URLDecoder;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -114,5 +116,22 @@ public class AuthUtil {
 		}
 
 		return authToken;
+	}
+
+	public static void setTokenCookie(HttpServletRequest httpReq, HttpServletResponse httpResp, String authToken) {
+		Cookie cookie = new Cookie("osAuthToken", authToken);
+		cookie.setPath(httpReq.getContextPath());
+		cookie.setHttpOnly(true);
+		cookie.setSecure(httpReq.isSecure());
+
+		if (authToken == null) {
+			cookie.setMaxAge(0);
+		}
+
+		httpResp.addCookie(cookie);
+	}
+
+	public static void clearTokenCookie(HttpServletRequest httpReq, HttpServletResponse httpResp) {
+		setTokenCookie(httpReq, httpResp, null);
 	}
 }

@@ -127,9 +127,8 @@ public class AuthTokenFilter extends GenericFilterBean {
 			TokenDetail tokenDetail = new TokenDetail();
 			tokenDetail.setToken(authToken);
 			tokenDetail.setIpAddress(httpReq.getRemoteAddr());			
-			
-			RequestEvent<TokenDetail> atReq = new RequestEvent<TokenDetail>(tokenDetail);			
-			ResponseEvent<AuthToken> atResp = authService.validateToken(atReq);
+
+			ResponseEvent<AuthToken> atResp = authService.validateToken(new RequestEvent<>(tokenDetail));
 			if (atResp.isSuccessful()) {
 				userDetails = atResp.getPayload().getUser();
 				loginAuditLog = atResp.getPayload().getLoginAuditLog();
@@ -141,6 +140,7 @@ public class AuthTokenFilter extends GenericFilterBean {
 		if (userDetails == null) {
 			String clientHdr = httpReq.getHeader(OS_CLIENT_HDR);
 			if (clientHdr != null && clientHdr.equals("webui")) {
+				AuthUtil.clearTokenCookie(httpReq, httpResp);
 				setUnauthorizedResp(httpResp);
 			} else {
 				setRequireAuthResp(httpResp);

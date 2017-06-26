@@ -1,6 +1,6 @@
 
 angular.module('openspecimen')
-  .factory('AuthService', function($http, $rootScope, $window, $cookieStore, ApiUtil, ApiUrls) {
+  .factory('AuthService', function($http, $rootScope, $window, ApiUtil, ApiUrls) {
     var url = function() {
       return ApiUrls.getUrl('sessions');
     };
@@ -21,14 +21,12 @@ angular.module('openspecimen')
 
       saveToken: function(token) {
         $window.localStorage['osAuthToken'] = token;
-        $cookieStore.put('osAuthToken', token);
         $http.defaults.headers.common['X-OS-API-TOKEN'] = token;
         $http.defaults.withCredentials = true;
       },
 
       removeToken: function() {
         delete $window.localStorage['osAuthToken'];
-        $cookieStore.remove('osAuthToken');
         delete $http.defaults.headers.common['X-OS-API-TOKEN'];
         delete $http.defaults.headers.common['Authorization'];
       }
