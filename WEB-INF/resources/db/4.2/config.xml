@@ -24,4 +24,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="mdnasim" id="Setting to configure success/error notification toast display time">
+    <sql>
+      call add_cfg_prop(
+        'common', 'toast_disp_time',
+        'toast_disp_time', 'toast_disp_time_desc',
+        'INT', '5'
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

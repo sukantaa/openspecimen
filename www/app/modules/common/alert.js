@@ -1,6 +1,6 @@
 
 angular.module('openspecimen')
-  .factory('Alerts', function($interval, $translate) {
+  .factory('Alerts', function($rootScope, $interval, $translate) {
     return {
       messages: [],
 
@@ -23,7 +23,8 @@ angular.module('openspecimen')
         }
 
         if (timeout === undefined || timeout === null) {
-          timeout = 5000;
+          timeout = ($rootScope.global.appProps.toast_disp_time || 5) * 1000;
+          timeout < 1000 && (timeout = 5000);
         }
 
         var promise = $interval(function() {

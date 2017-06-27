@@ -2218,7 +2218,9 @@
         "deployment_site_url": "Deployment Site URL",
         "deployment_site_url_desc": "Website URL to navigate users on clicking deployment site logo",
         "cont_spmns_report_query": "Container Specimens Report",
-        "cont_spmns_report_query_desc": "Saved query to use for generating container specimens report"
+        "cont_spmns_report_query_desc": "Saved query to use for generating container specimens report",
+        "toast_disp_time": "Toast Display Time",
+        "toast_disp_time_desc": "Duration, in seconds, for which the success or error notification toasts should be displayed."
       },
 
       "email": {
