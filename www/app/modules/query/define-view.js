@@ -522,9 +522,8 @@ angular.module('os.query.defineview', ['os.query.models'])
     };
 
     function nodeChecked(node) {
-      if (node.checked) {
-        node.expanded = true;
-      } else if (node.aggFn) {
+      node.expanded = true;
+      if (!node.checked && node.aggFn) {
         node.aggFn = '';
       }
 
@@ -551,6 +550,7 @@ angular.module('os.query.defineview', ['os.query.models'])
           } else if (formName == nodes[j].form.name) {
             var node = nodes.splice(j, 1)[0]; // removes node 
             nodes.splice(i, 0, node); // inserts node
+            node.checked = true;
             selectFormFields(selectedFieldsMap[formName], node);
             break;
           }
@@ -642,8 +642,9 @@ angular.module('os.query.defineview', ['os.query.models'])
     function getSelectedFields(forms, incCaption) {
       var selected = [];
       for (var i = 0; i < forms.length; ++i) {
-        if (forms[i].checked) {
-          selected = selected.concat(getAllFormFields(forms[i], incCaption));
+        if (forms[i].checked && forms[i].type == 'temporal') {
+          var name = '$temporal.' + forms[i].form.id;
+          selected.push(incCaption ? {name: name, label: forms[i].val, form: forms[i].val} : name);
         } else if (forms[i].children) {
           var fields = forms[i].children;
           for (var j = 0; j < fields.length; ++j) {
@@ -678,34 +679,6 @@ angular.module('os.query.defineview', ['os.query.models'])
         
       return selected;
     }
-
-    function getAllFormFields(form, incCaption) {
-      if (form.type == 'temporal') {
-        var name = '$temporal.' + form.form.id;
-        return incCaption ? [{name: name, label: form.val, form: form.val}] : [name];
-      }
-
-      var result = [];
-      for (var i = 0; i < form.children.length; ++i) {
-        var field = form.children[i];
-        if (field.type == 'subform') {
-          result = result.concat(getAllFormFields(field, incCaption));
-        } else {
-          if (incCaption) {
-            result.push({
-              form: field.form,
-              name: field.name,
-              label: field.val,
-              type: field.dataType
-            });
-          } else {
-            result.push(field.name);
-          }
-        }
-      }
-
-      return result;
-    };
 
     function getSelectedFieldsMap() {
       var selectedFieldsMap = {};
