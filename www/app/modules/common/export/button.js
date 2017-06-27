@@ -29,6 +29,6 @@ angular.module('openspecimen')
       template: '<button ng-click="export()">' +
                 '  <span class="fa fa-download"></span>' +
                 '  <span translate="common.buttons.export">Export</span>' +
-                '</a>'
+                '</button>'
     };
   });

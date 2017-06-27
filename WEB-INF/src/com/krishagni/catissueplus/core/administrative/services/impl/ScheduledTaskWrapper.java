@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.administrative.services.impl;
 
+import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -30,7 +31,8 @@ public class ScheduledTaskWrapper implements Runnable {
 	public void run() {
 		ScheduledJobRun jobRun = null;
 		try {			
-			jobRun = callback.started(job, args, runBy);			
+			jobRun = callback.started(job, args, runBy);
+			AuthUtil.setCurrentUser(runBy);
 			job.newTask().doJob(jobRun);
 			callback.completed(jobRun); 
 		} catch (Exception e) {

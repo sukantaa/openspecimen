@@ -79,7 +79,10 @@ public class UserController {
 			boolean listAll,
 
 			@RequestParam(value = "includeStats", required = false, defaultValue = "false")
-			boolean includeStats) {
+			boolean includeStats,
+
+			@RequestParam(value = "type", required = false)
+			String type) {
 		
 		UserListCriteria crit = new UserListCriteria()
 			.startAt(start)
@@ -91,7 +94,8 @@ public class UserController {
 			.domainName(domainName)
 			.activityStatus(activityStatus)
 			.listAll(listAll)
-			.includeStat(includeStats);
+			.includeStat(includeStats)
+			.type(type);
 		
 		
 		RequestEvent<UserListCriteria> req = new RequestEvent<UserListCriteria>(crit);

@@ -121,9 +121,19 @@ public class UserServiceImpl implements UserService, InitializingBean {
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<UserSummary>> getUsers(RequestEvent<UserListCriteria> req) {
-		List<User> users = daoFactory.getUserDao().getUsers(addUserListCriteria(req.getPayload()));
-		List<UserSummary> result = UserSummary.from(users);
+		UserListCriteria crit = req.getPayload();
 
+		if (StringUtils.isNotBlank(crit.type())) {
+			try {
+				User.Type.valueOf(crit.type());
+			} catch (IllegalArgumentException iae) {
+				return ResponseEvent.userError(UserErrorCode.INVALID_TYPE, crit.type());
+			}
+		}
+
+		List<User> users = daoFactory.getUserDao().getUsers(addUserListCriteria(crit));
+		List<UserSummary> result = UserSummary.from(users);
+		
 		if (req.getPayload().includeStat() && CollectionUtils.isNotEmpty(result)) {
 			Collection<Long> userIds = users.stream().map(User::getId).collect(Collectors.toList());
 			Map<Long, Integer> cpCount = daoFactory.getUserDao().getCpCount(userIds);

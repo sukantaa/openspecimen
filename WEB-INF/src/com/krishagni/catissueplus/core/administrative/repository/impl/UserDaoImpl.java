@@ -267,6 +267,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 		addActivityStatusRestriction(criteria, listCrit.activityStatus());
 		addInstituteRestriction(criteria, listCrit.instituteName());
 		addDomainRestriction(criteria, listCrit.domainName());
+		addTypeRestriction(criteria, listCrit.type());
 		return criteria;
 	}
 
@@ -296,6 +297,14 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 		}
 		
 		criteria.add(Restrictions.eq("u.activityStatus", activityStatus));
+	}
+
+	private void addTypeRestriction(Criteria criteria, String type) {
+		if (StringUtils.isBlank(type)) {
+			return;
+		}
+
+		criteria.add(Restrictions.eq("u.type", User.Type.valueOf(type)));
 	}
 	
 	private void addInstituteRestriction(Criteria criteria, String instituteName) {
