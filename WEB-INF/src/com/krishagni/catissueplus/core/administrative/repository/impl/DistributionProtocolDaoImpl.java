@@ -13,12 +13,14 @@ import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Subqueries;
 import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
@@ -36,12 +38,9 @@ public class DistributionProtocolDaoImpl extends AbstractDao<DistributionProtoco
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<DistributionProtocol> getDistributionProtocols(DpListCriteria crit) {
-		Criteria query = getDpListQuery(crit)
-				.setFirstResult(crit.startAt())
-				.setMaxResults(crit.maxResults())
-				.addOrder(Order.asc("title"));
-
-		return query.list();
+		return getDpListQuery(crit).addOrder(Order.asc("dp.title"))
+			.setFirstResult(crit.startAt()).setMaxResults(crit.maxResults())
+			.list();
 	}
 
 	@Override
@@ -147,9 +146,17 @@ public class DistributionProtocolDaoImpl extends AbstractDao<DistributionProtoco
 	}
 
 	private Criteria getDpListQuery(DpListCriteria crit) {
-		Criteria query = sessionFactory.getCurrentSession().createCriteria(DistributionProtocol.class)
-			.add(Restrictions.ne("activityStatus", "Disabled"));
-		return addSearchConditions(query, crit);
+		return getCurrentSession().createCriteria(DistributionProtocol.class, "dp")
+				.add(Subqueries.propertyIn("dp.id", getDpIdsQuery(crit)));
+	}
+
+	private DetachedCriteria getDpIdsQuery(DpListCriteria crit) {
+		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(DistributionProtocol.class)
+			.setProjection(Projections.distinct(Projections.property("id")));
+		Criteria query = detachedCriteria.getExecutableCriteria(getCurrentSession());
+		query.add(Restrictions.ne("activityStatus", "Disabled"));
+		addSearchConditions(query, crit);
+		return detachedCriteria;
 	}
 
 	private Criteria addSearchConditions(Criteria query, DpListCriteria crit) {
@@ -205,7 +212,6 @@ public class DistributionProtocolDaoImpl extends AbstractDao<DistributionProtoco
 		
 		query.createAlias("distributingSites", "distSites");
 		addSitesCondition(query, siteIds);
-		query.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 	}
 
 	private void addExpiredDpsCondition(Criteria query, DpListCriteria crit) {
