@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -20,8 +22,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.de.events.ExecuteQueryEventOp;
 import com.krishagni.catissueplus.core.de.events.ExecuteSavedQueryOp;
 import com.krishagni.catissueplus.core.de.events.FacetDetail;
@@ -29,6 +35,7 @@ import com.krishagni.catissueplus.core.de.events.GetFacetValuesOp;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
 import com.krishagni.catissueplus.core.de.events.QueryExecResult;
 import com.krishagni.catissueplus.core.de.services.QueryService;
+import com.krishagni.catissueplus.core.de.services.SavedQueryErrorCode;
 
 import edu.common.dynamicextensions.nutility.IoUtil;
 
@@ -61,6 +68,22 @@ public class QueryController {
 
 		opDetail.setSavedQueryId(queryId);
 		return response(querySvc.executeSavedQuery(request(opDetail)));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value="/default-result-view")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<String> getDefaultResultView() {
+		String fieldsJson = ConfigUtil.getInstance().getFileContent("query", "default_result_view", null);
+		if (StringUtils.isBlank(fieldsJson)) {
+			return Collections.emptyList();
+		} else {
+			try {
+				return new ObjectMapper().readValue(fieldsJson, new TypeReference<List<String>>(){});
+			} catch (IOException e) {
+				throw OpenSpecimenException.userError(SavedQueryErrorCode.INV_RV_CFG, e.getMessage());
+			}
+		}
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, value="/export")

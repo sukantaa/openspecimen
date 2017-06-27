@@ -320,7 +320,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 
 			String value = getStrSetting(module, name, (String)null);
 			if (StringUtils.isBlank(value)) {
-				if (defValue != null && defValue.length > 0) {
+				if (defValue != null && defValue.length > 0 && defValue[0] != null) {
 					contentType = Utility.getContentType(defValue[0]);
 					filename = defValue[0].getName();
 					in = new FileInputStream(defValue[0]);

@@ -34,4 +34,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Query: default result view">
+    <sql>
+      call add_cfg_prop(
+        'query', 'default_result_view',
+        'default_result_view', 'default_result_view_desc',
+        'FILE', 'classpath:/com/krishagni/catissueplus/core/de/query/default-result-view.json'
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>
