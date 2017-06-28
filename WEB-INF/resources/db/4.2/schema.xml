@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  
+  <changeSet author="agosavi" id="Notifications table">
+    <createTable tableName="OS_NOTIFICATIONS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+
+      <column name="OPERATION" type="${text.type}(16)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="ENTITY_TYPE" type="${text.type}(64)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="ENTITY_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="MESSAGE" type="${text.type}(512)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="CREATED_BY" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+      
+      <column name="CREATION_TIME" type="${timestamp.type}">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  
+  <changeSet author="agosavi" id="Notifications sequence" dbms="oracle">
+    <createSequence sequenceName="OS_NOTIFS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+  
+  <changeSet author="agosavi" id="Add FK on user who triggered notification">
+    <addForeignKeyConstraint constraintName="FK_NOTIFICATION_CREATED_BY"
+      baseTableName="OS_NOTIFICATIONS" baseColumnNames="CREATED_BY"
+      referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+  
+  <changeSet author="agosavi" id="User notifications">
+    <createTable tableName="OS_USER_NOTIFICATIONS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+
+      <column name="USER_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="NOTIFICATION_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="STATUS" type="${text.type}(16)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  
+  <changeSet author="agosavi" id="Notifications user sequence" dbms="oracle">
+    <createSequence sequenceName="OS_USER_NOTIFS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+  
+  <changeSet author="agosavi" id="Add FK on notified user">
+    <addForeignKeyConstraint constraintName="FK_NOTIF_USERS_USER_ID"
+      baseTableName="OS_USER_NOTIFICATIONS" baseColumnNames="USER_ID"
+      referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+  
+  <changeSet author="agosavi" id="Add FK on notification">
+    <addForeignKeyConstraint constraintName="FK_NOTIF_USERS_NOTIF_ID"
+      baseTableName="OS_USER_NOTIFICATIONS" baseColumnNames="NOTIFICATION_ID"
+      referencedTableName="OS_NOTIFICATIONS" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>	
+</databaseChangeLog>
