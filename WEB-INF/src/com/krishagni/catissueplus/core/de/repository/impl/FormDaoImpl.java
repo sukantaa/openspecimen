@@ -42,7 +42,7 @@ import krishagni.catissueplus.beans.FormContextBean;
 import krishagni.catissueplus.beans.FormRecordEntryBean;
 
 public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao {
-	
+
 	@Override
 	public Class<FormContextBean> getType() {
 		return FormContextBean.class;
@@ -598,7 +598,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 		Query query = countReq ? getCountFormsQuery(crit) : getListFormsQuery(crit);
 
 		if (StringUtils.isNotBlank(crit.query())) {
-			query.setParameter("caption", "%" + crit.query() + "%");
+			query.setParameter("caption", "%" + crit.query().toLowerCase() + "%");
 		}
 		
 		if (crit.userId() != null) {
@@ -648,7 +648,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 
 		StringBuilder sqlBuilder = new StringBuilder(String.format(GET_ALL_FORMS, proj, whereClause, cpFormsSql));
 		if (StringUtils.isNotBlank(crit.query())) {
-			sqlBuilder.append(" and c.caption like :caption ");
+			sqlBuilder.append(" and lower(c.caption) like :caption ");
 		}
 		
 		if (crit.userId() != null) {
@@ -664,7 +664,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 		if (!countReq) {
 			sqlBuilder.append(" order by modificationTime desc ");
 		}
-		
+
 		return sqlBuilder.toString();
 	}
 
