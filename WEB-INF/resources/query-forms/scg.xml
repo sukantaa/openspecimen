@@ -320,5 +320,7 @@
         <pathLink>true</pathLink>
       </subForm>
     </row>
+
+    $querySvc.insertCustomQueryForms('visit')
   </view>
 </form>

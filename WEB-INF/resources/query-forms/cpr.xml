@@ -441,5 +441,7 @@
         </row>
       </subForm>
     </row>
+
+    $querySvc.insertCustomQueryForms('cpr')
   </view>
 </form>

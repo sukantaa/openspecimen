@@ -191,5 +191,7 @@
         <extnFkCol>RECORD_ID</extnFkCol>
       </subForm>
     </row>
+
+    $querySvc.insertCustomQueryForms('cp')
   </view>
 </form>

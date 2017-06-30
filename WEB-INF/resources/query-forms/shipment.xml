@@ -238,5 +238,7 @@
         </row>
       </subForm>
     </row>
+
+    $querySvc.insertCustomQueryForms('shipment')
   </view>
 </form>

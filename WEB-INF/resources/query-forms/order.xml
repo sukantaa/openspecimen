@@ -259,5 +259,7 @@
         </row>
       </subForm>
     </row>
+
+    $querySvc.insertCustomQueryForms('order')
   </view>
 </form>
