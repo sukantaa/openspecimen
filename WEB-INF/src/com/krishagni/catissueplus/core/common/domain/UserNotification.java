@@ -12,6 +12,8 @@ public class UserNotification extends BaseEntity {
 	private User user;
 	
 	private Notification notification;
+
+	private String urlKey;
 	
 	private Status status;
 
@@ -29,6 +31,14 @@ public class UserNotification extends BaseEntity {
 
 	public void setNotification(Notification notification) {
 		this.notification = notification;
+	}
+
+	public String getUrlKey() {
+		return urlKey;
+	}
+
+	public void setUrlKey(String urlKey) {
+		this.urlKey = urlKey;
 	}
 
 	public Status getStatus() {

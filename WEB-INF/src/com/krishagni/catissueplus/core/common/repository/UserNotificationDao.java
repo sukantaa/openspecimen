@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.common.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import com.krishagni.catissueplus.core.common.domain.Notification;
@@ -9,6 +10,8 @@ public interface UserNotificationDao extends Dao<UserNotification> {
 	List<UserNotification> getUserNotifications(UserNotifsListCriteria crit);
 
 	Long getUnreadNotificationsCount(UserNotifsListCriteria crit);
+
+	int markUserNotificationsAsRead(Long userId, Date notifsBefore);
 
 	//
 	// if notification object related methods grow, we can move them to NotificationDao

@@ -61,6 +61,10 @@
         <constraints nullable="false"/>
       </column>
 
+      <column name="URL_KEY" type="${text.type}(255)">
+        <constraints nullable="false"/>
+      </column>
+
       <column name="STATUS" type="${text.type}(16)">
         <constraints nullable="false"/>
       </column>

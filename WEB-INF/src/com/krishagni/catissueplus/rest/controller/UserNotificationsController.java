@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.rest.controller;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +49,7 @@ public class UserNotificationsController {
 		return resp.getPayload();
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/count")
+	@RequestMapping(method = RequestMethod.GET, value = "/unread-count")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public Map<String, Long> getUnreadNotificationsCount() {
@@ -60,15 +61,21 @@ public class UserNotificationsController {
 	@RequestMapping(method = RequestMethod.PUT, value = "/mark-as-read")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public List<UserNotificationDetail> readNotifications(@RequestBody List<UserNotificationDetail> notifs) {
-		List<Long> ids = Utility.collect(notifs, "id");
-		if (CollectionUtils.isEmpty(ids)) {
-			return Collections.emptyList();
-		}
-
-		RequestEvent<List<Long>> req = new RequestEvent<>(ids);
-		ResponseEvent<List<UserNotificationDetail>> resp = notificationSvc.markNotificationsAsRead(req);
+	public Integer readNotifications(@RequestBody MarkAsReadOp op) {
+		ResponseEvent<Integer> resp = notificationSvc.markNotificationsAsRead(new RequestEvent<>(op.getNotifsBefore()));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
+	}
+}
+
+class MarkAsReadOp {
+	private Date notifsBefore;
+
+	public Date getNotifsBefore() {
+		return notifsBefore;
+	}
+
+	public void setNotifsBefore(Date notifsBefore) {
+		this.notifsBefore = notifsBefore;
 	}
 }

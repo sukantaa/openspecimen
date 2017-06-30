@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.common.repository.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -41,6 +42,14 @@ public class UserNotificationDaoImpl extends AbstractDao<UserNotification> imple
 	}
 
 	@Override
+	public int markUserNotificationsAsRead(Long userId, Date notifsBefore) {
+		return getCurrentSession().getNamedQuery(MARK_AS_READ)
+			.setParameter("userId", userId)
+			.setParameter("notifsBefore", notifsBefore)
+			.executeUpdate();
+	}
+
+	@Override
 	public void saveOrUpdate(Notification notification) {
 		getCurrentSession().saveOrUpdate(notification);
 	}
@@ -69,4 +78,8 @@ public class UserNotificationDaoImpl extends AbstractDao<UserNotification> imple
 
 		return query.createAlias("un.user", "user").add(Restrictions.eq("user.id", userId));
 	}
+
+	private static final String FQN = UserNotification.class.getName();
+
+	private static final String MARK_AS_READ = FQN + ".markNotifsAsRead";
 }

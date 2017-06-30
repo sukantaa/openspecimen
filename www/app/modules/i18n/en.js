@@ -1963,6 +1963,13 @@
     }
   },
 
+  "notifs": {
+    "title": "Notifications",
+    "loading": "Loading notifications. Please wait for a moment... ",
+    "no_notifs": "No notifications to show",
+    "view_all": "View All Notifications"
+  },
+
    "jobs": {
      "list": "Jobs",
      "create": "Create Job",

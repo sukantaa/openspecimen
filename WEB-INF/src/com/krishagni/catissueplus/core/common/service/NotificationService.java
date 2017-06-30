@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.common.service;
 
+import java.util.Date;
 import java.util.List;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -14,7 +15,7 @@ public interface NotificationService {
 
 	ResponseEvent<Long> getUnreadNotificationsCount();
 
-	ResponseEvent<List<UserNotificationDetail>> markNotificationsAsRead(RequestEvent<List<Long>> req);
+	ResponseEvent<Integer> markNotificationsAsRead(RequestEvent<Date> req);
 
 	void addNotification(Notification notification, List<User> users);
 }

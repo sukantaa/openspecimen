@@ -16,11 +16,30 @@
     
     <many-to-one name="notification" column="NOTIFICATION_ID"/>
 
+    <property name="urlKey" column="URL_KEY"/>
+
     <property name="status" column="STATUS" not-null="true">
       <type name="org.hibernate.type.EnumType">
         <param name="enumClass">com.krishagni.catissueplus.core.common.domain.UserNotification$Status</param>
         <param name="type">12</param>
       </type>
     </property>
+
+    <sql-query name="markNotifsAsRead">
+      update
+        os_user_notifications
+      set
+        status = 'READ'
+      where
+        user_id = :userId and
+        notification_id in (
+          select
+            identifier
+          from
+            os_notifications
+          where
+            creation_time &lt;= :notifsBefore
+        )
+    </sql-query>
   </class>
 </hibernate-mapping>

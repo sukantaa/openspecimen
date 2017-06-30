@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.common.service.impl;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,19 +61,16 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<List<UserNotificationDetail>> markNotificationsAsRead(RequestEvent<List<Long>> req) {
+	public ResponseEvent<Integer> markNotificationsAsRead(RequestEvent<Date> req) {
 		try {
-			UserNotifsListCriteria crit = new UserNotifsListCriteria().ids(req.getPayload());
-			List<UserNotification> userNotifications = daoFactory.getUserNotificationDao().getUserNotifications(crit);
-
-			if (crit.ids().size() != userNotifications.size()) {
-				Set<Long> notFoundIds = new HashSet<>(crit.ids());
-				userNotifications.forEach(notification -> notFoundIds.remove(notification.getId()));
-				throw OpenSpecimenException.userError(NotificationErrorCode.NOT_FOUND, notFoundIds, notFoundIds.size());
+			Date notifsBefore = req.getPayload();
+			if (notifsBefore == null) {
+				notifsBefore = Calendar.getInstance().getTime();
 			}
 
-			userNotifications.forEach(n -> n.setStatus(UserNotification.Status.READ));
-			return ResponseEvent.response(UserNotificationDetail.from(userNotifications));
+			int readNotifs = daoFactory.getUserNotificationDao().markUserNotificationsAsRead(
+					AuthUtil.getCurrentUser().getId(), notifsBefore);
+			return ResponseEvent.response(readNotifs);
 		} catch(OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch(Exception e) {

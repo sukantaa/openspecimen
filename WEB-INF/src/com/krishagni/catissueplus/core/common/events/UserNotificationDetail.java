@@ -27,6 +27,8 @@ public class UserNotificationDetail {
 	private Date creationTime;
 
 	private UserSummary user;
+
+	private String urlKey;
 	
 	private String status;
 
@@ -94,6 +96,14 @@ public class UserNotificationDetail {
 		this.user = user;
 	}
 
+	public String getUrlKey() {
+		return urlKey;
+	}
+
+	public void setUrlKey(String urlKey) {
+		this.urlKey = urlKey;
+	}
+
 	public String getStatus() {
 		return status;
 	}
@@ -114,6 +124,7 @@ public class UserNotificationDetail {
 		detail.setCreatedBy(UserSummary.from(notif.getCreatedBy()));
 		detail.setCreationTime(notif.getCreationTime());
 		detail.setUser(UserSummary.from(userNotif.getUser()));
+		detail.setUrlKey(userNotif.getUrlKey());
 		detail.setStatus(userNotif.getStatus().name());
 		return detail;
 	}
