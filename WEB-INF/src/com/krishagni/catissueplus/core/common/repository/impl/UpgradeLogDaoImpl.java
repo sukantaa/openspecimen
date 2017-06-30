@@ -12,14 +12,22 @@ public class UpgradeLogDaoImpl extends AbstractDao<UpgradeLog> implements Upgrad
 	@SuppressWarnings("unchecked")
 	public UpgradeLog getLatestVersion() {
 		List<UpgradeLog> log = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_LATEST_VERSION)
-				.setMaxResults(1)
-				.list();
+			.getNamedQuery(GET_UPGRADE_LOGS)
+			.setMaxResults(1)
+			.list();
 		
 		return log.isEmpty() ? null : log.get(0);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<UpgradeLog> getUpgradeLogs() {
+		return sessionFactory.getCurrentSession()
+			.getNamedQuery(GET_UPGRADE_LOGS)
+			.list();
 	}
 	
 	private static final String FQN = UpgradeLog.class.getName();
 	
-	private static final String GET_LATEST_VERSION = FQN + ".getLatestVersion";
+	private static final String GET_UPGRADE_LOGS = FQN + ".getUpgradeLogs";
 }

@@ -20,7 +20,7 @@
 
     <property name="upgradedBy" column="UPGRADED_BY"/>
     
-    <query name="getLatestVersion">
+    <query name="getUpgradeLogs">
       select
         upgradeLog
       from
