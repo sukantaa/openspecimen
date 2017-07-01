@@ -3,41 +3,36 @@ package com.krishagni.catissueplus.core.de.events;
 import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 
 public class ListQueryAuditLogsCriteria extends AbstractListCriteria<ListQueryAuditLogsCriteria> {
-	public static enum Type {
-		ALL,
-		LAST_24
-	};
-	
-	private Long savedQueryId;
-	
-	private Type type;
-	
-	private boolean countReq;
+	private Long queryId;
 
-	public Long savedQueryId() {
-		return savedQueryId;
+	private Long userId;
+
+	private Long instituteId;
+
+	public Long queryId() {
+		return queryId;
 	}
 
-	public ListQueryAuditLogsCriteria savedQueryId(Long savedQueryId) {
-		this.savedQueryId = savedQueryId;
-		return self();
-	}
-	
-	public Type type() {
-		return type;
-	}
-
-	public ListQueryAuditLogsCriteria type(Type type) {
-		this.type = type;
+	public ListQueryAuditLogsCriteria queryId(Long queryId) {
+		this.queryId = queryId;
 		return self();
 	}
 
-	public boolean countReq() {
-		return countReq;
+	public Long userId() {
+		return userId;
 	}
 
-	public ListQueryAuditLogsCriteria countReq(boolean countReq) {
-		this.countReq = countReq;
+	public ListQueryAuditLogsCriteria userId(Long userId) {
+		this.userId = userId;
+		return self();
+	}
+
+	public Long instituteId() {
+		return instituteId;
+	}
+
+	public ListQueryAuditLogsCriteria instituteId(Long instituteId) {
+		this.instituteId = instituteId;
 		return self();
 	}
 

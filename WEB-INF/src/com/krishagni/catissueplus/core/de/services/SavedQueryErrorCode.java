@@ -45,7 +45,9 @@ public enum SavedQueryErrorCode implements ErrorCode {
 
 	PHI_NOT_ALLOWED_IN_AGR,
 
-	INV_RV_CFG;
+	INV_RV_CFG,
+
+	AUDIT_LOG_NOT_FOUND;
 	
 	@Override
 	public String code() {

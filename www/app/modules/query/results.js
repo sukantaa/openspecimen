@@ -146,7 +146,7 @@ angular.module('os.query.results', ['os.query.models'])
       $scope.resultsCtx.error = false;
 
       currResults = {};
-      QueryExecutor.getRecords(undefined, qc.selectedCp.id, getAql(true, true), qc.wideRowMode || 'DEEP').then(
+      QueryExecutor.getRecords(qc.id, qc.selectedCp.id, getAql(true, true), qc.wideRowMode || 'DEEP').then(
         function(result) {
           currResults = result;
           $scope.resultsCtx.waitingForRecords = false;
@@ -319,7 +319,7 @@ angular.module('os.query.results', ['os.query.models'])
       var counters = $scope.resultsCtx.counters;
       counters.waiting = true;
       counters.error = false;
-      QueryExecutor.getCount(undefined, qc.selectedCp.id, aql).then(
+      QueryExecutor.getCount(qc.id, qc.selectedCp.id, aql).then(
         function(result) {
           counters.waiting = false;
           angular.extend(counters, result);

@@ -7,7 +7,24 @@ import java.util.List;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
-import com.krishagni.catissueplus.core.de.events.*;
+import com.krishagni.catissueplus.core.de.events.ExecuteQueryEventOp;
+import com.krishagni.catissueplus.core.de.events.ExecuteSavedQueryOp;
+import com.krishagni.catissueplus.core.de.events.FacetDetail;
+import com.krishagni.catissueplus.core.de.events.GetFacetValuesOp;
+import com.krishagni.catissueplus.core.de.events.ListFolderQueriesCriteria;
+import com.krishagni.catissueplus.core.de.events.ListQueryAuditLogsCriteria;
+import com.krishagni.catissueplus.core.de.events.ListSavedQueriesCriteria;
+import com.krishagni.catissueplus.core.de.events.QueryAuditLogDetail;
+import com.krishagni.catissueplus.core.de.events.QueryAuditLogSummary;
+import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
+import com.krishagni.catissueplus.core.de.events.QueryExecResult;
+import com.krishagni.catissueplus.core.de.events.QueryFolderDetails;
+import com.krishagni.catissueplus.core.de.events.QueryFolderSummary;
+import com.krishagni.catissueplus.core.de.events.SavedQueriesList;
+import com.krishagni.catissueplus.core.de.events.SavedQueryDetail;
+import com.krishagni.catissueplus.core.de.events.SavedQuerySummary;
+import com.krishagni.catissueplus.core.de.events.ShareQueryFolderOp;
+import com.krishagni.catissueplus.core.de.events.UpdateFolderQueriesOp;
 
 public interface QueryService {	
 	ResponseEvent<SavedQueriesList> getSavedQueries(RequestEvent<ListSavedQueriesCriteria> req);
@@ -56,8 +73,10 @@ public interface QueryService {
 
 	//
 	// query audit logs related APIs
-	//	
-	ResponseEvent<QueryAuditLogsList> getAuditLogs(RequestEvent<ListQueryAuditLogsCriteria> req);
+	//
+	ResponseEvent<Long> getAuditLogsCount(RequestEvent<ListQueryAuditLogsCriteria> req);
+
+	ResponseEvent<List<QueryAuditLogSummary>> getAuditLogs(RequestEvent<ListQueryAuditLogsCriteria> req);
 
 	ResponseEvent<QueryAuditLogDetail> getAuditLog(RequestEvent<Long> req);
 

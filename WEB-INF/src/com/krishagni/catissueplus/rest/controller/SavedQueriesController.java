@@ -3,7 +3,6 @@ package com.krishagni.catissueplus.rest.controller;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -68,20 +67,20 @@ public class SavedQueriesController {
 			.countReq(countReq)
 			.query(searchString);
 		
-		return response(querySvc.getSavedQueries(getRequest(crit)));		
+		return response(querySvc.getSavedQueries(request(crit)));
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public SavedQueryDetail getQueryDetails(@PathVariable("id") Long queryId) {
-		return response(querySvc.getSavedQuery(getRequest(queryId)));
+		return response(querySvc.getSavedQuery(request(queryId)));
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}/definition-file")
 	@ResponseStatus(HttpStatus.OK)	
 	public void getQueryDefFile(@PathVariable("id") Long queryId, HttpServletResponse response) {
-		String queryDef = response(querySvc.getQueryDef(getRequest(queryId)));
+		String queryDef = response(querySvc.getQueryDef(request(queryId)));
 
 		response.setContentType("application/json");
 		response.setHeader("Content-Disposition", "attachment;filename=QueryDef_" + queryId + ".json");
@@ -113,7 +112,7 @@ public class SavedQueriesController {
 	public SavedQueryDetail saveQuery(@RequestBody SavedQueryDetail detail) {
 		curateSavedQueryDetail(detail);
 		
-		return response(querySvc.saveQuery(getRequest(detail)));
+		return response(querySvc.saveQuery(request(detail)));
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
@@ -122,35 +121,32 @@ public class SavedQueriesController {
 	public SavedQueryDetail updateQuery(@RequestBody SavedQueryDetail detail) {
 		curateSavedQueryDetail(detail);
 		
-		return response(querySvc.updateQuery(getRequest(detail)));
+		return response(querySvc.updateQuery(request(detail)));
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public Long deleteQuery(@PathVariable("id") Long id) {
-		return response(querySvc.deleteQuery(getRequest(id)));
+		return response(querySvc.deleteQuery(request(id)));
 	}
 
 	@RequestMapping(method = RequestMethod.GET,  value = "/{id}/audit-logs")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public List<QueryAuditLogSummary> getQueryAuditLogs(
-			@PathVariable("id") 
+			@PathVariable("id")
 			Long savedQueryId,
 			
-			@RequestParam(value = "start", required = false, defaultValue = "0") 
-			int start,
+			@RequestParam(value = "startAt", required = false, defaultValue = "0")
+			int startAt,
 			
-			@RequestParam(value = "max", required = false, defaultValue = "25") 
-			int max) {
+			@RequestParam(value = "maxResults", required = false, defaultValue = "25")
+			int maxResults) {
 		
 		ListQueryAuditLogsCriteria crit = new ListQueryAuditLogsCriteria()
-			.startAt(start)
-			.maxResults(max)
-			.savedQueryId(savedQueryId);
-		
-		return response(querySvc.getAuditLogs(getRequest(crit))).getAuditLogs();
+			.queryId(savedQueryId).startAt(startAt).maxResults(maxResults);
+		return response(querySvc.getAuditLogs(request(crit)));
 	}
 	
 	private void curateSavedQueryDetail(SavedQueryDetail detail) {
@@ -187,7 +183,7 @@ public class SavedQueriesController {
 		return resp.getPayload();
 	}
 
-	private <T> RequestEvent<T> getRequest(T payload) {
-		return new RequestEvent<T>(payload);				
+	private <T> RequestEvent<T> request(T payload) {
+		return new RequestEvent<>(payload);
 	}		
 }

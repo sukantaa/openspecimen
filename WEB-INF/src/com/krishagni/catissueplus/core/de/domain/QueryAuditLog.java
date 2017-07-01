@@ -7,7 +7,7 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 public class QueryAuditLog {
 	private Long id;
 	
-	private Long queryId;
+	private SavedQuery query;
 	
 	private User runBy;
 	
@@ -29,12 +29,12 @@ public class QueryAuditLog {
 		this.id = id;
 	}
 
-	public Long getQueryId() {
-		return queryId;
+	public SavedQuery getQuery() {
+		return query;
 	}
 
-	public void setQueryId(Long queryId) {
-		this.queryId = queryId;
+	public void setQuery(SavedQuery query) {
+		this.query = query;
 	}
 
 	public User getRunBy() {

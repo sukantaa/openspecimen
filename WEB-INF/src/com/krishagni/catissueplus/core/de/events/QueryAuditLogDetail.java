@@ -1,6 +1,5 @@
 package com.krishagni.catissueplus.core.de.events;
 
-import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.de.domain.QueryAuditLog;
 
 public class QueryAuditLogDetail extends QueryAuditLogSummary {
@@ -17,14 +16,8 @@ public class QueryAuditLogDetail extends QueryAuditLogSummary {
 	
 	public static QueryAuditLogDetail from(QueryAuditLog auditLog){
 		QueryAuditLogDetail detail = new QueryAuditLogDetail();
-		
-		detail.setId(auditLog.getId());
-		detail.setRunBy(UserSummary.from(auditLog.getRunBy()));
-		detail.setTimeOfExecution(auditLog.getTimeOfExecution());
-		detail.setTimeToFinish(auditLog.getTimeToFinish());
-		detail.setRunType(auditLog.getRunType());
-		detail.setRecordCount(auditLog.getRecordCount());
-		detail.setSql(auditLog.getSql());		
+		copyTo(auditLog, detail);
+		detail.setSql(auditLog.getSql());
 		return detail;
-	}	
+	}
 }

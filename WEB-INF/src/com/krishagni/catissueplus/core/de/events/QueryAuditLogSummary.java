@@ -1,10 +1,13 @@
 package com.krishagni.catissueplus.core.de.events;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.catissueplus.core.de.domain.QueryAuditLog;
 
 @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
 public class QueryAuditLogSummary {	
@@ -86,5 +89,31 @@ public class QueryAuditLogSummary {
 
 	public void setRecordCount(Long recordCount) {
 		this.recordCount = recordCount;
-	}	
+	}
+
+	public static <T extends QueryAuditLogSummary> T copyTo(QueryAuditLog log, T result) {
+		result.setId(log.getId());
+
+		if (log.getQuery() != null) {
+			result.setQueryId(log.getQuery().getId());
+			result.setQueryTitle(log.getQuery().getTitle());
+		}
+
+		result.setRunType(log.getRunType());
+		result.setRunBy(UserSummary.from(log.getRunBy()));
+		result.setTimeOfExecution(log.getTimeOfExecution());
+		result.setTimeToFinish(log.getTimeToFinish());
+		result.setRecordCount(log.getRecordCount());
+		return result;
+	}
+
+	public static QueryAuditLogSummary from(QueryAuditLog log) {
+		QueryAuditLogSummary result = new QueryAuditLogSummary();
+		copyTo(log, result);
+		return result;
+	}
+
+	public static List<QueryAuditLogSummary> from(List<QueryAuditLog> logs) {
+		return logs.stream().map(QueryAuditLogSummary::from).collect(Collectors.toList());
+	}
 }

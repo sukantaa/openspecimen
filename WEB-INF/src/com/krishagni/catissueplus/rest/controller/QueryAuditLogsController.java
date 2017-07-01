@@ -1,6 +1,8 @@
 package com.krishagni.catissueplus.rest.controller;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,9 +17,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.de.events.ListQueryAuditLogsCriteria;
-import com.krishagni.catissueplus.core.de.events.ListQueryAuditLogsCriteria.Type;
 import com.krishagni.catissueplus.core.de.events.QueryAuditLogDetail;
-import com.krishagni.catissueplus.core.de.events.QueryAuditLogsList;
+import com.krishagni.catissueplus.core.de.events.QueryAuditLogSummary;
 import com.krishagni.catissueplus.core.de.services.QueryService;
 
 @Controller
@@ -25,45 +26,45 @@ import com.krishagni.catissueplus.core.de.services.QueryService;
 public class QueryAuditLogsController {
 
 	@Autowired
-	private HttpServletRequest httpServletRequest;
-
-	@Autowired
 	private QueryService querySvc;
 	
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody	
-	public QueryAuditLogsList getAuditLogs(
-			@RequestParam(value = "type", required = false, defaultValue = "LAST_24") 
-			String type,
+	public List<QueryAuditLogSummary> getAuditLogs(
+		@RequestParam(value = "queryId", required = false)
+		Long queryId,
 			
-			@RequestParam(value = "queryId", required = false, defaultValue = "-1") 
-			Long queryId,
+		@RequestParam(value = "startAt", required = false, defaultValue = "0")
+		int startAt,
 			
-			@RequestParam(value = "start", required = false, defaultValue = "0") 
-			int start,
-			
-			@RequestParam(value = "max", required = false, defaultValue = "25") 
-			int max,
-			
-			@RequestParam(value = "countReq", required = false, defaultValue = "false") 
-			boolean countReq) {
+		@RequestParam(value = "maxResults", required = false, defaultValue = "25")
+		int maxResults) {
 		
 		ListQueryAuditLogsCriteria crit = new ListQueryAuditLogsCriteria()
-			.type(Type.valueOf(type))
-			.savedQueryId(queryId)
-			.startAt(start)
-			.maxResults(max)
-			.countReq(countReq);
-		
-		return response(querySvc.getAuditLogs(getRequest(crit)));
+			.queryId(queryId)
+			.startAt(startAt)
+			.maxResults(maxResults);
+		return response(querySvc.getAuditLogs(request(crit)));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/count")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Long> getAuditLogsCount(
+		@RequestParam(value = "queryId", required = false)
+		Long queryId) {
+
+		ListQueryAuditLogsCriteria crit = new ListQueryAuditLogsCriteria().queryId(queryId);
+		Long count = response(querySvc.getAuditLogsCount(request(crit)));
+		return Collections.singletonMap("count", count);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value="{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody	
 	public QueryAuditLogDetail getAuditLog(@PathVariable Long id) {
-		return response(querySvc.getAuditLog(getRequest(id)));
+		return response(querySvc.getAuditLog(request(id)));
 	}
 
 	private <T> T response(ResponseEvent<T> resp) {
@@ -71,7 +72,7 @@ public class QueryAuditLogsController {
 		return resp.getPayload();
 	}
 
-	private <T> RequestEvent<T> getRequest(T payload) {
-		return new RequestEvent<T>(payload);				
+	private <T> RequestEvent<T> request(T payload) {
+		return new RequestEvent<>(payload);
 	}	
 }
