@@ -32,8 +32,11 @@ public class QueryAuditLogsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody	
 	public List<QueryAuditLogSummary> getAuditLogs(
-		@RequestParam(value = "queryId", required = false)
-		Long queryId,
+		@RequestParam(value = "query", required = false)
+		String query,
+
+		@RequestParam(value = "userId", required = false)
+		Long userId,
 			
 		@RequestParam(value = "startAt", required = false, defaultValue = "0")
 		int startAt,
@@ -42,9 +45,8 @@ public class QueryAuditLogsController {
 		int maxResults) {
 		
 		ListQueryAuditLogsCriteria crit = new ListQueryAuditLogsCriteria()
-			.queryId(queryId)
-			.startAt(startAt)
-			.maxResults(maxResults);
+			.query(query).userId(userId)
+			.startAt(startAt).maxResults(maxResults);
 		return response(querySvc.getAuditLogs(request(crit)));
 	}
 
@@ -52,10 +54,13 @@ public class QueryAuditLogsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public Map<String, Long> getAuditLogsCount(
-		@RequestParam(value = "queryId", required = false)
-		Long queryId) {
+		@RequestParam(value = "query", required = false)
+		String query,
 
-		ListQueryAuditLogsCriteria crit = new ListQueryAuditLogsCriteria().queryId(queryId);
+		@RequestParam(value = "userId", required = false)
+		Long userId) {
+
+		ListQueryAuditLogsCriteria crit = new ListQueryAuditLogsCriteria().query(query).userId(userId);
 		Long count = response(querySvc.getAuditLogsCount(request(crit)));
 		return Collections.singletonMap("count", count);
 	}

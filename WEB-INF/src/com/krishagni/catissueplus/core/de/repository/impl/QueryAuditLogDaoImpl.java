@@ -2,7 +2,10 @@ package com.krishagni.catissueplus.core.de.repository.impl;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -39,9 +42,16 @@ public class QueryAuditLogDaoImpl extends AbstractDao<QueryAuditLog> implements 
 	private Criteria getLogsQuery(ListQueryAuditLogsCriteria crit) {
 		Criteria query = getCurrentSession().createCriteria(QueryAuditLog.class);
 
-		if (crit.queryId() != null) {
-			query.createAlias("query", "query")
-				.add(Restrictions.eq("query.id", crit.queryId()));
+		if (StringUtils.isNotBlank(crit.query())) {
+			Disjunction cond = Restrictions.disjunction();
+			query.createAlias("query", "query");
+
+			if (StringUtils.isNumeric(crit.query())) {
+				cond.add(Restrictions.eq("query.id", Long.parseLong(crit.query())));
+			}
+
+			cond.add(Restrictions.ilike("query.title", crit.query(), MatchMode.ANYWHERE));
+			query.add(cond);
 		}
 
 		if (crit.userId() != null || crit.instituteId() != null) {
@@ -49,7 +59,9 @@ public class QueryAuditLogDaoImpl extends AbstractDao<QueryAuditLog> implements 
 
 			if (crit.userId() != null) {
 				query.add(Restrictions.eq("rb.id", crit.userId()));
-			} else {
+			}
+
+			if (crit.instituteId() != null) {
 				query.createAlias("rb.institute", "ri").add(Restrictions.eq("ri.id", crit.instituteId()));
 			}
 		}

@@ -17,6 +17,10 @@
         <span class="fa fa-upload"></span>
         <span translate="common.buttons.import">Import</span>
       </button>
+      <button class="default" ui-sref="query-audit-logs" show-if-admin="institute">
+        <span class="fa fa-list"></span>
+        <span translate="queries.audit_logs.view_logs">View Audit Logs</span>
+      </button>
       <div dropdown ng-if="selectedQueries.length > 0" class="os-inline-btn">
         <button class="default dropdown-toggle">
           <span class="fa fa-folder"></span>

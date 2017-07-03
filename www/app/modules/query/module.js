@@ -78,5 +78,11 @@ angular.module('os.query',
        },
        parent: 'query-root'
      })
+     .state('query-audit-logs', {
+       url: '/query-audit-logs',
+       templateUrl: 'modules/query/audit-logs.html',
+       controller: 'QueryAuditLogsCtrl',
+       parent: 'signed-in'
+     });
   });
 

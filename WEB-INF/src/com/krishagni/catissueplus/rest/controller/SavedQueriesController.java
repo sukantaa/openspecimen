@@ -145,7 +145,7 @@ public class SavedQueriesController {
 			int maxResults) {
 		
 		ListQueryAuditLogsCriteria crit = new ListQueryAuditLogsCriteria()
-			.queryId(savedQueryId).startAt(startAt).maxResults(maxResults);
+			.query(savedQueryId.toString()).startAt(startAt).maxResults(maxResults);
 		return response(querySvc.getAuditLogs(request(crit)));
 	}
 	
