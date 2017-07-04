@@ -37,9 +37,26 @@ angular.module('os.query',
        parent: 'signed-in'
      })
      .state('query-list', {
-       url: '/list',
+       url: '/list?folderId',
        templateUrl: 'modules/query/list.html',
        controller: 'QueryListCtrl',
+       resolve: {
+         folders: function(currentUser, queryGlobal) {
+           return queryGlobal.loadFolders(currentUser).then(
+             function(resp) {
+               return resp.allFolders;
+             }
+           );
+         },
+
+         folder: function($stateParams, folders) {
+           if (!!$stateParams.folderId) {
+             return folders.find(function(folder) { return folder.id == $stateParams.folderId; });
+           }
+
+           return undefined;
+         }
+       },
        parent: 'query-root'
      })
      .state('query-addedit', {
@@ -84,5 +101,7 @@ angular.module('os.query',
        controller: 'QueryAuditLogsCtrl',
        parent: 'signed-in'
      });
+  }).run(function(UrlResolver) {
+    UrlResolver.regUrlState('folder-queries', 'query-list', 'folderId');
   });
 

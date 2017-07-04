@@ -7,20 +7,22 @@ import java.util.List;
 import java.util.Set;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 
-public class QueryFolder {
-
-	private Long id;
-
+public class QueryFolder extends BaseEntity {
 	private String name;
 
 	private User owner;
 	
 	private Boolean sharedWithAll;
 
-	private Set<User> sharedWith = new HashSet<User>();
+	private Set<User> sharedWith = new HashSet<>();
 
-	private Set<SavedQuery> savedQueries = new HashSet<SavedQuery>();
+	private Set<SavedQuery> savedQueries = new HashSet<>();
+
+	public static String getEntityName() {
+		return "query_folder";
+	}
 
 	public String getName() {
 		return name;
@@ -52,14 +54,6 @@ public class QueryFolder {
 
 	public void setSavedQueries(Set<SavedQuery> savedQueries) {
 		this.savedQueries = savedQueries;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public User getOwner() {

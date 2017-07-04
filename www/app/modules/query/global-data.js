@@ -1,10 +1,18 @@
 
 angular.module('os.query.globaldata', ['os.query.models', 'os.biospecimen.models'])
-  .factory('QueryGlobalData', function($translate, $q, $http, ApiUrls, CollectionProtocol, Form, SavedQuery, QueryUtil, Util) {
+  .factory('QueryGlobalData', function(
+    $translate, $q, $http,
+    ApiUrls, CollectionProtocol, Form, SavedQuery, QueryFolder, QueryUtil, Util) {
+
     var QueryGlobalData = function() {
       this.cpsQ = undefined;
       this.cpList = undefined;
       this.defSelectList = undefined;
+
+      this.foldersQ = undefined;
+      this.allFolders = undefined;
+      this.myFolders = undefined;
+      this.sharedFolders = undefined;
     };
 
     QueryGlobalData.prototype.getCps = function() {
@@ -28,6 +36,38 @@ angular.module('os.query.globaldata', ['os.query.models', 'os.biospecimen.models
       this.cpsQ.then(function(result) { d.resolve(result); });
       return d.promise;
     };
+
+    QueryGlobalData.prototype.loadFolders = function(currentUser) {
+      var d = $q.defer();
+      if (!this.foldersQ) {
+        this.foldersQ = QueryFolder.query();
+      }
+
+      var that = this;
+      if (!this.allFolders) {
+        this.foldersQ.then(
+          function(folders) {
+            that.allFolders = folders;
+            that.myFolders = [];
+            that.sharedFolders = [];
+
+            angular.forEach(folders, function(folder) {
+              if (folder.owner.id == currentUser.id) {
+                that.myFolders.push(folder);
+              } else {
+                that.sharedFolders.push(folder);
+              }
+            });
+
+            d.resolve({allFolders: folders, myFolders: that.myFolders, sharedFolders: that.sharedFolders});
+          }
+        );
+      } else {
+        d.resolve({allFolders: this.allFolders, myFolders: this.myFolders, sharedFolders: this.sharedFolders});
+      }
+
+      return d.promise;
+    }
 
     QueryGlobalData.prototype.loadCpForms = function(cp) {
       var d = $q.defer();

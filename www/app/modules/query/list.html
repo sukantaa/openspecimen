@@ -191,7 +191,7 @@
       <div class="os-table-body">
         <div class="row" ng-repeat="folder in folders.myFolders"> 
           <div class="col col-xs-12 clearfix folder" 
-            ng-class="{'os-query-selected-folder': folders.selectedFolder == folder}"> 
+            ng-class="{'os-query-selected-folder': folders.selectedFolder.id == folder.id}">
             <div class="pull-left" ng-click="selectFolder(folder)" title="{{folder.name}}">
               {{folder.name}}
             </div>

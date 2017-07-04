@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,6 +41,7 @@ import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr.ParticipantReadAccess;
+import com.krishagni.catissueplus.core.common.domain.Notification;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -50,6 +52,8 @@ import com.krishagni.catissueplus.core.common.service.EmailService;
 import com.krishagni.catissueplus.core.common.service.TemplateService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.AqlBuilder;
 import com.krishagni.catissueplus.core.de.domain.Filter;
@@ -499,7 +503,7 @@ public class QueryServiceImpl implements QueryService {
 			daoFactory.getQueryFolderDao().saveOrUpdate(queryFolder);
 			
 			if (!queryFolder.getSharedWith().isEmpty()) {
-				sendFolderSharedEmail(queryFolder.getOwner(), queryFolder, queryFolder.getSharedWith());
+				notifyFolderShared(queryFolder.getOwner(), queryFolder, queryFolder.getSharedWith());
 			}			
 			return ResponseEvent.response(QueryFolderDetails.from(queryFolder));
 		} catch (OpenSpecimenException ose) {
@@ -541,7 +545,7 @@ public class QueryServiceImpl implements QueryService {
 			daoFactory.getQueryFolderDao().saveOrUpdate(existing);
 			
 			if (!newUsers.isEmpty()) {
-				sendFolderSharedEmail(user, queryFolder, newUsers);
+				notifyFolderShared(user, existing, newUsers);
 			}
 			return ResponseEvent.response(QueryFolderDetails.from(existing));			
 		} catch (OpenSpecimenException ose) {
@@ -707,7 +711,7 @@ public class QueryServiceImpl implements QueryService {
 				.collect(Collectors.toList());
 
 			if (newUsers != null && !newUsers.isEmpty()) {
-				sendFolderSharedEmail(user, queryFolder, newUsers);
+				notifyFolderShared(user, queryFolder, newUsers);
 			}
 			
 			return ResponseEvent.response(result);
@@ -825,7 +829,7 @@ public class QueryServiceImpl implements QueryService {
 					try {
 						QueryResponse resp = exporter.export(fout, query, getResultScreener(query));
 						insertAuditLog(user, opDetail, resp);
-						sendEmail();
+						notifyExportCompleted();
 					} catch (Exception e) {
 						logger.error("Error exporting query data", e);
 						throw OpenSpecimenException.serverError(e);
@@ -836,7 +840,7 @@ public class QueryServiceImpl implements QueryService {
 					return true;
 				}
 
-				private void sendEmail() {
+				private void notifyExportCompleted() {
 					try {
 						User user = userDao.getById(AuthUtil.getCurrentUser().getId());
 						if (user.isSysUser()) {
@@ -849,6 +853,7 @@ public class QueryServiceImpl implements QueryService {
 							savedQuery = daoFactory.getSavedQueryDao().getQuery(queryId);
 						}
 						sendQueryDataExportedEmail(user, savedQuery, filename);
+						notifyQueryDataExported(user, savedQuery, filename);
 					} catch (Exception e) {
 						logger.error("Error sending email with query exported data", e);
 					}
@@ -1180,7 +1185,7 @@ public class QueryServiceImpl implements QueryService {
 	
 	private void sendQueryDataExportedEmail(User user, SavedQuery query, String filename) {
 		String title = query != null ? query.getTitle() : "Unsaved query";
-		Map<String, Object> props = new HashMap<String, Object>();
+		Map<String, Object> props = new HashMap<>();
 		props.put("user", user);
 		props.put("query", query);
 		props.put("filename", filename);
@@ -1189,17 +1194,51 @@ public class QueryServiceImpl implements QueryService {
 		
 		emailService.sendEmail(QUERY_DATA_EXPORTED_EMAIL_TMPL, new String[] {user.getEmailAddress()}, props);
 	}
+
+	private void notifyQueryDataExported(User user, SavedQuery query, String filename) {
+		String[] params = {query != null ? query.getTitle() : "Unsaved query"};
+		String msg = MessageUtil.getInstance().getMessage(QUERY_DATA_EXPORTED_EMAIL_TMPL + "_subj", params);
+
+		Notification notif = new Notification();
+		notif.setEntityId(query != null ? query.getId() : -1L);
+		notif.setEntityType("query");
+		notif.setOperation("EXPORT");
+		notif.setCreatedBy(AuthUtil.getCurrentUser());
+		notif.setCreationTime(Calendar.getInstance().getTime());
+		notif.setMessage(msg);
+
+		String url = ConfigUtil.getInstance().getAppUrl() + "/rest/ng/query/export?fileId=" + filename;
+		NotifUtil.getInstance().notify(notif, Collections.singletonMap(url, Collections.singleton(user)));
+	}
 	
-	private void sendFolderSharedEmail(User user, QueryFolder folder, Collection<User> sharedUsers) {
-		Map<String, Object> props = new HashMap<String, Object>();
-		props.put("user", user);
+	private void notifyFolderShared(User sharedBy, QueryFolder folder, Collection<User> sharedUsers) {
+		String[] subjParams = {folder.getName()};
+
+		//
+		// Step 1: Send email notifications
+		//
+		Map<String, Object> props = new HashMap<>();
+		props.put("user", sharedBy);
 		props.put("folder", folder);
 		props.put("appUrl", ConfigUtil.getInstance().getAppUrl());
+		props.put("$subject", subjParams);
 		
 		for (User sharedWith : sharedUsers) {
 			props.put("sharedWith", sharedWith);
 			emailService.sendEmail(SHARE_QUERY_FOLDER_EMAIL_TMPL, new String[] {sharedWith.getEmailAddress()}, props);
-		}		
+		}
+
+		//
+		// Step 2: Add UI notifications
+		//
+		Notification notif = new Notification();
+		notif.setOperation("UPDATE");
+		notif.setEntityType(QueryFolder.getEntityName());
+		notif.setEntityId(folder.getId());
+		notif.setCreationTime(Calendar.getInstance().getTime());
+		notif.setCreatedBy(AuthUtil.getCurrentUser());
+		notif.setMessage(MessageUtil.getInstance().getMessage(SHARE_QUERY_FOLDER_EMAIL_TMPL + "_subj", subjParams));
+		NotifUtil.getInstance().notify(notif, Collections.singletonMap("folder-queries", sharedUsers));
 	}
 
 	private FacetDetail getFacetDetail(Long cpId, String facet, String restriction, String searchTerm) {

@@ -1,7 +1,7 @@
 
 angular.module('os.query.list', ['os.query.models'])
   .controller('QueryListCtrl', function(
-    $scope, $state, $modal, currentUser, queryGlobal,
+    $scope, $state, $modal, currentUser, queryGlobal, folder,
     Util, SavedQuery, QueryFolder, Alerts) {
 
     function init() {
@@ -9,7 +9,7 @@ angular.module('os.query.list', ['os.query.models'])
       $scope.queryList = [];
       $scope.selectedQueries = [];
       $scope.folders = {
-        selectedFolder: undefined,
+        selectedFolder: folder,
         myFolders: [],
         sharedFolders: []
       };
@@ -30,18 +30,10 @@ angular.module('os.query.list', ['os.query.models'])
     };
  
     function loadAllFolders() {
-      QueryFolder.query().then(
-        function(folders) {
-          $scope.folders.myFolders = [];
-          $scope.folders.sharedFolders = [];
-
-          angular.forEach(folders, function(folder) {
-            if (folder.owner.id == currentUser.id) {
-              $scope.folders.myFolders.push(folder);
-            } else {
-              $scope.folders.sharedFolders.push(folder);
-            }
-          });
+      queryGlobal.loadFolders().then(
+        function(resp) {
+          $scope.folders.myFolders     = resp.myFolders;
+          $scope.folders.sharedFolders = resp.sharedFolders;
         }
       );
     };
@@ -104,11 +96,8 @@ angular.module('os.query.list', ['os.query.models'])
      * Folder related actions
      */
     $scope.selectFolder = function(folder, force) {
-      if (folder == $scope.folders.selectedFolder && !force) {
-        return;
-      }
-
-      loadFolderQueries(folder);
+      var opts = (force && {reload: true}) || {};
+      $state.go('query-list', {folderId: (folder && folder.id) || -1}, opts);
     };
 
     $scope.addSelectedQueriesToFolder = function(folder) {
