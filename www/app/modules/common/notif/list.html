@@ -15,10 +15,11 @@
         <span ng-switch-when="CREATE" class="fa fa-plus"></span>
         <span ng-switch-when="UPDATE" class="fa fa-pencil"></span>
         <span ng-switch-when="DELETE" class="fa fa-trash"></span>
+        <span ng-switch-when="EXPORT" class="fa fa-external-link"></span>
         <span ng-switch-default>{{notif.operation.charAt(0)}}</span>
       </div>
       <div class="os-notif-msg">
-        <a ng-href="{{notif.href}}" target="{{notif.newTab ? '_blank' : '_self'}}">
+        <a ng-href="{{notif.href}}" target="{{notif.newTab ? '_blank' : '_self'}}" ng-click="$event.stopPropagation()">
           <span>{{notif.message}}</span>
         </a>
       </div>

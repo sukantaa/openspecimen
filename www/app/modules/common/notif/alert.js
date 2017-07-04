@@ -5,7 +5,8 @@ angular.module('os.common.notif')
     var ctx = {
       notifsOpen: false, 
       unreadCount: 0,
-      openTime: undefined
+      openTime: undefined,
+      stop: undefined
     };
 
     function init() {
@@ -27,6 +28,14 @@ angular.module('os.common.notif')
           }
         }
       );
+
+      $scope.$on('$destroy',
+        function() {
+          if (ctx.stop) {
+            $interval.cancel(ctx.stop);
+          }
+        }
+      );
     }
 
     function syncUnreadCount() {
@@ -41,14 +50,16 @@ angular.module('os.common.notif')
           scheduleNextSync();
         },
 
-        function() {
-          scheduleNextSync();
+        function(resp) {
+          if (resp.status != 401) {
+            scheduleNextSync();
+          }
         }
       );
     }
 
     function scheduleNextSync() {
-      $interval(syncUnreadCount, 5000, 1);
+      ctx.stop = $interval(syncUnreadCount, 5000, 1);
     }
 
     init();
