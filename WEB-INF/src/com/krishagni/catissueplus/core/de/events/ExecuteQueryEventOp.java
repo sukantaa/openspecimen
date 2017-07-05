@@ -19,6 +19,8 @@ public class ExecuteQueryEventOp  {
 	
 	private String indexOf;
 
+	private boolean outputIsoDateTime;
+
 	public Long getCpId() {
 		return cpId;
 	}
@@ -74,5 +76,12 @@ public class ExecuteQueryEventOp  {
 	public void setIndexOf(String indexOf) {
 		this.indexOf = indexOf;
 	}
-	
+
+	public boolean isOutputIsoDateTime() {
+		return outputIsoDateTime;
+	}
+
+	public void setOutputIsoDateTime(boolean outputIsoDateTime) {
+		this.outputIsoDateTime = outputIsoDateTime;
+	}
 }

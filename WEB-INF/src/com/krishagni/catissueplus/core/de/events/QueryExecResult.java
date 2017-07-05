@@ -5,6 +5,8 @@ import java.util.List;
 public class QueryExecResult {
 	private String[] columnLabels;
 
+	private String[] columnTypes;
+
 	private String[] columnUrls;
 	
 	private List<String[]> rows;
@@ -19,6 +21,15 @@ public class QueryExecResult {
 
 	public QueryExecResult setColumnLabels(String[] columnLabels) {
 		this.columnLabels = columnLabels;
+		return this;
+	}
+
+	public String[] getColumnTypes() {
+		return columnTypes;
+	}
+
+	public QueryExecResult setColumnTypes(String[] columnTypes) {
+		this.columnTypes = columnTypes;
 		return this;
 	}
 

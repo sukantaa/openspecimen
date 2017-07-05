@@ -146,7 +146,9 @@ angular.module('os.query.results', ['os.query.models'])
       $scope.resultsCtx.error = false;
 
       currResults = {};
-      QueryExecutor.getRecords(qc.id, qc.selectedCp.id, getAql(true, true), qc.wideRowMode || 'DEEP').then(
+
+      var outputIsoFmt = (qc.reporting.type != 'crosstab');
+      QueryExecutor.getRecords(qc.id, qc.selectedCp.id, getAql(true, true), qc.wideRowMode || 'DEEP', outputIsoFmt).then(
         function(result) {
           currResults = result;
           $scope.resultsCtx.waitingForRecords = false;
@@ -431,15 +433,18 @@ angular.module('os.query.results', ['os.query.models'])
                            '</div>';
           }
 
+          var isDateColumn = (result.columnTypes[idx] == 'DATE');
           colDefs.push({
-            field: "col" + idx,
-            instance: columnInstance(columnLabel).instance,
-            displayName: columnLabel,
-            minWidth: width < 100 ? 100 : width,
+            field:        "col" + idx,
+            instance:     columnInstance(columnLabel).instance,
+            displayName:  columnLabel,
+            minWidth:     width < 100 ? 100 : width,
             headerCellTemplate: 'modules/query/column-filter.html',
             cellTemplate: !!cellTemplate ? cellTemplate : undefined,
-            showSummary: showColSummary,
-            summary: summaryRow[idx]
+            showSummary:  showColSummary,
+            summary:      summaryRow[idx],
+            sortFn:       isDateColumn ? QueryUtil.sortDatesFn : undefined,
+            cellFilter:   isDateColumn ? "date: global.dateTimeFmt" : undefined
           });
         }
       );

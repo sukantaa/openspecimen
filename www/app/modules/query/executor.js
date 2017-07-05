@@ -28,14 +28,15 @@ angular.module('os.query.executor', [])
         );
       },
 
-      getRecords: function(queryId, cpId, aql, wideRowMode) {
+      getRecords: function(queryId, cpId, aql, wideRowMode, outputIsoFmt) {
         var req = {
           savedQueryId: queryId, 
           cpId: cpId,
           drivingForm: 'Participant',
           runType: 'Data', 
           aql: aql, 
-          wideRowMode: wideRowMode || "OFF"
+          wideRowMode: wideRowMode || "OFF",
+          outputIsoDateTime: (outputIsoFmt || false)
         };
         return $http.post(queryUrl, req).then(
           function(resp) {

@@ -338,6 +338,7 @@ public class QueryServiceImpl implements QueryService {
 			return ResponseEvent.response(
 				new QueryExecResult()
 					.setColumnLabels(queryResult.getColumnLabels())
+					.setColumnTypes(queryResult.getColumnTypes())
 					.setColumnUrls(queryResult.getColumnUrls())
 					.setRows(queryResult.getStringifiedRows())
 					.setDbRowsCount(queryResult.getDbRowsCount())
@@ -952,6 +953,7 @@ public class QueryServiceImpl implements QueryService {
 		Query query = Query.createQuery()
 			.wideRowMode(WideRowMode.valueOf(op.getWideRowMode()))
 			.ic(true)
+			.outputIsoDateTime(op.isOutputIsoDateTime())
 			.dateFormat(ConfigUtil.getInstance().getDeDateFmt())
 			.timeFormat(ConfigUtil.getInstance().getTimeFmt());
 		query.compile(rootForm, op.getAql());

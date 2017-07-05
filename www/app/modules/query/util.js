@@ -621,6 +621,19 @@ angular.module('os.query.util', [])
       ).join(", ");
     }
 
+    function sortDatesFn(d1, d2) {
+      if (!!d1 && !!d2) {
+        return new Date(d1) - new Date(d2);
+      } else if (!!d1) {
+        return 1;
+      } else if (!!d2) {
+        return -1;
+      } else {
+        return 0;
+      }
+    }
+
+
     return {
       initOpsDesc:         initOpsDesc,
 
@@ -664,6 +677,8 @@ angular.module('os.query.util', [])
 
       disableCpSelection:  disableCpSelection,
 
-      getStringifiedValue: getStringifiedValue
+      getStringifiedValue: getStringifiedValue,
+
+      sortDatesFn:         sortDatesFn
     };
   });
