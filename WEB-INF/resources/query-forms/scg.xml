@@ -126,7 +126,16 @@
             <column>IDENTIFIER</column>
           </userField>
         </row>
-        <row>        
+        <row>
+          <siteField>
+            <name>primarySite</name>
+            <udn>primarySite</udn>
+            <caption>#getMessage("visit_missed_by_primary_site")</caption>
+            <column>PRIMARY_SITE_ID</column>
+            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+          </siteField>
+        </row>
+        <row>
           <dropDown>
             <name>institute</name>
             <udn>institute</udn>
