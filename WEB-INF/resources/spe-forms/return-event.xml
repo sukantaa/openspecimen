@@ -24,7 +24,7 @@
         <caption>#getMessage("order_items_quantity")</caption>
         <column>RETURNED_QUANTITY</column>
         <mandatory>true</mandatory>
-        <noOfDigitsAfterDecimal>4</noOfDigitsAfterDecimal>
+        <noOfDigitsAfterDecimal>2</noOfDigitsAfterDecimal>
       </numberField>
     </row>
 
