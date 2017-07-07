@@ -199,12 +199,15 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 	@Override
 	public List<Specimen> getSpecimens(SpecimenListCriteria crit, boolean orderByLocation) {
-		Criteria query = getContainerSpecimensListQuery(crit)
+		Criteria query = getCurrentSession().createCriteria(Specimen.class, "specimen")
+			.createAlias("specimen.position", "pos")
+			.add(Subqueries.propertyIn("specimen.id", getContainerSpecimensListQuery(crit)))
 			.setFirstResult(crit.startAt())
 			.setMaxResults(crit.maxResults());
 
 		if (orderByLocation) {
-			query.addOrder(Order.asc("pos.container"))
+			query.createAlias("pos.container", "container")
+				.addOrder(Order.asc("container.name"))
 				.addOrder(Order.asc("pos.posTwoOrdinal"))
 				.addOrder(Order.asc("pos.posOneOrdinal"));
 		} else {
@@ -218,8 +221,8 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	public Long getSpecimensCount(SpecimenListCriteria crit) {
 		Number count = (Number) getContainerSpecimensListQuery(crit)
 			.setProjection(Projections.rowCount())
+			.getExecutableCriteria(getCurrentSession())
 			.uniqueResult();
-
 		return count.longValue();
 	}
 
@@ -432,12 +435,16 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		return s1.getStorageLocation().getPosition() - s2.getStorageLocation().getPosition();
 	}
 
-	private Criteria getContainerSpecimensListQuery(SpecimenListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(Specimen.class, "specimen")
-			.createAlias("position", "pos")
+	private DetachedCriteria getContainerSpecimensListQuery(SpecimenListCriteria crit) {
+		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Specimen.class, "specimen")
+			.setProjection(Projections.distinct(Projections.property("specimen.id")));
+		Criteria query = detachedCriteria.getExecutableCriteria(getCurrentSession());
+
+
+		query.createAlias("specimen.position", "pos")
 			.createAlias("pos.container", "container")
-			.createAlias("container.ancestorContainers", "ansc")
-			.add(Restrictions.eq("ansc.id", crit.ancestorContainerId()));
+			.createAlias("container.ancestorContainers", "anscestor")
+			.add(Restrictions.eq("anscestor.id", crit.ancestorContainerId()));
 
 		if (crit.containerId() != null) {
 			query.add(Restrictions.eq("container.id", crit.containerId()));
@@ -478,7 +485,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		}
 
 		SpecimenDaoHelper.getInstance().addSiteCpsCond(query, crit, startAlias);
-		return query;
+		return detachedCriteria;
 	}
 
 	private class ListQueryBuilder {
