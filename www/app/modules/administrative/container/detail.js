@@ -39,7 +39,7 @@ angular.module('os.administrative.container.detail', ['os.administrative.models'
     function computeMetrics(container) {
       var types = Object.keys(container.specimensByType).sort(
         function(t1, t2) {
-          return container.specimensByType[t1] - container.specimensByType[t2];
+          return container.specimensByType[t2] - container.specimensByType[t1];
         }
       );
 
