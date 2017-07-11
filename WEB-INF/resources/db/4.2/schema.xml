@@ -126,4 +126,10 @@
       )
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Add index on EMPI field of staged participants to fasten participants lookup based on EMPI">
+    <createIndex tableName="OS_STAGED_PARTICIPANTS" indexName="OS_STAGED_PARTS_EMPI_IDX">
+      <column name="EMPI_ID"/>
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>
