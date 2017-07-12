@@ -207,6 +207,14 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 		return result;
 	}
 
+	@Override
+	public List<User> getSuperAndInstituteAdmins(String instituteName) {
+		UserListCriteria crit = new UserListCriteria().activityStatus("Active").type("SUPER");
+		List<User> users = getUsers(crit);
+		users.addAll(getUsers(crit.type("INSTITUTE").instituteName(instituteName)));
+		return users;
+	}
+
 	private Criteria getUsersListQuery(UserListCriteria crit) {
 		Criteria criteria = sessionFactory.getCurrentSession()
 			.createCriteria(User.class, "u")

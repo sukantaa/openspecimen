@@ -50,4 +50,6 @@ public interface UserDao extends Dao<User> {
 	public int updateStatus(List<User> users, String status);
 
 	public Map<Long, Integer> getCpCount(Collection<Long> userIds);
+
+	List<User> getSuperAndInstituteAdmins(String instituteName);
 }

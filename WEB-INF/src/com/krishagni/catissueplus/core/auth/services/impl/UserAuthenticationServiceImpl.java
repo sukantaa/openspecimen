@@ -2,6 +2,7 @@
 package com.krishagni.catissueplus.core.auth.services.impl;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import com.krishagni.catissueplus.core.auth.services.AuthenticationService;
 import com.krishagni.catissueplus.core.auth.services.UserAuthenticationService;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
+import com.krishagni.catissueplus.core.common.domain.Notification;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -33,6 +35,8 @@ import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
+import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 
 public class UserAuthenticationServiceImpl implements UserAuthenticationService {
@@ -218,7 +222,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		}
 		
 		user.setActivityStatus(Status.ACTIVITY_STATUS_LOCKED.getStatus());
-		sendLockedAccountEmailNotif(user, failedLoginAttempts);
+		notifyUserAccountLocked(user, failedLoginAttempts);
 	}
 	
 	private void insertApiCallLog(LoginDetail loginDetail, User user, LoginAuditLog loginAuditLog) {
@@ -237,11 +241,32 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		return ConfigUtil.getInstance().getBoolSetting("administrative", "system_lockdown", false);
 	}
 
-	private void sendLockedAccountEmailNotif(User user, int failedLoginAttempts) {
+	private void notifyUserAccountLocked(User lockedUser, int failedLoginAttempts) {
+		String[] subjParams = {lockedUser.getFirstName(), lockedUser.getLastName()};
+
 		Map<String, Object> emailProps = new HashMap<>();
-		emailProps.put("user", user);
+		emailProps.put("lockedUser", lockedUser);
 		emailProps.put("failedLoginAttempts", failedLoginAttempts);
-		String[] rcpts = {user.getEmailAddress()};
-		EmailUtil.getInstance().sendEmail(ACCOUNT_LOCKED_NOTIF_TMPL, rcpts, null, emailProps);
+		emailProps.put("$subject", subjParams);
+		emailProps.put("ccAdmin", false);
+
+		List<User> rcpts = daoFactory.getUserDao().getSuperAndInstituteAdmins(lockedUser.getInstitute().getName());
+		if (!rcpts.contains(lockedUser)) {
+			rcpts.add(lockedUser);
+		}
+
+		for (User rcpt : rcpts) {
+			emailProps.put("user", rcpt);
+			EmailUtil.getInstance().sendEmail(ACCOUNT_LOCKED_NOTIF_TMPL, new String[] {rcpt.getEmailAddress()}, null, emailProps);
+		}
+
+		Notification notif = new Notification();
+		notif.setEntityId(lockedUser.getId());
+		notif.setEntityType(User.getEntityName());
+		notif.setCreatedBy(daoFactory.getUserDao().getSystemUser());
+		notif.setCreationTime(Calendar.getInstance().getTime());
+		notif.setOperation("UPDATE");
+		notif.setMessage(MessageUtil.getInstance().getMessage(ACCOUNT_LOCKED_NOTIF_TMPL + "_subj", subjParams));
+		NotifUtil.getInstance().notify(notif, Collections.singletonMap("user-overview", rcpts));
 	}
 }
