@@ -1,7 +1,13 @@
 
 angular.module('os.administrative.models.order', ['os.common.models'])
-  .factory('DistributionOrder', function(osModel, $http, Specimen) {
-    var DistributionOrder = osModel('distribution-orders');
+  .factory('DistributionOrder', function(osModel, $http, Specimen, SpecimenList) {
+    var DistributionOrder = osModel('distribution-orders',
+      function(order) {
+        if (!!order.specimenList) {
+          order.specimenList = new SpecimenList(order.specimenList);
+        }
+      }
+    );
 
     DistributionOrder.prototype.getType = function() {
       return 'distribution_order';
@@ -15,6 +21,8 @@ angular.module('os.administrative.models.order', ['os.common.models'])
       this.requester = {id: this.requester.id};
       this.distributionProtocol = {id: this.distributionProtocol.id};
       this.request = !!this.request ? {id: this.request.id} : undefined;
+      this.specimenList = !!this.specimenList ? {id: this.specimenList.id} : undefined;
+      this.async = true;
 
       angular.forEach(this.orderItems,
         function(orderItem) {
@@ -47,6 +55,15 @@ angular.module('os.administrative.models.order', ['os.common.models'])
         'DISTRIBUTED',
         'DISTRIBUTED_AND_CLOSED'
       ];
+    }
+
+    DistributionOrder.prototype.getOrderItems = function(params) {
+      params = params || {};
+      return $http.get(DistributionOrder.url() + this.$id() + '/items', {params: params}).then(
+        function(resp) {
+          return resp.data;
+        }
+      );
     }
 
     DistributionOrder.getDistributionDetails = function(labels, filterOpts) {

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrderItem;
+import com.krishagni.catissueplus.core.administrative.events.DistributionOrderItemListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderSummary;
 import com.krishagni.catissueplus.core.common.repository.Dao;
@@ -21,4 +22,8 @@ public interface DistributionOrderDao extends Dao<DistributionOrder> {
 	public List<DistributionOrderItem> getDistributedOrderItems(List<Long> specimenIds);
 
 	public Map<String, Object> getOrderIds(String key, Object value);
+
+	List<DistributionOrderItem> getOrderItems(DistributionOrderItemListCriteria crit);
+
+	void saveOrUpdateOrderItem(DistributionOrderItem item);
 }

@@ -24,7 +24,7 @@ angular.module('os.biospecimen.specimenlist')
       $scope.pagingOpts = {
         totalSpmns: 0,
         currPage: 1,
-        spmnsPerPage: 10000 // for v3.5, practically disabling list specimens pagination
+        spmnsPerPage: 100
       };
 
       Util.filter($scope, 'ctx.filterOpts', loadSpecimens);
@@ -38,7 +38,7 @@ angular.module('os.biospecimen.specimenlist')
         $scope.pagingOpts = {
           totalSpmns: 0,
           currPage: 1,
-          spmnsPerPage: 10000
+          spmnsPerPage: 100
         };
       }
 
@@ -210,7 +210,12 @@ angular.module('os.biospecimen.specimenlist')
     }
 
     $scope.distributeSpecimens = function() {
-      gotoView('order-addedit', {orderId: ''}, 'no_specimens_for_distribution');
+      if (!$scope.ctx.selection.any) {
+        $state.go('order-addedit', {orderId: '', specimenListId: list.id});
+        return;
+      }
+
+      gotoView('order-addedit', {orderId: ''});
     }
 
     $scope.shipSpecimens = function() {

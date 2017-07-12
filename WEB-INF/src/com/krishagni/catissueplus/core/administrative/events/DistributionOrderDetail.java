@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 
 public class DistributionOrderDetail extends DistributionOrderSummary implements Mergeable<String, DistributionOrderDetail>, Serializable {
@@ -19,8 +20,10 @@ public class DistributionOrderDetail extends DistributionOrderSummary implements
 	private String comments;
 
 	private SpecimenRequestSummary request;
+
+	private SpecimenListSummary specimenList;
 	
-	private List<DistributionOrderItemDetail> orderItems = new ArrayList<DistributionOrderItemDetail>();
+	private List<DistributionOrderItemDetail> orderItems = new ArrayList<>();
 	
 	private String activityStatus;
 
@@ -30,6 +33,13 @@ public class DistributionOrderDetail extends DistributionOrderSummary implements
 	// For BO template
 	//
 	private DistributionOrderItemDetail orderItem;
+
+	//
+	// for async execution
+	//
+	private boolean async;
+
+	private boolean completed = true;
 
 	public UserSummary getDistributor() {
 		return distributor;
@@ -61,6 +71,14 @@ public class DistributionOrderDetail extends DistributionOrderSummary implements
 
 	public void setRequest(SpecimenRequestSummary request) {
 		this.request = request;
+	}
+
+	public SpecimenListSummary getSpecimenList() {
+		return specimenList;
+	}
+
+	public void setSpecimenList(SpecimenListSummary specimenList) {
+		this.specimenList = specimenList;
 	}
 
 	public List<DistributionOrderItemDetail> getOrderItems() {
@@ -95,7 +113,27 @@ public class DistributionOrderDetail extends DistributionOrderSummary implements
 		this.orderItem = orderItem;
 	}
 
+	public boolean isAsync() {
+		return async;
+	}
+
+	public void setAsync(boolean async) {
+		this.async = async;
+	}
+
+	public boolean isCompleted() {
+		return completed;
+	}
+
+	public void setCompleted(boolean completed) {
+		this.completed = completed;
+	}
+
 	public static DistributionOrderDetail from(DistributionOrder order) {
+		return from(order, false);
+	}
+
+	public static DistributionOrderDetail from(DistributionOrder order, boolean includeOrderItems) {
 		DistributionOrderDetail detail = new DistributionOrderDetail();
 		fromTo(order, detail);
 
@@ -106,10 +144,17 @@ public class DistributionOrderDetail extends DistributionOrderSummary implements
 		if (order.getRequest() != null) {
 			detail.setRequest(SpecimenRequestSummary.from(order.getRequest()));
 		}
+
+		if (order.getSpecimenList() != null) {
+			detail.setSpecimenList(SpecimenListSummary.fromSpecimenList(order.getSpecimenList()));
+		}
 		
 		detail.setTrackingUrl(order.getTrackingUrl());
 		detail.setComments(order.getComments());
-		detail.setOrderItems(DistributionOrderItemDetail.from(order.getOrderItems()));
+		if (includeOrderItems) {
+			detail.setOrderItems(DistributionOrderItemDetail.from(order.getOrderItems()));
+		}
+
 		detail.setActivityStatus(order.getActivityStatus());
 		return detail;
 	}

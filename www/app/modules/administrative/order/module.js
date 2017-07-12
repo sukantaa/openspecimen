@@ -30,16 +30,24 @@ angular.module('os.administrative.order',
         parent: 'order-root'
       })
       .state('order-addedit', {
-        url: '/order-addedit/:orderId?requestId',
+        url: '/order-addedit/:orderId?requestId&specimenListId',
         templateUrl: 'modules/administrative/order/addedit.html',
         controller: 'OrderAddEditCtrl',
         resolve: {
-          order: function($stateParams , DistributionOrder) {
+          specimenList: function($stateParams, SpecimenList) {
+            if ($stateParams.specimenListId) {
+              return SpecimenList.getById($stateParams.specimenListId);
+            }
+
+            return null;
+          },
+
+          order: function($stateParams, specimenList, DistributionOrder) {
             if ($stateParams.orderId) {
               return DistributionOrder.getById($stateParams.orderId);
             }
 
-            return new DistributionOrder({status: 'PENDING', orderItems: []});
+            return new DistributionOrder({status: 'PENDING', orderItems: [], specimenList: specimenList});
           },
 
           spmnRequest: function($stateParams, $injector, order) {
@@ -118,6 +126,12 @@ angular.module('os.administrative.order',
         templateUrl: 'modules/administrative/order/overview.html',
         parent: 'order-detail'
       })
+      .state('order-detail.items', {
+        url: '/items',
+        templateUrl: 'modules/administrative/order/items.html',
+        controller: 'OrderItemsCtrl',
+        parent: 'order-detail'
+      })
       .state('order-return-specimens', {
         url: '/return-specimens',
         templateUrl: 'modules/administrative/order/return-specimens.html',
@@ -129,4 +143,6 @@ angular.module('os.administrative.order',
         },
         parent: 'order-root'
       });
-  });
+  }).run(function(UrlResolver) {
+    UrlResolver.regUrlState('order-overview', 'order-detail.overview', 'orderId');
+  });;

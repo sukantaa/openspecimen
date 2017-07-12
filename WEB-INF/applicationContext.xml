@@ -536,6 +536,7 @@
     <property name="querySvc"            ref="querySvc"/>
     <property name="emailService"        ref="emailService"/>
     <property name="deDaoFactory"        ref="deDaoFactory"/>
+    <property name="taskExecutor"        ref="taskExecutor"/>
   </bean>
   
   <bean id="dpRequirementFactory"

@@ -33,7 +33,7 @@ angular.module('os.biospecimen.models.specimenlist', ['os.common.models'])
     }
 
     SpecimenList.prototype.getSpecimens = function(params) {
-      var params = params || {maxResults: 1000, includeListCount: true};
+      var params = params || {maxResults: 100, includeListCount: true};
       return $http.get(getSpecimensUrl(this.$id()), {params: params}).then(Specimen.modelArrayRespTransform);
     };
 

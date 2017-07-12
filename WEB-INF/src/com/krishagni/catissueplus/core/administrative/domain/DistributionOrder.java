@@ -13,6 +13,7 @@ import org.hibernate.envers.Audited;
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionOrderErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SpecimenRequestErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.common.CollectionUpdater;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Status;
@@ -52,6 +53,8 @@ public class DistributionOrder extends BaseEntity {
 	private String comments;
 
 	private SpecimenRequest request;
+
+	private SpecimenList specimenList;
 	
 	public static String getEntityName() {
 		return ENTITY_NAME;
@@ -165,6 +168,14 @@ public class DistributionOrder extends BaseEntity {
 		this.request = request;
 	}
 
+	public SpecimenList getSpecimenList() {
+		return specimenList;
+	}
+
+	public void setSpecimenList(SpecimenList specimenList) {
+		this.specimenList = specimenList;
+	}
+
 	public Institute getInstitute() {
 		return requester.getInstitute();
 	}
@@ -179,11 +190,10 @@ public class DistributionOrder extends BaseEntity {
 		setExecutionDate(newOrder.getExecutionDate());
 		setTrackingUrl(newOrder.getTrackingUrl());
 		setComments(newOrder.getComments());
+		setSpecimenList(newOrder.getSpecimenList());
 
 		updateRequest(newOrder);
 		updateOrderItems(newOrder);
-		updateDistribution(newOrder);		
-		updateStatus(newOrder);
 	}
 
 	public Set<DistributionOrderItem> getOrderItemsWithReqDetail() {
@@ -204,7 +214,7 @@ public class DistributionOrder extends BaseEntity {
 			throw OpenSpecimenException.userError(DistributionOrderErrorCode.ALREADY_EXECUTED);
 		}
 		
-		if (CollectionUtils.isEmpty(getOrderItems())) {
+		if (getSpecimenList() == null && CollectionUtils.isEmpty(getOrderItems())) {
 			throw OpenSpecimenException.userError(DistributionOrderErrorCode.NO_SPECIMENS_TO_DIST);
 		}
 
@@ -250,29 +260,11 @@ public class DistributionOrder extends BaseEntity {
 			return;
 		}
 		
-		CollectionUpdater.update(orderItems, other.orderItems);		
+		CollectionUpdater.update(getOrderItems(), other.getOrderItems());
 		for (DistributionOrderItem item : getOrderItems()) {
 			item.setOrder(this);
 		}
 		
-	}
-	
-	private void updateDistribution(DistributionOrder other) {
-		if (getStatus() == Status.PENDING && other.getStatus() == Status.EXECUTED) {
-			distribute();
-		}
-	}
-	
-	private void updateStatus(DistributionOrder other) {
-		if (status == other.status) {
-			return;
-		}
-		
-		if (status == Status.PENDING && other.isOrderExecuted()) {
-			setStatus(other.status);
-		} else {
-			throw OpenSpecimenException.userError(DistributionOrderErrorCode.STATUS_CHANGE_NOT_ALLOWED);
-		}
 	}
 	
 	public DistributionOrderItem getItemBySpecimen(String label) {

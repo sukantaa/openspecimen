@@ -3,6 +3,7 @@ angular.module('os.administrative.order.detail', ['os.administrative.models'])
   
     function init() {
       $scope.order = order;
+      $scope.orderItems = [];
       $scope.rptTmplConfigured = false;
       if (!!order.distributionProtocol.report && !!order.distributionProtocol.report.id) {
         $scope.rptTmplConfigured = true;

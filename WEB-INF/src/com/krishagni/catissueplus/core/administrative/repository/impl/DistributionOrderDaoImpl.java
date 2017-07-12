@@ -20,6 +20,7 @@ import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrderItem;
+import com.krishagni.catissueplus.core.administrative.events.DistributionOrderItemListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderSummary;
 import com.krishagni.catissueplus.core.administrative.events.DistributionProtocolDetail;
@@ -106,6 +107,23 @@ public class DistributionOrderDaoImpl extends AbstractDao<DistributionOrder> imp
 	@Override
 	public Map<String, Object> getOrderIds(String key, Object value) {
 		return getObjectIds("orderId", key, value);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<DistributionOrderItem> getOrderItems(DistributionOrderItemListCriteria crit) {
+		return getCurrentSession().createCriteria(DistributionOrderItem.class, "orderItem")
+			.createAlias("orderItem.order", "order")
+			.add(Restrictions.eq("order.id", crit.orderId()))
+			.setFirstResult(crit.startAt())
+			.setMaxResults(crit.maxResults())
+			.addOrder(Order.asc("orderItem.id"))
+			.list();
+	}
+
+	@Override
+	public void saveOrUpdateOrderItem(DistributionOrderItem item) {
+		getCurrentSession().saveOrUpdate(item);
 	}
 
 	@SuppressWarnings("unchecked")

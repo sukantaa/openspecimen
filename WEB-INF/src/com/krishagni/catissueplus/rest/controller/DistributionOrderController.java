@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderDetail;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderItemDetail;
+import com.krishagni.catissueplus.core.administrative.events.DistributionOrderItemListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderSummary;
 import com.krishagni.catissueplus.core.administrative.events.ReturnedSpecimenDetail;
@@ -192,6 +193,28 @@ public class DistributionOrderController {
 	@ResponseBody
 	public QueryDataExportResult exportDistributionReport(@PathVariable("id") Long orderId) {
 		ResponseEvent<QueryDataExportResult> resp = distributionService.exportReport(getRequest(orderId));
+		resp.throwErrorIfUnsuccessful();
+		return resp.getPayload();
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/items")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<DistributionOrderItemDetail> getOrderItems(
+		@PathVariable("id")
+		Long orderId,
+
+		@RequestParam(value = "startAt", required = false, defaultValue = "0")
+		int startAt,
+
+		@RequestParam(value = "maxResults", required = false, defaultValue = "100")
+		int maxResults) {
+		DistributionOrderItemListCriteria crit = new DistributionOrderItemListCriteria()
+			.orderId(orderId)
+			.startAt(startAt)
+			.maxResults(maxResults);
+
+		ResponseEvent<List<DistributionOrderItemDetail>> resp = distributionService.getOrderItems(getRequest(crit));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}

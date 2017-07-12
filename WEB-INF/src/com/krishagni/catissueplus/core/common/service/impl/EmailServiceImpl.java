@@ -177,7 +177,7 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 		props.put("adminPhone", "1234567890");//TODO: will be replaced by property file
 		props.put("dateFmt", new SimpleDateFormat(ConfigUtil.getInstance().getDateTimeFmt()));
 		props.put("urlEncoder", URLEncoder.class);
-		String subject = getSubject(tmplKey, (String[]) props.get("$subject"));
+		String subject = getSubject(tmplKey, (Object[]) props.get("$subject"));
 		String content = templateService.render(getBaseTmpl(), props);
 
 		Email email = new Email();
@@ -195,7 +195,7 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 		return sendEmail(email);
 	}
 	
-	private String getSubject(String subjKey, String[] subjParams) {
+	private String getSubject(String subjKey, Object[] subjParams) {
 		return getSubjectPrefix() + MessageUtil.getInstance().getMessage(subjKey.toLowerCase() + "_subj", subjParams);
 	}
 

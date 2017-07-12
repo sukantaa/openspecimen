@@ -43,4 +43,6 @@ public interface SpecimenDao extends Dao<Specimen> {
 	public boolean areDuplicateLabelsPresent();
 
 	public Map<Long, Long> getSpecimenStorageSite(Set<Long> specimenIds);
+
+	List<String> getNonCompliantSpecimens(SpecimenListCriteria crit);
 }

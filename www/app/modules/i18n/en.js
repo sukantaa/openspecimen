@@ -1815,6 +1815,7 @@
     "dist_date": "Distribution Date",
     "creation_date": "Creation Date",
     "tracking_url": "Tracking URL",
+    "specimen_list": "Specimen List",
     "receiving_institute": "Receiving Institute",
     "receiving_site": "Receiving Site",
     "execution_date": "Execution Date",
@@ -1823,6 +1824,8 @@
     "details": "Order Details",
     "no_specimens_in_list": "No specimens in order list to distribute. Add at least one specimen",
     "enter_specimen_label": "To add specimens to distribution list, enter labels or barcodes separated by a comma, tab or newline and click add",
+    "loading_items": "Loading order items. Please wait for a moment ...",
+    "more_time": "Saving distribution order is taking more time than anticipated. An email notification will be sent to you on successful distribution of specimens",
 
     "report_gen_initiated": "Generating distribution order report...",
     "downloading_report": "Downloading distribution order report...",

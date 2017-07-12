@@ -1,14 +1,15 @@
 
 angular.module('os.administrative.order.addedit', ['os.administrative.models', 'os.biospecimen.models'])
   .controller('OrderAddEditCtrl', function(
-    $scope, $state, $translate, order, spmnRequest, Institute,
-    Specimen, SpecimensHolder, Site, DistributionProtocol, DistributionOrder, Alerts, Util, SpecimenUtil) {
+    $scope, $state, $translate, order, spmnRequest,
+    Institute, Specimen, SpecimensHolder, Site, DistributionProtocol, DistributionOrder, Alerts, Util, SpecimenUtil) {
     
     var ignoreQtyWarning = false;
 
     function init() {
       $scope.input = {};
       $scope.order = order;
+      $scope.skipSpecimensTab = (!!order.specimenList && !!order.specimenList.id);
 
       order.request = spmnRequest;
       if (!!spmnRequest) {
@@ -30,13 +31,15 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
 
       setUserAndSiteList(order);
 
-      if (!!spmnRequest) {
-        order.orderItems = getOrderItemsFromReq(spmnRequest.items, order.orderItems);
-      } else if (!order.id && angular.isArray(SpecimensHolder.getSpecimens())) {
-        order.orderItems = getOrderItems(SpecimensHolder.getSpecimens());
-        SpecimensHolder.setSpecimens(null);
+      if (!$scope.skipSpecimensTab) {
+        if (!order.id && angular.isArray(SpecimensHolder.getSpecimens())) {
+          order.orderItems = getOrderItems(SpecimensHolder.getSpecimens());
+          SpecimensHolder.setSpecimens(null);
+        } else {
+          loadOrderItems();
+        }
       }
-      
+
       if (!order.executionDate) {
         order.executionDate = new Date();
       }
@@ -61,6 +64,18 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
       Institute.query().then(
         function (institutes) {
           $scope.instituteNames = Institute.getNames(institutes);
+        }
+      );
+    }
+
+    function loadOrderItems() {
+      order.getOrderItems().then(
+        function(orderItems) {
+          order.orderItems = orderItems;
+
+          if (!!spmnRequest) {
+            order.orderItems = getOrderItemsFromReq(spmnRequest.items, order.orderItems);
+          }
         }
       );
     }
@@ -183,7 +198,12 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
 
       orderClone.$saveOrUpdate().then(
         function(savedOrder) {
-          $state.go('order-detail.overview', {orderId: savedOrder.id});
+          if (savedOrder.completed) {
+            $state.go('order-detail.overview', {orderId: savedOrder.id});
+          } else {
+            Alerts.info('orders.more_time');
+            $state.go('order-list');
+          }
         }
       );
     };

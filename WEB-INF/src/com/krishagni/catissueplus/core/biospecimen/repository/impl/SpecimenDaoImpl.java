@@ -264,6 +264,25 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		return result;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<String> getNonCompliantSpecimens(SpecimenListCriteria crit) {
+		if (CollectionUtils.isEmpty(crit.ids()) && crit.specimenListId() == null) {
+			return Collections.emptyList();
+		}
+
+		Criteria query = getCurrentSession().createCriteria(Specimen.class, "specimen")
+			.setProjection(Projections.property("specimen.label"))
+			.add(Subqueries.propertyNotIn("specimen.id", getSpecimenIdsQuery(crit)));
+
+		if (CollectionUtils.isNotEmpty(crit.ids())) {
+			addIdsCond(query, crit.ids());
+		}
+
+		addSpecimenListCond(query, crit);
+		return query.list();
+	}
+
 	private void addIdsCond(Criteria query, List<Long> ids) {
 		addInCond(query, "specimen.id", ids);
 	}

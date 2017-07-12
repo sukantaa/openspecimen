@@ -159,12 +159,12 @@ public class DistributionOrderItem extends BaseEntity {
 			requestItem.throwErrorIfFulfilled();
 		}
 
-		order.addOnSaveProc(() -> specimen.distribute(this));
+		specimen.distribute(this);
 
 		if (requestItem != null) {
 			requestItem.distribute(getOrder());
 		}
-	}	
+	}
 
 	public void returnSpecimen() {
 		specimen.returnSpecimen(this);
@@ -174,5 +174,15 @@ public class DistributionOrderItem extends BaseEntity {
 	public static boolean isValidDistributionStatus(String status) {
 		return status.equals(Status.DISTRIBUTED.name()) ||
 			status.equals(Status.DISTRIBUTED_AND_CLOSED.name());
+	}
+
+	public static DistributionOrderItem createOrderItem(DistributionOrder order, Specimen specimen) {
+		DistributionOrderItem item = new DistributionOrderItem();
+		item.setOrder(order);
+		item.setSpecimen(specimen);
+		item.setQuantity(specimen.getAvailableQuantity());
+		item.setStatus(Status.DISTRIBUTED_AND_CLOSED);
+
+		return item;
 	}
 }

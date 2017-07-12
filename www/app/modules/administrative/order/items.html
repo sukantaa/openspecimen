@@ -1,0 +1,58 @@
+<div>
+  <div ng-if="ctx.loading">
+    <span translate="orders.loading_items">Loading order items. Please wait for a moment ...</span>
+  </div>
+
+  <table class="os-table" ng-if="!ctx.loading">
+    <thead class="os-table-head">
+      <tr class="row">
+        <td class="col os-col-20">
+          <span translate="orders.spec.label">Label</span>
+        </td>
+        <td class="col os-col-30">
+          <span translate="orders.spec.desc">Description</span>
+        </td>
+        <td class="col os-col-20">
+          <span translate="orders.spec.cp">Collection Protocol</span>
+        </td>
+        <td class="col os-col-15">
+          <span translate="orders.spec.quantity">Quantity</span>
+        </td>
+        <td class="col os-col-15">
+          <span translate="orders.status">Status</span>
+        </td>
+      </tr>
+    </thead>
+    <tbody class="os-table-body">
+      <tr class="row" ng-repeat="item in ctx.items" ng-init="specimen = item.specimen">
+        <td class="col os-col-20">
+          <a ui-sref="specimen({specimenId: specimen.id})">
+            <span>{{specimen.label}}</span>
+            <span ng-if="!!specimen.barcode">({{specimen.barcode}})</span>
+          </a>
+        </td>
+        <td class="col os-col-30">
+          <a ui-sref="specimen({specimenId: specimen.id})">
+            <os-specimen-desc specimen="specimen" detailed="true"></os-specimen-desc>
+          </a>
+        </td>
+        <td class="col os-col-20">
+          <span>{{specimen.cpShortTitle}}</span>
+        </td>
+        <td class="col os-col-15">
+          <span>{{item.quantity}}</span>
+          <os-specimen-unit specimen-class="specimen.specimenClass" type="specimen.type">
+          </os-specimen-unit>
+        </td>
+        <td class="col os-col-15">
+          <span>{{'orders.item_statuses.' + item.status | translate}}</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <span ng-if="!ctx.loading && ctx.items.length > 0 && ctx.items.length < ctx.totalItems">
+    <pager total-items="ctx.totalItems" items-per-page="ctx.itemsPerPage" ng-model="ctx.currPage">
+    </pager>
+  </span>
+</div>

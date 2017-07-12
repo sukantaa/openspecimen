@@ -9,9 +9,14 @@
             <tr>
               <td style="padding:0px;border-collapse:collapse;padding:0px;padding-bottom:10px">
                 <p style="margin:10px 0 0 0">
-                  Hello $order.requester.firstName $order.requester.lastName,
+                  Hello $rcpt.firstName $rcpt.lastName,
                   <br><br>
-                  Your order "$order.name" has been processed.
+                  Order <b>$order.name</b> has been
+                  #if ($order.status == 'EXECUTED')
+                    processed.
+                  #else
+                    saved.
+                  #end
                   <br><br>
                   A brief description of the order:
                   <br><br>

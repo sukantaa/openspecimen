@@ -13,10 +13,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.core.task.AsyncTaskExecutor;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder.Status;
@@ -33,13 +40,16 @@ import com.krishagni.catissueplus.core.administrative.domain.factory.StorageCont
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderDetail;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderItemDetail;
+import com.krishagni.catissueplus.core.administrative.events.DistributionOrderItemListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderSummary;
 import com.krishagni.catissueplus.core.administrative.events.ReturnedSpecimenDetail;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.administrative.services.DistributionOrderService;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenListErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
@@ -47,6 +57,7 @@ import com.krishagni.catissueplus.core.common.EntityCrudListener;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
+import com.krishagni.catissueplus.core.common.domain.Notification;
 import com.krishagni.catissueplus.core.common.errors.ErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -58,7 +69,9 @@ import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
+import com.krishagni.catissueplus.core.common.util.SessionUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.domain.Filter;
@@ -72,6 +85,10 @@ import com.krishagni.rbac.common.errors.RbacErrorCode;
 import edu.common.dynamicextensions.query.WideRowMode;
 
 public class DistributionOrderServiceImpl implements DistributionOrderService, ObjectStateParamsResolver {
+	private static final Log logger = LogFactory.getLog(DistributionOrderServiceImpl.class);
+
+	private static final long ASYNC_CALL_TIMEOUT = 5000;
+
 	private DaoFactory daoFactory;
 
 	private DistributionOrderFactory distributionFactory;
@@ -81,6 +98,8 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 	private EmailService emailService;
 
 	private com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory;
+
+	private AsyncTaskExecutor taskExecutor;
 
 	private List<EntityCrudListener<DistributionOrderDetail, DistributionOrder>> listeners = new ArrayList<>();
 
@@ -103,7 +122,11 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 	public void setDeDaoFactory(com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory) {
 		this.deDaoFactory = deDaoFactory;
 	}
-	
+
+	public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
+		this.taskExecutor = taskExecutor;
+	}
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<DistributionOrderSummary>> getOrders(RequestEvent<DistributionOrderListCriteria> req) {
@@ -148,81 +171,13 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 	}
 
 	@Override
-	@PlusTransactional
 	public ResponseEvent<DistributionOrderDetail> createOrder(RequestEvent<DistributionOrderDetail> req) {
-		try {
-			DistributionOrderDetail input = req.getPayload();
-			DistributionOrder order = distributionFactory.createDistributionOrder(input, Status.PENDING);
-			
-			AccessCtrlMgr.getInstance().ensureCreateDistributionOrderRights(order);
-			
-			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
-			ensureUniqueConstraints(null, order, ose);
-			ensureValidSpecimens(order, ose);
-
-			Status inputStatus = null;
-			try {
-				inputStatus = Status.valueOf(input.getStatus());
-			} catch (IllegalArgumentException iae) {
-				ose.addError(DistributionOrderErrorCode.INVALID_STATUS, input.getStatus());
-			}
-
-			ose.checkAndThrow();
-			
-			SpecimenRequest request = order.getRequest();
-			if (request != null && request.isClosed()) {
-				throw OpenSpecimenException.userError(SpecimenRequestErrorCode.CLOSED, request.getId());
-			}
-
-			if (inputStatus == Status.EXECUTED) {
-				order.distribute();
-			}
-
-			daoFactory.getDistributionOrderDao().saveOrUpdate(order, true);
-			sendOrderProcessedEmail(order, null);
-
-			DistributionOrderDetail output = DistributionOrderDetail.from(order);
-			listeners.forEach(listener -> listener.onSave(input, output, order));
-			return ResponseEvent.response(output);
-		} catch (OpenSpecimenException ose) {
-			return ResponseEvent.error(ose);
-		} catch (Exception e) {
-			return ResponseEvent.serverError(e);
-		}
+		return saveOrUpdateOrder(this::createOrder, req.getPayload());
 	}
 	
 	@Override
-	@PlusTransactional
 	public ResponseEvent<DistributionOrderDetail> updateOrder(RequestEvent<DistributionOrderDetail> req) {
-		try {
-			DistributionOrderDetail input = req.getPayload();
-			DistributionOrder existingOrder = getOrder(input.getId(), input.getName());
-			if (existingOrder.isOrderExecuted()) {
-				return ResponseEvent.userError(DistributionOrderErrorCode.CANT_UPDATE_EXEC_ORDER, existingOrder.getName());
-			}
-
-			AccessCtrlMgr.getInstance().ensureUpdateDistributionOrderRights(existingOrder);
-			DistributionOrder newOrder = distributionFactory.createDistributionOrder(input, null);
-			AccessCtrlMgr.getInstance().ensureUpdateDistributionOrderRights(newOrder);
-
-			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
-			ensureUniqueConstraints(existingOrder, newOrder, ose);
-			ensureValidSpecimens(newOrder, ose);
-			ose.checkAndThrow();
-			
-			Status oldStatus = existingOrder.getStatus();
-			existingOrder.update(newOrder);
-			daoFactory.getDistributionOrderDao().saveOrUpdate(existingOrder, true);
-			sendOrderProcessedEmail(existingOrder, oldStatus);
-
-			DistributionOrderDetail output = DistributionOrderDetail.from(existingOrder);
-			listeners.forEach(listener -> listener.onSave(input, output, existingOrder));
-			return ResponseEvent.response(output);
-		} catch (OpenSpecimenException ose) {
-			return ResponseEvent.error(ose);
-		} catch (Exception e) {
-			return ResponseEvent.serverError(e);
-		}
+		return saveOrUpdateOrder(this::updateOrder, req.getPayload());
 	}
 
 	@Override
@@ -264,6 +219,24 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 			return ResponseEvent.serverError(e);
 		}
 	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<DistributionOrderItemDetail>> getOrderItems(RequestEvent<DistributionOrderItemListCriteria> req) {
+		try {
+			DistributionOrderItemListCriteria crit = req.getPayload();
+
+			DistributionOrder order = getOrder(crit.orderId(), null);
+			AccessCtrlMgr.getInstance().ensureReadDistributionOrderRights(order);
+
+			List<DistributionOrderItem> items = daoFactory.getDistributionOrderDao().getOrderItems(crit);
+			return ResponseEvent.response(DistributionOrderItemDetail.from(items));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
 	
 	@Override
 	@PlusTransactional
@@ -271,7 +244,7 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 		try {
 			List<Specimen> specimens = getReadAccessSpecimens(req.getPayload());
 			if (CollectionUtils.isEmpty(specimens)) {
-				return ResponseEvent.response(Collections.EMPTY_LIST);
+				return ResponseEvent.response(Collections.emptyList());
 			}
 
 			List<Long> ids = specimens.stream().map(Specimen::getId).collect(Collectors.toList());
@@ -347,6 +320,140 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 		return crit;
 	}
 
+	@PlusTransactional
+	private ResponseEvent<DistributionOrderDetail> createOrder(DistributionOrderDetail input) {
+		long t1 = System.currentTimeMillis();
+		try {
+			DistributionOrder order = distributionFactory.createDistributionOrder(input, Status.PENDING);
+
+			AccessCtrlMgr.getInstance().ensureCreateDistributionOrderRights(order);
+
+			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+			ensureUniqueConstraints(null, order, ose);
+			ensureValidSpecimenList(order, ose);
+
+			Status inputStatus = null;
+			try {
+				inputStatus = Status.valueOf(input.getStatus());
+			} catch (IllegalArgumentException iae) {
+				ose.addError(DistributionOrderErrorCode.INVALID_STATUS, input.getStatus());
+			}
+
+			ose.checkAndThrow();
+
+			SpecimenRequest request = order.getRequest();
+			if (request != null && request.isClosed()) {
+				return ResponseEvent.userError(SpecimenRequestErrorCode.CLOSED, request.getId());
+			}
+
+			List<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps();
+			if (siteCps != null && siteCps.isEmpty()) {
+				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			daoFactory.getDistributionOrderDao().saveOrUpdate(order, true);
+
+			ensureValidSpecimens(order, siteCps, ose);
+			ose.checkAndThrow();
+
+			order = daoFactory.getDistributionOrderDao().getById(order.getId());
+			distributeOrder(order, siteCps, inputStatus);
+
+			DistributionOrder savedOrder = daoFactory.getDistributionOrderDao().getById(order.getId());
+			DistributionOrderDetail output = DistributionOrderDetail.from(savedOrder);
+			listeners.forEach(listener -> listener.onSave(input, output, savedOrder));
+
+			notifySaveOrUpdateOrder(savedOrder, null, t1);
+			return ResponseEvent.response(output);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		} finally {
+			logger.info("Time taken to save distribution order is " + (System.currentTimeMillis() - t1) + " ms");
+		}
+	}
+
+	@PlusTransactional
+	private ResponseEvent<DistributionOrderDetail> updateOrder(DistributionOrderDetail input) {
+		long t1 = System.currentTimeMillis();
+		try {
+			DistributionOrder existingOrder = getOrder(input.getId(), input.getName());
+			if (existingOrder.isOrderExecuted()) {
+				return ResponseEvent.userError(DistributionOrderErrorCode.CANT_UPDATE_EXEC_ORDER, existingOrder.getName());
+			}
+
+			AccessCtrlMgr.getInstance().ensureUpdateDistributionOrderRights(existingOrder);
+			DistributionOrder newOrder = distributionFactory.createDistributionOrder(input, null);
+			AccessCtrlMgr.getInstance().ensureUpdateDistributionOrderRights(newOrder);
+
+			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+			ensureUniqueConstraints(existingOrder, newOrder, ose);
+			ensureValidSpecimenList(newOrder, ose);
+			ose.checkAndThrow();
+
+			List<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps();
+			if (siteCps != null && siteCps.isEmpty()) {
+				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			Status oldStatus = existingOrder.getStatus();
+			existingOrder.update(newOrder);
+			daoFactory.getDistributionOrderDao().saveOrUpdate(existingOrder, true);
+
+			ensureValidSpecimens(existingOrder, siteCps, ose);
+			ose.checkAndThrow();
+
+			existingOrder = daoFactory.getDistributionOrderDao().getById(existingOrder.getId());
+			distributeOrder(existingOrder, siteCps, newOrder.getStatus());
+
+			DistributionOrder savedOrder = daoFactory.getDistributionOrderDao().getById(existingOrder.getId());
+			DistributionOrderDetail output = DistributionOrderDetail.from(savedOrder);
+			listeners.forEach(listener -> listener.onSave(input, output, savedOrder));
+
+			notifySaveOrUpdateOrder(savedOrder, oldStatus, t1);
+			return ResponseEvent.response(output);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		} finally {
+			logger.info("Time taken to save distribution order is " + (System.currentTimeMillis() - t1) + " ms");
+		}
+	}
+
+	private ResponseEvent<DistributionOrderDetail> saveOrUpdateOrder(Function<DistributionOrderDetail, ResponseEvent<DistributionOrderDetail>> workFn, DistributionOrderDetail input) {
+		User currentUser = AuthUtil.getCurrentUser();
+		Future<ResponseEvent<DistributionOrderDetail>> result = taskExecutor.submit(
+				() -> {
+					try {
+						AuthUtil.setCurrentUser(currentUser);
+						return workFn.apply(input);
+					} finally {
+						AuthUtil.clearCurrentUser();
+					}
+				}
+		);
+
+		return unwrap(result, input.isAsync() ? ASYNC_CALL_TIMEOUT : 0);
+	}
+
+	private ResponseEvent<DistributionOrderDetail> unwrap(Future<ResponseEvent<DistributionOrderDetail>> result, long timeout) {
+		try {
+			if (timeout > 0) {
+				return result.get(timeout, TimeUnit.MILLISECONDS);
+			} else {
+				return result.get();
+			}
+		} catch (TimeoutException e) {
+			DistributionOrderDetail output = new DistributionOrderDetail();
+			output.setCompleted(false);
+			return ResponseEvent.response(output);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	private void ensureUniqueConstraints(DistributionOrder existingOrder, DistributionOrder newOrder, OpenSpecimenException ose) {
 		if (existingOrder == null || !newOrder.getName().equals(existingOrder.getName())) {
 			DistributionOrder order = daoFactory.getDistributionOrderDao().getOrder(newOrder.getName());
@@ -356,8 +463,15 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 		}
 	}
 
-	private List<Specimen> getReadAccessSpecimensByIds(List<Long> specimenIds) {
-		return getReadAccessSpecimens(new SpecimenListCriteria().ids(specimenIds));
+	private void ensureValidSpecimenList(DistributionOrder order, OpenSpecimenException ose) {
+		SpecimenList specimenList = order.getSpecimenList();
+		if (specimenList == null) {
+			return;
+		}
+
+		if (!AuthUtil.isAdmin() && !specimenList.canUserAccess(AuthUtil.getCurrentUser().getId())) {
+			ose.addError(SpecimenListErrorCode.ACCESS_NOT_ALLOWED);
+		}
 	}
 
 	private List<Specimen> getReadAccessSpecimens(SpecimenListCriteria crit) {
@@ -369,15 +483,61 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 		return daoFactory.getSpecimenDao().getSpecimens(crit.siteCps(siteCpPairs));
 	}
 
-	private void ensureValidSpecimens(DistributionOrder order, OpenSpecimenException ose) {
-		List<Long> specimenIds = Utility.collect(order.getOrderItems(), "specimen.id");
-		List<Specimen> specimens = getReadAccessSpecimensByIds(specimenIds);
-		if (specimens == null) {
-			ose.addError(RbacErrorCode.ACCESS_DENIED);
+	private void ensureValidSpecimens(DistributionOrder order, List<Pair<Long, Long>> siteCps, OpenSpecimenException ose) {
+		if (order.getSpecimenList() != null) {
+			Long orderId = order.getId();
+
+			int startAt = 0, maxSpmns = 100;
+			boolean endOfSpecimens = false;
+			while (!endOfSpecimens) {
+				if (order == null) {
+					order = daoFactory.getDistributionOrderDao().getById(orderId);
+				}
+
+				List<Specimen> specimens = getSpecimens(order.getSpecimenList(), siteCps, startAt, maxSpmns);
+				if (specimens.isEmpty() && startAt == 0) {
+					ose.addError(DistributionOrderErrorCode.NO_SPMNS_IN_LIST, order.getSpecimenList().getName());
+				}
+
+				ensureValidSpecimens(specimens, order.getDistributionProtocol(), siteCps, ose);
+
+				startAt += specimens.size();
+				endOfSpecimens = (specimens.size() < maxSpmns);
+
+				specimens.clear();
+				order = null;
+				SessionUtil.getInstance().clearSession();
+			}
+		} else {
+			List<Specimen> specimens = Utility.collect(order.getOrderItems(), "specimen");
+			ensureValidSpecimens(specimens, order.getDistributionProtocol(), siteCps, ose);
+		}
+	}
+
+	private List<Specimen> getSpecimens(SpecimenList specimenList, List<Pair<Long, Long>> siteCps, int startAt, int maxResults) {
+		SpecimenListCriteria crit = new SpecimenListCriteria()
+			.specimenListId(specimenList.getId()).siteCps(siteCps)
+			.startAt(startAt).maxResults(maxResults)
+			.limitItems(true);
+		return daoFactory.getSpecimenDao().getSpecimens(crit);
+	}
+
+	private void ensureValidSpecimens(
+		List<Specimen> inputSpecimens, DistributionProtocol dp, List<Pair<Long, Long>> siteCpPairs, OpenSpecimenException ose) {
+
+		if (CollectionUtils.isEmpty(inputSpecimens)) {
 			return;
 		}
 
-		List<String> closedSpmns = specimens.stream()
+		List<Long> specimenIds = inputSpecimens.stream().map(Specimen::getId).collect(Collectors.toList());
+		SpecimenListCriteria crit = new SpecimenListCriteria().siteCps(siteCpPairs).ids(specimenIds);
+		String nonCompliantSpmnLabels = daoFactory.getSpecimenDao().getNonCompliantSpecimens(crit)
+			.stream().collect(Collectors.joining(", "));
+		if (!nonCompliantSpmnLabels.isEmpty()) {
+			ose.addError(DistributionOrderErrorCode.SPECIMEN_DOES_NOT_EXIST, nonCompliantSpmnLabels);
+		}
+
+		List<String> closedSpmns = inputSpecimens.stream()
 			.filter(spmn -> !spmn.isActive()).map(Specimen::getLabel)
 			.collect(Collectors.toList());
 		if (!closedSpmns.isEmpty()) {
@@ -385,30 +545,19 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 			return;
 		}
 
-		Map<Long, Specimen> specimenMap = specimens.stream().collect(Collectors.toMap(Specimen::getId, specimen -> specimen));
-		if (specimens.size() != specimenIds.size()) {
-			String notFoundLabels = order.getOrderItems().stream()
-				.map(oi -> oi.getSpecimen()) // order specimens
-				.filter(os -> !specimenMap.containsKey(os.getId())) // non existing specimens
-				.map(ns -> ns.getLabel()) // non existing specimen labels
-				.collect(Collectors.joining(", "));
-			ose.addError(DistributionOrderErrorCode.SPECIMEN_DOES_NOT_EXIST, notFoundLabels);
-			return;
-		}
+		ensureDpValidity(inputSpecimens, dp, ose);
 
-		ensureDpValidity(specimens, specimenMap, order.getDistributionProtocol(), ose);
-
-		int stmtsCount = order.getDistributionProtocol().getConsentTiers().size();
+		int stmtsCount = dp.getConsentTiers().size();
 		if (stmtsCount > 0) {
 			List<String> nonConsentingLabels = daoFactory.getDistributionProtocolDao()
-				.getNonConsentingSpecimens(order.getDistributionProtocol().getId(), specimenIds, stmtsCount);
+				.getNonConsentingSpecimens(dp.getId(), specimenIds, stmtsCount);
 			if (!nonConsentingLabels.isEmpty()) {
 				ose.addError(DistributionOrderErrorCode.NON_CONSENTING_SPECIMENS, nonConsentingLabels);
 			}
 		}
 	}
 
-	private void ensureDpValidity(List<Specimen> specimens, Map<Long, Specimen> specimenMap, DistributionProtocol dp, OpenSpecimenException ose) {
+	private void ensureDpValidity(List<Specimen> specimens, DistributionProtocol dp, OpenSpecimenException ose) {
 		List<Specimen> spmnWithDps = specimens.stream()
 			.filter(spmn -> !spmn.getDistributionProtocols().isEmpty())
 			.collect(Collectors.toList());
@@ -427,6 +576,7 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 			return;
 		}
 
+		Map<Long, Specimen> specimenMap = specimens.stream().collect(Collectors.toMap(Specimen::getId, s -> s));
 		Set<Long> allowedSites = AccessCtrlMgr.getInstance().getDistributionOrderAllowedSites(dp);
 		Map<Long, Set<Long>> spmnSitesMap = daoFactory.getSpecimenDao().getSpecimenSites(Utility.collect(spmnWithoutDps, "id", true));
 		String errorLabels = spmnSitesMap.entrySet().stream()
@@ -437,6 +587,38 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 		if (StringUtils.isNotBlank(errorLabels)) {
 			ose.addError(DistributionOrderErrorCode.INVALID_SPECIMENS_FOR_DP, errorLabels);
 		}
+	}
+
+	private void distributeOrder(DistributionOrder order, List<Pair<Long, Long>> siteCps, Status status) {
+		if (!Status.EXECUTED.equals(status)) {
+			return;
+		}
+
+		order.distribute();
+		daoFactory.getDistributionOrderDao().saveOrUpdate(order);
+		if (order.getSpecimenList() == null) {
+			return;
+		}
+
+		boolean endOfSpecimens = false;
+		int starAt = 0, maxSpmns = 100;
+		List<Specimen> specimens;
+		while (!endOfSpecimens) {
+			specimens = getSpecimens(order.getSpecimenList(), siteCps, starAt, maxSpmns);
+			specimens.forEach(spmn -> distributeSpecimen(order, spmn));
+
+			starAt += specimens.size();
+			endOfSpecimens = (specimens.size() < maxSpmns);
+
+			specimens.clear();
+			SessionUtil.getInstance().clearSession();
+		}
+	}
+
+	private void distributeSpecimen(DistributionOrder order, Specimen specimen) {
+		DistributionOrderItem item = DistributionOrderItem.createOrderItem(order, specimen);
+		daoFactory.getDistributionOrderDao().saveOrUpdateOrderItem(item);
+		item.distribute();
 	}
 
 	private SavedQuery getReportQuery(DistributionOrder order) {
@@ -512,22 +694,51 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 		return MessageUtil.getInstance().getMessage(code);
 	}
 	
-	private void sendOrderProcessedEmail(DistributionOrder order, Status oldStatus) {
+	private void notifySaveOrUpdateOrder(DistributionOrder order, Status oldStatus, Long startTime) {
+		long timeTaken = (System.currentTimeMillis() - startTime) + 500;
+
 		Status newStatus = order.getStatus();
-		if (!newStatus.equals(Status.EXECUTED) || newStatus.equals(oldStatus)) {
+		if (timeTaken < ASYNC_CALL_TIMEOUT && (!newStatus.equals(Status.EXECUTED) || newStatus.equals(oldStatus))) {
 			return;
 		}
 
-		String[] rcpts = {
-			order.getRequester().getEmailAddress(),
-			order.getDistributor().getEmailAddress()
-		};
-		String[] subjectParams = {order.getName()};
+		Set<User> rcpts = new HashSet<>();
+		if (newStatus.equals(Status.EXECUTED)) {
+			rcpts.add(order.getDistributor());
+			rcpts.add(order.getRequester());
+			rcpts.add(order.getDistributionProtocol().getPrincipalInvestigator());
+			rcpts.addAll(order.getDistributionProtocol().getCoordinators());
 
-		Map<String, Object> props = new HashMap<String, Object>();
-		props.put("$subject", subjectParams);
-		props.put("order", order);
-		emailService.sendEmail(ORDER_DISTRIBUTED_EMAIL_TMPL, rcpts, props);
+			if (order.getSite() != null && CollectionUtils.isNotEmpty(order.getSite().getCoordinators())) {
+				rcpts.addAll(order.getSite().getCoordinators());
+			}
+		}
+
+		if (!rcpts.contains(AuthUtil.getCurrentUser())) {
+			rcpts.add(AuthUtil.getCurrentUser());
+		}
+
+		Object[] subjectParams = { order.getName(), newStatus.equals(Status.EXECUTED) ? 1 : 2 };
+
+		// Send email notification
+		Map<String, Object> emailProps = new HashMap<>();
+		emailProps.put("$subject", subjectParams);
+		emailProps.put("order", order);
+		for (User rcpt : rcpts) {
+			emailProps.put("rcpt", rcpt);
+			emailService.sendEmail(ORDER_DISTRIBUTED_EMAIL_TMPL, new String[] { rcpt.getEmailAddress() }, null, emailProps);
+		}
+
+		// UI notification
+		String msg = MessageUtil.getInstance().getMessage(ORDER_DISTRIBUTED_EMAIL_TMPL + "_subj", subjectParams);
+		Notification notif = new Notification();
+		notif.setEntityType(DistributionOrder.getEntityName());
+		notif.setEntityId(order.getId());
+		notif.setOperation(oldStatus == null ? "CREATE" : "UPDATE");
+		notif.setCreatedBy(AuthUtil.getCurrentUser());
+		notif.setCreationTime(Calendar.getInstance().getTime());
+		notif.setMessage(msg);
+		NotifUtil.getInstance().notify(notif, Collections.singletonMap("order-overview", rcpts));
 	}
 
 	private DistributionOrder getOrder(Long orderId, String orderName) {

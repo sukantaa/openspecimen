@@ -5,6 +5,7 @@ import java.util.List;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderDetail;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderItemDetail;
+import com.krishagni.catissueplus.core.administrative.events.DistributionOrderItemListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderSummary;
 import com.krishagni.catissueplus.core.administrative.events.ReturnedSpecimenDetail;
@@ -29,6 +30,8 @@ public interface DistributionOrderService {
 	public ResponseEvent<DistributionOrderDetail> deleteOrder(RequestEvent<Long> req);
 	
 	public ResponseEvent<QueryDataExportResult> exportReport(RequestEvent<Long> req);
+
+	ResponseEvent<List<DistributionOrderItemDetail>> getOrderItems(RequestEvent<DistributionOrderItemListCriteria> req);
 	
 	public ResponseEvent<List<DistributionOrderItemDetail>> getDistributedSpecimens(RequestEvent<SpecimenListCriteria> req);
 

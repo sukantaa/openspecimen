@@ -50,6 +50,7 @@ import com.krishagni.catissueplus.core.common.util.CsvFileWriter;
 import com.krishagni.catissueplus.core.common.util.CsvWriter;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.catissueplus.core.common.util.SessionUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.importer.domain.ImportJob;
 import com.krishagni.catissueplus.core.importer.domain.ImportJob.CsvType;
@@ -855,25 +856,7 @@ public class ImportServiceImpl implements ImportService {
 		}
 
 		private void clearSession() {
-			try {
-				sessionFactory.getCurrentSession().flush();
-			} catch (Exception e) {
-				//
-				// Oops, we encountered error. This happens when we've received database errors
-				// like data truncation error, unique constraint etc ... We can't do much except
-				// log and move forward
-				//
-				logger.info("Error flushing the database session", e);
-			} finally {
-				try {
-					sessionFactory.getCurrentSession().clear();
-				} catch (Exception e) {
-					//
-					// Something severely wrong...
-					//
-					logger.error("Error cleaning the database session", e);
-				}
-			}
+			SessionUtil.getInstance().clearSession();
 		}
 
 		private boolean isCopyNotifToAdminEnabled() {

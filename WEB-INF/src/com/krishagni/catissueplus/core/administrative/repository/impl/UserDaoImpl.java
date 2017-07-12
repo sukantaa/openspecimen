@@ -193,6 +193,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	}
 
 	@SuppressWarnings("unchecked")
+	@Override
 	public Map<Long, Integer> getCpCount(Collection<Long> userIds) {
 		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CP_COUNT_BY_USERS)
 			.setParameterList("userIds", userIds)

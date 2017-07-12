@@ -25,8 +25,6 @@ public enum DistributionOrderErrorCode implements ErrorCode {
 	
 	RPT_TMPL_NOT_CONFIGURED,
 	
-	STATUS_CHANGE_NOT_ALLOWED, 
-	
 	ALREADY_EXECUTED,
 
 	DUPLICATE_SPECIMENS,
@@ -34,6 +32,8 @@ public enum DistributionOrderErrorCode implements ErrorCode {
 	INVALID_SPECIMEN_STATUS,
 	
 	NO_SPECIMENS_TO_DIST,
+
+	NO_SPMNS_IN_LIST,
 
 	INVALID_DP_FOR_REQ,
 

@@ -21,7 +21,7 @@
         <div ng-include src="'orders/addedit-detail.html'"></div>
       </os-wizard-step>
 
-      <os-wizard-step title="{{'orders.specimens' | translate}}" on-finish="areItemQuantitiesValid(doWizard)">
+      <os-wizard-step ng-if="!skipSpecimensTab" title="{{'orders.specimens' | translate}}" on-finish="areItemQuantitiesValid(doWizard)">
         <div ng-include src="'orders/addedit-order-specimens.html'"></div>
       </os-wizard-step>
 
@@ -141,9 +141,20 @@
         <button class="btn os-btn-text" ng-click="back()">
           <span translate="common.buttons.cancel">Cancel</span>
         </button>
-        <button class="btn btn-primary" os-form-submit="doWizard.next(false)">
+
+        <button class="btn btn-primary" os-form-submit="doWizard.next(false)" ng-if="!doWizard.isLastStep()">
           <span translate="common.buttons.next"> Next </span>
         </button>
+
+        <span ng-if="doWizard.isLastStep()">
+          <button class="btn btn-primary" os-form-submit="saveDraft()">
+            <span translate="orders.buttons.save_draft"> Save as Draft </span>
+          </button>
+
+          <button class="btn btn-primary" os-form-submit="distribute()">
+            <span translate="orders.buttons.distribute"> Distribute </span>
+          </button>
+        </span>
       </div>
     </div>
   </form>
