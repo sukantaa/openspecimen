@@ -101,7 +101,7 @@
         where
           u.activity_status != 'Disabled' and
           i.activity_status != 'Disabled' and
-          s.activity_status != 'Disabled'
+          (s.identifier is null or s.activity_status != 'Disabled')
       )
     </sql>
   </changeSet>
@@ -122,7 +122,7 @@
         where
           u.activity_status != 'Disabled' and
           i.activity_status != 'Disabled' and
-          s.activity_status != 'Disabled'
+          (s.identifier is null or s.activity_status != 'Disabled')
       )
     </sql>
   </changeSet>
