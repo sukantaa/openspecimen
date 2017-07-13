@@ -2360,7 +2360,9 @@
         "help_link": "Online Help",
         "help_link_desc": "Link to online software help",
         "forum_link": "Q & A Forums",
-        "forum_link_desc": "Link to Q & A forums site"
+        "forum_link_desc": "Link to Q & A forums site",
+        "cp_setup_help_link": "Collection Protocol Setup",
+        "cp_setup_help_link_desc": "Link to training materials on how to setup (create, update) collection protocols, events, specimen requirements, consents, label formats, and many more"
       }
     },
 

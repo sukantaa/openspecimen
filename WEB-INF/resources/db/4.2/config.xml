@@ -44,4 +44,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="agosavi" id="Collection protocol management training link">
+    <sql>
+      call add_cfg_prop(
+        'training', 'cp_setup_help_link',
+        'cp_setup_help_link', 'cp_setup_help_link_desc',
+        'STRING', 'http://help.openspecimen.org/collection-protocol'
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>
