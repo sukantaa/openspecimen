@@ -1,6 +1,8 @@
 
 package com.krishagni.catissueplus.core.administrative.repository.impl;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -35,20 +37,24 @@ public class ContainerTypeDaoImpl extends AbstractDao<ContainerType> implements 
 	@Override
 	public Long getTypesCount(ContainerTypeListCriteria crit) {
 		Number count = (Number) getTypesListQuery(crit)
-				.setProjection(Projections.rowCount())
-				.uniqueResult();
+			.setProjection(Projections.rowCount())
+			.uniqueResult();
 		return count.longValue();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public ContainerType getByName(String name) {
-		List<ContainerType> result = sessionFactory.getCurrentSession()
-			.getNamedQuery(CONTAINER_TYPE_BY_NAME)
-			.setParameter("name", name)
+	public List<ContainerType> getByNames(Collection<String> names) {
+		return sessionFactory.getCurrentSession().getNamedQuery(CONTAINER_TYPES_BY_NAMES)
+			.setParameterList("names", names)
 			.list();
+	}
 
-		return result.isEmpty() ? null : result.iterator().next();
+	@Override
+	@SuppressWarnings("unchecked")
+	public ContainerType getByName(String name) {
+		List<ContainerType> result = getByNames(Collections.singleton(name));
+		return result.isEmpty() ? null : result.get(0);
 	}
 
 	private Criteria getTypesListQuery(ContainerTypeListCriteria crit) {
@@ -81,5 +87,5 @@ public class ContainerTypeDaoImpl extends AbstractDao<ContainerType> implements 
 	
 	private static final String CONTAINER_TYPE_FQN = ContainerType.class.getName();
 	
-	private static final String CONTAINER_TYPE_BY_NAME = CONTAINER_TYPE_FQN + ".getByName";
+	private static final String CONTAINER_TYPES_BY_NAMES = CONTAINER_TYPE_FQN + ".getByNames";
 }

@@ -757,6 +757,12 @@
     <property name="templateService" ref="templateService"/>
   </bean>
 
+  <bean id="importContainerTypes" class="com.krishagni.catissueplus.core.init.ImportContainerTypes">
+    <property name="jdbcTemplate" ref="jdbcTemplate"/>
+    <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="containerTypeSvc" ref="containerTypeSvc"/>
+  </bean>
+
   <!-- Move these to importer-beans.xml -->
   <bean id="importJobDao" class="com.krishagni.catissueplus.core.importer.repository.impl.ImportJobDaoImpl">
     <property name="sessionFactory" ref="sessionFactory"/>

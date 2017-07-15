@@ -56,11 +56,11 @@
     
     <filter name="activeEntity"/>
      
-    <query name="getByName">
+    <query name="getByNames">
       from
         com.krishagni.catissueplus.core.administrative.domain.ContainerType containerType
       where
-        containerType.name = :name
+        containerType.name in (:names)
     </query>
 
   </class>
