@@ -6,7 +6,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Calendar;
+import java.util.Collections;
 
+import org.springframework.beans.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
@@ -23,7 +26,11 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
-import com.krishagni.catissueplus.core.common.service.EmailService;
+import com.krishagni.catissueplus.core.common.domain.Notification;
+import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.EmailUtil;
+import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 import com.krishagni.rbac.domain.Group;
 import com.krishagni.rbac.domain.GroupRole;
@@ -59,9 +66,7 @@ public class RbacServiceImpl implements RbacService {
 	private DaoFactory daoFactory;
 	
 	private UserDao userDao;
-	
-	private EmailService emailService;
-	
+
 	public DaoFactory getDaoFactory() {
 		return daoFactory;
 	}
@@ -72,10 +77,6 @@ public class RbacServiceImpl implements RbacService {
 	
 	public void setUserDao(UserDao userDao) {
 		this.userDao = userDao;
-	}	
-
-	public void setEmailService(EmailService emailService) {
-		this.emailService = emailService;
 	}
 	
 	@Override
@@ -444,7 +445,18 @@ public class RbacServiceImpl implements RbacService {
 			
 			if (resp != null) {
 				daoFactory.getSubjectDao().saveOrUpdate(subject, true);
-				sendEmail(resp, oldSrDetails, subjectRoleOp.getOp());
+
+				List<User> notifUsers = AccessCtrlMgr.getInstance()
+					.getSuperAndSiteAdmins(resp.getSite(), resp.getCollectionProtocol());
+				if (!notifUsers.contains(AuthUtil.getCurrentUser())) {
+					//
+					// if the current user is not site or super admin
+					//
+					notifUsers.add(AuthUtil.getCurrentUser());
+				}
+
+				sendEmail(user, resp, notifUsers, oldSrDetails, subjectRoleOp.getOp());
+				addNotifs(user, resp, notifUsers, subjectRoleOp.getOp().name());
 			}
 			
 			return ResponseEvent.response(SubjectRoleDetail.from(resp));
@@ -474,7 +486,7 @@ public class RbacServiceImpl implements RbacService {
 			throw OpenSpecimenException.userError(RbacErrorCode.SUBJECT_NOT_FOUND);
 		}
 		
-		ArrayList<SubjectRole> subjectRoles = new ArrayList<SubjectRole>();
+		ArrayList<SubjectRole> subjectRoles = new ArrayList<>();
 		for (String role : roleNames) {
 			SubjectRole sr = createSubjectRole(site, cp, role, systemRole);
 			AccessCtrlMgr.getInstance().ensureCreateUpdateUserRolesRights(user, sr.getSite());
@@ -498,8 +510,17 @@ public class RbacServiceImpl implements RbacService {
 		}
 		
 		daoFactory.getSubjectDao().saveOrUpdate(subject, true);
+		List<User> notifUsers = AccessCtrlMgr.getInstance().getSuperAndSiteAdmins(site, cp);
+		if (!notifUsers.contains(AuthUtil.getCurrentUser())) {
+			//
+			// if the current user is not site or super admin
+			//
+			notifUsers.add(AuthUtil.getCurrentUser());
+		}
+
 		for (SubjectRole sr : subjectRoles) {
-			sendEmail(sr, null, op);
+			sendEmail(user, sr, notifUsers, null, op);
+			addNotifs(user, sr, notifUsers, op.name());
 		}
 	}
 	
@@ -896,17 +917,64 @@ public class RbacServiceImpl implements RbacService {
 		}
 	}
 	
-	private void sendEmail(SubjectRole newSr, Map<String, Object> oldSrDetails, OP op) {
-		User user = userDao.getById(newSr.getSubject().getId());
-		Map<String, Object> props = new HashMap<String, Object>();
+	private void sendEmail(User subject, SubjectRole newSr, List<User> users, Map<String, Object> oldSrDetails, OP op) {
+		String [] subjParams = new String[] {subject.getFirstName(), subject.getLastName()};
+		Map<String, Object> props = new HashMap<>();
 		props.put("operation", op.name());
-		props.put("user", user);
+		props.put("user", subject);
 		props.put("sr", newSr);
 		props.put("oldSr", oldSrDetails);
-		
-		emailService.sendEmail(ROLE_UPDATED_EMAIL_TMPL, new String[]{user.getEmailAddress()}, props);
-	}
-	
-	private static final String ROLE_UPDATED_EMAIL_TMPL = "users_role_updated";
+		props.put("$subject", subjParams);
+		props.put("ccAdmin", false);
 
+		for (User rcpt : users) {
+			props.put("rcpt", rcpt);
+			EmailUtil.getInstance().sendEmail(ROLE_UPDATED_EMAIL_TMPL, new String[]{rcpt.getEmailAddress()}, null, props);
+		}
+	}
+
+	private void addNotifs(User subject, SubjectRole newSr, List<User> notifyUsers, String op) {
+		if (notifyUsers.contains(subject)) {
+			notifyUsers.remove(subject);
+		}
+
+		Notification notif = new Notification();
+		notif.setEntityType(User.getEntityName());
+		notif.setEntityId(subject.getId());
+		notif.setOperation("UPDATE");
+		notif.setMessage(getNotifMsg(subject, newSr, op));
+		notif.setCreatedBy(AuthUtil.getCurrentUser());
+		notif.setCreationTime(Calendar.getInstance().getTime());
+		NotifUtil.getInstance().notify(notif, Collections.singletonMap("user-roles", notifyUsers));
+
+		Notification notification = new Notification();
+		BeanUtils.copyProperties(notif, notification, "id", "message", "notifiedUsers");
+		notification.setMessage(getNotifMsg(null, newSr, op));
+		NotifUtil.getInstance().notify(notification, Collections.singletonMap("user-roles", Collections.singletonList(subject)));
+	}
+
+	private String getNotifMsg(User user, SubjectRole sr, String op) {
+		Site site = sr.getSite();
+		String siteName = site != null ? site.getName() : StringUtils.EMPTY;
+		int siteChoice = site != null ? 2 : 1;
+
+		CollectionProtocol cp = sr.getCollectionProtocol();
+		String cpTitle = cp != null ? cp.getShortTitle() : StringUtils.EMPTY;
+		int cpChoice = cp != null ? 2 : 1;
+
+		String msgKey;
+		Object[] params;
+		if (user == null) {
+			msgKey = "rbac_user_notif_role_" + op.toLowerCase();
+			params = new Object[] {sr.getRole().getName(), cpTitle, cpChoice, siteName, siteChoice};
+		} else {
+			msgKey = "rbac_admin_notif_role_" + op.toLowerCase();
+			params = new Object[] {user.getFirstName(), user.getLastName(), sr.getRole().getName(),
+				cpTitle, cpChoice, siteName, siteChoice};
+		}
+
+		return MessageUtil.getInstance().getMessage(msgKey, params);
+	}
+
+	private static final String ROLE_UPDATED_EMAIL_TMPL = "users_role_updated";
 }

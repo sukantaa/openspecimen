@@ -2,23 +2,32 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
+import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTask;
+import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
-import com.krishagni.catissueplus.core.common.service.EmailService;
+import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
+import com.krishagni.catissueplus.core.common.domain.Notification;
+import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.EmailUtil;
+import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
-import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 
 @Configurable
 public class CpExpiringNotification implements ScheduledTask {
@@ -27,10 +36,7 @@ public class CpExpiringNotification implements ScheduledTask {
 	
 	@Autowired
 	private DaoFactory daoFactory;
-	
-	@Autowired
-	private EmailService emailService;
-	
+
 	@Override
 	@PlusTransactional
 	public void doJob(ScheduledJobRun jobRun) throws Exception {
@@ -43,7 +49,7 @@ public class CpExpiringNotification implements ScheduledTask {
 			.getExpiringCps(intervalStartDate, intervalEndDate);
 		for (CollectionProtocol cp : cps) {
 		  if (isEligibleForReminder(cp, intervalStartDate, notificationDays, repeatInterval)) {
-		    sendExpiryReminder(cp);
+		    notifyCpExpiryReminder(cp);
 		  }
 		}
 	}
@@ -79,11 +85,30 @@ public class CpExpiringNotification implements ScheduledTask {
 		return daysBeforeExpiry == 0 || (notificationDays - daysBeforeExpiry) % repeatInterval == 0;
 	}
 	
-	private void sendExpiryReminder(CollectionProtocol cp) {
-		Map<String, Object> emailProps = new HashMap<String, Object>();
-		emailProps.put("$subject", new String[] {cp.getShortTitle()});
+	private void notifyCpExpiryReminder(CollectionProtocol cp) {
+		Map<String, Object> emailProps = new HashMap<>();
+		String[] subjParams = {cp.getShortTitle(), Utility.getDateString(cp.getEndDate())};
+		emailProps.put("$subject", subjParams);
 		emailProps.put("cp", cp);
-		String[] rcpts = {cp.getPrincipalInvestigator().getEmailAddress()};
-		emailService.sendEmail(CP_EXPIRING_NOTIFICATION_TMPL, rcpts, emailProps);
+		emailProps.put("ccAdmin", false);
+
+
+		Set<User> rcpts = new HashSet<>(AccessCtrlMgr.getInstance().getSuperAndSiteAdmins(null, cp));
+		rcpts.add(cp.getPrincipalInvestigator());
+		rcpts.addAll(cp.getCoordinators());
+
+		for (User rcpt : rcpts) {
+			emailProps.put("rcpt", rcpt);
+			EmailUtil.getInstance().sendEmail(CP_EXPIRING_NOTIFICATION_TMPL, new String[] {rcpt.getEmailAddress()}, null, emailProps);
+		}
+
+		Notification notif = new Notification();
+		notif.setEntityType(CollectionProtocol.getEntityName());
+		notif.setEntityId(cp.getId());
+		notif.setOperation("ALERT");
+		notif.setMessage(MessageUtil.getInstance().getMessage(CP_EXPIRING_NOTIFICATION_TMPL.toLowerCase() + "_subj", subjParams));
+		notif.setCreatedBy(AuthUtil.getCurrentUser());
+		notif.setCreationTime(Calendar.getInstance().getTime());
+		NotifUtil.getInstance().notify(notif, Collections.singletonMap("cp-overview", rcpts));
 	}
 }

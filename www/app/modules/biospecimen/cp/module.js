@@ -278,5 +278,9 @@ angular.module('os.biospecimen.cp',
         parent: 'cp-detail.settings',
         controller: 'CpDpSettingsCtrl'
       });
+    })
+
+    .run(function(UrlResolver) {
+      UrlResolver.regUrlState('cp-overview', 'cp-detail.overview', 'cpId');
     });
   

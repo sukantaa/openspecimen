@@ -228,7 +228,6 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 		return addSearchConditions(criteria, crit);
 	}
 
-
 	private String[] excludeUsersList() {
 		return new String[] {
 			User.SYS_USER,

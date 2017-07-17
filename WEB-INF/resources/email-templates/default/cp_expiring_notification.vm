@@ -9,7 +9,7 @@
             <tr>
               <td style="padding:0px;border-collapse:collapse;padding:0px;padding-bottom:10px">
                 <p style="margin:10px 0 0 0">
-                  Hello $cp.principalInvestigator.firstName $cp.principalInvestigator.lastName,
+                  Hello $rcpt.firstName $rcpt.lastName,
                   <br><br>
                   $cp.title is expiring on $dateFmt.format($cp.endDate).
                   <br><br>

@@ -152,4 +152,5 @@ angular.module('os.administrative.user',
 
   .run(function(UrlResolver) {
     UrlResolver.regUrlState('user-overview', 'user-detail.overview', 'userId');
+    UrlResolver.regUrlState('user-roles', 'user-detail.roles', 'userId');
   });

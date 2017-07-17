@@ -19,12 +19,14 @@ import com.krishagni.catissueplus.core.administrative.domain.Shipment;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolSite;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CprErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantErrorCode;
@@ -117,6 +119,22 @@ public class AccessCtrlMgr {
 		}
 
 		ensureUserImportRights(user);
+	}
+
+	public List<User> getSuperAndSiteAdmins(Site site, CollectionProtocol cp) {
+		UserListCriteria crit = new UserListCriteria().activityStatus("Active").type("SUPER");
+		List<User> result = bsDaoFactory.getUserDao().getUsers(crit);
+
+		if (site != null) {
+			result.addAll(site.getCoordinators());
+		} else if (cp != null) {
+			result.addAll(cp.getSites().stream()
+				.map(CollectionProtocolSite::getSite)
+				.flatMap(s -> s.getCoordinators().stream())
+				.collect(Collectors.toList()));
+		}
+
+		return result;
 	}
 
 	private void ensureUserObjectRights(User user, Operation op) {
