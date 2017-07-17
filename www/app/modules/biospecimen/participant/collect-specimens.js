@@ -3,10 +3,10 @@ angular.module('os.biospecimen.participant.collect-specimens',
   [ 
     'os.biospecimen.models'
   ])
-  .factory('CollectSpecimensSvc', function($state, Container) {
+  .factory('CollectSpecimensSvc', function($state, $parse, CpConfigSvc, Container) {
     var data = {opts: {}};
 
-    function getReservePositionsOp(cpId, specimens) {
+    function getReservePositionsOp(cpId, cprId, allocRules, specimens) {
       var aliquots = {}, result = [];
       angular.forEach(specimens,
         function(specimen) {
@@ -14,43 +14,56 @@ angular.module('os.biospecimen.participant.collect-specimens',
             return;
           }
 
+          angular.extend(specimen, {cpId: cpId, cprId: cprId});
+          var match = specimen.getMatchingRule(allocRules);
+
+          var selectorCrit;
           if (specimen.lineage == 'Aliquot') {
-            var key = specimen.parent.id + "-" + specimen.parent.reqId;
-            var tenantDetail = aliquots[key];
-            if (!tenantDetail) {
-              aliquots[key] = tenantDetail = {
-                lineage: specimen.lineage,
-                specimenClass: specimen.specimenClass,
-                specimenType: specimen.type,
-                numOfAliquots: 0
-              };
-
-              result.push(tenantDetail);
+            var key = specimen.parent.id + '-' + specimen.parent.reqId + '-' + match.index;
+            selectorCrit = aliquots[key];
+            if (!selectorCrit) {
+              aliquots[key] = selectorCrit = getSelectorCriteria(match.rule, cpId, cprId, specimen);
+              result.push(selectorCrit);
             }
-
-            tenantDetail.numOfAliquots++;
           } else {
-            result.push({
-              lineage: specimen.lineage,
-              specimenClass: specimen.specimenClass,
-              specimenType: specimen.type
-            })
+            selectorCrit = getSelectorCriteria(match.rule, cpId, cprId, specimen);
+            result.push(selectorCrit);
           }
+
+          selectorCrit.minFreePositions++;
+          selectorCrit.$$group.push(specimen);
         }
       );
 
-      return {cpId: cpId, tenants: result};
+      return {cpId: cpId, criteria: result};
     }
 
-    function assignReservedPositions(specimens, positions) {
-      var idx = 0;
-      angular.forEach(specimens,
-        function(specimen) {
-          if (specimen.storageType == 'Virtual' || (!!specimen.status && specimen.status != 'Pending')) {
-            return;
-          }
+    function getSelectorCriteria(allocRule, cpId, cprId, specimen) {
+      var selectorCrit = {
+        specimen: angular.extend({}, specimen),
+        minFreePositions: 0,
+        ruleName:   (allocRule && allocRule.name) || undefined,
+        ruleParams: (allocRule && allocRule.params) || undefined,
+        '$$group': []
+      };
 
-          specimen.storageLocation = positions[idx++];
+      var attrsToDelete = [
+        'hasChildren', 'parent', 'children', 'depth',
+        'hasOnlyPendingChildren', 'isOpened', 'selected'
+      ];
+      angular.forEach(attrsToDelete, function(attr) { delete selectorCrit.specimen[attr]; });
+      return selectorCrit;
+    }
+
+    function assignReservedPositions(resvOp, positions) {
+      var idx = 0;
+      angular.forEach(resvOp.criteria,
+        function(selectorCriteria) {
+          angular.forEach(selectorCriteria.$$group,
+            function(specimen) {
+              specimen.storageLocation = positions[idx++];
+            }
+          );
         }
       );
     }
@@ -65,12 +78,17 @@ angular.module('os.biospecimen.participant.collect-specimens',
         data.specimens = specimens;
         data.opts = opts || {};
 
-        Container.getReservedPositions(getReservePositionsOp(visit.cpId, specimens)).then(
-          function(positions) {
-            if (positions.length > 0) {
-              assignReservedPositions(specimens, positions);
-            }
-            $state.go('participant-detail.collect-specimens', {visitId: visit.id, eventId: visit.eventId});
+        CpConfigSvc.getWorkflowData(visit.cpId, 'auto-allocation').then(
+          function(data) {
+            var resvOp = getReservePositionsOp(visit.cpId, visit.cprId, data.rules || [], specimens);
+            Container.getReservedPositions(resvOp).then(
+              function(positions) {
+                if (positions.length > 0) {
+                  assignReservedPositions(resvOp, positions);
+                }
+                $state.go('participant-detail.collect-specimens', {visitId: visit.id, eventId: visit.eventId});
+              }
+            )
           }
         );
       },

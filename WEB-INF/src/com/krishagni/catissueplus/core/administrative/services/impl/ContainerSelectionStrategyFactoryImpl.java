@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionRule;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategy;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategyFactory;
 
@@ -16,19 +17,11 @@ public class ContainerSelectionStrategyFactoryImpl implements ContainerSelection
 
 	private Map<String, Class> strategyClasses = new HashMap<>();
 
+	private Map<String, Class> ruleClasses = new HashMap<>();
+
 	@Override
 	public ContainerSelectionStrategy getStrategy(String name) {
-		try {
-			Class klass = strategyClasses.get(name);
-			if (klass == null) {
-				return null;
-			}
-
-			return (ContainerSelectionStrategy)klass.newInstance();
-		} catch (Exception e) {
-			throw new RuntimeException("Error instantiating class", e);
-		}
-
+		return getInstance(strategyClasses, name);
 	}
 
 	@Override
@@ -37,18 +30,49 @@ public class ContainerSelectionStrategyFactoryImpl implements ContainerSelection
 	}
 
 	public void setStrategyClasses(Map<String, String> strategyClassNames) {
-		strategyClassNames.forEach(
-			(strategy, impl) -> {
+		registerClasses(strategyClassNames, "strategy", ContainerSelectionStrategy.class, strategyClasses);
+	}
+
+	@Override
+	public ContainerSelectionRule getRule(String name) {
+		return getInstance(ruleClasses, name);
+	}
+
+	@Override
+	public List<String> getRuleNames() {
+		return new ArrayList<>(ruleClasses.keySet());
+	}
+
+	public void setRuleClasses(Map<String, String> ruleClassNames) {
+		registerClasses(ruleClassNames, "rule", ContainerSelectionRule.class, ruleClasses);
+	}
+
+	private <T> T getInstance(Map<String, Class> classMap, String name) {
+		try {
+			Class<T> klass = classMap.get(name);
+			if (klass == null) {
+				return null;
+			}
+
+			return klass.newInstance();
+		} catch (Exception e) {
+			throw new RuntimeException("Error instantiating class", e);
+		}
+	}
+
+	private void registerClasses(Map<String, String> nameImplMap, String category, Class assignableTo, Map<String, Class> output) {
+		nameImplMap.forEach(
+			(name, impl) -> {
 				try {
 					Class klass = Class.forName(impl);
-					if (!ContainerSelectionStrategy.class.isAssignableFrom(klass)) {
-						logger.error("Invalid class implementation " + impl + " for strategy " + strategy);
+					if (!assignableTo.isAssignableFrom(klass)) {
+						logger.error(String.format("Invalid class implementation %s for %s %s", impl, category, name));
 						return;
 					}
 
-					strategyClasses.put(strategy, klass);
+					output.put(name, klass);
 				} catch (Exception e) {
-					logger.error("Couldn't register class implementation " + impl + " for strategy " + strategy, e);
+					logger.error(String.format("Couldn't register class implementation %s for %s %s", impl, category, name), e);
 				}
 			}
 		);

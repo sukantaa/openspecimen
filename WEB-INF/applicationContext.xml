@@ -487,6 +487,11 @@
         <entry key="recently-used" value="com.krishagni.catissueplus.core.administrative.services.impl.RecentlyUsedContainerSelectionStrategy"/>
       </map>
     </property>
+    <property name="ruleClasses">
+      <map>
+        <entry key="ContainerType" value="com.krishagni.catissueplus.core.administrative.services.impl.ContainerTypeRestriction"/>
+      </map>
+    </property>
   </bean>
 
   <bean id="storageContainerSvc" class="com.krishagni.catissueplus.core.administrative.services.impl.StorageContainerServiceImpl">

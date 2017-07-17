@@ -8,7 +8,6 @@ import java.util.Map;
 
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
-import com.krishagni.catissueplus.core.administrative.events.ContainerSelectorCriteria;
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
@@ -46,8 +45,6 @@ public interface StorageContainerDao extends Dao<StorageContainer> {
 	public List<StorageContainerSummary> getChildContainers(Long containerId, int noOfColumns);
 
 	List<StorageContainer> getDescendantContainers(StorageContainerListCriteria crit);
-
-	public List<Long> getLeastEmptyContainerId(ContainerSelectorCriteria crit);
 
 	public int deleteReservedPositions(List<String> reservationIds);
 

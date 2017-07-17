@@ -6,4 +6,8 @@ public interface ContainerSelectionStrategyFactory {
 	ContainerSelectionStrategy getStrategy(String name);
 
 	List<String> getStrategyNames();
+
+	ContainerSelectionRule getRule(String name);
+
+	List<String> getRuleNames();
 }

@@ -14,6 +14,7 @@ import com.krishagni.catissueplus.core.administrative.domain.DistributionProtoco
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolErrorCode;
+import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerErrorCode;
 import com.krishagni.catissueplus.core.administrative.events.DistributionProtocolSummary;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategyFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -360,7 +361,7 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		}
 
 		if (containerSelFactory.getStrategy(strategy) == null) {
-			ose.addError(CpErrorCode.INV_CONT_SEL_STRATEGY, strategy);
+			ose.addError(StorageContainerErrorCode.INV_CONT_SEL_STRATEGY, strategy);
 			return;
 		}
 

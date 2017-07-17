@@ -64,18 +64,6 @@ angular.module('os.biospecimen.specimen',
         resolve: {
           extensionCtxt: function(cp, specimen) {
             return specimen.getExtensionCtxt({cpId: cp.id});
-          },
-
-          reservedPosition: function(cp, specimen, Container) {
-            if (!cp.containerSelectionStrategy) {
-              return null;
-            }
-
-            if (specimen.storageType == 'Virtual' || (!!specimen.status && specimen.status != 'Pending')) {
-              return null;
-            }
-
-            return Container.reservePositionForSpecimen(cp.id, specimen);
           }
         },
         controller: 'AddEditSpecimenCtrl',
@@ -225,6 +213,18 @@ angular.module('os.biospecimen.specimen',
             } else {
               return {};
             }
+          },
+
+          containerAllocRules: function(cp, CpConfigSvc) {
+            if (!cp.containerSelectionStrategy) {
+              return [];
+            }
+
+            return CpConfigSvc.getWorkflowData(cp.id, 'auto-allocation').then(
+              function(data) {
+                return (data && data.rules && data.rules.length > 0) ? data.rules : [];
+              }
+            );
           }
         },
         parent: 'signed-in'

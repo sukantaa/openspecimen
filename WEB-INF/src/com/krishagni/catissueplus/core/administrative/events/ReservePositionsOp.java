@@ -8,7 +8,7 @@ public class ReservePositionsOp {
 
 	private String reservationToCancel;
 
-	private List<TenantDetail> tenants = new ArrayList<>();
+	private List<ContainerCriteria> criteria = new ArrayList<>();
 
 	public Long getCpId() {
 		return cpId;
@@ -26,11 +26,11 @@ public class ReservePositionsOp {
 		this.reservationToCancel = reservationToCancel;
 	}
 
-	public List<TenantDetail> getTenants() {
-		return tenants;
+	public List<ContainerCriteria> getCriteria() {
+		return criteria;
 	}
 
-	public void setTenants(List<TenantDetail> tenants) {
-		this.tenants = tenants;
+	public void setCriteria(List<ContainerCriteria> criteria) {
+		this.criteria = criteria;
 	}
 }

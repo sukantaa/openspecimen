@@ -1,6 +1,6 @@
 angular.module('os.biospecimen.specimen')
   .controller('BulkCreateAliquotsCtrl', function(
-    $scope, $q, parentSpmns, cp,
+    $scope, $q, parentSpmns, cp, containerAllocRules,
     Specimen, Alerts, Util, SpecimenUtil, Container) {
 
     var ignoreQtyWarning = false, reservationId;
@@ -18,6 +18,13 @@ angular.module('os.biospecimen.specimen')
             specimenClass: ps.specimenClass,
             type: ps.type,
             createdOn: createdOn,
+            parentId: ps.id,
+            parentLabel: ps.label,
+            visitId: ps.visitId,
+            anatomicSite: ps.anatomicSite,
+            laterality: ps.laterality,
+            pathology: ps.pathology,
+            collectionContainer: ps.collectionContainer,
             parent: {
               id: ps.id,
               label: ps.label,
@@ -129,18 +136,28 @@ angular.module('os.biospecimen.specimen')
     }
 
     function reservePositions() {
+      var attrsToDelete = ['parent', 'count', 'quantity'];
+
+      var criteria = $scope.ctx.aliquotsSpec.map(
+        function(spec) {
+          var spmn = new Specimen(spec);
+          spmn.initialQty = spec.quantity;
+          angular.forEach(attrsToDelete, function(attr) { delete spmn[attr]; });
+
+          var match = spmn.getMatchingRule(containerAllocRules);
+          return {
+            specimen: spmn,
+            minFreePositions: +spec.count,
+            ruleName: match.index != -1 ? match.rule.name : undefined,
+            ruleParams: match.index != -1 ? match.rule.params : undefined
+          }
+        }
+      );
+
       return Container.getReservedPositions({
         cpId: cp.id,
         reservationToCancel: reservationId,
-        tenants: $scope.ctx.aliquotsSpec.map(
-          function(spec) {
-            return {
-              specimenClass: spec.specimenClass,
-              specimenType: spec.type,
-              numOfAliquots: +spec.count
-            }
-          }
-        )
+        criteria: criteria,
       }).then(
         function(locations) {
           if (locations.length > 0) {

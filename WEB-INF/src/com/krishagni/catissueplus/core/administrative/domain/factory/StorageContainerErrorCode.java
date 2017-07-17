@@ -70,7 +70,11 @@ public enum StorageContainerErrorCode implements ErrorCode {
 
 	AUTOMATED_NOT_DIMENSIONLESS,
 
-	SPMNS_RPT_NOT_CONFIGURED;
+	SPMNS_RPT_NOT_CONFIGURED,
+
+	INV_CONT_SEL_STRATEGY,
+
+	INV_CONT_SEL_RULE;
 
 	@Override
 	public String code() {

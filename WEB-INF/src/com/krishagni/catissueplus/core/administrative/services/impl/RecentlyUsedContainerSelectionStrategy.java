@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
@@ -20,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
-import com.krishagni.catissueplus.core.administrative.events.TenantDetail;
+import com.krishagni.catissueplus.core.administrative.events.ContainerCriteria;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategy;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
@@ -41,13 +42,8 @@ public class RecentlyUsedContainerSelectionStrategy implements ContainerSelectio
 	private Map<String, StorageContainer> recentlyUsed = new HashMap<>();
 
 	@Override
-	public StorageContainer getContainer(TenantDetail criteria, Boolean aliquotsInSameContainer) {
-		int numFreeLocs = 1;
-		if (aliquotsInSameContainer != null && aliquotsInSameContainer && criteria.getNumOfAliquots() > 1) {
-			numFreeLocs = criteria.getNumOfAliquots();
-		}
-
-		StorageContainer container = recentlyUsed.get(criteria.getKey());
+	public StorageContainer getContainer(ContainerCriteria criteria, Boolean aliquotsInSameContainer) {
+		StorageContainer container = recentlyUsed.get(criteria.key());
 		if (container == null) {
 			container = getRecentlySelectedContainer(criteria);
 		}
@@ -56,25 +52,26 @@ public class RecentlyUsedContainerSelectionStrategy implements ContainerSelectio
 			return null;
 		}
 
-		if (!canContainSpecimen(container, criteria, numFreeLocs)) {
-			container = nextContainer(container, criteria, numFreeLocs);
+		int freePositions = criteria.getRequiredPositions(aliquotsInSameContainer);
+		if (!canContainSpecimen(container, criteria, freePositions)) {
+			container = nextContainer(container, criteria, freePositions);
 		}
 
 		if (container != null) {
-			recentlyUsed.put(criteria.getKey(), container);
+			recentlyUsed.put(criteria.key(), container);
 		}
 
 		return container;
 	}
 
 	@SuppressWarnings("unchecked")
-	private StorageContainer getRecentlySelectedContainer(TenantDetail crit) {
+	private StorageContainer getRecentlySelectedContainer(ContainerCriteria crit) {
 		//
 		// first lookup containers used for (cp, class, type) combination
 		//
 		List<StorageContainer> containers = getRecentlySelectedContainerQuery(crit)
-			.add(Restrictions.eq("spmn.specimenClass", crit.getSpecimenClass()))
-			.add(Restrictions.eq("spmn.specimenType", crit.getSpecimenType()))
+			.add(Restrictions.eq("spmn.specimenClass", crit.specimen().getSpecimenClass()))
+			.add(Restrictions.eq("spmn.specimenType", crit.specimen().getType()))
 			.list();
 
 		if (CollectionUtils.isNotEmpty(containers)) {
@@ -88,21 +85,27 @@ public class RecentlyUsedContainerSelectionStrategy implements ContainerSelectio
 		return CollectionUtils.isNotEmpty(containers) ? containers.iterator().next() : null;
 	}
 
-	private Criteria getRecentlySelectedContainerQuery(TenantDetail criteria) {
+	private Criteria getRecentlySelectedContainerQuery(ContainerCriteria criteria) {
 		Session session = sessionFactory.getCurrentSession();
 		session.enableFilter("activeEntity");
-		return session.createCriteria(StorageContainer.class)
-			.createAlias("occupiedPositions", "pos")
+		Criteria query = session.createCriteria(StorageContainer.class, "cont")
+			.createAlias("cont.occupiedPositions", "pos")
 			.createAlias("pos.occupyingSpecimen", "spmn")
 			.createAlias("spmn.visit", "visit")
 			.createAlias("visit.registration", "reg")
 			.createAlias("reg.collectionProtocol", "cp")
-			.createAlias("site", "site")
-			.createAlias("compAllowedCps", "allowedCp", JoinType.LEFT_OUTER_JOIN)
-			.add(Restrictions.eq("cp.id", criteria.getCpId()))
-			.add(getSiteCpRestriction(criteria.getSiteCps()))
+			.createAlias("cont.site", "site")
+			.createAlias("cont.compAllowedCps", "allowedCp", JoinType.LEFT_OUTER_JOIN)
+			.add(Restrictions.eq("cp.id", criteria.specimen().getCpId()))
+			.add(getSiteCpRestriction(criteria.siteCps()))
 			.addOrder(Order.desc("pos.id"))
 			.setMaxResults(1);
+
+		if (criteria.rule() != null) {
+			query.add(criteria.rule().getRestriction("cont", criteria.ruleParams()));
+		}
+
+		return query;
 	}
 
 	private Disjunction getSiteCpRestriction(Set<Pair<Long, Long>> siteCps) {
@@ -117,15 +120,15 @@ public class RecentlyUsedContainerSelectionStrategy implements ContainerSelectio
 		return disjunction;
 	}
 
-	private StorageContainer nextContainer(StorageContainer last, TenantDetail crit, int freeLocs) {
+	private StorageContainer nextContainer(StorageContainer last, ContainerCriteria crit, int freeLocs) {
 		logger.info(String.format(
 			"Finding next container satisfying criteria (cp = %d, class = %s, type = %s, free locs = %d) with base %s",
-			crit.getCpId(), crit.getSpecimenClass(), crit.getSpecimenType(), freeLocs, last.getName()
+			crit.specimen().getCpId(), crit.specimen().getSpecimenClass(), crit.specimen().getType(), freeLocs, last.getName()
 		));
 		return nextContainer(last.getParentContainer(), last, crit, freeLocs, new HashSet<>());
 	}
 
-	private StorageContainer nextContainer(StorageContainer parent, StorageContainer last, TenantDetail criteria, int freeLocs, Set<StorageContainer> visited) {
+	private StorageContainer nextContainer(StorageContainer parent, StorageContainer last, ContainerCriteria criteria, int freeLocs, Set<StorageContainer> visited) {
 		if (parent == null) {
 			return null;
 		}
@@ -167,12 +170,14 @@ public class RecentlyUsedContainerSelectionStrategy implements ContainerSelectio
 		}
 	}
 
-	private boolean canContainSpecimen(StorageContainer container, TenantDetail crit, int freeLocs) {
+	private boolean canContainSpecimen(StorageContainer container, ContainerCriteria crit, int freeLocs) {
 		if (cp == null) {
-			cp = daoFactory.getCollectionProtocolDao().getById(crit.getCpId());
+			cp = daoFactory.getCollectionProtocolDao().getById(crit.specimen().getCpId());
 		}
 
-		return container.canContainSpecimen(cp, crit.getSpecimenClass(), crit.getSpecimenType()) &&
-				container.hasFreePositionsForReservation(freeLocs);
+
+		return container.canContainSpecimen(cp, crit.specimen().getSpecimenClass(), crit.specimen().getType()) &&
+			container.hasFreePositionsForReservation(freeLocs) &&
+			(crit.rule() == null || crit.rule().eval(container, crit.ruleParams()));
 	}
 }

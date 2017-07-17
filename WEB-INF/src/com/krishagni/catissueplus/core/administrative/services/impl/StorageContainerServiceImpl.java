@@ -28,6 +28,7 @@ import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPos
 import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerFactory;
 import com.krishagni.catissueplus.core.administrative.events.AssignPositionsOp;
+import com.krishagni.catissueplus.core.administrative.events.ContainerCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ContainerHierarchyDetail;
 import com.krishagni.catissueplus.core.administrative.events.ContainerQueryCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ContainerReplicationDetail;
@@ -41,6 +42,7 @@ import com.krishagni.catissueplus.core.administrative.events.TenantDetail;
 import com.krishagni.catissueplus.core.administrative.events.VacantPositionsOp;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.ContainerMapExporter;
+import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionRule;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategy;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategyFactory;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTaskManager;
@@ -506,7 +508,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 			ContainerSelectionStrategy strategy = selectionStrategyFactory.getStrategy(cp.getContainerSelectionStrategy());
 			if (strategy == null) {
-				throw OpenSpecimenException.userError(CpErrorCode.INV_CONT_SEL_STRATEGY, cp.getContainerSelectionStrategy());
+				throw OpenSpecimenException.userError(StorageContainerErrorCode.INV_CONT_SEL_STRATEGY, cp.getContainerSelectionStrategy());
 			}
 
 			Set<Pair<Long, Long>> allowedSiteCps = AccessCtrlMgr.getInstance().getReadAccessContainerSiteCps(cpId);
@@ -520,21 +522,29 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			}
 
 			List<StorageContainerPosition> reservedPositions = new ArrayList<>();
-			for (TenantDetail detail : op.getTenants()) {
-				detail.setCpId(cpId);
-				detail.setSiteCps(reqSiteCps);
+			for (ContainerCriteria criteria : op.getCriteria()) {
+				criteria.siteCps(reqSiteCps);
+
+				if (StringUtils.isNotBlank(criteria.ruleName())) {
+					ContainerSelectionRule rule = selectionStrategyFactory.getRule(criteria.ruleName());
+					if (rule == null) {
+						throw OpenSpecimenException.userError(StorageContainerErrorCode.INV_CONT_SEL_RULE, criteria.ruleName());
+					}
+
+					criteria.rule(rule);
+				}
 
 				boolean allAllocated = false;
 				while (!allAllocated) {
 					long t2 = System.currentTimeMillis();
-					StorageContainer container = strategy.getContainer(detail, cp.getAliquotsInSameContainer());
+					StorageContainer container = strategy.getContainer(criteria, cp.getAliquotsInSameContainer());
 					if (container == null) {
 						ResponseEvent<List<StorageLocationSummary>> resp = new ResponseEvent<>(Collections.emptyList());
 						resp.setRollback(true);
 						return resp;
 					}
 
-					int numPositions = detail.getNumOfAliquots();
+					int numPositions = criteria.minFreePositions();
 					if (numPositions <= 0) {
 						numPositions = 1;
 					}
@@ -558,7 +568,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 					if (numPositions == 0) {
 						allAllocated = true;
 					} else {
-						detail.setNumOfAliquots(numPositions);
+						criteria.minFreePositions(numPositions);
 					}
 
 					System.err.println("***** Allocation time: " + (System.currentTimeMillis() - t2) + " ms");
