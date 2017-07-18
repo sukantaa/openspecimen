@@ -51,7 +51,9 @@ public interface CollectionProtocolDao extends Dao<CollectionProtocol> {
 	public CollectionProtocolEvent getCpeByEventLabel(String title, String label);
 	
 	public CollectionProtocolEvent getCpeByShortTitleAndEventLabel(String shortTitle, String label);
-	
+
+	public List<CollectionProtocolEvent> getCpesByShortTitleAndEventLabels(String shortTitle, Collection<String> labels);
+
 	public CollectionProtocolEvent getCpeByCode(String shortTitle, String code);
 
 	public int getMinEventPoint(Long cpId);

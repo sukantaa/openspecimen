@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -18,13 +19,16 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.AnonymizeEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol.SpecimenLabelPrePrintMode;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.ConsentResponses;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
+import com.krishagni.catissueplus.core.biospecimen.domain.ParticipantMedicalIdentifier;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
@@ -180,16 +184,17 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			}
 
 			Date regDate = Calendar.getInstance().getTime();
+			List<CollectionProtocolRegistration> cprs = new ArrayList<>();
 			List<CollectionProtocolRegistrationDetail> result = new ArrayList<>();
-			List<Visit> visits = new ArrayList<>();
+			List<CollectionProtocolEvent> events = getCpes(detail);
 			for (int i = 0; i < detail.getRegCount(); i++) {
-				CollectionProtocolRegistrationDetail cpr;
-				result.add((cpr = registerParticipant(detail, regDate, collectionSite, i == 0)));
-				visits.addAll(addVisits(cpr.getId(), collectionSite, detail.getEvents(), i == 0));
+				CollectionProtocolRegistration cpr = registerParticipant(detail, regDate, collectionSite, events, i == 0);
+				cprs.add(cpr);
+				result.add(CollectionProtocolRegistrationDetail.from(cpr, false));
 			}
 
-			if (detail.getKitDetail() != null && !result.isEmpty()) {
-				List<Specimen> spmns = visits.stream()
+			if (detail.getKitDetail() != null && !cprs.isEmpty()) {
+				List<Specimen> spmns = cprs.stream().flatMap(cpr -> cpr.getOrderedVisits().stream())
 					.flatMap(visit -> visit.getSpecimens().stream())
 					.filter(Specimen::isPrePrintEnabled)
 					.collect(Collectors.toList());
@@ -509,9 +514,19 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	}
 
 	private CollectionProtocolRegistrationDetail saveOrUpdateRegistration(
-			CollectionProtocolRegistrationDetail input,
-			CollectionProtocolRegistration existing,
-			boolean saveParticipant) {
+		CollectionProtocolRegistrationDetail input,
+		CollectionProtocolRegistration existing,
+		boolean saveParticipant) {
+
+		CollectionProtocolRegistration cpr = saveOrUpdateRegistration(input, existing, null, saveParticipant);
+		return CollectionProtocolRegistrationDetail.from(cpr, false);
+	}
+
+	private CollectionProtocolRegistration saveOrUpdateRegistration(
+		CollectionProtocolRegistrationDetail input,
+		CollectionProtocolRegistration existing,
+		List<CollectionProtocolEvent> cpes,
+		boolean saveParticipant) {
 
 		CollectionProtocolRegistration cpr = cprFactory.createCpr(existing, input);
 		raiseErrorIfSpecimenCentric(cpr);
@@ -522,13 +537,14 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			AccessCtrlMgr.getInstance().ensureUpdateCprRights(cpr);
 		}
 
-		return saveOrUpdateRegistration(cpr, existing, saveParticipant);
+		return saveOrUpdateRegistration(cpr, existing, cpes, saveParticipant);
 	}
 
-	private CollectionProtocolRegistrationDetail saveOrUpdateRegistration(
-			CollectionProtocolRegistration cpr,
-			CollectionProtocolRegistration existing,
-			boolean saveParticipant) {
+	private CollectionProtocolRegistration saveOrUpdateRegistration(
+		CollectionProtocolRegistration cpr,
+		CollectionProtocolRegistration existing,
+		List<CollectionProtocolEvent> cpes,
+		boolean saveParticipant) {
 
 		raiseErrorIfSpecimenCentric(cpr);
 
@@ -552,7 +568,12 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		
 		cpr.setPpidIfEmpty();
 		daoFactory.getCprDao().saveOrUpdate(cpr);
-		return CollectionProtocolRegistrationDetail.from(cpr, false);		
+
+		if (existing == null && cpr.isSpecimenLabelPrePrintOnRegEnabled()) {
+			addVisits(cpr, cpes == null ? cpr.getCollectionProtocol().getOrderedCpeList() : cpes);
+		}
+
+		return cpr;
 	}
 
 	private ParticipantRegistrationsList saveOrUpdateRegistrations(ParticipantRegistrationsList input, boolean update) {
@@ -920,7 +941,13 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		);
 	}
 
-	private CollectionProtocolRegistrationDetail registerParticipant(BulkRegistrationsDetail bulkRegDetail, Date regDate, String mrnSite, boolean checkPermission) {
+	private CollectionProtocolRegistration registerParticipant(
+		BulkRegistrationsDetail bulkRegDetail,
+		Date regDate,
+		String mrnSite,
+		List<CollectionProtocolEvent> events,
+		boolean checkPermission) {
+
 		CollectionProtocolRegistrationDetail cprDetail = new CollectionProtocolRegistrationDetail();
 		cprDetail.setRegistrationDate(regDate);
 		cprDetail.setCpId(bulkRegDetail.getCpId());
@@ -929,9 +956,9 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		cprDetail.setParticipant(getParticipantDetail(mrnSite));
 
 		if (checkPermission) {
-			return saveOrUpdateRegistration(cprDetail, null, true);
+			return saveOrUpdateRegistration(cprDetail, null, events, true);
 		} else {
-			return saveOrUpdateRegistration(cprFactory.createCpr(cprDetail), null, true);
+			return saveOrUpdateRegistration(cprFactory.createCpr(cprDetail), null, events, true);
 		}
 	}
 
@@ -947,25 +974,82 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		return participant;
 	}
 
-	private List<Visit> addVisits(Long cprId, String visitSite, List<CollectionProtocolEventDetail> events, boolean checkPermission) {
-		if (CollectionUtils.isEmpty(events)) {
+	private void addVisits(CollectionProtocolRegistration cpr, List<CollectionProtocolEvent> cpes) {
+		if (CollectionUtils.isEmpty(cpes)) {
+			return;
+		}
+
+		List<ParticipantMedicalIdentifier> pmis = cpr.getParticipant().getPmisOrderedById();
+		Site mrnSite = null;
+		if (CollectionUtils.isNotEmpty(pmis)) {
+			mrnSite = pmis.iterator().next().getSite();
+		}
+
+		boolean checkPermission = true;
+		for (CollectionProtocolEvent cpe : cpes) {
+			String collectionSite = mrnSite != null ? mrnSite.getName() :
+				(cpe.getDefaultSite() != null ? cpe.getDefaultSite().getName() : null);
+
+			VisitDetail visitDetail = new VisitDetail();
+			visitDetail.setCprId(cpr.getId());
+			visitDetail.setEventId(cpe.getId());
+			visitDetail.setStatus(Visit.VISIT_STATUS_PENDING);
+			visitDetail.setSite(collectionSite);
+
+			cpr.addVisit(visitSvc.addVisit(visitDetail, checkPermission));
+			checkPermission = false;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<CollectionProtocolEvent> getCpes(BulkRegistrationsDetail detail) {
+		List<CollectionProtocolEventDetail> cpeDetails = detail.getEvents();
+
+		if (CollectionUtils.isEmpty(cpeDetails)) {
 			return Collections.emptyList();
 		}
 
-		List<Visit> visits = new ArrayList<>();
-		for (CollectionProtocolEventDetail cpeDetail : events) {
-			VisitDetail visitDetail = new VisitDetail();
-			visitDetail.setCprId(cprId);
-			visitDetail.setEventId(cpeDetail.getId());
-			visitDetail.setEventLabel(cpeDetail.getEventLabel());
-			visitDetail.setSite(visitSite);
-			visitDetail.setStatus(Visit.VISIT_STATUS_PENDING);
+		List<CollectionProtocolEvent> result = null;
+		Collection<Object> notFoundEvents    = null;
 
-			visits.add(visitSvc.addVisit(visitDetail, checkPermission));
-			checkPermission = false;
+		List<Long> eventIds = cpeDetails.stream().filter(cpe -> cpe.getId() != null)
+			.map(CollectionProtocolEventDetail::getId)
+			.collect(Collectors.toList());
+
+		if (CollectionUtils.isNotEmpty(eventIds)) {
+			if (eventIds.size() != cpeDetails.size()) {
+				throw OpenSpecimenException.userError(CpeErrorCode.IDS_OR_LABELS_REQUIRED, 1);
+			}
+
+			result = daoFactory.getCollectionProtocolDao().getCpes(eventIds);
+			if (result.size() != eventIds.size()) {
+				notFoundEvents = CollectionUtils.subtract(
+					eventIds,
+					result.stream().map(CollectionProtocolEvent::getId).collect(Collectors.toList()));
+			}
+		} else {
+			List<String> eventLabels = cpeDetails.stream().filter(cpe -> StringUtils.isNotBlank(cpe.getEventLabel()))
+				.map(CollectionProtocolEventDetail::getEventLabel)
+				.collect(Collectors.toList());
+
+			if (eventLabels.size() != cpeDetails.size()) {
+				throw OpenSpecimenException.userError(CpeErrorCode.IDS_OR_LABELS_REQUIRED, 2);
+			}
+
+			result = daoFactory.getCollectionProtocolDao().getCpesByShortTitleAndEventLabels(
+				detail.getCpShortTitle(), eventLabels);
+			if (result.size() != eventIds.size()) {
+				notFoundEvents = CollectionUtils.subtract(
+					eventLabels,
+					result.stream().map(CollectionProtocolEvent::getEventLabel).collect(Collectors.toList()));
+			}
 		}
 
-		return visits;
+		if (CollectionUtils.isNotEmpty(notFoundEvents)) {
+			throw OpenSpecimenException.userError(CpeErrorCode.NOT_FOUND, notFoundEvents, notFoundEvents.size());
+		}
+
+		return result;
 	}
 
 	private void raiseErrorIfSpecimenCentric(CollectionProtocolRegistration cpr) {

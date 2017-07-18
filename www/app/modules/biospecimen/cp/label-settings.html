@@ -254,9 +254,11 @@
         <span translate="cp.when_to_print">When to Print</span>
       </label>
       <div class="col-xs-6">
-        <os-select name="visitNameprintMode" ng-model="settingCtx.cp.visitNamePrintMode" list="settingCtx.visitNamePrintModes"
-          display-prop="displayName" select-prop="name" placeholder="{{'cp.when_to_print' | translate}}">
-        </os-select>
+        <label class="radio-inline" ng-repeat="printMode in settingCtx.visitNamePrintModes">
+          <input type="radio" name="visitNamePrintMode" ng-model="settingCtx.cp.visitNamePrintMode"
+            ng-value="printMode.name">
+          <span>{{printMode.displayName}}</span>
+        </label>
       </div>
     </div>
 

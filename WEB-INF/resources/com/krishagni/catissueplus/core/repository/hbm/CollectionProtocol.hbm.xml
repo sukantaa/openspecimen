@@ -196,7 +196,7 @@
         cpe.eventLabel = :label
     </query>
     
-    <query name="getCpeByShortTitleAndEventLabel">
+    <query name="getCpesByShortTitleAndEventLabels">
       select
         cpe
       from
@@ -204,7 +204,7 @@
         join cp.collectionProtocolEvents cpe
       where
         cp.shortTitle = :shortTitle and
-        cpe.eventLabel = :label
+        cpe.eventLabel in (:labels)
     </query>
 
     <query name="getCpByTitle">

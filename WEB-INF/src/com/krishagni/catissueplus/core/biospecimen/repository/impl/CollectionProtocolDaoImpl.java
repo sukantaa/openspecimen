@@ -183,7 +183,6 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 				.setParameterList("cpeIds", cpeIds)
 				.list();
 	}
-	
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -212,15 +211,20 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 	@SuppressWarnings("unchecked")
 	@Override
 	public CollectionProtocolEvent getCpeByShortTitleAndEventLabel(String shortTitle, String label) {
-		List<CollectionProtocolEvent> events = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_CPE_BY_CP_SHORT_TITLE_AND_LABEL)
-				.setString("shortTitle", shortTitle)
-				.setString("label", label)
-				.list();
-		
+		List<CollectionProtocolEvent> events = getCpesByShortTitleAndEventLabels(shortTitle, Collections.singleton(label));
 		return CollectionUtils.isEmpty(events) ? null : events.iterator().next();
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<CollectionProtocolEvent> getCpesByShortTitleAndEventLabels(String shortTitle, Collection<String> labels) {
+		return sessionFactory.getCurrentSession()
+			.getNamedQuery(GET_CPES_BY_CP_SHORT_TITLE_AND_LABELS)
+			.setString("shortTitle", shortTitle)
+			.setParameterList("labels", labels)
+			.list();
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public CollectionProtocolEvent getCpeByCode(String shortTitle, String code) {
@@ -430,7 +434,7 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 		
 		return cp;		
 	}
-	
+
 	private static final String FQN = CollectionProtocol.class.getName();
 	
 	private static final String GET_PARTICIPANT_N_SPECIMEN_CNT = FQN + ".getParticipantAndSpecimenCount";
@@ -441,8 +445,8 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 	
 	private static final String GET_CPE_BY_CP_TITLE_AND_LABEL = FQN + ".getCpeByTitleAndEventLabel";
 	
-	private static final String GET_CPE_BY_CP_SHORT_TITLE_AND_LABEL = FQN + ".getCpeByShortTitleAndEventLabel";
-	
+	private static final String GET_CPES_BY_CP_SHORT_TITLE_AND_LABELS = FQN + ".getCpesByShortTitleAndEventLabels";
+
 	private static final String GET_CP_BY_TITLE = FQN + ".getCpByTitle";
 	
 	private static final String GET_CPS_BY_SHORT_TITLE = FQN + ".getCpsByShortTitle";

@@ -302,6 +302,7 @@
     },
 
     "spmn_label_pre_print_modes": {
+      "ON_REGISTRATION": "On Registration",
       "ON_VISIT": "On Visit",
       "NONE": "None"
     },

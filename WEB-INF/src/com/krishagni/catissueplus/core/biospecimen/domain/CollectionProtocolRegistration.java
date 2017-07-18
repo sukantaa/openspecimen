@@ -293,12 +293,19 @@ public class CollectionProtocolRegistration extends BaseEntity {
 			setPpid(cp.getId() + "_" + participant.getId());
 		}
 	}
+
+	public boolean isSpecimenLabelPrePrintOnRegEnabled() {
+		return !getCollectionProtocol().isManualSpecLabelEnabled() &&
+			getCollectionProtocol().getSpmnLabelPrePrintMode() == CollectionProtocol.SpecimenLabelPrePrintMode.ON_REGISTRATION;
+	}
+
+	public void addVisit(Visit visit) {
+		visit.setRegistration(this);
+		getVisits().add(visit);
+	}
 	
 	public void addVisits(Collection<Visit> visits) {
-		for (Visit visit : visits) {
-			visit.setRegistration(this); 
-			getVisits().add(visit);
-		}
+		visits.forEach(this::addVisit);
 	}
 
 	private void updateConsentResponses(Collection<ConsentTierResponse> consentResponses) {
