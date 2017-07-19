@@ -123,6 +123,7 @@ public class ImportRecordsTask implements ScheduledTask {
 		logger.info("Starting to import records from file: " + file.getName());
 
 		FileInputStream in = null;
+		boolean processed = false;
 		try {
 			in = FileUtils.openInputStream(file);
 
@@ -130,14 +131,17 @@ public class ImportRecordsTask implements ScheduledTask {
 			ImportDetail detail = getImportDetail(file, fileId);
 			ResponseEvent<ImportJobDetail> resp = importService.importObjects(new RequestEvent<>(detail));
 			resp.throwErrorIfUnsuccessful();
-			moveFileToProcessedDir(file);
-
+			processed = true;
 			logger.info(String.format("Import job %d created to import records from file: %d", resp.getPayload().getId(), file.getName()));
 		} catch (Exception e) {
 			logger.error("Error importing records from file: " + file.getName(), e);
-			moveFileToUnprocessedDir(file);
 		} finally {
 			IOUtils.closeQuietly(in);
+			if (processed) {
+				moveFileToProcessedDir(file);
+			} else {
+				moveFileToUnprocessedDir(file);
+			}
 		}
 	}
 
