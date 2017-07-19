@@ -203,7 +203,13 @@
     </form>
 
     <form name="collectionForm" os-form-validator="collectionForm" novalidate ng-if="customFieldGroups.length > 0">
-      <div ng-repeat="group in customFieldGroups" ng-if="!group.noMatch">
+      <div ng-if="customFieldGroups[0].visitFields">
+        <sde-form-fields name="visit" table="customFieldGroups[0].multiple" opts="customFieldGroups[0].opts"
+          base-fields="customFieldGroups[0].baseFields" fields="customFieldGroups[0].fields"
+          obj="customFieldGroups[0].input">
+        </sde-form-fields>
+      </div>
+      <div ng-repeat="group in customFieldGroups" ng-if="!group.noMatch && !group.visitFields">
         <div class="panel panel-default">
           <div class="panel-heading">
             <span>{{group.title}}</span>

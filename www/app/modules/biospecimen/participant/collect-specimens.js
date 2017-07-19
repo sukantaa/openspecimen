@@ -123,7 +123,7 @@ angular.module('os.biospecimen.participant.collect-specimens',
   .controller('CollectSpecimensCtrl', 
     function(
       $scope, $translate, $state, $document, $q, $parse, $injector,
-      cpr, visit, latestVisit, cpDict, customFieldGroups,
+      cpr, visit, latestVisit, cpDict, spmnCollFields,
       Visit, Specimen, PvManager,
       CollectSpecimensSvc, Container, Alerts, Util, SpecimenUtil) {
 
@@ -428,7 +428,13 @@ angular.module('os.biospecimen.participant.collect-specimens',
 
       function displayCustomFieldGroups(specimens, navigateTo) {
         var groups = $scope.customFieldGroups = SpecimenUtil.sdeGroupSpecimens(
-          cpDict, customFieldGroups, flatten(specimens, []));
+          cpDict, spmnCollFields.fieldGroups || [], flatten(specimens, []));
+
+        var visitFieldsGrp = getVisitFieldsGroup(spmnCollFields);
+        if (visitFieldsGrp) {
+          groups.unshift(visitFieldsGrp);
+        }
+
         if (groups.length == 0 || (groups.length == 1 && groups[0].noMatch)) {
           navigateTo();
           return;
@@ -439,13 +445,28 @@ angular.module('os.biospecimen.participant.collect-specimens',
         }
       }
 
+      function getVisitFieldsGroup(spmnCollFields) {
+        if (!spmnCollFields.visitFields) {
+          return undefined;
+        }
+
+        return {
+          visitFields: true,
+          multiple: true,
+          fields: {groups: [spmnCollFields.visitFields], table: []},
+          baseFields: cpDict,
+          input: [{visit: visit}],
+          opts: {static: true}
+        };
+      }
+
       function updateSpecimens(navigateTo) {
         var sdeSampleSvc = $injector.get('sdeSample');
 
         var specimens = [];
         angular.forEach($scope.customFieldGroups,
           function(group) {
-            if (group.noMatch) {
+            if (group.noMatch || group.visitFields) {
               return;
             }
 
@@ -453,13 +474,21 @@ angular.module('os.biospecimen.participant.collect-specimens',
           }
         );
 
-        sdeSampleSvc.updateSamples(specimens).then(
-          function() {
-            navigateTo();
-          }
-        );
-      }
 
+        var visitToSave = undefined;
+        if ($scope.customFieldGroups[0].visitFields) {
+          visitToSave = $scope.customFieldGroups[0].input[0].visit;
+        }
+
+        if (specimens.length > 0) {
+          specimens[0].visit = visitToSave;
+          sdeSampleSvc.updateSamples(specimens).then(navigateTo);
+        } else if (visitToSave) {
+          new Visit(visitToSave).$saveOrUpdate().then(navigateTo);
+        } else {
+          navigateTo();
+        }
+      }
 
       $scope.applyFirstLocationToAll = function() {
         var location = {};
@@ -627,6 +656,8 @@ angular.module('os.biospecimen.participant.collect-specimens',
           var payload = {visit: visitToSave, specimens: specimensToSave};
           Visit.collectVisitAndSpecimens(payload).then(
             function(result) {
+              angular.extend(visit, result.data.visit);
+
               var visitId = result.data.visit.id;
               var sd = CollectSpecimensSvc.getStateDetail();
               $scope.specimens.length = 0;

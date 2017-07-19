@@ -449,14 +449,14 @@ angular.module('os.biospecimen.participant',
             //
             return $stateParams.visitId ? null : cpr.getLatestVisit();
           },
-          customFieldGroups: function($stateParams, hasSde, cp, CpConfigSvc) {
+          spmnCollFields: function($stateParams, hasSde, cp, CpConfigSvc) {
             if (!hasSde) {
-              return [];
+              return {};
             }
 
             return CpConfigSvc.getWorkflowData(cp.id, 'specimenCollection').then(
               function(data) {
-                return (data && data.fieldGroups) || [];
+                return data || {};
               }
             );
           },
