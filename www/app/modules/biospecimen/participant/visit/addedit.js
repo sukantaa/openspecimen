@@ -21,7 +21,7 @@ angular.module('os.biospecimen.visit.addedit', [])
         angular.extend(currVisit, {
           visitDate: currVisit.anticipatedVisitDate || new Date(),
           status: 'Complete',
-          clinicalDiagnosis: latestVisit ? latestVisit.clinicalDiagnosis : currVisit.clinicalDiagnosis
+          clinicalDiagnoses: latestVisit ? latestVisit.clinicalDiagnoses : currVisit.clinicalDiagnoses
         });
         delete currVisit.anticipatedVisitDate;
       }

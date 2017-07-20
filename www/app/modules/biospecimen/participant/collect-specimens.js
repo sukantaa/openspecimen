@@ -140,7 +140,7 @@ angular.module('os.biospecimen.participant.collect-specimens',
         visit.cprId = cpr.id;
         delete visit.anticipatedVisitDate;
         if (!!latestVisit) {
-          visit.clinicalDiagnosis = latestVisit.clinicalDiagnosis;
+          visit.clinicalDiagnoses = latestVisit.clinicalDiagnoses;
         }
 
         $scope.visit = visit;

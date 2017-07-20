@@ -16,7 +16,7 @@ angular.module('os.common.models', [])
       };
 
       Model.modelRespTransform = function(response) {
-        return new Model(response.data);
+        return !!response.data ? new Model(response.data) : null;
       };
 
       Model.modelArrayRespTransform = function(response) {

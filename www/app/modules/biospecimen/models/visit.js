@@ -28,10 +28,12 @@ angular.module('os.biospecimen.models.visit', ['os.common.models', 'os.biospecim
           event.eventId = event.id;
           event.site = event.defaultSite;
           event.cpTitle = event.collectionProtocol;
+          event.clinicalDiagnoses = [event.clinicalDiagnosis];
          
           delete event.id;
           delete event.defaultSite;
           delete event.collectionProtocol;
+          delete event.clinicalDiagnosis;
           delete event.specimenRequirements;
           delete event.visitNamePrintMode;
           delete event.visitNamePrintCopies;
