@@ -19,7 +19,7 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.rbac.events.SubjectRoleDetail;
 
-public interface UserService extends UserDetailsService, SAMLUserDetailsService {
+public interface UserService {
 	public ResponseEvent<List<UserSummary>> getUsers(RequestEvent<UserListCriteria> req);
 	
 	public ResponseEvent<Long> getUsersCount(RequestEvent<UserListCriteria> req);
