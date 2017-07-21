@@ -597,7 +597,7 @@
   
   <security:authentication-manager alias="authManager">
     <security:authentication-provider user-service-ref="userSvc" >
-       <security:password-encoder ref="passwordEncoder"></security:password-encoder>
+      <security:password-encoder ref="passwordEncoder"></security:password-encoder>
     </security:authentication-provider>
   </security:authentication-manager>
   

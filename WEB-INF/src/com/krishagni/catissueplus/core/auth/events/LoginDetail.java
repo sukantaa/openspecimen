@@ -1,6 +1,9 @@
 
 package com.krishagni.catissueplus.core.auth.events;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class LoginDetail {
 	private String loginName;
 
@@ -15,6 +18,8 @@ public class LoginDetail {
 	private String apiUrl;
 	
 	private String requestMethod;
+	
+	private Map<String, String> props = new HashMap<>();
 
 	public String getLoginName() {
 		return loginName;
@@ -72,4 +77,11 @@ public class LoginDetail {
 		this.requestMethod = requestMethod;
 	}
 
+	public Map<String, String> getProps() {
+		return props;
+	}
+
+	public void setProps(Map<String, String> props) {
+		this.props = props;
+	}
 }
