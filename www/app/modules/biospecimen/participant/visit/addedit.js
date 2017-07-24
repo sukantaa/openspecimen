@@ -21,7 +21,8 @@ angular.module('os.biospecimen.visit.addedit', [])
         angular.extend(currVisit, {
           visitDate: currVisit.anticipatedVisitDate || new Date(),
           status: 'Complete',
-          clinicalDiagnoses: latestVisit ? latestVisit.clinicalDiagnoses : currVisit.clinicalDiagnoses
+          clinicalDiagnoses: latestVisit ? latestVisit.clinicalDiagnoses : currVisit.clinicalDiagnoses,
+          site: getVisitSite(cpr, latestVisit, currVisit)
         });
         delete currVisit.anticipatedVisitDate;
       }
@@ -38,6 +39,19 @@ angular.module('os.biospecimen.visit.addedit', [])
       if (!hasDict) {
         loadPvs();
       }
+    }
+
+    function getVisitSite(cpr, latestVisit, currVisit) {
+      var site = currVisit.site;
+      if (!!site) {
+        // site = site;
+      } else if (latestVisit) {
+        site = latestVisit.site;
+      } else if (cpr.participant.pmis.length > 0) {
+        site = cpr.participant.pmis[0].siteName;
+      }
+
+      return site;
     }
 
     $scope.saveVisit = function() {
