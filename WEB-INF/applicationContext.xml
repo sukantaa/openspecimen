@@ -1097,6 +1097,15 @@
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
   </bean>
 
+  <bean id="InstitutePrintRuleSvc" class="com.krishagni.catissueplus.core.common.service.impl.InstitutePrintRuleServiceImpl">
+    <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="institutePrintRuleFactory" ref="institutePrintRuleFactory"/>
+  </bean>
+
+  <bean id="institutePrintRuleFactory" class="com.krishagni.catissueplus.core.common.domain.factory.impl.InstitutePrintRuleFactoryImpl">
+    <property name="daoFactory" ref="biospecimenDaoFactory"/>
+  </bean>
+
   <task:scheduler id="taskScheduler" pool-size="1"/>
   <task:annotation-driven scheduler="taskScheduler"/>
   <context:annotation-config/>

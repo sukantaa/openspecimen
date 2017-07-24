@@ -11,6 +11,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 
@@ -122,10 +124,12 @@ public class LabelPrintRule {
 		return cmdFileFmt;
 	}
 
+	@JsonIgnore
 	public void setCmdFileFmt(CmdFileFmt cmdFileFmt) {
 		this.cmdFileFmt = cmdFileFmt;
 	}
 
+	@JsonSetter
 	public void setCmdFileFmt(String fmt) {
 		this.cmdFileFmt = CmdFileFmt.get(fmt);
 		if (this.cmdFileFmt == null) {
