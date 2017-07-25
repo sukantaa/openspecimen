@@ -11,7 +11,7 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 
-public class InstitutePrintRule extends BaseEntity {
+public class ConfigPrintRule extends BaseEntity {
 	private String objectType;
 
 	private Institute institute;

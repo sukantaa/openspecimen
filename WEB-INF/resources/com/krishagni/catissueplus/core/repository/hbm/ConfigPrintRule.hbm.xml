@@ -4,7 +4,7 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
   <hibernate-mapping>
-  <class name="com.krishagni.catissueplus.core.common.domain.InstitutePrintRule"
+  <class name="com.krishagni.catissueplus.core.common.domain.ConfigPrintRule"
          table="OS_PRINT_RULES">
 
 	<id name="id" column="IDENTIFIER">

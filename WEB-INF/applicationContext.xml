@@ -1097,12 +1097,12 @@
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
   </bean>
 
-  <bean id="InstitutePrintRuleSvc" class="com.krishagni.catissueplus.core.common.service.impl.InstitutePrintRuleServiceImpl">
+  <bean id="configPrintRuleSvc" class="com.krishagni.catissueplus.core.common.service.impl.ConfigPrintRuleServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
-    <property name="institutePrintRuleFactory" ref="institutePrintRuleFactory"/>
+    <property name="configPrintRuleFactory" ref="configPrintRuleFactory"/>
   </bean>
 
-  <bean id="institutePrintRuleFactory" class="com.krishagni.catissueplus.core.common.domain.factory.impl.InstitutePrintRuleFactoryImpl">
+  <bean id="configPrintRuleFactory" class="com.krishagni.catissueplus.core.common.domain.factory.impl.ConfigPrintRuleFactoryImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
   </bean>
 

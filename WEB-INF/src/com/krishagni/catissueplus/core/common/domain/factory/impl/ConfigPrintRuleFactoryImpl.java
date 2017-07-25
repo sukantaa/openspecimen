@@ -7,18 +7,17 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.factory.InstituteErrorCode;
-import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
-import com.krishagni.catissueplus.core.common.domain.InstitutePrintRule;
-import com.krishagni.catissueplus.core.common.domain.factory.InstitutePrintRuleFactory;
+import com.krishagni.catissueplus.core.common.domain.ConfigPrintRule;
+import com.krishagni.catissueplus.core.common.domain.factory.ConfigPrintRuleFactory;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
-import com.krishagni.catissueplus.core.common.events.InstitutePrintRuleDetail;
+import com.krishagni.catissueplus.core.common.events.ConfigPrintRuleDetail;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 
-public class InstitutePrintRuleFactoryImpl implements InstitutePrintRuleFactory {
+public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 	private DaoFactory daoFactory;
 
 	public void setDaoFactory(DaoFactory daoFactory) {
@@ -26,8 +25,8 @@ public class InstitutePrintRuleFactoryImpl implements InstitutePrintRuleFactory 
 	}
 
 	@Override
-	public InstitutePrintRule createInstitutePrintRule(InstitutePrintRuleDetail detail) {
-		InstitutePrintRule rule = new InstitutePrintRule();
+	public ConfigPrintRule createConfigPrintRule(ConfigPrintRuleDetail detail) {
+		ConfigPrintRule rule = new ConfigPrintRule();
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 
 		rule.setUpdatedBy(AuthUtil.getCurrentUser());
@@ -43,7 +42,7 @@ public class InstitutePrintRuleFactoryImpl implements InstitutePrintRuleFactory 
 		return rule;
 	}
 
-	private void setObjectType(InstitutePrintRuleDetail detail, InstitutePrintRule rule) {
+	private void setObjectType(ConfigPrintRuleDetail detail, ConfigPrintRule rule) {
 		if (StringUtils.isBlank(detail.getObjectType())) {
 			return;
 		}
@@ -51,9 +50,8 @@ public class InstitutePrintRuleFactoryImpl implements InstitutePrintRuleFactory 
 		rule.setObjectType(detail.getObjectType());
 	}
 
-	private void setInstitute(InstitutePrintRuleDetail detail, InstitutePrintRule rule, OpenSpecimenException ose) {
+	private void setInstitute(ConfigPrintRuleDetail detail, ConfigPrintRule rule, OpenSpecimenException ose) {
 		if (detail.getInstituteId() == null && StringUtils.isBlank(detail.getInstituteName())) {
-			ose.addError(SiteErrorCode.INSTITUTE_REQUIRED);
 			return;
 		}
 
@@ -74,7 +72,7 @@ public class InstitutePrintRuleFactoryImpl implements InstitutePrintRuleFactory 
 		rule.setInstitute(institute);
 	}
 
-	private void setCollectionProtocol(InstitutePrintRuleDetail detail, InstitutePrintRule rule, OpenSpecimenException ose) {
+	private void setCollectionProtocol(ConfigPrintRuleDetail detail, ConfigPrintRule rule, OpenSpecimenException ose) {
 		CollectionProtocol cp = null;
 		Object key = null;
 
@@ -96,7 +94,7 @@ public class InstitutePrintRuleFactoryImpl implements InstitutePrintRuleFactory 
 		rule.setCollectionProtocol(cp);
 	}
 
-	private void setStatus(InstitutePrintRuleDetail detail, InstitutePrintRule rule) {
+	private void setStatus(ConfigPrintRuleDetail detail, ConfigPrintRule rule) {
 		if (detail.getStatus() == null) {
 			return;
 		}
@@ -104,7 +102,7 @@ public class InstitutePrintRuleFactoryImpl implements InstitutePrintRuleFactory 
 		rule.setStatus(detail.getStatus());
 	}
 
-	private void setRules(InstitutePrintRuleDetail detail, InstitutePrintRule rule) {
+	private void setRules(ConfigPrintRuleDetail detail, ConfigPrintRule rule) {
 		if (detail.getRules().isEmpty()) {
 			return;
 		}

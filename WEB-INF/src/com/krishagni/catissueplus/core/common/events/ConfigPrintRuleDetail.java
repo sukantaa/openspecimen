@@ -8,10 +8,10 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
-import com.krishagni.catissueplus.core.common.domain.InstitutePrintRule;
+import com.krishagni.catissueplus.core.common.domain.ConfigPrintRule;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
-public class InstitutePrintRuleDetail {
+public class ConfigPrintRuleDetail {
 	private Long Id;
 
 	private String objectType;
@@ -122,8 +122,8 @@ public class InstitutePrintRuleDetail {
 		this.rules = rules;
 	}
 
-	public static InstitutePrintRuleDetail from(InstitutePrintRule rule) {
-		InstitutePrintRuleDetail detail = new InstitutePrintRuleDetail();
+	public static ConfigPrintRuleDetail from(ConfigPrintRule rule) {
+		ConfigPrintRuleDetail detail = new ConfigPrintRuleDetail();
 
 		CollectionProtocol cp = rule.getCollectionProtocol();
 		if (cp != null) {
@@ -134,8 +134,8 @@ public class InstitutePrintRuleDetail {
 
 		detail.setId(rule.getId());
 		detail.setObjectType(rule.getObjectType());
-		detail.setInstituteId(rule.getInstitute().getId());
-		detail.setInstituteName(rule.getInstitute().getName());
+		detail.setInstituteId(rule.getInstitute() != null ? rule.getInstitute().getId() : null);
+		detail.setInstituteName(rule.getInstitute() != null ? rule.getInstitute().getName() : null);
 		detail.setUpdatedBy(UserSummary.from(rule.getUpdatedBy()));
 		detail.setUpdatedOn(rule.getUpdatedOn());
 		detail.setStatus(rule.getStatus());

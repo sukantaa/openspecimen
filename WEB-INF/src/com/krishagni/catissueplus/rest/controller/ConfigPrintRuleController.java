@@ -9,23 +9,23 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.krishagni.catissueplus.core.common.events.InstitutePrintRuleDetail;
+import com.krishagni.catissueplus.core.common.events.ConfigPrintRuleDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
-import com.krishagni.catissueplus.core.common.service.InstitutePrintRuleService;
+import com.krishagni.catissueplus.core.common.service.ConfigPrintRuleService;
 
 @Controller
 @RequestMapping("/print-rules")
-public class InstitutePrintRuleController {
+public class ConfigPrintRuleController {
 	@Autowired
-	private InstitutePrintRuleService institutePrintRuleSvc;
+	private ConfigPrintRuleService configPrintRuleSvc;
 
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public InstitutePrintRuleDetail createInstitutePrintRule(@RequestBody InstitutePrintRuleDetail detail) {
-		RequestEvent<InstitutePrintRuleDetail> req = new RequestEvent<InstitutePrintRuleDetail>(detail);
-		ResponseEvent<InstitutePrintRuleDetail> resp = institutePrintRuleSvc.createInstitutePrintRule(req);
+	public ConfigPrintRuleDetail createConfigPrintRule(@RequestBody ConfigPrintRuleDetail detail) {
+		RequestEvent<ConfigPrintRuleDetail> req = new RequestEvent<ConfigPrintRuleDetail>(detail);
+		ResponseEvent<ConfigPrintRuleDetail> resp = configPrintRuleSvc.createConfigPrintRule(req);
 		resp.throwErrorIfUnsuccessful();
 
 		return resp.getPayload();
