@@ -79,4 +79,8 @@ angular.module('os.administrative.dp',
         controller: 'DpHistoryCtrl',
         parent: 'dp-detail'
       });
+  })
+
+  .run(function(UrlResolver) {
+    UrlResolver.regUrlState('dp-overview', 'dp-detail.overview', 'dpId');
   });
