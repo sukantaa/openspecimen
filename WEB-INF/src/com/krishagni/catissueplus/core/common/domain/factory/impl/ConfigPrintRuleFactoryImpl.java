@@ -12,10 +12,12 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.domain.ConfigPrintRule;
 import com.krishagni.catissueplus.core.common.domain.factory.ConfigPrintRuleFactory;
+import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.ConfigPrintRuleDetail;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.Status;
 
 public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 	private DaoFactory daoFactory;
@@ -35,7 +37,7 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 		setObjectType(detail, rule);
 		setInstitute(detail, rule, ose);
 		setCollectionProtocol(detail, rule, ose);
-		setStatus(detail, rule);
+		setActivityStatus(detail, rule, ose);
 		setRules(detail, rule);
 
 		ose.checkAndThrow();
@@ -94,12 +96,19 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 		rule.setCollectionProtocol(cp);
 	}
 
-	private void setStatus(ConfigPrintRuleDetail detail, ConfigPrintRule rule) {
-		if (detail.getStatus() == null) {
+	private void setActivityStatus(ConfigPrintRuleDetail detail, ConfigPrintRule rule, OpenSpecimenException ose) {
+		String activityStatus = detail.getActivityStatus();
+		if (StringUtils.isBlank(activityStatus)) {
+			rule.setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
 			return;
 		}
 
-		rule.setStatus(detail.getStatus());
+		if (!Status.isValidActivityStatus(activityStatus)) {
+			ose.addError(ActivityStatusErrorCode.INVALID);
+			return;
+		}
+
+		rule.setActivityStatus(activityStatus);
 	}
 
 	private void setRules(ConfigPrintRuleDetail detail, ConfigPrintRule rule) {

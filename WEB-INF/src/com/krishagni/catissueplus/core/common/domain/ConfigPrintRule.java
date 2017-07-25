@@ -22,7 +22,7 @@ public class ConfigPrintRule extends BaseEntity {
 
 	private Date updatedOn;
 
-	private String status;
+	private String activityStatus;
 
 	private transient List<LabelPrintRule> rules;
 
@@ -66,12 +66,12 @@ public class ConfigPrintRule extends BaseEntity {
 		this.updatedOn = updatedOn;
 	}
 
-	public String getStatus() {
-		return status;
+	public String getActivityStatus() {
+		return activityStatus;
 	}
 
-	public void setStatus(String status) {
-		this.status = status;
+	public void setActivityStatus(String activityStatus) {
+		this.activityStatus = activityStatus;
 	}
 
 	public List<LabelPrintRule> getRules() {

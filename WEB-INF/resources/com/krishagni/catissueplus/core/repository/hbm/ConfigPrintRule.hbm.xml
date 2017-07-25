@@ -25,6 +25,6 @@
 
 	<property name="ruleDefJson" column="RULE_DEF"/>
 
-	<property name="status" column="STATUS"/>
+	<property name="activityStatus" column="ACTIVITY_STATUS"/>
   </class>
 </hibernate-mapping>

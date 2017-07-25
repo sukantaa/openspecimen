@@ -167,7 +167,7 @@
 
       <column name="RULE_DEF" type="${clob.type}"/>
 
-      <column name="STATUS" type="${text.type}(32)"/>
+      <column name="ACTIVITY_STATUS" type="${text.type}(32)"/>
     </createTable>
   </changeSet>
 

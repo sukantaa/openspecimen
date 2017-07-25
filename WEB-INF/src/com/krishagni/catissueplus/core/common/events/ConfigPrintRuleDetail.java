@@ -30,7 +30,7 @@ public class ConfigPrintRuleDetail {
 
 	private Date updatedOn;
 
-	private String status;
+	private String activityStatus;
 
 	private List<LabelPrintRule> rules = new ArrayList<LabelPrintRule>();
 
@@ -106,12 +106,12 @@ public class ConfigPrintRuleDetail {
 		this.updatedOn = updatedOn;
 	}
 
-	public String getStatus() {
-		return status;
+	public String getActivityStatus() {
+		return activityStatus;
 	}
 
-	public void setStatus(String status) {
-		this.status = status;
+	public void setActivityStatus(String activityStatus) {
+		this.activityStatus = activityStatus;
 	}
 
 	public List<LabelPrintRule> getRules() {
@@ -138,7 +138,7 @@ public class ConfigPrintRuleDetail {
 		detail.setInstituteName(rule.getInstitute() != null ? rule.getInstitute().getName() : null);
 		detail.setUpdatedBy(UserSummary.from(rule.getUpdatedBy()));
 		detail.setUpdatedOn(rule.getUpdatedOn());
-		detail.setStatus(rule.getStatus());
+		detail.setActivityStatus(rule.getActivityStatus());
 		detail.setRules(rule.getRules());
 		return detail;
 	}
