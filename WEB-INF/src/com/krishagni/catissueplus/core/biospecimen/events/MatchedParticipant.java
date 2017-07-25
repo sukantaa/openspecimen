@@ -1,8 +1,8 @@
 package com.krishagni.catissueplus.core.biospecimen.events;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 
@@ -37,11 +37,8 @@ public class MatchedParticipant {
 	}
 	
 	public static List<MatchedParticipant> from(Map<Participant, List<String>> matchedParticipants) {
-		List<MatchedParticipant> result = new ArrayList<MatchedParticipant>();
-		for (Map.Entry<Participant, List<String>> matchedParticipant : matchedParticipants.entrySet()) {
-			result.add(MatchedParticipant.from(matchedParticipant.getKey(), matchedParticipant.getValue()));
-		}
-		
-		return result;
+		return matchedParticipants.entrySet().stream()
+			.map(mp -> MatchedParticipant.from(mp.getKey(), mp.getValue()))
+			.collect(Collectors.toList());
 	}
 }

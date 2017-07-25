@@ -1,6 +1,7 @@
 
 package com.krishagni.catissueplus.rest.controller;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.events.MatchedParticipant;
+import com.krishagni.catissueplus.core.biospecimen.events.MatchedParticipantsList;
 import com.krishagni.catissueplus.core.biospecimen.events.ParticipantDetail;
 import com.krishagni.catissueplus.core.biospecimen.services.ParticipantService;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -41,49 +43,48 @@ public class ParticipantController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public ParticipantDetail getParticipantById(@PathVariable("id") Long participantId) {
-		ResponseEvent<ParticipantDetail> resp = participantSvc.getParticipant(getRequest(participantId));
-		resp.throwErrorIfUnsuccessful();
-		return resp.getPayload();
+		return response(participantSvc.getParticipant(request(participantId)));
 	}
 	
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public ParticipantDetail createParticipant(@RequestBody ParticipantDetail participantDetail) {
-		ResponseEvent<ParticipantDetail> resp = participantSvc.createParticipant(getRequest(participantDetail));
-		resp.throwErrorIfUnsuccessful();
-		return resp.getPayload();
+		return response(participantSvc.createParticipant(request(participantDetail)));
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public ParticipantDetail updateParticipant(@PathVariable Long id, @RequestBody ParticipantDetail participantDetail) {
-		ResponseEvent<ParticipantDetail> resp = participantSvc.updateParticipant(getRequest(participantDetail));
-		resp.throwErrorIfUnsuccessful();
-		return resp.getPayload();
+		participantDetail.setId(id);
+		return response(participantSvc.updateParticipant(request(participantDetail)));
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public ParticipantDetail delete(@PathVariable Long id,
-		@RequestParam(value = "includeChildren", required = false, defaultValue = "false") 
-		String includeChildren) {
-		
-		ResponseEvent<ParticipantDetail> resp = participantSvc.delete(getRequest(id));
-		resp.throwErrorIfUnsuccessful();
-		return resp.getPayload();
+	public ParticipantDetail delete(@PathVariable Long id) {
+		return response(participantSvc.delete(request(id)));
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/match")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public List<MatchedParticipant> getMatchedParticipants(@RequestBody ParticipantDetail criteria) {
-		criteria.setReqRegInfo(true);
-		ResponseEvent<List<MatchedParticipant>> resp = participantSvc.getMatchingParticipants(getRequest(criteria));
-		resp.throwErrorIfUnsuccessful();
-		return resp.getPayload();
+		List<MatchedParticipantsList> result = getMatchedParticipants(Collections.singletonList(criteria));
+		return result.get(0).getMatches();
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/multi-match")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<MatchedParticipantsList> getMatchedParticipants(@RequestBody List<ParticipantDetail> criteriaList) {
+		for (ParticipantDetail criteria : criteriaList) {
+			criteria.setReqRegInfo(true);
+		}
+
+		return response(participantSvc.getMatchingParticipants(request(criteriaList)));
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value="/extension-form")
@@ -96,7 +97,12 @@ public class ParticipantController {
 		return formSvc.getExtensionInfo(cpId, Participant.EXTN);
 	}
 
-	private <T> RequestEvent<T> getRequest(T payload) {
-		return new RequestEvent<T>(payload);
-	}	
+	private <T> RequestEvent<T> request(T payload) {
+		return new RequestEvent<>(payload);
+	}
+
+	private <T> T response(ResponseEvent<T> resp) {
+		resp.throwErrorIfUnsuccessful();
+		return resp.getPayload();
+	}
 }

@@ -46,6 +46,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.ConsentDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpEntityDeleteCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.MatchedParticipant;
+import com.krishagni.catissueplus.core.biospecimen.events.MatchedParticipantsList;
 import com.krishagni.catissueplus.core.biospecimen.events.ParticipantDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ParticipantRegistrationsList;
 import com.krishagni.catissueplus.core.biospecimen.events.PmiDetail;
@@ -754,10 +755,11 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	}
 
 	private ParticipantDetail lookupParticipant(ParticipantDetail detail) {
-		ResponseEvent<List<MatchedParticipant>> resp = participantService.getMatchingParticipants(new RequestEvent<>(detail));
+		RequestEvent<List<ParticipantDetail>> req = new RequestEvent<>(Collections.singletonList(detail));
+		ResponseEvent<List<MatchedParticipantsList>> resp = participantService.getMatchingParticipants(req);
 		resp.throwErrorIfUnsuccessful();
 
-		List<MatchedParticipant> result = resp.getPayload();
+		List<MatchedParticipant> result = resp.getPayload().get(0).getMatches();
 		if (result.isEmpty()) {
 			throw OpenSpecimenException.userError(ParticipantErrorCode.NOT_FOUND);
 		}

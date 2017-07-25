@@ -338,8 +338,10 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 	private static CprSummary getCprSummary(CollectionProtocolRegistration cpr) {
 		CprSummary cprSummary = new CprSummary();
 		cprSummary.setCpId(cpr.getCollectionProtocol().getId());
-		cprSummary.setCprId(cpr.getId());
 		cprSummary.setCpShortTitle(cpr.getCollectionProtocol().getShortTitle());
+		cprSummary.setCprId(cpr.getId());
+		cprSummary.setPpid(cpr.getPpid());
+		cprSummary.setRegistrationDate(cpr.getRegistrationDate());
 		return cprSummary;
 	}
 }
