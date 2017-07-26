@@ -32,7 +32,8 @@ angular.module('os.biospecimen.specimen')
       scope: {
         specimens: '&',
         initList: '&',
-        resourceOpts: '=?'
+        resourceOpts: '=?',
+        opts: '=?'
       },
 
       templateUrl: 'modules/biospecimen/participant/specimen/specimen-ops.html',
@@ -73,7 +74,19 @@ angular.module('os.biospecimen.specimen')
         }
 
         scope.distributeSpecimens = function() {
-          gotoView('order-addedit', {orderId: ''}, 'no_specimens_for_distribution');
+          var orderParams = {orderId: ''};
+
+          var spmns = scope.specimens();
+          if (!spmns || spmns.length == 0) {
+            var opts = scope.opts || {};
+            if (!!opts.listIdName && !!opts.listIdValue) {
+              orderParams[opts.listIdName] = opts.listIdValue;
+              $state.go('order-addedit', orderParams);
+              return;
+            }
+          }
+
+          gotoView('order-addedit', orderParams, 'no_specimens_for_distribution');
         }
 
         scope.shipSpecimens = function() {
@@ -90,6 +103,21 @@ angular.module('os.biospecimen.specimen')
 
         scope.addEvent = function() {
           gotoView('bulk-add-event', {}, 'no_specimens_to_add_event');
+        }
+
+        scope.retrieveSpecimens = function() {
+          var selectedSpmns = scope.specimens();
+          if (!selectedSpmns || selectedSpmns.length == 0) {
+            Alerts.error('specimen_list.no_specimens_to_retrieve');
+            return;
+          }
+
+          var spmnsToUpdate = selectedSpmns.map(function(spmn) { return {id: spmn.id, storageLocation: {}}; });
+          Specimen.bulkUpdate(spmnsToUpdate).then(
+            function(updatedSpmns) {
+              scope.initList();
+            }
+          );
         }
       }
     };
