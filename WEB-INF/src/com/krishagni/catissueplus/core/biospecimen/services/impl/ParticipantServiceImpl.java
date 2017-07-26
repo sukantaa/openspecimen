@@ -1,6 +1,7 @@
 
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -17,6 +18,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantErr
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantUtil;
 import com.krishagni.catissueplus.core.biospecimen.events.MatchedParticipant;
+import com.krishagni.catissueplus.core.biospecimen.events.MatchedParticipantsList;
 import com.krishagni.catissueplus.core.biospecimen.events.ParticipantDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.PmiDetail;
 import com.krishagni.catissueplus.core.biospecimen.matching.ParticipantLookupLogic;
@@ -149,14 +151,20 @@ public class ParticipantServiceImpl implements ParticipantService, InitializingB
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<List<MatchedParticipant>> getMatchingParticipants(RequestEvent<ParticipantDetail> req) {
+	public ResponseEvent<List<MatchedParticipantsList>> getMatchingParticipants(RequestEvent<List<ParticipantDetail>> req) {
 		try {
-			List<MatchedParticipant> matchedParticipants = getParticipantLookupLogic().getMatchingParticipants(req.getPayload());
-			if (req.getPayload().isReqRegInfo()) {
-				addRegInfo(matchedParticipants);
+			List<MatchedParticipantsList> result = new ArrayList<>();
+
+			for (ParticipantDetail inputCrit : req.getPayload()) {
+				List<MatchedParticipant> matchedParticipants = getParticipantLookupLogic().getMatchingParticipants(inputCrit);
+				if (inputCrit.isReqRegInfo()) {
+					addRegInfo(matchedParticipants);
+				}
+
+				result.add(MatchedParticipantsList.from(inputCrit, matchedParticipants));
 			}
 
-			return ResponseEvent.response(matchedParticipants);
+			return ResponseEvent.response(result);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {

@@ -307,7 +307,7 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 		result.setEthnicities(new HashSet<>(participant.getEthnicities()));
 		result.setGender(participant.getGender());
 		result.setEmpi(excludePhi ? "###" : participant.getEmpi());
-		result.setPmis(PmiDetail.from(participant.getPmis(), excludePhi)); 
+		result.setPmis(PmiDetail.from(participant.getPmisOrderedById(), excludePhi));
 		result.setRaces(new HashSet<>(participant.getRaces()));
 		result.setSexGenotype(participant.getSexGenotype());
 		result.setUid(excludePhi ? "###" : participant.getUid());
@@ -338,8 +338,10 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 	private static CprSummary getCprSummary(CollectionProtocolRegistration cpr) {
 		CprSummary cprSummary = new CprSummary();
 		cprSummary.setCpId(cpr.getCollectionProtocol().getId());
-		cprSummary.setCprId(cpr.getId());
 		cprSummary.setCpShortTitle(cpr.getCollectionProtocol().getShortTitle());
+		cprSummary.setCprId(cpr.getId());
+		cprSummary.setPpid(cpr.getPpid());
+		cprSummary.setRegistrationDate(cpr.getRegistrationDate());
 		return cprSummary;
 	}
 }

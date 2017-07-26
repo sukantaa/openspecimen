@@ -27,6 +27,7 @@ import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import com.krishagni.catissueplus.core.administrative.domain.ForgotPasswordToken;
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.UserEvent;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserFactory;
 import com.krishagni.catissueplus.core.administrative.events.AnnouncementDetail;
@@ -42,6 +43,7 @@ import com.krishagni.catissueplus.core.auth.domain.LoginAuditLog;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
+import com.krishagni.catissueplus.core.common.domain.Notification;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.BulkEntityDetail;
@@ -51,12 +53,12 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.service.EmailService;
-import com.krishagni.catissueplus.core.common.domain.Notification;
-import com.krishagni.catissueplus.core.common.util.NotifUtil;
-import com.krishagni.catissueplus.core.common.util.EmailUtil;
+import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
@@ -171,7 +173,10 @@ public class UserServiceImpl implements UserService, InitializingBean, UserDetai
 	@Override
 	public UserDetails loadUserByUsername(String username)
 	throws UsernameNotFoundException {
-		return daoFactory.getUserDao().getUser(username, DEFAULT_AUTH_DOMAIN);
+		int slashIdx = username.indexOf('/');
+		String loginName = slashIdx != -1 ? username.substring(0, slashIdx) : username;
+		String domain    = slashIdx != -1 ? username.substring(slashIdx + 1) : DEFAULT_AUTH_DOMAIN;
+		return daoFactory.getUserDao().getUser(loginName, domain);
 	}
 	
 	@Override
@@ -686,6 +691,11 @@ public class UserServiceImpl implements UserService, InitializingBean, UserDetai
 	}
 
 	private void notifyUserUpdated(User user, String op) {
+		boolean newAccountCreated = op.equals("approved") || op.equals("created");
+		if (newAccountCreated) {
+			EventPublisher.getInstance().publish(UserEvent.CREATED, user);
+		}
+
 		String opDesc = MessageUtil.getInstance().getMessage("users_op_" + op);
 		String [] subjParams = new String[] {user.getFirstName(), user.getLastName(), opDesc};
 
@@ -704,7 +714,7 @@ public class UserServiceImpl implements UserService, InitializingBean, UserDetai
 			users.add(AuthUtil.getCurrentUser());
 		}
 
-		if (!op.equals("created") && !op.equals("approved") && !users.contains(user)) {
+		if (!newAccountCreated && !users.contains(user)) {
 			//
 			// hack: for approved and created op, a separate email is sent to the user
 			//

@@ -45,7 +45,7 @@ public class SamlAuthenticationServiceImpl extends SimpleUrlAuthenticationSucces
 	}
 	
 	@Override
-	public void authenticate(String username, String password) {
+	public void authenticate(LoginDetail loginDetail) {
 		throw OpenSpecimenException.serverError(new UnsupportedOperationException("Not supported for this implementation"));
 	}
 

@@ -54,4 +54,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="mdnasim" id="Config setting to enable or disable notifications on DP role updates">
+    <sql>
+      call add_cfg_prop(
+        'notifications', 'email_users_dp_role_updated',
+        'users_dp_role_updated', 'users_dp_role_updated_desc',
+        'BOOLEAN', 'true'
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

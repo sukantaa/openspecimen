@@ -189,13 +189,18 @@ angular.module('os.common.box', [])
           // Explicit starting cell specified
           //
           var startCell = input[i].startCell.trim().split(',');
-          if (startCell.length != 2) {
-            alert("Invalid start position: " + input[1].startCell);
-            return;
-          }
+          if (opts.box.positionLabelingMode() == 'LINEAR') {
+            startRow    = Math.floor((+startCell - 1) / opts.box.numberOfColumns()) + 1;
+            startColumn = ((+startCell - 1) % opts.box.numberOfColumns()) + 1;
+          } else {
+            if (startCell.length != 2) {
+              alert("Invalid start position: " + input[i].startCell);
+              return;
+            }
 
-          startRow    = NumberConverterUtil.toNumber(opts.box.rowLabelingScheme(),    startCell[0].trim());
-          startColumn = NumberConverterUtil.toNumber(opts.box.columnLabelingScheme(), startCell[1].trim());
+            startRow    = NumberConverterUtil.toNumber(opts.box.rowLabelingScheme(),    startCell[0].trim());
+            startColumn = NumberConverterUtil.toNumber(opts.box.columnLabelingScheme(), startCell[1].trim());
+          }
 
           //
           // fast forward map index to point to first occupant in cell (row, column)

@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.UserEvent;
 import com.krishagni.catissueplus.core.audit.domain.UserApiCallLog;
 import com.krishagni.catissueplus.core.audit.services.AuditService;
 import com.krishagni.catissueplus.core.auth.AuthConfig;
@@ -32,6 +33,7 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
@@ -82,9 +84,17 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 			}
 			
 			AuthenticationService authService = user.getAuthDomain().getAuthProviderInstance();
-			authService.authenticate(loginDetail.getLoginName(), loginDetail.getPassword());
-			
-			Map<String, Object> authDetail = new HashMap<String, Object>();
+			authService.authenticate(loginDetail);
+
+			//
+			// publish auth data for anyone to do extra checks
+			//
+			Map<String, Object> authEventData = new HashMap<>();
+			authEventData.put("loginDetail", loginDetail);
+			authEventData.put("user", user);
+			EventPublisher.getInstance().publish(UserEvent.XTRA_AUTH, authEventData);
+
+			Map<String, Object> authDetail = new HashMap<>();
 			authDetail.put("user", user);
 			
 			String authToken = generateToken(user, loginDetail);
@@ -193,6 +203,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		insertApiCallLog(loginDetail, user, loginAuditLog);
 		return AuthUtil.encodeToken(token);
 	}
+
+
 	
 	private LoginAuditLog insertLoginAudit(User user, String ipAddress, boolean loginSuccessful) {
 		LoginAuditLog loginAuditLog = new LoginAuditLog();

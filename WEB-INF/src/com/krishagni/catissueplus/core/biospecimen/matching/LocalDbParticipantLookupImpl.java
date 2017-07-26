@@ -48,7 +48,7 @@ public class LocalDbParticipantLookupImpl implements ParticipantLookupLogic {
 			}
 		}
 		
-		if (participant.getPmis() != null) {
+		if (CollectionUtils.isNotEmpty(participant.getPmis())) {
 			List<Participant> matched = dao.getByPmis(participant.getPmis());
 			if (CollectionUtils.isNotEmpty(matched)) {
 				addParticipant(matchedParticipants, matched, "pmi");

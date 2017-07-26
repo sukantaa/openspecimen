@@ -11,12 +11,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collection;
 import java.util.function.Predicate;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.krishagni.catissueplus.core.administrative.domain.Institute;
+import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.DpDistributionSite;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.DpConsentTier;
 import com.krishagni.catissueplus.core.administrative.domain.DpRequirement;
@@ -32,11 +36,13 @@ import com.krishagni.catissueplus.core.administrative.events.DpRequirementDetail
 import com.krishagni.catissueplus.core.administrative.events.DprStat;
 import com.krishagni.catissueplus.core.administrative.repository.DpListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.DpRequirementDao;
+import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.DistributionProtocolService;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.ConsentStatement;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ConsentStatementErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.domain.Notification;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
@@ -54,6 +60,8 @@ import com.krishagni.catissueplus.core.common.util.CsvWriter;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.common.util.EmailUtil;
+import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.catissueplus.core.de.services.FormService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
@@ -162,6 +170,7 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 			
 			daoFactory.getDistributionProtocolDao().saveOrUpdate(dp);
 			dp.addOrUpdateExtension();
+			notifyDpRoleUpdated(dp);
 			return ResponseEvent.response(DistributionProtocolDetail.from(dp));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -781,4 +790,92 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 			throw OpenSpecimenException.userError(DistributionProtocolErrorCode.DUP_CONSENT, tier.getStatement().getCode(), dp.getShortTitle());
 		}
 	}
+
+	private void notifyDpRoleUpdated(DistributionProtocol dp) {
+		Map<String, Object> props = new HashMap<>();
+		props.put("dp", dp);
+		props.put("instituteSitesMap", DpDistributionSite.getInstituteSitesMap(dp.getDistributingSites()));
+
+		notifyDpRoleUpdated(Collections.singletonList(dp.getPrincipalInvestigator()), dp, props, null, N_USER, N_DP_PI);
+		notifyDpRoleUpdated(dp.getCoordinators(), dp, props, null, N_USER, N_DP_COORD);
+
+		notifyDpRoleUpdated(getInstituteAdmins(dp.getInstitute()), dp, props, dp.getInstitute().getName(), N_INST_ADMIN, N_DP_RECV_SITE);
+		if (dp.getDefReceivingSite() != null) {
+			notifyDpRoleUpdated(dp.getDefReceivingSite().getCoordinators(), dp, props, dp.getDefReceivingSite().getName(), N_SITE_ADMIN, N_DP_RECV_SITE);
+		}
+
+		for (DpDistributionSite distSite : dp.getDistributingSites()) {
+			if (distSite.getSite() != null) {
+				notifyDpRoleUpdated(distSite.getSite().getCoordinators(), dp, props, distSite.getSite().getName(), 1, 1);
+			}
+		}
+	}
+
+	private void notifyDpRoleUpdated(
+		Collection<User> notifyUsers,
+		DistributionProtocol dp,
+		Map<String, Object> props,
+		String instSiteName,
+		int userOrSiteOrInst, // 0: user, 1: site, 2: institute
+		int roleChoice) {     // for users -  1: PI / 2: Coordinator, for others - 1: distributing / 2: receiving
+
+		if (CollectionUtils.isEmpty(notifyUsers)) {
+			return;
+		}
+
+		String notifMessage = getNotifMsg(dp.getShortTitle(), instSiteName, userOrSiteOrInst, roleChoice);
+		props.put("emailText", notifMessage);
+		for (User rcpt : notifyUsers) {
+			props.put("rcpt", rcpt);
+			EmailUtil.getInstance().sendEmail(ROLE_UPDATED_EMAIL_TMPL, new String[] {rcpt.getEmailAddress()}, null, props);
+		}
+
+		Notification notif = new Notification();
+		notif.setEntityType(DistributionProtocol.getEntityName());
+		notif.setEntityId(dp.getId());
+		notif.setOperation("UPDATE");
+		notif.setCreatedBy(AuthUtil.getCurrentUser());
+		notif.setCreationTime(Calendar.getInstance().getTime());
+		notif.setMessage(notifMessage);
+		NotifUtil.getInstance().notify(notif, Collections.singletonMap("dp-overview", notifyUsers));
+	}
+
+	private String getNotifMsg(String shortTitle, String instSiteName, int siteOrInst, int roleChoice) {
+		String msgKey;
+		Object[] params;
+		if (siteOrInst == 0) {
+			msgKey = "dp_user_notif_role";
+			params = new Object[] { roleChoice, shortTitle};
+		} else {
+			msgKey = "dp_site_inst_notif";
+			params = new Object[] {siteOrInst, instSiteName, roleChoice, shortTitle};
+		}
+
+		return MessageUtil.getInstance().getMessage(msgKey, params);
+	}
+
+	private List<User> getInstituteAdmins(Institute institute) {
+		return daoFactory.getUserDao().getUsers(
+			new UserListCriteria()
+				.instituteName(institute.getName())
+				.type("INSTITUTE")
+				.activityStatus("Active")
+		);
+	}
+
+	private static final String ROLE_UPDATED_EMAIL_TMPL = "users_dp_role_updated";
+
+	private static final int N_USER = 0;
+
+	private static final int N_SITE_ADMIN = 1;
+
+	private static final int N_INST_ADMIN = 2;
+
+	private static final int N_DP_PI = 1;
+
+	private static final int N_DP_COORD = 2;
+
+	private static final int N_DP_DIST_SITE = 1;
+
+	private static final int N_DP_RECV_SITE = 2;
 }
