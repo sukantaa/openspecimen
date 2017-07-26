@@ -3,6 +3,7 @@ package com.krishagni.catissueplus.core.common.domain.factory.impl;
 
 import java.util.Calendar;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
@@ -13,6 +14,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.domain.ConfigPrintRule;
 import com.krishagni.catissueplus.core.common.domain.factory.ConfigPrintRuleFactory;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
+import com.krishagni.catissueplus.core.common.errors.ConfigPrintRuleErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.ConfigPrintRuleDetail;
@@ -38,7 +40,7 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 		setInstitute(detail, rule, ose);
 		setCollectionProtocol(detail, rule, ose);
 		setActivityStatus(detail, rule, ose);
-		setRules(detail, rule);
+		setRules(detail, rule, ose);
 
 		ose.checkAndThrow();
 		return rule;
@@ -111,8 +113,9 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 		rule.setActivityStatus(activityStatus);
 	}
 
-	private void setRules(ConfigPrintRuleDetail detail, ConfigPrintRule rule) {
-		if (detail.getRules().isEmpty()) {
+	private void setRules(ConfigPrintRuleDetail detail, ConfigPrintRule rule, OpenSpecimenException ose) {
+		if (CollectionUtils.isEmpty(detail.getRules())) {
+			ose.addError(ConfigPrintRuleErrorCode.RULES_REQUIRED);
 			return;
 		}
 

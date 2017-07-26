@@ -32,7 +32,7 @@ public class ConfigPrintRuleDetail {
 
 	private String activityStatus;
 
-	private List<LabelPrintRule> rules = new ArrayList<LabelPrintRule>();
+	private List<LabelPrintRule> rules;
 
 	public Long getId() {
 		return Id;

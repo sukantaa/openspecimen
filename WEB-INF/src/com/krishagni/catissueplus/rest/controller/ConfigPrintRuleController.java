@@ -24,10 +24,15 @@ public class ConfigPrintRuleController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public ConfigPrintRuleDetail createConfigPrintRule(@RequestBody ConfigPrintRuleDetail detail) {
-		RequestEvent<ConfigPrintRuleDetail> req = new RequestEvent<ConfigPrintRuleDetail>(detail);
-		ResponseEvent<ConfigPrintRuleDetail> resp = configPrintRuleSvc.createConfigPrintRule(req);
-		resp.throwErrorIfUnsuccessful();
+		return response(configPrintRuleSvc.createConfigPrintRule(request(detail)));
+	}
 
+	private <T> RequestEvent<T> request(T payload) {
+		return new RequestEvent<>(payload);
+	}
+
+	private <T> T response(ResponseEvent<T> resp) {
+		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}
 }

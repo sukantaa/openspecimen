@@ -165,7 +165,9 @@
         <constraints nullable="false"/>
       </column>
 
-      <column name="RULE_DEF" type="${clob.type}"/>
+      <column name="RULE_DEF" type="${clob.type}">
+        <constraints nullable="false"/>
+      </column>
 
       <column name="ACTIVITY_STATUS" type="${text.type}(32)"/>
     </createTable>
