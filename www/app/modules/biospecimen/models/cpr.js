@@ -18,7 +18,7 @@ angular.module('os.biospecimen.models.cpr',
     // overriding default query function
     //
     CollectionProtocolRegistration.query = function(queryParams) {
-      return $http.post(CollectionProtocolRegistration.url() + '/list', {params: queryParams})
+      return $http.post(CollectionProtocolRegistration.url() + '/list', queryParams)
         .then(CollectionProtocolRegistration.modelArrayRespTransform);
     }
 
@@ -26,7 +26,7 @@ angular.module('os.biospecimen.models.cpr',
     // overriding default getCount function
     //
     CollectionProtocolRegistration.getCount = function(queryParams) {
-      return $http.post(CollectionProtocolRegistration.url() + 'count', {params: queryParams})
+      return $http.post(CollectionProtocolRegistration.url() + 'count', queryParams)
         .then(CollectionProtocolRegistration.noTransform);
     }
 
