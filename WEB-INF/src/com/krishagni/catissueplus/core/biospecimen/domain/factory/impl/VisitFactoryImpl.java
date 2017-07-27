@@ -296,7 +296,7 @@ public class VisitFactoryImpl implements VisitFactory {
 
 			if (visit.getCpEvent() != null && visit.getCpEvent().getDefaultSite() != null) {
 				site = visit.getCpEvent().getDefaultSite();
-			} else {
+			} else if (visit.getRegistration() != null) {
 				CollectionProtocolRegistration cpr = visit.getRegistration();
 				Visit latestVisit = cpr.getLatestVisit();
 				if (latestVisit != null) {
