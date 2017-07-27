@@ -185,7 +185,6 @@
     <property name="cpeFactory" ref="cpeFactory"/>
     <property name="srFactory" ref="srFactory"/>
     <property name="rbacSvc" ref="rbacSvc"/>
-    <property name="emailService" ref="emailService"/>
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="listGenerator" ref="listGenerator"/>
     <property name="rptSettingsFactory" ref="reportSettingsFact"/>
