@@ -292,12 +292,6 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 		try {
 			Collection<Specimen> specimens = new ArrayList<Specimen>();
 			for (SpecimenDetail detail : req.getPayload()) {
-				//
-				// Pre-populate specimen interaction objects with
-				// appropriate created on time
-				//
-//				setCreatedOn(detail);
-
 				Specimen specimen = collectSpecimen(detail, null);
 				specimens.add(specimen);
 			}
