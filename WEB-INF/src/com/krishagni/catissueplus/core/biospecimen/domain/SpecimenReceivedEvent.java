@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -69,8 +70,15 @@ public class SpecimenReceivedEvent extends SpecimenEvent {
 		if (sr != null) {
 			event.setUser(sr.getReceiver());
 		}
-		
-		event.setTime(Calendar.getInstance().getTime());		
+
+		Date receivedTime;
+		if (specimen.getVisit() != null && specimen.getVisit().getVisitDate() != null) {
+			receivedTime = specimen.getVisit().getVisitDate();
+		} else {
+			receivedTime = Calendar.getInstance().getTime();
+		}
+
+		event.setTime(receivedTime);
 		if (event.getUser() == null) {
 			event.setUser(AuthUtil.getCurrentUser());
 		}		

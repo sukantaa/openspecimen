@@ -296,7 +296,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 				// Pre-populate specimen interaction objects with
 				// appropriate created on time
 				//
-				setCreatedOn(detail);
+//				setCreatedOn(detail);
 
 				Specimen specimen = collectSpecimen(detail, null);
 				specimens.add(specimen);
@@ -531,47 +531,6 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 		return daoFactory.getSpecimenDao().getSpecimens(crit);
 	}
 
-	private void setCreatedOn(SpecimenDetail detail) {
-		//
-		// 1. If primary specimen, copy received time, if available, to created on.
-		//    Otherwise use current time for both created on and receive time
-		// 2. If not primary specimen and parent is already collected, use current time
-		// 3. Copy parent's created on to its children
-		//
-		Date createdOn = Calendar.getInstance().getTime();
-		if (Specimen.NEW.equals(detail.getLineage())) {
-			if (detail.getReceivedEvent() != null && detail.getReceivedEvent().getTime() != null) {
-				createdOn = detail.getReceivedEvent().getTime();
-			} else {
-				ReceivedEventDetail receivedEvent = detail.getReceivedEvent();
-				if (receivedEvent == null) {
-					receivedEvent = new ReceivedEventDetail();
-				}
-
-				receivedEvent.setTime(createdOn);
-				detail.setReceivedEvent(receivedEvent);
-			}
-
-			setCreatedOn(detail.getSpecimensPool(), createdOn);
-		}
-
-		setCreatedOn(detail.getChildren(), createdOn);
-	}
-
-	private void setCreatedOn(List<SpecimenDetail> details, Date createdOn) {
-		if (CollectionUtils.isEmpty(details)) {
-			return;
-		}
-
-		for (SpecimenDetail detail : details) {
-			if (detail.getCreatedOn() == null) {
-				detail.setCreatedOn(createdOn);
-			}
-
-			setCreatedOn(detail.getChildren(), detail.getCreatedOn());
-		}
-	}
-
 	private void setDistributionStatus(SpecimenDetail specimen) {
 		setDistributionStatus(flattenSpecimenTree(specimen));
 	}
@@ -711,6 +670,10 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 
 		if (CollectionUtils.isNotEmpty(detail.getChildren())) {
 			for (SpecimenDetail childDetail : detail.getChildren()) {
+				if (childDetail.getCreatedOn() == null) {
+					childDetail.setCreatedOn(specimen.getCreatedOn());
+				}
+
 				collectSpecimen(childDetail, specimen);
 			}
 		}
