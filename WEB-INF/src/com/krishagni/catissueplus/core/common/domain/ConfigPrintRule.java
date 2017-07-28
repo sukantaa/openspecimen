@@ -5,11 +5,13 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
+import com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenLabelPrintRule;
 
 public class ConfigPrintRule extends BaseEntity {
 	private String objectType;
@@ -24,7 +26,7 @@ public class ConfigPrintRule extends BaseEntity {
 
 	private String activityStatus;
 
-	private transient List<LabelPrintRule> rules;
+	private transient List<SpecimenLabelPrintRule> rules;
 
 	public String getObjectType() {
 		return objectType;
@@ -74,11 +76,11 @@ public class ConfigPrintRule extends BaseEntity {
 		this.activityStatus = activityStatus;
 	}
 
-	public List<LabelPrintRule> getRules() {
+	public List<SpecimenLabelPrintRule> getRules() {
 		return rules;
 	}
 
-	public void setRules(List<LabelPrintRule> rules) {
+	public void setRules(List<SpecimenLabelPrintRule> rules) {
 		this.rules = rules;
 	}
 
@@ -91,10 +93,10 @@ public class ConfigPrintRule extends BaseEntity {
 	}
 
 	public void setRuleDefJson(String ruleDefJson) {
-		List<LabelPrintRule> list = null;
+		List<SpecimenLabelPrintRule> list = null;
 		try {
 			list = getReadMapper().readValue(ruleDefJson, TypeFactory.defaultInstance()
-				.constructCollectionType(List.class, LabelPrintRule.class));
+				.constructCollectionType(List.class, SpecimenLabelPrintRule.class));
 		} catch (Exception e) {
 			throw new RuntimeException("Error marshalling JSON to print rule", e);
 		}
@@ -107,7 +109,7 @@ public class ConfigPrintRule extends BaseEntity {
 	}
 
 	private ObjectMapper getWriteMapper() {
-		ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = new ObjectMapper().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		mapper.setVisibilityChecker(
 			mapper.getSerializationConfig().getDefaultVisibilityChecker()
 				.withFieldVisibility(Visibility.ANY)

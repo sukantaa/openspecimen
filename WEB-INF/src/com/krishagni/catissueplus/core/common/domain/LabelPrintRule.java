@@ -124,12 +124,12 @@ public class LabelPrintRule {
 		return cmdFileFmt;
 	}
 
-	@JsonIgnore
+	@JsonSetter
 	public void setCmdFileFmt(CmdFileFmt cmdFileFmt) {
 		this.cmdFileFmt = cmdFileFmt;
 	}
 
-	@JsonSetter
+	@JsonIgnore
 	public void setCmdFileFmt(String fmt) {
 		this.cmdFileFmt = CmdFileFmt.get(fmt);
 		if (this.cmdFileFmt == null) {

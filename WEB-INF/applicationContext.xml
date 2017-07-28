@@ -1104,6 +1104,7 @@
 
   <bean id="configPrintRuleFactory" class="com.krishagni.catissueplus.core.common.domain.factory.impl.ConfigPrintRuleFactoryImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="printLabelTokensRegistrar" ref="specimenPrintLabelTokensRegistrar"/>
   </bean>
 
   <task:scheduler id="taskScheduler" pool-size="1"/>

@@ -1,13 +1,11 @@
 package com.krishagni.catissueplus.core.common.events;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
-import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
 import com.krishagni.catissueplus.core.common.domain.ConfigPrintRule;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
@@ -32,7 +30,7 @@ public class ConfigPrintRuleDetail {
 
 	private String activityStatus;
 
-	private List<LabelPrintRule> rules;
+	private List<SpecimenLabelPrintRuleDetail> rules;
 
 	public Long getId() {
 		return Id;
@@ -114,11 +112,11 @@ public class ConfigPrintRuleDetail {
 		this.activityStatus = activityStatus;
 	}
 
-	public List<LabelPrintRule> getRules() {
+	public List<SpecimenLabelPrintRuleDetail> getRules() {
 		return rules;
 	}
 
-	public void setRules(List<LabelPrintRule> rules) {
+	public void setRules(List<SpecimenLabelPrintRuleDetail> rules) {
 		this.rules = rules;
 	}
 
@@ -139,7 +137,7 @@ public class ConfigPrintRuleDetail {
 		detail.setUpdatedBy(UserSummary.from(rule.getUpdatedBy()));
 		detail.setUpdatedOn(rule.getUpdatedOn());
 		detail.setActivityStatus(rule.getActivityStatus());
-		detail.setRules(rule.getRules());
+		detail.setRules(SpecimenLabelPrintRuleDetail.from(rule.getRules()));
 		return detail;
 	}
 }
