@@ -144,4 +144,13 @@
       baseTableName="OS_ORDERS" baseColumnNames="SPECIMEN_LIST_ID"
       referencedTableName="CATISSUE_SPECIMENLIST_TAGS" referencedColumnNames="IDENTIFIER"/>
   </changeSet>
+
+  <changeSet author="ckhilosiya" id="Maintain status of API calls for container store list">
+    <addColumn tableName="OS_CONTAINER_STORE_LISTS">
+      <column name="STATUS" type="${text.type}(16)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="STATE" type="${tinyint.type}"/>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

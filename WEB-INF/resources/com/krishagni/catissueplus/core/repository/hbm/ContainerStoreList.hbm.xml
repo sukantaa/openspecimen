@@ -26,6 +26,15 @@
 
     <property name="executionTime" column="EXECUTION_TIME"/>
 
+    <property name="status" column="STATUS">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">com.krishagni.catissueplus.core.administrative.domain.ContainerStoreList$Status</param>
+        <param name="type">12</param>
+      </type>
+    </property>
+
+    <property name="state" column="STATE"/>
+
     <set name="items" table="OS_CONT_STORE_LIST_ITEMS" inverse="true" cascade="all-delete-orphan">
       <key column="STORE_LIST_ID"/>
       <one-to-many class="com.krishagni.catissueplus.core.administrative.domain.ContainerStoreListItem"/>
@@ -37,7 +46,7 @@
       from
         com.krishagni.catissueplus.core.administrative.domain.ContainerStoreList sl
       where
-        sl.executionTime is null
+        sl.status != 'SUCCESS'
       order by
         sl.id asc
     </query>

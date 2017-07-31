@@ -949,7 +949,6 @@ public class StorageContainer extends BaseEntity {
 
 	public void processList(ContainerStoreList list) {
 		getAutoFreezerProvider().getInstance().processList(list);
-		list.setExecutionTime(Calendar.getInstance().getTime());
 	}
 
 	private void deleteWithoutCheck() {
