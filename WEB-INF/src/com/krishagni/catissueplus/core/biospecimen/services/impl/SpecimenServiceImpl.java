@@ -290,7 +290,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 	@PlusTransactional
 	public ResponseEvent<List<SpecimenDetail>> collectSpecimens(RequestEvent<List<SpecimenDetail>> req) {
 		try {
-			Collection<Specimen> specimens = new ArrayList<Specimen>();
+			Collection<Specimen> specimens = new ArrayList<>();
 			for (SpecimenDetail detail : req.getPayload()) {
 				Specimen specimen = collectSpecimen(detail, null);
 				specimens.add(specimen);

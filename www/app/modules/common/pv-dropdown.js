@@ -41,12 +41,8 @@ angular.module('openspecimen')
         var prop = 'P:' + attrs.attribute + ':' + parentVal;
         q = getCachedValues(formCtrl, 'pvs', prop, function() { return _loadPvsByParent(attrs, parentVal); });
       } else {
-        if (!searchTerm) {
-          var prop = attrs.attribute + ":" + attrs.showOnlyLeafValues;
-          q = getCachedValues(formCtrl, 'pvs', prop, function() { return _loadPvs(scope, attrs, searchTerm); });
-        } else {
-          q = _loadPvs(scope, attrs, searchTerm);
-        }
+        var prop = attrs.attribute + ":" + attrs.showOnlyLeafValues + ":S:" + (searchTerm || '');
+        q = getCachedValues(formCtrl, 'pvs', prop, function() { return _loadPvs(scope, attrs, searchTerm); });
       }
 
       q.then(
@@ -145,7 +141,7 @@ angular.module('openspecimen')
       scope: true,
       replace: true,
       link : linker,
-      template: '<os-select refresh="searchPvs($select.search)" list="pvs" ' +
+      template: '<os-select refresh="searchPvs($select.search)" list="pvs" on-change="searchPvs"' +
                 '  select-prop="value" display-prop="displayValue"> ' +
                 '</os-select>'
     };
