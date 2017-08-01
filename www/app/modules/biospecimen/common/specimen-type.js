@@ -71,6 +71,17 @@ angular.module('os.biospecimen.common')
       }
 
       SpecimenTypeUtil.setClass(formCtrl, [scope.specimen], scope.options);
+
+      scope.$watch('specimen.type',
+        function(newVal, oldVal) {
+          if (newVal == oldVal) {
+            return;
+          }
+
+          scope.model = {value: newVal};
+          SpecimenTypeUtil.setClass(formCtrl, [scope.specimen], scope.options);
+        }
+      );
     }
 
     return {
