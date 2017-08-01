@@ -28,7 +28,7 @@ public class ParticipantDaoImpl extends AbstractDao<Participant> implements Part
 	public Participant getByUid(String uid) {		
 		List<Participant> participants = sessionFactory.getCurrentSession()
 				.getNamedQuery(GET_BY_UID)
-				.setString("uid", uid)
+				.setString("uid", uid.toLowerCase())
 				.list();
 		return participants == null || participants.isEmpty() ? null : participants.iterator().next();
 	}
@@ -38,7 +38,7 @@ public class ParticipantDaoImpl extends AbstractDao<Participant> implements Part
 	public Participant getByEmpi(String empi) {
 		List<Participant> participants = sessionFactory.getCurrentSession()
 				.getNamedQuery(GET_BY_EMPI)
-				.setString("empi", empi)
+				.setString("empi", empi.toLowerCase())
 				.list();
 		return participants == null || participants.isEmpty() ? null : participants.iterator().next();
 	}
@@ -52,7 +52,7 @@ public class ParticipantDaoImpl extends AbstractDao<Participant> implements Part
 
 		return sessionFactory.getCurrentSession()
 				.getNamedQuery(GET_BY_LNAME_AND_DOB)
-				.setString("lname", lname)
+				.setString("lname", lname.toLowerCase())
 				.setTimestamp("dobStart", dobStart)
 				.setTimestamp("dobEnd", dobEnd)
 				.list();
@@ -85,16 +85,16 @@ public class ParticipantDaoImpl extends AbstractDao<Participant> implements Part
 	@Override
 	public boolean isUidUnique(String uid) {
 		Query query = sessionFactory.getCurrentSession().getNamedQuery(GET_PARTICIPANT_ID_BY_UID);
-		query.setString("uid", uid);
-		return query.list().isEmpty() ? true : false;
+		query.setString("uid", uid.toLowerCase());
+		return query.list().isEmpty();
 	}
 
 	@Override
 	public boolean isPmiUnique(String siteName, String mrn) {
 		Query query = sessionFactory.getCurrentSession().getNamedQuery(GET_PMI_ID_BY_SITE_MRN);
-		query.setString("siteName", siteName);
-		query.setString("mrn", mrn);
-		return query.list().isEmpty() ? true : false;
+		query.setString("siteName", siteName.toLowerCase());
+		query.setString("mrn", mrn.toLowerCase());
+		return query.list().isEmpty();
 	}
 	
 	@Override
@@ -117,8 +117,8 @@ public class ParticipantDaoImpl extends AbstractDao<Participant> implements Part
 			
 			junction.add(
 					Restrictions.and(
-							Restrictions.eq("pmi.medicalRecordNumber", pmi.getMrn()),
-							Restrictions.eq("site.name", pmi.getSiteName())));
+							Restrictions.ilike("pmi.medicalRecordNumber", pmi.getMrn()),
+							Restrictions.ilike("site.name", pmi.getSiteName())));
 			
 			added = true;
 		}

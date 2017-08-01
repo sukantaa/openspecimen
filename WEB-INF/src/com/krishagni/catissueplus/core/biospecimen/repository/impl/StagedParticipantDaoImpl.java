@@ -30,7 +30,7 @@ public class StagedParticipantDaoImpl extends AbstractDao<StagedParticipant> imp
 	@SuppressWarnings("unchecked")
 	public StagedParticipant getByEmpi(String empi) {
 		List<StagedParticipant> participants = getCurrentSession().getNamedQuery(GET_BY_EMPI)
-			.setString("empi", empi)
+			.setString("empi", empi.toLowerCase())
 			.list();
 		return CollectionUtils.isEmpty(participants) ? null : participants.iterator().next();
 	}
@@ -57,8 +57,8 @@ public class StagedParticipantDaoImpl extends AbstractDao<StagedParticipant> imp
 			
 			junction.add(
 				Restrictions.and(
-					Restrictions.eq("pmi.medicalRecordNumber", pmi.getMrn()),
-					Restrictions.eq("pmi.site", pmi.getSiteName())));
+					Restrictions.ilike("pmi.medicalRecordNumber", pmi.getMrn()),
+					Restrictions.ilike("pmi.site", pmi.getSiteName())));
 			added = true;
 		}
 
