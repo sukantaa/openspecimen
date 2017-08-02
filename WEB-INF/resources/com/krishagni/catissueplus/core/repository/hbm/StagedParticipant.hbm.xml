@@ -57,7 +57,7 @@
       from
         com.krishagni.catissueplus.core.biospecimen.domain.StagedParticipant p
       where
-        p.empi = :empi
+        lower(p.empi) = :empi
     </query>
 
     <query name="deleteOldParticipants">

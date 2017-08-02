@@ -13,23 +13,32 @@ import com.krishagni.catissueplus.core.common.PlusTransactional;
 
 @Configurable
 public class ContainerStoreListExecutor implements ScheduledTask {
+	private final static int MAX_PENDING_LISTS_TO_FETCH = 15;
 
 	@Autowired
 	private DaoFactory daoFactory;
 
 	@Override
-	@PlusTransactional
 	public void doJob(ScheduledJobRun jobRun)
 	throws Exception {
-		int maxResults = 15;
-
 		boolean hasPendingLists = true;
 		while (hasPendingLists) {
-			List<ContainerStoreList> storeLists = daoFactory.getContainerStoreListDao().getPendingStoreLists(0, maxResults);
+			List<ContainerStoreList> storeLists = getPendingStoreLists();
 			storeLists.forEach(ContainerStoreList::process);
-			if (storeLists.size() < maxResults) {
-				hasPendingLists = false;
-			}
+			hasPendingLists = (storeLists.size() >= MAX_PENDING_LISTS_TO_FETCH);
 		}
+	}
+
+	@PlusTransactional
+	private List<ContainerStoreList> getPendingStoreLists() {
+		List<ContainerStoreList> storeLists = daoFactory.getContainerStoreListDao().getPendingStoreLists(0, MAX_PENDING_LISTS_TO_FETCH);
+		for (ContainerStoreList list : storeLists) {
+			//
+			// Touch the auto freezer provider so that its data is already loaded while we are in transaction.
+			//
+			list.getContainer().getAutoFreezerProvider().getImplClass();
+		}
+
+		return storeLists;
 	}
 }

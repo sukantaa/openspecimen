@@ -41,5 +41,11 @@
         <span translate="specimen_list.add_event">Add Event</span>
       </a>
     </li>
+    <li show-if-allowed="resourceOpts.specimenUpdateOpts">
+      <a ng-click="retrieveSpecimens()">
+        <span class="fa fa-reply"></span>
+        <span translate="specimen_list.retrieve_specimens">Retrieve</span>
+      </a>
+    </li>
   </ul>
 </div>

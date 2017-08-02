@@ -13,6 +13,12 @@ public class ContainerStoreList extends BaseEntity {
 		PICK
 	}
 
+	public enum Status {
+		PENDING,
+		FAILED,
+		SUCCESS
+	}
+
 	private StorageContainer container;
 
 	private User user;
@@ -22,6 +28,10 @@ public class ContainerStoreList extends BaseEntity {
 	private Date creationTime;
 
 	private Date executionTime;
+
+	private Status status = Status.PENDING;
+
+	private Short state;
 
 	private Set<ContainerStoreListItem> items = new HashSet<>();
 
@@ -63,6 +73,22 @@ public class ContainerStoreList extends BaseEntity {
 
 	public void setExecutionTime(Date executionTime) {
 		this.executionTime = executionTime;
+	}
+
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+	public Short getState() {
+		return state;
+	}
+
+	public void setState(Short state) {
+		this.state = state;
 	}
 
 	public Set<ContainerStoreListItem> getItems() {

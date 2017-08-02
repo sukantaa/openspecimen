@@ -24,27 +24,7 @@
 
   <div class="os-page-commands">
     <div class="left">
-      <button show-if-allowed="specimenUpdateOpts" class="default" ng-click="createAliquots()">
-        <span class="fa fa-share-alt"></span>
-        <span translate="specimen_list.create_aliquots">Create Aliquots</span>
-      </button>
-
-      <button show-if-allowed="specimenUpdateOpts" class="default" ng-click="createDerivatives()">
-        <span class="fa fa-flask"></span>
-        <span translate="specimen_list.create_derivatives">Create Derivatives</span>
-      </button>
-
-      <button show-if-allowed="orderCreateOpts" ng-if="!ctx.reqBasedDistOrShip" class="default"
-        ng-click="distributeSpecimens()">
-        <span class="fa fa-share"></span>
-        <span translate="specimen_list.distribute">Distribute</span>
-      </button>
-
-      <button show-if-allowed="shipmentCreateOpts" ng-if="!ctx.reqBasedDistOrShip" class="default"
-        ng-click="shipSpecimens()">
-        <span class="fa fa-paper-plane-o"></span>
-        <span translate="specimen_list.ship">Ship</span>
-      </button>
+      <os-specimen-ops specimens="getSelectedSpecimens()" init-list="loadSpecimens()" opts="ctx.opsOpts"></os-specimen-ops>
 
       <os-plugin-hooks view-name="'specimen-list'" sec-name="'page-header'"></os-plugin-hooks>
 
@@ -53,7 +33,7 @@
           <span translate="common.buttons.more">More</span>
           <span class="fa fa-caret-down"></span>
         </button>
-        <ul class="dropdown-menu dropdown-menu-right">
+        <ul class="dropdown-menu">
           <li>
             <a ui-sref="specimen-list-addedit({listId: ctx.list.id})">
               <span class="fa fa-pencil"></span>
@@ -83,12 +63,6 @@
             <a ng-click="confirmRemoveSpecimens()">
               <span class="fa fa-trash"></span>
               <span translate="specimen_list.remove_spmns">Remove from Cart</span>
-            </a>
-          </li>
-          <li show-if-allowed="specimenUpdateOpts">
-            <a ng-click="addEvent()">
-              <span class="fa fa-calendar-o"></span>
-              <span translate="specimen_list.add_event">Add Event</span>
             </a>
           </li>
           <li show-if-allowed="specimenUpdateOpts">

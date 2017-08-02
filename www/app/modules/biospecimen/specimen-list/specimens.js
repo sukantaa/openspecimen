@@ -4,8 +4,6 @@ angular.module('os.biospecimen.specimenlist')
     SpecimensHolder, SpecimenList, CollectionProtocol, Container, DeleteUtil, Alerts, Util) {
 
     function init() { 
-      $scope.orderCreateOpts =    {resource: 'Order', operations: ['Create']};
-      $scope.shipmentCreateOpts = {resource: 'ShippingAndTracking', operations: ['Create']};
       $scope.specimenUpdateOpts = {resource: 'VisitAndSpecimen', operations: ['Update']};
 
       $scope.ctx = {
@@ -16,7 +14,8 @@ angular.module('os.biospecimen.specimenlist')
         selection: {all: false, any: false, specimens: []},
         reqBasedDistOrShip: (reqBasedDistOrShip.value == 'true'),
         url: SpecimenList.url(),
-        breadcrumbs: $stateParams.breadcrumbs
+        breadcrumbs: $stateParams.breadcrumbs,
+        opsOpts: {listIdName: 'specimenListId', listIdValue: list.id}
       }
 
       $scope.$on('osRightDrawerOpen', initFilterPvs);
@@ -55,6 +54,7 @@ angular.module('os.biospecimen.specimenlist')
           }
 
           $scope.ctx.spmnsInView = specimens;
+          $scope.ctx.selection = {all: false, any: false, specimens: []};
         }
       );
     };
@@ -125,6 +125,12 @@ angular.module('os.biospecimen.specimenlist')
 
       SpecimensHolder.setSpecimens($scope.ctx.selection.specimens);
       $state.go(state, params);
+    }
+
+    $scope.loadSpecimens = loadSpecimens;
+
+    $scope.getSelectedSpecimens = function() {
+      return $scope.ctx.selection.specimens;
     }
 
     $scope.addChildSpecimens = function() {
@@ -207,31 +213,6 @@ angular.module('os.biospecimen.specimenlist')
 
     $scope.searchContainer = function(name) {
       loadContainerList(name);
-    }
-
-    $scope.distributeSpecimens = function() {
-      if (!$scope.ctx.selection.any) {
-        $state.go('order-addedit', {orderId: '', specimenListId: list.id});
-        return;
-      }
-
-      gotoView('order-addedit', {orderId: ''});
-    }
-
-    $scope.shipSpecimens = function() {
-      gotoView('shipment-addedit', {shipmentId: ''}, 'no_specimens_for_shipment');
-    }
-    
-    $scope.createAliquots = function() {
-      gotoView('specimen-bulk-create-aliquots', {}, 'no_specimens_to_create_aliquots');
-    }
-
-    $scope.createDerivatives = function() {
-      gotoView('specimen-bulk-create-derivatives', {}, 'no_specimens_to_create_derivatives');
-    }
-
-    $scope.addEvent = function() {
-      gotoView('bulk-add-event', {}, 'no_specimens_to_add_event');
     }
 
     $scope.transferSpecimens = function() {
