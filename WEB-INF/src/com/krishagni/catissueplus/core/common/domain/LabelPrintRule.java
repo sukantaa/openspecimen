@@ -40,21 +40,21 @@ public class LabelPrintRule {
 
 	private String labelType;
 	
-	private IpAddressMatcher ipAddressMatcher;
+	transient private IpAddressMatcher ipAddressMatcher;
 	
-	private String userLogin;
+	transient private String userLogin;
 	
 	private String printerName;
 	
 	private String cmdFilesDir;
 
-	private String labelDesign;
+	transient private String labelDesign;
 
-	private List<LabelTmplToken> dataTokens = new ArrayList<LabelTmplToken>();
+	transient private List<LabelTmplToken> dataTokens = new ArrayList<LabelTmplToken>();
 	
-	private MessageSource messageSource;
+	transient private MessageSource messageSource;
 
-	private CmdFileFmt cmdFileFmt = CmdFileFmt.KEY_VALUE;
+	transient private CmdFileFmt cmdFileFmt = CmdFileFmt.KEY_VALUE;
 
 	public String getLabelType() {
 		return labelType;
