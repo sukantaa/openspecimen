@@ -160,7 +160,9 @@
         <constraints primaryKey="true" nullable="false"/>
       </column>
 
-      <column name="OBJECT_TYPE" type="${text.type}(32)"/>
+      <column name="OBJECT_TYPE" type="${text.type}(32)">
+        <constraints nullable="false"/>
+      </column>
 
       <column name="INSTITUTE_ID" type="${int.type}"/>
 

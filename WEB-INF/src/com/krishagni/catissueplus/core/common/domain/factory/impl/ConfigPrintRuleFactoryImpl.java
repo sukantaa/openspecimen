@@ -42,7 +42,7 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 		rule.setUpdatedBy(AuthUtil.getCurrentUser());
 		rule.setUpdatedOn(Calendar.getInstance().getTime());
 
-		setObjectType(detail, rule);
+		setObjectType(detail, rule, ose);
 		setInstitute(detail, rule, ose);
 		setCollectionProtocol(detail, rule, ose);
 		setActivityStatus(detail, rule, ose);
@@ -52,8 +52,9 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 		return rule;
 	}
 
-	private void setObjectType(ConfigPrintRuleDetail detail, ConfigPrintRule rule) {
+	private void setObjectType(ConfigPrintRuleDetail detail, ConfigPrintRule rule, OpenSpecimenException ose) {
 		if (StringUtils.isBlank(detail.getObjectType())) {
+			ose.addError(ConfigPrintRuleErrorCode.OBJECT_TYPE_REQUIRED);
 			return;
 		}
 
@@ -99,6 +100,7 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 
 		if (cp == null && key != null) {
 			ose.addError(CpErrorCode.NOT_FOUND);
+			return;
 		}
 
 		rule.setCollectionProtocol(cp);
@@ -176,7 +178,8 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 	}
 
 	private void setSpecimenClass(SpecimenLabelPrintRuleDetail detail, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
-		if (!validPermissibleValue(detail.getSpecimenClass()) && StringUtils.isNotBlank(detail.getSpecimenClass())) {
+		if (!isValidPermissibleValue("specimen_type", detail.getSpecimenClass()) &&
+				StringUtils.isNotBlank(detail.getSpecimenClass())) {
 			ose.addError(SrErrorCode.INVALID_SPECIMEN_CLASS);
 			return;
 		}
@@ -185,7 +188,8 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 	}
 
 	private void setSpecimenType(SpecimenLabelPrintRuleDetail detail, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
-		if (!validPermissibleValue(detail.getSpecimenType()) && StringUtils.isNotBlank(detail.getSpecimenType())) {
+		if (!isValidPermissibleValue("specimen_type", detail.getSpecimenType()) &&
+				StringUtils.isNotBlank(detail.getSpecimenType())) {
 			ose.addError(SrErrorCode.INVALID_SPECIMEN_TYPE);
 			return;
 		}
@@ -193,8 +197,8 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 		rule.setSpecimenType(detail.getSpecimenType());
 	}
 
-	private Boolean validPermissibleValue(String input) {
-		PermissibleValue pvs = daoFactory.getPermissibleValueDao().getByValue("specimen_type", input);
+	private Boolean isValidPermissibleValue(String attribute, String input) {
+		PermissibleValue pvs = daoFactory.getPermissibleValueDao().getByValue(attribute, input);
 		return pvs != null ? true : false;
 	}
 }
