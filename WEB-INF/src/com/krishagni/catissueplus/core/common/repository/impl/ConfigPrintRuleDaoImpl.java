@@ -5,5 +5,8 @@ import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.ConfigPrintRuleDao;
 
 public class ConfigPrintRuleDaoImpl extends AbstractDao<ConfigPrintRule> implements ConfigPrintRuleDao {
-
+	@Override
+	public Class<?> getType() {
+		return ConfigPrintRule.class;
+	}
 }

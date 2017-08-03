@@ -6,4 +6,6 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 
 public interface ConfigPrintRuleService {
 	ResponseEvent<ConfigPrintRuleDetail> createConfigPrintRule(RequestEvent<ConfigPrintRuleDetail> req);
+
+	ResponseEvent<ConfigPrintRuleDetail> updateConfigPrintRule(RequestEvent<ConfigPrintRuleDetail> req);
 }
