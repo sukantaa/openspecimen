@@ -15,6 +15,11 @@ import com.krishagni.catissueplus.core.common.repository.ConfigPrintRuleListCrit
 import com.krishagni.catissueplus.core.common.util.Status;
 
 public class ConfigPrintRuleDaoImpl extends AbstractDao<ConfigPrintRule> implements ConfigPrintRuleDao {
+	@Override
+	public Class<?> getType() {
+		return ConfigPrintRule.class;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<ConfigPrintRule> getConfigPrintRules(ConfigPrintRuleListCriteria crit) {

@@ -1,6 +1,8 @@
 package com.krishagni.catissueplus.core.common.errors;
 
 public enum ConfigPrintRuleErrorCode implements ErrorCode{
+	NOT_FOUND,
+
 	OBJECT_TYPE_REQUIRED,
 
 	RULES_REQUIRED,

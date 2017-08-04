@@ -11,4 +11,6 @@ public interface ConfigPrintRuleService {
 	ResponseEvent<List<ConfigPrintRuleDetail>> getConfigPrintRules(RequestEvent<ConfigPrintRuleListCriteria> req);
 
 	ResponseEvent<ConfigPrintRuleDetail> createConfigPrintRule(RequestEvent<ConfigPrintRuleDetail> req);
+
+	ResponseEvent<ConfigPrintRuleDetail> updateConfigPrintRule(RequestEvent<ConfigPrintRuleDetail> req);
 }

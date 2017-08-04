@@ -12,6 +12,7 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenLabelPrintRule;
+import com.krishagni.catissueplus.core.common.util.Status;
 
 public class ConfigPrintRule extends BaseEntity {
 	private String objectType;
@@ -104,6 +105,20 @@ public class ConfigPrintRule extends BaseEntity {
 		this.rules = list;
 	}
 
+	public void update(ConfigPrintRule rule) {
+		updateStatus(rule.getActivityStatus());
+		if (isDisabled()) {
+			return;
+		}
+
+		setObjectType(rule.getObjectType());
+		setInstitute(rule.getInstitute());
+		setCollectionProtocol(rule.getCollectionProtocol());
+		setUpdatedBy(rule.getUpdatedBy());
+		setUpdatedOn(rule.getUpdatedOn());
+		setRules(rule.getRules());
+	}
+
 	private ObjectMapper getReadMapper() {
 		return new ObjectMapper();
 	}
@@ -117,5 +132,17 @@ public class ConfigPrintRule extends BaseEntity {
 				.withSetterVisibility(Visibility.NONE)
 				.withCreatorVisibility(Visibility.NONE));
 		return mapper;
+	}
+
+	private boolean isDisabled() {
+		return Status.ACTIVITY_STATUS_DISABLED.getStatus().equals(getActivityStatus());
+	}
+
+	private void updateStatus(String activityStatus) {
+		if (getActivityStatus().equals(activityStatus)) {
+			return;
+		}
+
+		setActivityStatus(activityStatus);
 	}
 }
