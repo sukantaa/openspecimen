@@ -12,6 +12,7 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenLabelPrintRule;
+import com.krishagni.catissueplus.core.common.util.Status;
 
 public class ConfigPrintRule extends BaseEntity {
 	private String objectType;
@@ -102,6 +103,15 @@ public class ConfigPrintRule extends BaseEntity {
 		}
 
 		this.rules = list;
+	}
+
+	public void delete(boolean close) {
+		String activityStatus = Status.ACTIVITY_STATUS_CLOSED.getStatus();
+		if (!close) {
+			activityStatus = Status.ACTIVITY_STATUS_DISABLED.getStatus();
+		}
+
+		setActivityStatus(activityStatus);
 	}
 
 	private ObjectMapper getReadMapper() {
