@@ -1,7 +1,9 @@
 package com.krishagni.catissueplus.core.common.events;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
@@ -139,5 +141,9 @@ public class ConfigPrintRuleDetail {
 		detail.setActivityStatus(rule.getActivityStatus());
 		detail.setRules(SpecimenLabelPrintRuleDetail.from(rule.getRules()));
 		return detail;
+	}
+
+	public static List<ConfigPrintRuleDetail> from(Collection<ConfigPrintRule> rules) {
+		return rules.stream().map(ConfigPrintRuleDetail::from).collect(Collectors.toList());
 	}
 }
