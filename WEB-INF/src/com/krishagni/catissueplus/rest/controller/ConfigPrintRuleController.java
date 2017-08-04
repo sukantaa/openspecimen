@@ -39,11 +39,11 @@ public class ConfigPrintRuleController {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public List<ConfigPrintRuleDetail>  deleteConfigPrintRule(
-			@PathVariable
-			Long id,
+		@PathVariable
+		Long id,
 
-			@RequestParam(value="close", required=false, defaultValue="false")
-			boolean close) {
+		@RequestParam(value="close", required=false, defaultValue="false")
+		boolean close) {
 
 		BulkDeleteEntityOp op = new BulkDeleteEntityOp();
 		op.setIds(Collections.singleton(id));
@@ -56,11 +56,11 @@ public class ConfigPrintRuleController {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public List<ConfigPrintRuleDetail>  deleteConfigPrintRules(
-			@RequestParam(value = "id")
-			Long[] ids,
+		@RequestParam(value = "id")
+		Long[] ids,
 
-			@RequestParam(value="close", required=false, defaultValue="false")
-			boolean close) {
+		@RequestParam(value="close", required=false, defaultValue="false")
+		boolean close) {
 
 		BulkDeleteEntityOp op = new BulkDeleteEntityOp();
 		op.setIds(new HashSet<>(Arrays.asList(ids)));
