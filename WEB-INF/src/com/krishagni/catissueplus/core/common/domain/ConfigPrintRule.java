@@ -119,6 +119,15 @@ public class ConfigPrintRule extends BaseEntity {
 		setRules(rule.getRules());
 	}
 
+	public void delete(boolean close) {
+		String activityStatus = Status.ACTIVITY_STATUS_CLOSED.getStatus();
+		if (!close) {
+			activityStatus = Status.ACTIVITY_STATUS_DISABLED.getStatus();
+		}
+
+		setActivityStatus(activityStatus);
+	}
+
 	private ObjectMapper getReadMapper() {
 		return new ObjectMapper();
 	}

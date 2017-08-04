@@ -1,6 +1,8 @@
 package com.krishagni.catissueplus.core.common.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
@@ -9,6 +11,7 @@ import com.krishagni.catissueplus.core.common.domain.ConfigPrintRule;
 import com.krishagni.catissueplus.core.common.domain.factory.ConfigPrintRuleFactory;
 import com.krishagni.catissueplus.core.common.errors.ConfigPrintRuleErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.ConfigPrintRuleDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -75,7 +78,7 @@ public class ConfigPrintRuleServiceImpl implements ConfigPrintRuleService {
 			}
 
 			if (existing == null) {
-				return ResponseEvent.userError(ConfigPrintRuleErrorCode.NOT_FOUND);
+				return ResponseEvent.userError(ConfigPrintRuleErrorCode.NOT_FOUND, detail.getId(), 1);
 			}
 
 			ConfigPrintRule rule = configPrintRuleFactory.createConfigPrintRule(detail);
@@ -88,4 +91,30 @@ public class ConfigPrintRuleServiceImpl implements ConfigPrintRuleService {
 		}
 	}
 
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<ConfigPrintRuleDetail>> deleteConfigPrintRules(RequestEvent<BulkDeleteEntityOp> req) {
+		try {
+			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
+
+			Set<Long> ruleIds = req.getPayload().getIds();
+			List<ConfigPrintRule> rules = daoFactory.getConfigPrintRuleDao().getByIds(ruleIds);
+			if (ruleIds.size() != rules.size()) {
+				rules.forEach(institute -> ruleIds.remove(institute.getId()));
+				throw OpenSpecimenException.userError(ConfigPrintRuleErrorCode.NOT_FOUND, ruleIds, ruleIds.size());
+			}
+
+			List<ConfigPrintRuleDetail> deletedRules = new ArrayList<>();
+			for (ConfigPrintRule rule : rules) {
+				rule.delete(req.getPayload().isClose());
+				deletedRules.add(ConfigPrintRuleDetail.from(rule));
+			}
+
+			return ResponseEvent.response(deletedRules);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
 }
