@@ -48,7 +48,7 @@
                     #if ($rcpt.emailAddress == $user.emailAddress)
                       You have been assigned
                     #else
-                      User $user.firstName $user.lastName have been assigned
+                      User $user.firstName $user.lastName has been assigned
                     #end
                     <b> $sr.role.name </b> role on <b> $cp </b> $cpText for $siteText <b> $site </b>
                   #end
@@ -132,7 +132,7 @@
 			    <div style="font-weight: 700;color: #fff;background: #ab9364;padding: 3px 5px;float: left;margin-right: 5px;">
 			      <span>Delete</span>
 			    </div>
-		          #end
+                          #end
                         </td>
 		      </tr>
 		    #end

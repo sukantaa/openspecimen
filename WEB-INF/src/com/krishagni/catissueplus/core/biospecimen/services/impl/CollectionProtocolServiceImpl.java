@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -36,7 +37,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.User;
-import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.WorkflowUtil;
 import com.krishagni.catissueplus.core.biospecimen.domain.AliquotSpecimensRequirement;
@@ -108,6 +108,7 @@ import com.krishagni.catissueplus.core.query.ListConfig;
 import com.krishagni.catissueplus.core.query.ListDetail;
 import com.krishagni.catissueplus.core.query.ListGenerator;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
+import com.krishagni.rbac.events.SubjectRoleOpNotif;
 import com.krishagni.rbac.service.RbacService;
 
 
@@ -289,25 +290,20 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			ose.checkAndThrow();
 			
 			User oldPi = existingCp.getPrincipalInvestigator();
-			boolean piChanged = !oldPi.equals(cp.getPrincipalInvestigator());
-			
 			Collection<User> addedCoord = CollectionUtils.subtract(cp.getCoordinators(), existingCp.getCoordinators());
 			Collection<User> removedCoord = CollectionUtils.subtract(existingCp.getCoordinators(), cp.getCoordinators());
-			
+
+			Collection<CollectionProtocolSite> addedSites = CollectionUtils.subtract(cp.getSites(), existingCp.getSites());
+			Collection<CollectionProtocolSite> removedSites = CollectionUtils.subtract(existingCp.getSites(), cp.getSites());
+
 			existingCp.update(cp);
 			existingCp.addOrUpdateExtension();
 			
-			// PI role handling
-			if (piChanged) {
-				removeDefaultPiRoles(cp, oldPi);
-				addDefaultPiRoles(cp, cp.getPrincipalInvestigator());
-			} 
-
-			// Coordinator Role Handling
-			removeDefaultCoordinatorRoles(cp, removedCoord);
-			addDefaultCoordinatorRoles(cp, addedCoord);
-
 			fixSopDocumentName(existingCp);
+
+			// PI and coordinators role handling
+			addOrRemovePiCoordinatorRoles(cp, "UPDATE", oldPi, cp.getPrincipalInvestigator(), addedCoord, removedCoord);
+			notifyUsersOnCpUpdate(existingCp, addedSites, removedSites);
 			return ResponseEvent.response(CollectionProtocolDetail.from(existingCp));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -1293,8 +1289,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		cp.addOrUpdateExtension();
 		
 		//Assign default roles to PI and Coordinators
-		addDefaultPiRoles(cp, cp.getPrincipalInvestigator());
-		addDefaultCoordinatorRoles(cp, cp.getCoordinators());
+		addOrRemovePiCoordinatorRoles(cp, "CREATE", null, cp.getPrincipalInvestigator(), cp.getCoordinators(), null);
 		fixSopDocumentName(cp);
 		return cp;
 	}
@@ -1490,41 +1485,90 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		return aliquots;
 	}
 
-	private void addDefaultPiRoles(CollectionProtocol cp, User user) {
+	private void addOrRemovePiCoordinatorRoles(CollectionProtocol cp, String cpOp, User oldPi, User newPi, Collection<User> newCoord, Collection<User> removedCoord) {
+		List<User> notifUsers = null;
+		if (!Objects.equals(oldPi, newPi)) {
+			notifUsers = AccessCtrlMgr.getInstance().getSiteAdmins(null, cp);
+
+			if (newPi != null) {
+				addDefaultPiRoles(cp, notifUsers, newPi, cpOp);
+			}
+
+			if (oldPi != null) {
+				removeDefaultPiRoles(cp, notifUsers, oldPi, cpOp);
+			}
+		}
+
+		if (CollectionUtils.isNotEmpty(newCoord)) {
+			if (notifUsers == null) {
+				notifUsers = AccessCtrlMgr.getInstance().getSiteAdmins(null, cp);
+			}
+
+			addDefaultCoordinatorRoles(cp, notifUsers, newCoord, cpOp);
+		}
+
+		if (CollectionUtils.isNotEmpty(removedCoord)) {
+			if (notifUsers == null) {
+				notifUsers = AccessCtrlMgr.getInstance().getSiteAdmins(null, cp);
+			}
+
+			removeDefaultCoordinatorRoles(cp, notifUsers, removedCoord, cpOp);
+		}
+	}
+
+	private void addDefaultPiRoles(CollectionProtocol cp, List<User> notifUsers, User user, String cpOp) {
 		try {
-			rbacSvc.addSubjectRole(null, cp, user, getDefaultPiRoles());
+			for (String role : getDefaultPiRoles()) {
+				addRole(cp, notifUsers, user, role, cpOp);
+			}
 		} catch (OpenSpecimenException ose) {
 			ose.rethrow(RbacErrorCode.ACCESS_DENIED, CpErrorCode.USER_UPDATE_RIGHTS_REQUIRED);
 			throw ose;
 		}
 	}
 
-	private void removeDefaultPiRoles(CollectionProtocol cp, User user) {
+	private void removeDefaultPiRoles(CollectionProtocol cp, List<User> notifUsers, User user, String cpOp) {
 		try {
-			rbacSvc.removeSubjectRole(null, cp, user, getDefaultPiRoles());
-		} catch (OpenSpecimenException ose) {
-			ose.rethrow(RbacErrorCode.ACCESS_DENIED, CpErrorCode.USER_UPDATE_RIGHTS_REQUIRED);
-		}
-	}
-	
-	private void addDefaultCoordinatorRoles(CollectionProtocol cp, Collection<User> coordinators) {
-		try {
-			for (User user : coordinators) {
-				rbacSvc.addSubjectRole(null, cp, user, getDefaultCoordinatorRoles());
+			for (String role : getDefaultPiRoles()) {
+				removeRole(cp, notifUsers, user, role, cpOp);
 			}
 		} catch (OpenSpecimenException ose) {
 			ose.rethrow(RbacErrorCode.ACCESS_DENIED, CpErrorCode.USER_UPDATE_RIGHTS_REQUIRED);
 		}
 	}
 	
-	private void removeDefaultCoordinatorRoles(CollectionProtocol cp, Collection<User> coordinators) {
+	private void addDefaultCoordinatorRoles(CollectionProtocol cp, List<User> notifUsers, Collection<User> coordinators, String cpOp) {
 		try {
 			for (User user : coordinators) {
-				rbacSvc.removeSubjectRole(null, cp, user, getDefaultCoordinatorRoles());
+				for (String role : getDefaultCoordinatorRoles()) {
+					addRole(cp, notifUsers, user, role, cpOp);
+				}
 			}
 		} catch (OpenSpecimenException ose) {
 			ose.rethrow(RbacErrorCode.ACCESS_DENIED, CpErrorCode.USER_UPDATE_RIGHTS_REQUIRED);
 		}
+	}
+	
+	private void removeDefaultCoordinatorRoles(CollectionProtocol cp, List<User> notifUsers, Collection<User> coordinators, String cpOp) {
+		try {
+			for (User user : coordinators) {
+				for (String role : getDefaultCoordinatorRoles()) {
+					removeRole(cp, notifUsers, user, role, cpOp);
+				}
+			}
+		} catch (OpenSpecimenException ose) {
+			ose.rethrow(RbacErrorCode.ACCESS_DENIED, CpErrorCode.USER_UPDATE_RIGHTS_REQUIRED);
+		}
+	}
+
+	private void addRole(CollectionProtocol cp, List<User> admins, User user, String role, String cpOp) {
+		SubjectRoleOpNotif notifReq = getNotifReq(cp, role, admins, user, cpOp, "ADD");
+		rbacSvc.addSubjectRole(null, cp, user, new String[] { role }, notifReq);
+	}
+
+	private void removeRole(CollectionProtocol cp, List<User> admins, User user, String role, String cpOp) {
+		SubjectRoleOpNotif notifReq = getNotifReq(cp, role, admins, user, cpOp, "REMOVE");
+		rbacSvc.removeSubjectRole(null, cp, user, new String[] { role }, notifReq);
 	}
 	
 	private String[] getDefaultPiRoles() {
@@ -1739,8 +1783,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			cp = daoFactory.getCollectionProtocolDao().getById(cp.getId());
 
 			removeContainerRestrictions(cp);
-			removeDefaultPiRoles(cp, cp.getPrincipalInvestigator());
-			removeDefaultCoordinatorRoles(cp, cp.getCoordinators());
+			addOrRemovePiCoordinatorRoles(cp, "DELETE", cp.getPrincipalInvestigator(), null, null, cp.getCoordinators());
 			removeCpRoles(cp);
 			BeanUtils.copyProperties(cp, deletedCp);
 			cp.delete();
@@ -1782,12 +1825,17 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	}
 
 	private void notifyUsersOnCpCreate(CollectionProtocol cp) {
-		notifyUsersOnCpOp(cp, OP_CP_CREATED);
+		notifyUsersOnCpOp(cp, cp.getSites(), OP_CP_CREATED);
+	}
+
+	private void notifyUsersOnCpUpdate(CollectionProtocol cp, Collection<CollectionProtocolSite> addedSites, Collection<CollectionProtocolSite> removedSites) {
+		notifyUsersOnCpOp(cp, removedSites, OP_CP_SITE_REMOVED);
+		notifyUsersOnCpOp(cp, addedSites, OP_CP_SITE_ADDED);
 	}
 
 	private void notifyUsersOnCpDelete(CollectionProtocol cp, boolean success, String stackTrace) {
 		if (success) {
-			notifyUsersOnCpOp(cp, OP_CP_DELETED);
+			notifyUsersOnCpOp(cp, cp.getSites(), OP_CP_DELETED);
 		} else {
 			User currentUser = AuthUtil.getCurrentUser();
 			String[] rcpts = {currentUser.getEmailAddress(), cp.getPrincipalInvestigator().getEmailAddress()};
@@ -1802,7 +1850,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		}
 	}
 
-	private void notifyUsersOnCpOp(CollectionProtocol cp, int op) {
+	private void notifyUsersOnCpOp(CollectionProtocol cp, Collection<CollectionProtocolSite> sites, int op) {
 		Map<String, Object> emailProps = new HashMap<>();
 		emailProps.put("$subject", new Object[] {cp.getShortTitle(), op});
 		emailProps.put("cp", cp);
@@ -1810,12 +1858,12 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		emailProps.put("currentUser", AuthUtil.getCurrentUser());
 		emailProps.put("ccAdmin", false);
 
-		List<User> superAdmins = daoFactory.getUserDao()
-			.getUsers(new UserListCriteria().activityStatus("Active").type("SUPER"));
+		if (op == OP_CP_CREATED || op == OP_CP_DELETED) {
+			List<User> superAdmins = AccessCtrlMgr.getInstance().getSuperAdmins();
+			notifyUsers(superAdmins, CP_OP_EMAIL_TMPL, emailProps, (op == OP_CP_CREATED) ? "CREATE" : "DELETE");
+		}
 
-		notifyUsers(superAdmins, CP_OP_EMAIL_TMPL, emailProps, (op == OP_CP_CREATED) ? "CREATE" : "DELETE");
-
-		for (CollectionProtocolSite cpSite : cp.getSites()) {
+		for (CollectionProtocolSite cpSite : sites) {
 			String siteName = cpSite.getSite().getName();
 			emailProps.put("siteName", siteName);
 			emailProps.put("$subject", new Object[] {siteName, op, cp.getShortTitle()});
@@ -1840,6 +1888,25 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		notif.setCreationTime(Calendar.getInstance().getTime());
 		notif.setMessage(MessageUtil.getInstance().getMessage(template + "_subj", subjParams));
 		NotifUtil.getInstance().notify(notif, Collections.singletonMap("cp-overview", users));
+	}
+
+	private SubjectRoleOpNotif getNotifReq(CollectionProtocol cp, String role, List<User> notifUsers, User user, String cpOp, String roleOp) {
+		SubjectRoleOpNotif notifReq = new SubjectRoleOpNotif();
+		notifReq.setAdmins(notifUsers);
+		notifReq.setAdminNotifMsg("cp_admin_notif_role_" + roleOp.toLowerCase());
+		notifReq.setAdminNotifParams(new Object[] { user.getFirstName(), user.getLastName(), role, cp.getShortTitle(), user.getInstitute().getName() });
+		notifReq.setUser(user);
+
+		if (cpOp.equals("DELETE")) {
+			notifReq.setSubjectNotifMsg("cp_delete_user_notif_role");
+			notifReq.setSubjectNotifParams(new Object[] { cp.getShortTitle(), role });
+		} else {
+			notifReq.setSubjectNotifMsg("cp_user_notif_role_" + roleOp.toLowerCase());
+			notifReq.setSubjectNotifParams(new Object[] { role, cp.getShortTitle(), user.getInstitute().getName() });
+		}
+
+		notifReq.setEndUserOp(cpOp);
+		return notifReq;
 	}
 
 	private String getMsg(String code) {
@@ -2047,7 +2114,11 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 
 	private static final String CP_SITE_UPDATED_EMAIL_TMPL   = "cp_site_updated";
 
-	private static final int OP_CP_CREATED = 1;
+	private static final int OP_CP_SITE_ADDED = -1;
+
+	private static final int OP_CP_SITE_REMOVED = 1;
+
+	private static final int OP_CP_CREATED = 0;
 
 	private static final int OP_CP_DELETED = 2;
 }
