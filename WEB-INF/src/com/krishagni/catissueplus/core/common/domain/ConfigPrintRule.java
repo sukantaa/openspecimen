@@ -1,14 +1,16 @@
 package com.krishagni.catissueplus.core.common.domain;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
-import com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenLabelPrintRule;
 import com.krishagni.catissueplus.core.common.util.Status;
 
 public class ConfigPrintRule extends BaseEntity {
@@ -22,7 +24,7 @@ public class ConfigPrintRule extends BaseEntity {
 
 	private String activityStatus;
 
-	private SpecimenLabelPrintRule rule;
+	private Map<String, String> rule;
 
 	public String getObjectType() {
 		return objectType;
@@ -64,11 +66,11 @@ public class ConfigPrintRule extends BaseEntity {
 		this.activityStatus = activityStatus;
 	}
 
-	public SpecimenLabelPrintRule getRule() {
+	public Map<String, String> getRule() {
 		return rule;
 	}
 
-	public void setRule(SpecimenLabelPrintRule rule) {
+	public void setRule(Map<String, String> rule) {
 		this.rule = rule;
 	}
 
@@ -81,9 +83,9 @@ public class ConfigPrintRule extends BaseEntity {
 	}
 
 	public void setRuleDefJson(String ruleDefJson) {
-		SpecimenLabelPrintRule rule = null;
+		Map<String, String> rule = null;
 		try {
-			rule = getReadMapper().readValue(ruleDefJson, SpecimenLabelPrintRule.class);
+			rule = getReadMapper().readValue(ruleDefJson, new TypeReference<HashMap<String,Object>>() {});
 		} catch (Exception e) {
 			throw new RuntimeException("Error marshalling JSON to print rule", e);
 		}

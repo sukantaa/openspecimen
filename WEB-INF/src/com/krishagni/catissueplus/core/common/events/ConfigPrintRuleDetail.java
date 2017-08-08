@@ -3,6 +3,7 @@ package com.krishagni.catissueplus.core.common.events;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -25,7 +26,7 @@ public class ConfigPrintRuleDetail {
 
 	private String activityStatus;
 
-	private SpecimenLabelPrintRuleDetail rule;
+	private Map<String, String> rule;
 
 	public Long getId() {
 		return Id;
@@ -83,11 +84,11 @@ public class ConfigPrintRuleDetail {
 		this.activityStatus = activityStatus;
 	}
 
-	public SpecimenLabelPrintRuleDetail getRule() {
+	public Map<String, String> getRule() {
 		return rule;
 	}
 
-	public void setRule(SpecimenLabelPrintRuleDetail rule) {
+	public void setRule(Map<String, String> rule) {
 		this.rule = rule;
 	}
 
@@ -101,7 +102,8 @@ public class ConfigPrintRuleDetail {
 		detail.setUpdatedBy(UserSummary.from(rule.getUpdatedBy()));
 		detail.setUpdatedOn(rule.getUpdatedOn());
 		detail.setActivityStatus(rule.getActivityStatus());
-		detail.setRule(SpecimenLabelPrintRuleDetail.from(rule.getRule()));
+		detail.setRule(rule.getRule());
+
 		return detail;
 	}
 

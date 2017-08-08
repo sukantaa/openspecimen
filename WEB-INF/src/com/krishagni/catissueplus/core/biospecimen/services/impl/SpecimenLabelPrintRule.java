@@ -6,7 +6,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
 
 public class SpecimenLabelPrintRule extends LabelPrintRule {
-	transient private String cpShortTitle;
+	private String cpShortTitle;
 
 	transient private String visitSite;
 
