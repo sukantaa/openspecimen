@@ -2121,7 +2121,9 @@
         "password_rule": "Password Complexity Description",
         "password_rule_desc": "User friendly description of password complexity requirements.",
         "forgot_password": "Forgot Password",
-        "forgot_password_desc": "Allow or prevent users who have forgotten their passwords to set new password by using 'Forgot Password' feature."
+        "forgot_password_desc": "Allow or prevent users who have forgotten their passwords to set new password by using 'Forgot Password' feature.",
+        "default_domain": "Default Domain",
+        "default_domain_desc": "The user domain to be pre-selected for authentication on the user sign-in page."
       },
       
       "administrative": {
