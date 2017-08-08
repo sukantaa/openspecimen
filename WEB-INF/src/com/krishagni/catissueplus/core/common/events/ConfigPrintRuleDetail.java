@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
-import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.common.domain.ConfigPrintRule;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
@@ -20,19 +19,13 @@ public class ConfigPrintRuleDetail {
 
 	private String instituteName;
 
-	private Long cpId;
-
-	private String cpTitle;
-
-	private String cpShortTitle;
-
 	private UserSummary updatedBy;
 
 	private Date updatedOn;
 
 	private String activityStatus;
 
-	private List<SpecimenLabelPrintRuleDetail> rules;
+	private SpecimenLabelPrintRuleDetail rule;
 
 	public Long getId() {
 		return Id;
@@ -66,30 +59,6 @@ public class ConfigPrintRuleDetail {
 		this.instituteName = instituteName;
 	}
 
-	public String getCpTitle() {
-		return cpTitle;
-	}
-
-	public void setCpTitle(String cpTitle) {
-		this.cpTitle = cpTitle;
-	}
-
-	public String getCpShortTitle() {
-		return cpShortTitle;
-	}
-
-	public void setCpShortTitle(String cpShortTitle) {
-		this.cpShortTitle = cpShortTitle;
-	}
-
-	public Long getCpId() {
-		return cpId;
-	}
-
-	public void setCpId(Long cpId) {
-		this.cpId = cpId;
-	}
-
 	public UserSummary getUpdatedBy() {
 		return updatedBy;
 	}
@@ -114,23 +83,16 @@ public class ConfigPrintRuleDetail {
 		this.activityStatus = activityStatus;
 	}
 
-	public List<SpecimenLabelPrintRuleDetail> getRules() {
-		return rules;
+	public SpecimenLabelPrintRuleDetail getRule() {
+		return rule;
 	}
 
-	public void setRules(List<SpecimenLabelPrintRuleDetail> rules) {
-		this.rules = rules;
+	public void setRule(SpecimenLabelPrintRuleDetail rule) {
+		this.rule = rule;
 	}
 
 	public static ConfigPrintRuleDetail from(ConfigPrintRule rule) {
 		ConfigPrintRuleDetail detail = new ConfigPrintRuleDetail();
-
-		CollectionProtocol cp = rule.getCollectionProtocol();
-		if (cp != null) {
-			detail.setCpId(cp.getId());
-			detail.setCpTitle(cp.getTitle());
-			detail.setCpShortTitle(cp.getShortTitle());
-		}
 
 		detail.setId(rule.getId());
 		detail.setObjectType(rule.getObjectType());
@@ -139,7 +101,7 @@ public class ConfigPrintRuleDetail {
 		detail.setUpdatedBy(UserSummary.from(rule.getUpdatedBy()));
 		detail.setUpdatedOn(rule.getUpdatedOn());
 		detail.setActivityStatus(rule.getActivityStatus());
-		detail.setRules(SpecimenLabelPrintRuleDetail.from(rule.getRules()));
+		detail.setRule(SpecimenLabelPrintRuleDetail.from(rule.getRule()));
 		return detail;
 	}
 

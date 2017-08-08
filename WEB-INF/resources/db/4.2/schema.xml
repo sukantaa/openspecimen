@@ -166,8 +166,6 @@
 
       <column name="INSTITUTE_ID" type="${int.type}"/>
 
-      <column name="CP_ID" type="${int.type}"/>
-
       <column name="UPDATED_BY" type="${int.type}">
         <constraints nullable="false"/>
       </column>
@@ -192,12 +190,6 @@
     <addForeignKeyConstraint constraintName="FK_PRINT_RULE_INST_ID"
       baseTableName="OS_PRINT_RULES" baseColumnNames="INSTITUTE_ID"
       referencedTableName="CATISSUE_INSTITUTION" referencedColumnNames="IDENTIFIER"/>
-  </changeSet>
-
-  <changeSet author="agosavi" id="Add FK on print rule’s collection protocol">
-    <addForeignKeyConstraint constraintName="FK_PRINT_RULE_CP_ID"
-      baseTableName="OS_PRINT_RULES" baseColumnNames="CP_ID"
-      referencedTableName="CATISSUE_COLLECTION_PROTOCOL" referencedColumnNames="IDENTIFIER"/>
   </changeSet>
 
   <changeSet author="agosavi" id="Add FK on print rule’s updated by">

@@ -41,7 +41,6 @@ public class ConfigPrintRuleDaoImpl extends AbstractDao<ConfigPrintRule> impleme
 	private Criteria addSearchConditions(Criteria criteria, ConfigPrintRuleListCriteria crit) {
 		addObjectTypeRestriction(criteria, crit.objectType());
 		addUserNameRestriction(criteria, crit.userName());
-		addCpRestriction(criteria, crit.cpTitle());
 		addInstituteRestriction(criteria, crit.instituteName());
 		return criteria;
 	}
@@ -64,18 +63,6 @@ public class ConfigPrintRuleDaoImpl extends AbstractDao<ConfigPrintRule> impleme
 				.add(Restrictions.ilike("u.firstName", name, MatchMode.ANYWHERE))
 				.add(Restrictions.ilike("u.lastName", name, MatchMode.ANYWHERE))
 				.add(Restrictions.ilike("u.loginName", name, MatchMode.ANYWHERE))
-			);
-	}
-
-	private void addCpRestriction(Criteria criteria, String title) {
-		if (StringUtils.isBlank(title)) {
-			return;
-		}
-
-		criteria.createAlias("pr.collectionProtocol", "cp")
-			.add(Restrictions.disjunction()
-				.add(Restrictions.eq("cp.title", title))
-				.add(Restrictions.eq("cp.shortTitle", title))
 			);
 	}
 

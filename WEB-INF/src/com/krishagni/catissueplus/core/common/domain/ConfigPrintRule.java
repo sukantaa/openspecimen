@@ -1,16 +1,13 @@
 package com.krishagni.catissueplus.core.common.domain;
 
 import java.util.Date;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
-import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenLabelPrintRule;
 import com.krishagni.catissueplus.core.common.util.Status;
 
@@ -19,15 +16,13 @@ public class ConfigPrintRule extends BaseEntity {
 
 	private Institute institute;
 
-	private CollectionProtocol collectionProtocol;
-
 	private User updatedBy;
 
 	private Date updatedOn;
 
 	private String activityStatus;
 
-	private transient List<SpecimenLabelPrintRule> rules;
+	private SpecimenLabelPrintRule rule;
 
 	public String getObjectType() {
 		return objectType;
@@ -43,14 +38,6 @@ public class ConfigPrintRule extends BaseEntity {
 
 	public void setInstitute(Institute institute) {
 		this.institute = institute;
-	}
-
-	public CollectionProtocol getCollectionProtocol() {
-		return collectionProtocol;
-	}
-
-	public void setCollectionProtocol(CollectionProtocol collectionProtocol) {
-		this.collectionProtocol = collectionProtocol;
 	}
 
 	public User getUpdatedBy() {
@@ -77,32 +64,31 @@ public class ConfigPrintRule extends BaseEntity {
 		this.activityStatus = activityStatus;
 	}
 
-	public List<SpecimenLabelPrintRule> getRules() {
-		return rules;
+	public SpecimenLabelPrintRule getRule() {
+		return rule;
 	}
 
-	public void setRules(List<SpecimenLabelPrintRule> rules) {
-		this.rules = rules;
+	public void setRule(SpecimenLabelPrintRule rule) {
+		this.rule = rule;
 	}
 
 	public String getRuleDefJson() {
 		try {
-			return getWriteMapper().writeValueAsString(rules);
+			return getWriteMapper().writeValueAsString(rule);
 		} catch (Exception e) {
 			throw new RuntimeException("Error marshalling print rule to JSON", e);
 		}
 	}
 
 	public void setRuleDefJson(String ruleDefJson) {
-		List<SpecimenLabelPrintRule> list = null;
+		SpecimenLabelPrintRule rule = null;
 		try {
-			list = getReadMapper().readValue(ruleDefJson, TypeFactory.defaultInstance()
-				.constructCollectionType(List.class, SpecimenLabelPrintRule.class));
+			rule = getReadMapper().readValue(ruleDefJson, SpecimenLabelPrintRule.class);
 		} catch (Exception e) {
 			throw new RuntimeException("Error marshalling JSON to print rule", e);
 		}
 
-		this.rules = list;
+		this.rule = rule;
 	}
 
 	public void update(ConfigPrintRule rule) {
@@ -113,10 +99,9 @@ public class ConfigPrintRule extends BaseEntity {
 
 		setObjectType(rule.getObjectType());
 		setInstitute(rule.getInstitute());
-		setCollectionProtocol(rule.getCollectionProtocol());
 		setUpdatedBy(rule.getUpdatedBy());
 		setUpdatedOn(rule.getUpdatedOn());
-		setRules(rule.getRules());
+		setRule(rule.getRule());
 	}
 
 	public void delete(boolean close) {

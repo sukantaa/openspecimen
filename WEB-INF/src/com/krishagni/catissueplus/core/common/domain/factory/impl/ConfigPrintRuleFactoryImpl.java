@@ -1,18 +1,13 @@
 package com.krishagni.catissueplus.core.common.domain.factory.impl;
 
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.factory.InstituteErrorCode;
-import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
-import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenLabelPrintRule;
@@ -44,9 +39,8 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 
 		setObjectType(detail, rule, ose);
 		setInstitute(detail, rule, ose);
-		setCollectionProtocol(detail, rule, ose);
 		setActivityStatus(detail, rule, ose);
-		setRules(detail, rule, ose);
+		setRule(detail, rule, ose);
 
 		ose.checkAndThrow();
 		return rule;
@@ -83,29 +77,6 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 		rule.setInstitute(institute);
 	}
 
-	private void setCollectionProtocol(ConfigPrintRuleDetail detail, ConfigPrintRule rule, OpenSpecimenException ose) {
-		CollectionProtocol cp = null;
-		Object key = null;
-
-		if (detail.getCpId() != null) {
-			cp = daoFactory.getCollectionProtocolDao().getById(detail.getCpId());
-			key = detail.getCpId();
-		} else if (StringUtils.isNotBlank(detail.getCpTitle())) {
-			cp = daoFactory.getCollectionProtocolDao().getCollectionProtocol(detail.getCpTitle());
-			key = detail.getCpTitle();
-		} else if (StringUtils.isNotBlank(detail.getCpShortTitle())) {
-			cp = daoFactory.getCollectionProtocolDao().getCpByShortTitle(detail.getCpShortTitle());
-			key = detail.getCpShortTitle();
-		}
-
-		if (cp == null && key != null) {
-			ose.addError(CpErrorCode.NOT_FOUND);
-			return;
-		}
-
-		rule.setCollectionProtocol(cp);
-	}
-
 	private void setActivityStatus(ConfigPrintRuleDetail detail, ConfigPrintRule rule, OpenSpecimenException ose) {
 		String activityStatus = detail.getActivityStatus();
 		if (StringUtils.isBlank(activityStatus)) {
@@ -121,23 +92,14 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 		rule.setActivityStatus(activityStatus);
 	}
 
-	private void setRules(ConfigPrintRuleDetail detail, ConfigPrintRule rule, OpenSpecimenException ose) {
-		if (CollectionUtils.isEmpty(detail.getRules())) {
+	private void setRule(ConfigPrintRuleDetail detail, ConfigPrintRule rule, OpenSpecimenException ose) {
+		if (detail.getRule() == null) {
 			ose.addError(ConfigPrintRuleErrorCode.RULES_REQUIRED);
 			return;
 		}
 
-		List<SpecimenLabelPrintRule> list = createSpecimenLabelPrintRules(detail.getRules(), ose);
-		rule.setRules(list);
-	}
-
-	private List<SpecimenLabelPrintRule> createSpecimenLabelPrintRules(List<SpecimenLabelPrintRuleDetail> details, OpenSpecimenException ose) {
-		List<SpecimenLabelPrintRule> list = new ArrayList<>();
-		for (SpecimenLabelPrintRuleDetail detail : details) {
-			list.add(createSpecimenLabelPrintRule(detail, ose));
-		}
-
-		return list;
+		SpecimenLabelPrintRule specimenLabelPrintRule = createSpecimenLabelPrintRule(detail.getRule(), ose);
+		rule.setRule(specimenLabelPrintRule);
 	}
 
 	private SpecimenLabelPrintRule createSpecimenLabelPrintRule(SpecimenLabelPrintRuleDetail detail, OpenSpecimenException ose) {

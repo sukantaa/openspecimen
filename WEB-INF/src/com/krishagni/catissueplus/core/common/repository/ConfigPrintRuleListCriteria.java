@@ -5,8 +5,6 @@ import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 public class ConfigPrintRuleListCriteria extends AbstractListCriteria<ConfigPrintRuleListCriteria> {
 	private String objectType;
 
-	private String cpTitle;
-
 	private String instituteName;
 
 	private String userName;
@@ -24,15 +22,6 @@ public class ConfigPrintRuleListCriteria extends AbstractListCriteria<ConfigPrin
 
 	public ConfigPrintRuleListCriteria objectType(String objectType) {
 		this.objectType = objectType;
-		return self();
-	}
-
-	public String cpTitle() {
-		return this.cpTitle;
-	}
-
-	public ConfigPrintRuleListCriteria cpTitle(String cpTitle) {
-		this.cpTitle = cpTitle;
 		return self();
 	}
 

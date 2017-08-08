@@ -36,9 +36,6 @@ public class ConfigPrintRuleController {
 			@RequestParam(value = "objectType", required = false)
 			String objectType,
 
-			@RequestParam(value = "cpTitle", required = false)
-			String cpTitle,
-
 			@RequestParam(value = "instituteName", required = false)
 			String instituteName,
 
@@ -56,7 +53,6 @@ public class ConfigPrintRuleController {
 
 		ConfigPrintRuleListCriteria crit = new ConfigPrintRuleListCriteria()
 			.objectType(objectType)
-			.cpTitle(cpTitle)
 			.instituteName(instituteName)
 			.userName(userName)
 			.activityStatus(activityStatus)

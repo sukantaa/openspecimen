@@ -17,8 +17,6 @@
 
 	<many-to-one name="institute" column="INSTITUTE_ID"/>
 
-	<many-to-one name="collectionProtocol" column="CP_ID"/>
-
 	<many-to-one name="updatedBy" column="UPDATED_BY"/>
 
 	<property name="updatedOn" column="UPDATED_ON"/>
