@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +31,11 @@ public class CsvFileReader implements CsvReader {
 	}
 
 	public static CsvFileReader createCsvFileReader(InputStream inputStream, boolean firstRowHeaderRow) {
-		CSVReader csvReader = new CSVReader(new InputStreamReader(inputStream), Utility.getFieldSeparator());
+		return createCsvFileReader(new InputStreamReader(inputStream), firstRowHeaderRow);
+	}
+
+	public static CsvFileReader createCsvFileReader(Reader reader, boolean firstRowHeaderRow) {
+		CSVReader csvReader = new CSVReader(reader, Utility.getFieldSeparator());
 		return new CsvFileReader(csvReader, firstRowHeaderRow);
 	}
 	

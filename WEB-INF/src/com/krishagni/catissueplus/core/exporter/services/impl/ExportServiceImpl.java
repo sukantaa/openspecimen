@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.exporter.services.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -12,12 +13,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.apache.commons.beanutils.BeanUtilsBean2;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -42,6 +45,8 @@ import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.catissueplus.core.importer.domain.ObjectSchema;
 import com.krishagni.catissueplus.core.importer.services.ObjectSchemaFactory;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
+
+import edu.common.dynamicextensions.nutility.IoUtil;
 
 public class ExportServiceImpl implements ExportService {
 	private final static Log logger = LogFactory.getLog(ExportServiceImpl.class);
@@ -89,6 +94,7 @@ public class ExportServiceImpl implements ExportService {
 		job.setName(detail.getObjectType());
 		job.setCreatedBy(AuthUtil.getCurrentUser());
 		job.setCreationTime(Calendar.getInstance().getTime());
+		job.setParams(detail.getParams());
 		job.setSchema(schema);
 		job.setRecordIds(detail.getRecordIds());
 		exportJobDao.saveOrUpdate(job.markInProgress(), true);
@@ -131,6 +137,10 @@ public class ExportServiceImpl implements ExportService {
 
 		private long written = 0;
 
+		private File filesDir;
+
+		private long filesCount = 0;
+
 		private SimpleDateFormat df;
 
 		private SimpleDateFormat tf;
@@ -155,6 +165,7 @@ public class ExportServiceImpl implements ExportService {
 				AuthUtil.setCurrentUser(job.getCreatedBy());
 				generateRawRecordsFile();
 				generateOutputFile();
+				generateOutputZip(job);
 				completed();
 			} catch (Exception e) {
 				failed();
@@ -166,7 +177,11 @@ public class ExportServiceImpl implements ExportService {
 			}
 		}
 
-		private void generateRawRecordsFile() {
+		private void generateRawRecordsFile()
+		throws IOException {
+			ObjectSchema.Record record = job.getSchema().getRecord();
+			List<ObjectSchema.Field> fileFields = getFileFields(record);
+
 			try {
 				openWriter(getRawDataFile(job));
 
@@ -179,7 +194,7 @@ public class ExportServiceImpl implements ExportService {
 					}
 
 					for (Object object : objects) {
-						write(getRawDataRow("", "", job.getSchema().getRecord(), object));
+						write(getRawDataRow("", "", record, object));
 						++records;
 
 						if (records % 50 == 0) {
@@ -214,8 +229,14 @@ public class ExportServiceImpl implements ExportService {
 
 					updateFieldCount(namePrefix + field.getAttribute(), count);
 				} else {
+					String value = getString(object, field);
+					if ("file".equals(field.getType()) && StringUtils.isNotBlank(value)) {
+						value = ++filesCount + "_" + value;
+						writeFileData(object, field, value);
+					}
+
 					row.add(caption);
-					row.add(getString(object, field));
+					row.add(value);
 				}
 			}
 
@@ -245,10 +266,33 @@ public class ExportServiceImpl implements ExportService {
 			return row;
 		}
 
+		private List<ObjectSchema.Field> getFileFields(ObjectSchema.Record record) {
+			return record.getFields().stream().filter(f -> "file".equals(f.getType())).collect(Collectors.toList());
+		}
+
+		private void writeFileData(Object object, ObjectSchema.Field field, String filename) {
+			try {
+				if (filesDir == null) {
+					filesDir = new File(getJobDir(job), "files");
+				}
+
+				File destFile = new File(filesDir, filename);
+				String fileVar = field.getFile();
+				if (StringUtils.isBlank(fileVar)) {
+					fileVar = "documentFile";
+				}
+
+				Object value = getObject(object, fileVar);
+				FileUtils.copyFile((File) value, destFile);
+			} catch (IOException ioe) {
+				throw new RuntimeException("Error writing to file", ioe);
+			}
+		}
+
 		private void generateOutputFile() {
 			try {
 				openReader(getRawDataFile(job));
-				openWriter(getOutputFile(job));
+				openWriter(getOutputCsvFile(job));
 
 				write(getHeaderRow("", "", job.getSchema().getRecord()));
 
@@ -477,12 +521,29 @@ public class ExportServiceImpl implements ExportService {
 		return getJobDir(job) + File.separator + "raw-data.csv";
 	}
 
-	private String getOutputFile(ExportJob job) {
+	private String getOutputCsvFile(ExportJob job) {
 		return getJobDir(job) + File.separator + "output.csv";
+	}
+
+	private String getOutputFile(ExportJob job) {
+		File zipFile = new File(getJobDir(job), "output.zip");
+		if (zipFile.exists()) {
+			return zipFile.getAbsolutePath();
+		}
+
+		return getOutputCsvFile(job);
 	}
 
 	private void cleanupFiles(ExportJob job) {
 		new File(getRawDataFile(job)).delete();
+		new File(getOutputCsvFile(job)).delete();
+	}
+
+	private void generateOutputZip(ExportJob job) throws IOException {
+		String jobDir = getJobDir(job);
+		File jobZipFile = new File(jobDir + ".zip");
+		IoUtil.zipFiles(jobDir, jobZipFile.getAbsolutePath(), Collections.singletonList(getRawDataFile(job)));
+		FileUtils.moveFile(jobZipFile, new File(jobDir, "output.zip"));
 	}
 
 	private void sendJobStatusNotification(ExportJob job) {

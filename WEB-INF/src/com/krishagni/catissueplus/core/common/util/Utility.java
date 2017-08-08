@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.activation.FileTypeMap;
 import javax.crypto.Cipher;
@@ -118,6 +120,29 @@ public class Utility {
 	
 	public static InputStream getResourceInputStream(String path) {
 		return Thread.currentThread().getContextClassLoader().getResourceAsStream(path);		
+	}
+
+	public static List<String> csvToStringList(String value) {
+		CsvReader reader = null;
+		try {
+			reader = CsvFileReader.createCsvFileReader(new StringReader(value), false);
+
+			String[] row = new String[0];
+			if (reader.next()) {
+				row = reader.getRow();
+			}
+			return Stream.of(row).map(String::trim).collect(Collectors.toList());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (Exception e) {
+
+				}
+			}
+		}
 	}
 	
 	public static String stringListToCsv(Collection<String> elements) {

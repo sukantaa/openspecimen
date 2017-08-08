@@ -13,22 +13,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 
-import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.AnonymizeEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
-import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol.SpecimenLabelPrePrintMode;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.ConsentResponses;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
-import com.krishagni.catissueplus.core.biospecimen.domain.ParticipantMedicalIdentifier;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
@@ -74,9 +73,12 @@ import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
 import com.krishagni.catissueplus.core.common.service.impl.ConfigurationServiceImpl;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
-public class CollectionProtocolRegistrationServiceImpl implements CollectionProtocolRegistrationService, ObjectStateParamsResolver {
+public class CollectionProtocolRegistrationServiceImpl implements CollectionProtocolRegistrationService, ObjectStateParamsResolver, InitializingBean {
 	private DaoFactory daoFactory;
 
 	private CollectionProtocolRegistrationFactory cprFactory;
@@ -94,6 +96,8 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	private Anonymizer<CollectionProtocolRegistration> anonymizer;
 
 	private SpecimenKitService specimenKitSvc;
+
+	private ExportService exportSvc;
 	
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
@@ -129,6 +133,10 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 
 	public void setSpecimenKitSvc(SpecimenKitService specimenKitSvc) {
 		this.specimenKitSvc = specimenKitSvc;
+	}
+
+	public void setExportSvc(ExportService exportSvc) {
+		this.exportSvc = exportSvc;
 	}
 
 	@Override
@@ -512,6 +520,11 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		}
 
 		return daoFactory.getCprDao().getCprIds(key, value);
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		exportSvc.registerObjectsGenerator("consent", this::getConsentsGenerator);
 	}
 
 	private CollectionProtocolRegistrationDetail saveOrUpdateRegistration(
@@ -1051,5 +1064,37 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		if (cpr.getCollectionProtocol().isSpecimenCentric()) {
 			throw OpenSpecimenException.userError(CpErrorCode.OP_NOT_ALLOWED_SC, cpr.getCollectionProtocol().getShortTitle());
 		}
+	}
+
+	private Function<ExportJob, List<? extends Object>> getConsentsGenerator() {
+		return new Function<ExportJob, List<? extends Object>>() {
+			private boolean endOfConsents;
+
+			@Override
+			public List<? extends Object> apply(ExportJob exportJob) {
+				if (endOfConsents) {
+					return Collections.emptyList();
+				}
+
+				String consentFileDir = ConfigParams.getConsentsDirPath();
+				Map<String, String> params = exportJob.getParams();
+				String cpShortTitle = params.get("cpShortTitle");
+				List<String> ppids = Utility.csvToStringList(params.get("ppid"));
+
+				List<ConsentDetail> consents = ppids.stream()
+					.map(ppid -> getCpr(null, null, cpShortTitle, ppid))
+					.map(cpr -> getConsentWithFile(cpr, consentFileDir))
+					.collect(Collectors.toList());
+
+				endOfConsents = true;
+				return consents;
+			}
+		};
+	}
+
+	private ConsentDetail getConsentWithFile(CollectionProtocolRegistration cpr, String consentFileDir) {
+		ConsentDetail consent = ConsentDetail.fromCpr(cpr, false);
+		consent.setDocumentFile(new File(consentFileDir, cpr.getSignedConsentDocumentName()));
+		return consent;
 	}
 }

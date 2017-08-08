@@ -52,6 +52,7 @@
     <field>
       <caption>#getMessage("participant_consent_doc_name")</caption>
       <attribute>consentDocumentName</attribute>
+      <type>file</type>
     </field>
   </record>
 </object-schema>

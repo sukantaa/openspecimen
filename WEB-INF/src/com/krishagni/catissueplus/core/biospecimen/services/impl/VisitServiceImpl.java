@@ -7,11 +7,13 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -56,8 +58,10 @@ import com.krishagni.catissueplus.core.common.service.LabelPrinter;
 import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
 
-public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver {
+public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver, InitializingBean {
 	private DaoFactory daoFactory;
 
 	private VisitFactory visitFactory;
@@ -71,7 +75,9 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 	private SprPdfGenerator sprText2PdfGenerator;
 	
 	private static String defaultVisitSprDir;
-	
+
+	private ExportService exportSvc;
+
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
 	}
@@ -94,7 +100,11 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 	
 	public void setSprText2PdfGenerator(SprPdfGenerator sprText2PdfGenerator) {
 		this.sprText2PdfGenerator = sprText2PdfGenerator;
-	}	
+	}
+
+	public void setExportSvc(ExportService exportSvc) {
+		this.exportSvc = exportSvc;
+	}
 
 	@Override
 	@PlusTransactional
@@ -490,6 +500,11 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 		return daoFactory.getVisitsDao().getCprVisitIds(key, value);
 	}
 
+	@Override
+	public void afterPropertiesSet() {
+		exportSvc.registerObjectsGenerator("visit", this::getVisitsGenerator);
+	}
+
 	private Visit saveOrUpdateVisit(VisitDetail input, boolean update, boolean partial) {
 		Visit existing = null;
 		if (update) {
@@ -738,5 +753,30 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 		if (visit.getCollectionProtocol().isSpecimenCentric()) {
 			throw OpenSpecimenException.userError(CpErrorCode.OP_NOT_ALLOWED_SC, visit.getCollectionProtocol().getShortTitle());
 		}
+	}
+
+	private Function<ExportJob, List<? extends Object>> getVisitsGenerator() {
+		return new Function<ExportJob, List<? extends Object>>() {
+			private boolean endOfVisits;
+
+			@Override
+			public List<? extends Object> apply(ExportJob exportJob) {
+				if (endOfVisits) {
+					return Collections.emptyList();
+				}
+
+				Map<String, String> params = exportJob.getParams();
+				List<String> visitNames = Utility.csvToStringList(params.get("visitName"));
+
+				List<VisitDetail> visits = visitNames.stream()
+					.map(name -> getVisit(null, name))
+					.map(VisitDetail::from)
+					.map(visit -> {visit.setSprFile(getSprFile(visit.getId())); return visit;})
+					.collect(Collectors.toList());
+
+				endOfVisits = true;
+				return visits;
+			}
+		};
 	}
 }
