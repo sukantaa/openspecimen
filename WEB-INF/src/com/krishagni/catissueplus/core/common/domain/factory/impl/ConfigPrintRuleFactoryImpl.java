@@ -95,6 +95,11 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 	}
 
 	private void setRule(ConfigPrintRuleDetail detail, ConfigPrintRule rule, OpenSpecimenException ose) {
+		if (detail.getRule() == null) {
+			ose.addError(ConfigPrintRuleErrorCode.RULES_REQUIRED);
+			return;
+		}
+
 		if (detail.getObjectType().equals("SPECIMEN")) {
 			setSpecimenLabelPrintRule(detail, rule, ose);
 		} else if(detail.getObjectType().equals("VISIT")) {
