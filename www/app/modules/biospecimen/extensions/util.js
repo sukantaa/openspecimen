@@ -87,10 +87,10 @@ angular.module('os.biospecimen.extensions.util', [])
 
       return {
         formId: extnCtxt.formId,
-        recordId: !!entity.id && !!entity.extensionDetail ? entity.extensionDetail.id : undefined,
+        recordId: !!entity.extensionDetail ? entity.extensionDetail.id : undefined,
         formCtxtId: parseInt(extnCtxt.formCtxtId),
         objectId: entity.id,
-        formData: !!entity.id && !!entity.extensionDetail ? entity.extensionDetail.attrsMap : {},
+        formData: !!entity.extensionDetail ? (entity.extensionDetail.attrsMap || {}): {},
         showActionBtns: false,
         showPanel: false, 
         labelAlignment: 'horizontal',

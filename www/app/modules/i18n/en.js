@@ -359,7 +359,6 @@
     "middle_name": "Middle Name",
     "birth_date": "Birth Date",
     "uid": "National ID",
-    "uid_short": "NIN",
     "mpi": "Master Patient Index",
     "gender": "Gender",
     "vital_status": "Vital Status",
@@ -374,6 +373,7 @@
     "site": "Site",
     "select_site": "Select Site",
     "pmis": "Medical Identifiers",
+    "registered_cps": "Registered Protocols",
     "protocol_id": "PPID",
     "filter_title": "Filters",
     "spmn_label_or_barcode": "Specimen Label / Barcode",
@@ -412,6 +412,8 @@
 
     "similar_participants": "Following matching participant(s) found",
     "no_matching_participant": "No matching participant found",
+    "review_match_n_save": "Following matching participant found. Please review the details and save.",
+
     "already_reg": "Already Registered?",
     "matched_attrs": "Matched Attributes",
     "matching_attr": {
@@ -433,6 +435,8 @@
       "update_registration": "Update",
       "register_selected_participant": "Register Selected Participant",
       "merge_participants": "Merge Participants",
+      "use_selected_participant": "Use Selected Participant",
+      "merge_with_selected_participant": "Merge with Selected Participant",
       "ignore_matches": "Ignore Matches and Proceed",
       "lookup": "Lookup",
       "bulk_register": "Bulk Register",
