@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
@@ -189,6 +190,18 @@ public class LabelPrintRule {
 		result.append(", tokens = ").append(tokens);
 		return result.toString();
 	}
+
+	public Map<String, String> toDefMap() {
+		Map<String, String> rule = null;
+		try {
+			rule = BeanUtils.describe(this);
+		} catch (Exception e) {
+			throw new RuntimeException("Error in creating map from print rule ", e);
+		}
+
+		return rule;
+	}
+
 	protected boolean isWildCard(String str) {
 		return StringUtils.isNotBlank(str) && str.trim().equals("*");
 	}

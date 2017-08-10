@@ -62,6 +62,13 @@ public class ConfigPrintRuleController {
 		return response(configPrintRuleSvc.getConfigPrintRules(request(crit)));
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ConfigPrintRuleDetail getConfigPrintRule(@PathVariable Long id) {
+		return response(configPrintRuleSvc.getConfigPrintRule(request(id)));
+	}
+
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody

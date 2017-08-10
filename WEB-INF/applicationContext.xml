@@ -1103,6 +1103,19 @@
 
   <bean id="configPrintRuleFactory" class="com.krishagni.catissueplus.core.common.domain.factory.impl.ConfigPrintRuleFactoryImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="labelPrintRuleFactoryRegistrar" ref="labelPrintRuleFactoryRegistrar"/>
+  </bean>
+
+  <bean id="specimenPrintRuleFactory" class="com.krishagni.catissueplus.core.common.domain.factory.impl.SpecimenLabelPrintRuleFactoryImpl">
+    <property name="daoFactory" ref="biospecimenDaoFactory"/>
+  </bean>
+
+  <bean id="labelPrintRuleFactoryRegistrar" class="com.krishagni.catissueplus.core.common.domain.LabelPrintRuleFactoryRegistrar" factory-method="getInstance">
+    <property name="printRuleFactories">
+      <map>
+        <entry key="SPECIMEN" value-ref="specimenPrintRuleFactory"/>
+      </map>
+    </property>
   </bean>
 
   <task:scheduler id="taskScheduler" pool-size="1"/>

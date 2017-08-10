@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
+import com.krishagni.catissueplus.core.common.domain.factory.LabelPrintRuleFactory;
 import com.krishagni.catissueplus.core.common.util.Status;
 
 public class ConfigPrintRule extends BaseEntity {
@@ -24,7 +25,7 @@ public class ConfigPrintRule extends BaseEntity {
 
 	private String activityStatus;
 
-	private Map<String, String> rule;
+	private LabelPrintRule rule;
 
 	public String getObjectType() {
 		return objectType;
@@ -66,20 +67,24 @@ public class ConfigPrintRule extends BaseEntity {
 		this.activityStatus = activityStatus;
 	}
 
-	public Map<String, String> getRule() {
+	public LabelPrintRule getRule() {
 		return rule;
 	}
 
-	public void setRule(Map<String, String> rule) {
+	public void setRule(LabelPrintRule rule) {
 		this.rule = rule;
 	}
 
 	public String getRuleDefJson() {
 		try {
-			return getWriteMapper().writeValueAsString(rule);
+			return getWriteMapper().writeValueAsString(getRuleDef());
 		} catch (Exception e) {
 			throw new RuntimeException("Error marshalling print rule to JSON", e);
 		}
+	}
+
+	public Map<String, String> getRuleDef() {
+		return rule.toDefMap();
 	}
 
 	public void setRuleDefJson(String ruleDefJson) {
@@ -90,7 +95,12 @@ public class ConfigPrintRule extends BaseEntity {
 			throw new RuntimeException("Error marshalling JSON to print rule", e);
 		}
 
-		this.rule = rule;
+		setRuleDefJson(rule);
+	}
+
+	public void setRuleDefJson(Map<String, String> rule) {
+		LabelPrintRuleFactory factory = LabelPrintRuleFactoryRegistrar.getInstance().getFactory(objectType);
+		this.rule = factory.createLabelPrintRule(rule);
 	}
 
 	public void update(ConfigPrintRule rule) {

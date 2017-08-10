@@ -12,6 +12,8 @@ import com.krishagni.catissueplus.core.common.repository.ConfigPrintRuleListCrit
 public interface ConfigPrintRuleService {
 	ResponseEvent<List<ConfigPrintRuleDetail>> getConfigPrintRules(RequestEvent<ConfigPrintRuleListCriteria> req);
 
+	ResponseEvent<ConfigPrintRuleDetail> getConfigPrintRule(RequestEvent<Long> req);
+
 	ResponseEvent<ConfigPrintRuleDetail> createConfigPrintRule(RequestEvent<ConfigPrintRuleDetail> req);
 
 	ResponseEvent<ConfigPrintRuleDetail> updateConfigPrintRule(RequestEvent<ConfigPrintRuleDetail> req);

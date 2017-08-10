@@ -49,6 +49,24 @@ public class ConfigPrintRuleServiceImpl implements ConfigPrintRuleService {
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<ConfigPrintRuleDetail> getConfigPrintRule(RequestEvent<Long> req) {
+		try {
+			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
+			ConfigPrintRule rule = daoFactory.getConfigPrintRuleDao().getById(req.getPayload());
+			if (rule == null) {
+				return ResponseEvent.userError(ConfigPrintRuleErrorCode.NOT_FOUND, req.getPayload(), 1);
+			}
+
+			return ResponseEvent.response(ConfigPrintRuleDetail.from(rule));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<ConfigPrintRuleDetail> createConfigPrintRule(RequestEvent<ConfigPrintRuleDetail> req) {
 		try {
 			AccessCtrlMgr.getInstance().ensureUserIsAdmin();

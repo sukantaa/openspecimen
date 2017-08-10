@@ -102,7 +102,7 @@ public class ConfigPrintRuleDetail {
 		detail.setUpdatedBy(UserSummary.from(rule.getUpdatedBy()));
 		detail.setUpdatedOn(rule.getUpdatedOn());
 		detail.setActivityStatus(rule.getActivityStatus());
-		detail.setRule(rule.getRule());
+		detail.setRule(rule.getRuleDef());
 
 		return detail;
 	}
