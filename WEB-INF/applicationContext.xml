@@ -1096,24 +1096,24 @@
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
   </bean>
 
-  <bean id="configPrintRuleSvc" class="com.krishagni.catissueplus.core.common.service.impl.ConfigPrintRuleServiceImpl">
-    <property name="daoFactory" ref="biospecimenDaoFactory"/>
-    <property name="configPrintRuleFactory" ref="configPrintRuleFactory"/>
-  </bean>
-
-  <bean id="configPrintRuleFactory" class="com.krishagni.catissueplus.core.common.domain.factory.impl.ConfigPrintRuleFactoryImpl">
+  <bean id="printRuleConfigFactory" class="com.krishagni.catissueplus.core.common.domain.factory.impl.PrintRuleConfigFactoryImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="labelPrintRuleFactoryRegistrar" ref="labelPrintRuleFactoryRegistrar"/>
   </bean>
 
-  <bean id="specimenPrintRuleFactory" class="com.krishagni.catissueplus.core.common.domain.factory.impl.SpecimenLabelPrintRuleFactoryImpl">
+  <bean id="printRuleConfigSvc" class="com.krishagni.catissueplus.core.common.service.impl.PrintRuleConfigServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="printRuleConfigFactory" ref="printRuleConfigFactory"/>
   </bean>
 
   <bean id="labelPrintRuleFactoryRegistrar" class="com.krishagni.catissueplus.core.common.domain.LabelPrintRuleFactoryRegistrar" factory-method="getInstance">
     <property name="printRuleFactories">
       <map>
-        <entry key="SPECIMEN" value-ref="specimenPrintRuleFactory"/>
+        <entry key="SPECIMEN">
+          <bean class="com.krishagni.catissueplus.core.common.domain.factory.impl.SpecimenLabelPrintRuleFactoryImpl">
+            <property name="daoFactory" ref="biospecimenDaoFactory"/>
+          </bean>
+        </entry>
       </map>
     </property>
   </bean>

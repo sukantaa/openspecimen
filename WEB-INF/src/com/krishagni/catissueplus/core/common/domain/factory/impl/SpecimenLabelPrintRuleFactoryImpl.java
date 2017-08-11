@@ -7,14 +7,16 @@ import org.apache.commons.lang3.StringUtils;
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenLabelPrintRule;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
 import com.krishagni.catissueplus.core.common.domain.factory.LabelPrintRuleFactory;
-import com.krishagni.catissueplus.core.common.errors.ConfigPrintRuleErrorCode;
+import com.krishagni.catissueplus.core.common.errors.PrintRuleConfigErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.service.PvValidator;
 
 public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory {
 	private DaoFactory daoFactory;
@@ -34,7 +36,6 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 		setCpShortTitle(def, rule, ose);
 		setSpecimenClass(def, rule, ose);
 		setSpecimenType(def, rule, ose);
-
 		return rule;
 	}
 
@@ -56,7 +57,7 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 
 	private void setCmdFilesDir(Map<String, String> input, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
 		if (StringUtils.isBlank(input.get("cmdFilesDir"))) {
-			ose.addError(ConfigPrintRuleErrorCode.CMD_FILES_DIR_REQUIRED);
+			ose.addError(PrintRuleConfigErrorCode.CMD_FILES_DIR_REQ);
 			return;
 		}
 
@@ -64,26 +65,33 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 	}
 
 	private void setCpShortTitle(Map<String, String> input, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
-		if (StringUtils.isBlank(input.get("cpId")) && StringUtils.isBlank(input.get("cpTitle"))
-				&& StringUtils.isBlank(input.get("cpShortTitle"))) {
+		String cpId = input.get("cpId");
+		String cpShortTile = input.get("cpShortTitle");
+		String cpTitle = input.get("cpTitle");
+
+		if (StringUtils.isBlank(cpId) && StringUtils.isBlank(cpShortTile) && StringUtils.isBlank(cpTitle)) {
 			return;
 		}
+
 		CollectionProtocol cp = null;
 		Object key = null;
 
-		if (input.get("cpId") != null) {
-			cp = daoFactory.getCollectionProtocolDao().getById(Long.valueOf(input.get("cpId")).longValue());
-			key = input.get("cpId");
-		} else if (StringUtils.isNotBlank(input.get("cpTitle"))) {
-			cp = daoFactory.getCollectionProtocolDao().getCollectionProtocol(input.get("cpTitle"));
-			key = input.get("cpTitle");
-		} else if (StringUtils.isNotBlank(input.get("cpShortTitle"))) {
-			cp = daoFactory.getCollectionProtocolDao().getCpByShortTitle(input.get("cpShortTitle"));
-			key = input.get("cpShortTitle");
+		if (StringUtils.isNotBlank(cpId)) {
+			cp = daoFactory.getCollectionProtocolDao().getById(Long.valueOf(cpId).longValue());
+			key = cpId;
+		} else if (StringUtils.isNotBlank(cpShortTile)) {
+			cp = daoFactory.getCollectionProtocolDao().getCpByShortTitle(cpShortTile);
+			key = cpShortTile;
+		} else if (StringUtils.isNotBlank(cpTitle)) {
+			cp = daoFactory.getCollectionProtocolDao().getCollectionProtocol(cpTitle);
+			key = cpTitle;
 		}
 
-		if (cp == null && key != null) {
-			ose.addError(CpErrorCode.NOT_FOUND);
+		if (cp == null) {
+			if (key != null) {
+				ose.addError(CpErrorCode.NOT_FOUND, key);
+			}
+
 			return;
 		}
 
@@ -91,27 +99,36 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 	}
 
 	private void setSpecimenClass(Map<String, String> inputMap, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
-		if (!isValidPermissibleValue("specimen_type", inputMap.get("specimenClass")) &&
-				StringUtils.isNotBlank(inputMap.get("specimenClass"))) {
-			ose.addError(SrErrorCode.INVALID_SPECIMEN_CLASS);
+		String specimenClass = inputMap.get("specimenClass");
+		if (StringUtils.isBlank(specimenClass)) {
 			return;
 		}
 
-		rule.setSpecimenClass(inputMap.get("specimenClass"));
+		if (!PvValidator.isValid("specimen_type", specimenClass)) {
+			ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_CLASS, specimenClass);
+			return;
+		}
+
+		rule.setSpecimenClass(specimenClass);
 	}
 
 	private void setSpecimenType(Map<String, String> input, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
-		if (!isValidPermissibleValue("specimen_Type", input.get("specimenType")) &&
-				StringUtils.isNotBlank(input.get("specimenType"))) {
-			ose.addError(SrErrorCode.INVALID_SPECIMEN_TYPE);
+		String specimenType = input.get("specimenType");
+		if (StringUtils.isBlank(specimenType)) {
 			return;
 		}
 
-		rule.setSpecimenType(input.get("specimenType"));
-	}
+		boolean isValid;
+		if (StringUtils.isNotBlank(rule.getSpecimenClass())) {
+			isValid = PvValidator.isValid("specimen_type", rule.getSpecimenClass(), specimenType);
+		} else {
+			isValid = PvValidator.isValid("specimen_type", specimenType, true);
+		}
 
-	private Boolean isValidPermissibleValue(String attribute, String input) {
-		PermissibleValue pvs = daoFactory.getPermissibleValueDao().getByValue(attribute, input);
-		return pvs != null ? true : false;
+		if (!isValid) {
+			ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_TYPE, specimenType);
+		}
+
+		rule.setSpecimenType(specimenType);
 	}
 }

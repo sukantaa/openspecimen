@@ -8,19 +8,19 @@ import org.apache.commons.lang3.StringUtils;
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.factory.InstituteErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
-import com.krishagni.catissueplus.core.common.domain.ConfigPrintRule;
-import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRuleFactoryRegistrar;
-import com.krishagni.catissueplus.core.common.domain.factory.ConfigPrintRuleFactory;
+import com.krishagni.catissueplus.core.common.domain.PrintRuleConfig;
+import com.krishagni.catissueplus.core.common.domain.factory.LabelPrintRuleFactory;
+import com.krishagni.catissueplus.core.common.domain.factory.PrintRuleConfigFactory;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
-import com.krishagni.catissueplus.core.common.errors.ConfigPrintRuleErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
-import com.krishagni.catissueplus.core.common.events.ConfigPrintRuleDetail;
+import com.krishagni.catissueplus.core.common.errors.PrintRuleConfigErrorCode;
+import com.krishagni.catissueplus.core.common.events.PrintRuleConfigDetail;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 
-public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
+public class PrintRuleConfigFactoryImpl implements PrintRuleConfigFactory {
 	private DaoFactory daoFactory;
 
 	private LabelPrintRuleFactoryRegistrar labelPrintRuleFactoryRegistrar;
@@ -34,8 +34,8 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 	}
 
 	@Override
-	public ConfigPrintRule createConfigPrintRule(ConfigPrintRuleDetail detail) {
-		ConfigPrintRule rule = new ConfigPrintRule();
+	public PrintRuleConfig createPrintRuleConfig(PrintRuleConfigDetail detail) {
+		PrintRuleConfig rule = new PrintRuleConfig();
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 
 		rule.setUpdatedBy(AuthUtil.getCurrentUser());
@@ -49,20 +49,16 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 		return rule;
 	}
 
-	private void setObjectType(ConfigPrintRuleDetail detail, ConfigPrintRule rule, OpenSpecimenException ose) {
+	private void setObjectType(PrintRuleConfigDetail detail, PrintRuleConfig rule, OpenSpecimenException ose) {
 		if (StringUtils.isBlank(detail.getObjectType())) {
-			ose.addError(ConfigPrintRuleErrorCode.OBJECT_TYPE_REQUIRED);
+			ose.addError(PrintRuleConfigErrorCode.OBJECT_TYPE_REQ);
 			return;
 		}
 
 		rule.setObjectType(detail.getObjectType());
 	}
 
-	private void setInstitute(ConfigPrintRuleDetail detail, ConfigPrintRule rule, OpenSpecimenException ose) {
-		if (detail.getInstituteId() == null && StringUtils.isBlank(detail.getInstituteName())) {
-			return;
-		}
-
+	private void setInstitute(PrintRuleConfigDetail detail, PrintRuleConfig rule, OpenSpecimenException ose) {
 		Institute institute = null;
 		Object key = null;
 		if (detail.getInstituteId() != null) {
@@ -74,14 +70,17 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 		}
 
 		if (institute == null) {
-			ose.addError(InstituteErrorCode.NOT_FOUND, key);
+			if (key != null) {
+				ose.addError(InstituteErrorCode.NOT_FOUND, key);
+			}
+
 			return;
 		}
 
 		rule.setInstitute(institute);
 	}
 
-	private void setActivityStatus(ConfigPrintRuleDetail detail, ConfigPrintRule rule, OpenSpecimenException ose) {
+	private void setActivityStatus(PrintRuleConfigDetail detail, PrintRuleConfig rule, OpenSpecimenException ose) {
 		String activityStatus = detail.getActivityStatus();
 		if (StringUtils.isBlank(activityStatus)) {
 			rule.setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
@@ -96,14 +95,18 @@ public class ConfigPrintRuleFactoryImpl implements ConfigPrintRuleFactory {
 		rule.setActivityStatus(activityStatus);
 	}
 
-	private void setRule(ConfigPrintRuleDetail detail, ConfigPrintRule rule, OpenSpecimenException ose) {
-		if (detail.getRule() == null) {
-			ose.addError(ConfigPrintRuleErrorCode.RULES_REQUIRED);
+	private void setRule(PrintRuleConfigDetail detail, PrintRuleConfig rule, OpenSpecimenException ose) {
+		if (detail.getRule() == null || detail.getRule().isEmpty()) {
+			ose.addError(PrintRuleConfigErrorCode.RULES_REQ);
 			return;
 		}
 
-		LabelPrintRule labelPrintRule = labelPrintRuleFactoryRegistrar.getFactory(detail.getObjectType())
-				.createLabelPrintRule(detail.getRule());
-		rule.setRule(labelPrintRule);
+		LabelPrintRuleFactory factory = labelPrintRuleFactoryRegistrar.getFactory(detail.getObjectType());
+		if (factory == null) {
+			ose.addError(PrintRuleConfigErrorCode.INVALID_OBJECT_TYPE, detail.getObjectType());
+			return;
+		}
+
+		rule.setRule(factory.createLabelPrintRule(detail.getRule()));
 	}
 }

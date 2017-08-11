@@ -8,11 +8,11 @@ import java.util.stream.Collectors;
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
-import com.krishagni.catissueplus.core.common.domain.ConfigPrintRule;
+import com.krishagni.catissueplus.core.common.domain.PrintRuleConfig;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
-public class ConfigPrintRuleDetail {
-	private Long Id;
+public class PrintRuleConfigDetail {
+	private Long id;
 
 	private String objectType;
 
@@ -29,11 +29,11 @@ public class ConfigPrintRuleDetail {
 	private Map<String, String> rule;
 
 	public Long getId() {
-		return Id;
+		return id;
 	}
 
 	public void setId(Long id) {
-		Id = id;
+		this.id = id;
 	}
 
 	public String getObjectType() {
@@ -92,8 +92,8 @@ public class ConfigPrintRuleDetail {
 		this.rule = rule;
 	}
 
-	public static ConfigPrintRuleDetail from(ConfigPrintRule rule) {
-		ConfigPrintRuleDetail detail = new ConfigPrintRuleDetail();
+	public static PrintRuleConfigDetail from(PrintRuleConfig rule) {
+		PrintRuleConfigDetail detail = new PrintRuleConfigDetail();
 
 		detail.setId(rule.getId());
 		detail.setObjectType(rule.getObjectType());
@@ -103,11 +103,10 @@ public class ConfigPrintRuleDetail {
 		detail.setUpdatedOn(rule.getUpdatedOn());
 		detail.setActivityStatus(rule.getActivityStatus());
 		detail.setRule(rule.getRuleDef());
-
 		return detail;
 	}
 
-	public static List<ConfigPrintRuleDetail> from(Collection<ConfigPrintRule> rules) {
-		return rules.stream().map(ConfigPrintRuleDetail::from).collect(Collectors.toList());
+	public static List<PrintRuleConfigDetail> from(Collection<PrintRuleConfig> rules) {
+		return rules.stream().map(PrintRuleConfigDetail::from).collect(Collectors.toList());
 	}
 }

@@ -178,7 +178,9 @@
         <constraints nullable="false"/>
       </column>
 
-      <column name="ACTIVITY_STATUS" type="${text.type}(32)"/>
+      <column name="ACTIVITY_STATUS" type="${text.type}(32)">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
   </changeSet>
 

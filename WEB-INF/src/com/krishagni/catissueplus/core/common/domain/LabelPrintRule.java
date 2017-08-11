@@ -12,8 +12,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 
@@ -41,21 +39,21 @@ public class LabelPrintRule {
 
 	private String labelType;
 	
-	transient private IpAddressMatcher ipAddressMatcher;
+	private IpAddressMatcher ipAddressMatcher;
 	
-	transient private String userLogin;
+	private String userLogin;
 	
 	private String printerName;
 	
 	private String cmdFilesDir;
 
-	transient private String labelDesign;
+	private String labelDesign;
 
-	transient private List<LabelTmplToken> dataTokens = new ArrayList<LabelTmplToken>();
+	private List<LabelTmplToken> dataTokens = new ArrayList<LabelTmplToken>();
 	
-	transient private MessageSource messageSource;
+	private MessageSource messageSource;
 
-	transient private CmdFileFmt cmdFileFmt = CmdFileFmt.KEY_VALUE;
+	private CmdFileFmt cmdFileFmt = CmdFileFmt.KEY_VALUE;
 
 	public String getLabelType() {
 		return labelType;
@@ -125,12 +123,10 @@ public class LabelPrintRule {
 		return cmdFileFmt;
 	}
 
-	@JsonSetter
 	public void setCmdFileFmt(CmdFileFmt cmdFileFmt) {
 		this.cmdFileFmt = cmdFileFmt;
 	}
 
-	@JsonIgnore
 	public void setCmdFileFmt(String fmt) {
 		this.cmdFileFmt = CmdFileFmt.get(fmt);
 		if (this.cmdFileFmt == null) {

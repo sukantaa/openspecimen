@@ -2,17 +2,15 @@ package com.krishagni.catissueplus.core.common.repository;
 
 import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 
-public class ConfigPrintRuleListCriteria extends AbstractListCriteria<ConfigPrintRuleListCriteria> {
+public class PrintRuleConfigsListCriteria extends AbstractListCriteria<PrintRuleConfigsListCriteria> {
 	private String objectType;
 
 	private String instituteName;
 
 	private String userName;
 
-	private String activityStatus;
-
 	@Override
-	public ConfigPrintRuleListCriteria self() {
+	public PrintRuleConfigsListCriteria self() {
 		return this;
 	}
 
@@ -20,7 +18,7 @@ public class ConfigPrintRuleListCriteria extends AbstractListCriteria<ConfigPrin
 		return this.objectType;
 	}
 
-	public ConfigPrintRuleListCriteria objectType(String objectType) {
+	public PrintRuleConfigsListCriteria objectType(String objectType) {
 		this.objectType = objectType;
 		return self();
 	}
@@ -29,7 +27,7 @@ public class ConfigPrintRuleListCriteria extends AbstractListCriteria<ConfigPrin
 		return this.instituteName;
 	}
 
-	public ConfigPrintRuleListCriteria instituteName(String instituteName) {
+	public PrintRuleConfigsListCriteria instituteName(String instituteName) {
 		this.instituteName = instituteName;
 		return self();
 	}
@@ -38,17 +36,8 @@ public class ConfigPrintRuleListCriteria extends AbstractListCriteria<ConfigPrin
 		return this.userName;
 	}
 
-	public ConfigPrintRuleListCriteria userName(String userName) {
+	public PrintRuleConfigsListCriteria userName(String userName) {
 		this.userName = userName;
-		return self();
-	}
-
-	public String activityStatus() {
-		return this.activityStatus;
-	}
-
-	public ConfigPrintRuleListCriteria activityStatus(String activityStatus) {
-		this.activityStatus = activityStatus;
 		return self();
 	}
 }

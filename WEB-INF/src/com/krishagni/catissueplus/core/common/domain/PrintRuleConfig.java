@@ -14,7 +14,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.common.domain.factory.LabelPrintRuleFactory;
 import com.krishagni.catissueplus.core.common.util.Status;
 
-public class ConfigPrintRule extends BaseEntity {
+public class PrintRuleConfig extends BaseEntity {
 	private String objectType;
 
 	private Institute institute;
@@ -83,28 +83,30 @@ public class ConfigPrintRule extends BaseEntity {
 		}
 	}
 
-	public Map<String, String> getRuleDef() {
-		return rule.toDefMap();
-	}
-
 	public void setRuleDefJson(String ruleDefJson) {
-		Map<String, String> rule = null;
+		Map<String, String> rule;
 		try {
 			rule = getReadMapper().readValue(ruleDefJson, new TypeReference<HashMap<String,Object>>() {});
 		} catch (Exception e) {
 			throw new RuntimeException("Error marshalling JSON to print rule", e);
 		}
 
-		setRuleDefJson(rule);
+		setRuleDef(rule);
 	}
 
-	public void setRuleDefJson(Map<String, String> rule) {
+	public Map<String, String> getRuleDef() {
+		return getRule().toDefMap();
+	}
+
+	public void setRuleDef(Map<String, String> rule) {
 		LabelPrintRuleFactory factory = LabelPrintRuleFactoryRegistrar.getInstance().getFactory(objectType);
-		this.rule = factory.createLabelPrintRule(rule);
+		if (factory != null) {
+			setRule(factory.createLabelPrintRule(rule));
+		}
 	}
 
-	public void update(ConfigPrintRule rule) {
-		updateStatus(rule.getActivityStatus());
+	public void update(PrintRuleConfig rule) {
+		setActivityStatus(rule.getActivityStatus());
 		if (isDisabled()) {
 			return;
 		}
@@ -116,13 +118,8 @@ public class ConfigPrintRule extends BaseEntity {
 		setRule(rule.getRule());
 	}
 
-	public void delete(boolean close) {
-		String activityStatus = Status.ACTIVITY_STATUS_CLOSED.getStatus();
-		if (!close) {
-			activityStatus = Status.ACTIVITY_STATUS_DISABLED.getStatus();
-		}
-
-		setActivityStatus(activityStatus);
+	public void delete() {
+		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 	}
 
 	private ObjectMapper getReadMapper() {
@@ -142,13 +139,5 @@ public class ConfigPrintRule extends BaseEntity {
 
 	private boolean isDisabled() {
 		return Status.ACTIVITY_STATUS_DISABLED.getStatus().equals(getActivityStatus());
-	}
-
-	private void updateStatus(String activityStatus) {
-		if (getActivityStatus().equals(activityStatus)) {
-			return;
-		}
-
-		setActivityStatus(activityStatus);
 	}
 }

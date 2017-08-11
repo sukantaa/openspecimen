@@ -2,8 +2,6 @@ package com.krishagni.catissueplus.core.common.domain;
 
 import java.util.Map;
 
-import org.apache.commons.collections.MapUtils;
-
 import com.krishagni.catissueplus.core.common.domain.factory.LabelPrintRuleFactory;
 
 public class LabelPrintRuleFactoryRegistrar {
@@ -20,7 +18,7 @@ public class LabelPrintRuleFactoryRegistrar {
 	}
 
 	public static LabelPrintRuleFactoryRegistrar getInstance() {
-		if (instance == null || MapUtils.isEmpty(instance.printRuleFactories)) {
+		if (instance == null || instance.printRuleFactories == null) {
 			instance = new LabelPrintRuleFactoryRegistrar();
 		}
 

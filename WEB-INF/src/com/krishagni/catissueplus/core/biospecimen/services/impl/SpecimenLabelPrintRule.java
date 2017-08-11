@@ -8,13 +8,13 @@ import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
 public class SpecimenLabelPrintRule extends LabelPrintRule {
 	private String cpShortTitle;
 
-	transient private String visitSite;
+	private String visitSite;
 
 	private String specimenClass;
 	
 	private String specimenType;
 
-	transient private String lineage;
+	private String lineage;
 	
 	public String getCpShortTitle() {
 		return cpShortTitle;
