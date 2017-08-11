@@ -161,6 +161,9 @@ public class SpecimenListsController {
 		@RequestParam(value = "available", required = false, defaultValue = "false")
 		boolean available,
 
+		@RequestParam(value = "noQty", required = false, defaultValue = "false")
+		boolean noQty,
+
 		@RequestParam(value = "startAt", required = false, defaultValue = "0")
 		int startAt,
 
@@ -183,6 +186,7 @@ public class SpecimenListsController {
 			.startAt(startAt)
 			.maxResults(maxResults)
 			.available(available)
+			.noQty(noQty)
 			.includeStat(includeListCount)
 			.limitItems(true);
 

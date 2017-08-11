@@ -367,6 +367,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		addSpecimenTypeCond(query, crit);
 		addAnatomicSiteCond(query, crit);
 		addAvailableSpecimenCond(query, crit);
+		addNoQtySpecimenCond(query, crit);
 		return detachedCriteria;
 	}
 
@@ -503,6 +504,18 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 			Restrictions.disjunction()
 				.add(Restrictions.isNull("availableQuantity"))
 				.add(Restrictions.gt("availableQuantity", new BigDecimal(0)))
+		);
+	}
+
+	private void addNoQtySpecimenCond(Criteria query, SpecimenListCriteria crit) {
+		if (!crit.noQty()) {
+			return;
+		}
+
+		query.add(
+			Restrictions.disjunction()
+				.add(Restrictions.isNull("availableQuantity"))
+				.add(Restrictions.eq("availableQuantity", BigDecimal.ZERO))
 		);
 	}
 

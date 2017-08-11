@@ -780,7 +780,7 @@ public class Specimen extends BaseExtensionEntity {
 	}
 		
 	public void distribute(DistributionOrderItem item) {
-		if (!isAvailable() || !isCollected()) {
+		if (!isCollected() || isClosed()) {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.NOT_AVAILABLE_FOR_DIST, getLabel());
 		}
 		

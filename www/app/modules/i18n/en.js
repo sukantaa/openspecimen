@@ -138,7 +138,7 @@
     "specimenQty": "Invalid quantity",
     "match": "This field does not match with above field",
     "dist_qty_gt_avail_qty": "Distribution quantity greater than available",
-    "dist_qty_le_zero": "Distribution quantity cannot be less than or equals zero",
+    "dist_qty_lt_zero": "Distribution quantity cannot be less than zero",
     "ret_qty_gt_dist_qty": "Return quantity greater than distributed",
     "ret_qty_le_zero": "Return quantity cannot be less than or equals zero",
     "nan": "Not a valid number",
@@ -1854,7 +1854,8 @@
     "creation_success": "Distribution Order {{name}} successfully created",
 
     "menu": {
-      "overview": "Overview"
+      "overview": "Overview",
+      "items": "Specimens"
     },
 
     "spec": {
@@ -1892,7 +1893,9 @@
     },
 
     "errors": {
-      "insufficient_qty": "The distribution quantity of {{count}} {{ count == 1 ? 'specimen' : 'specimens' }} is more than the available quantity. Do you want to proceed?"
+      "insufficient_qty": "The distribution quantity of {{count}} {{ count == 1 ? 'specimen' : 'specimens' }} is more than the available quantity. Do you want to proceed?",
+      "no_qty_spmns_confirm": "The order contains {{spmnCount}} {{ spmnCount == 1 ? 'specimen' : 'specimens' }} with unspecified or zero available quantity. Do you want to proceed?",
+      "no_qty_spmns_msg": "The order contains one or more specimens with unspecified or zero available quantity"
     },
 
     "specimen_validation": {
