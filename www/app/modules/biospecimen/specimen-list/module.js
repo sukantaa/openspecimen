@@ -46,15 +46,6 @@ angular.module('os.biospecimen.specimenlist',
         },
         templateUrl: 'modules/biospecimen/specimen-list/specimens.html',
         controller: 'SpecimenListSpecimensCtrl',
-        resolve: {
-          reqBasedDistOrShip: function($injector) {
-            if ($injector.has('spmnReqCfgUtil')) {
-              return $injector.get('spmnReqCfgUtil').isReqBasedDistOrShippingEnabled();
-            } else {
-              return {value: false};
-            }
-          }
-        },
         parent: 'specimen-list-root'
       })
       .state('specimen-list-addedit', {
