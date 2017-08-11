@@ -617,13 +617,6 @@ public class SpecimenListServiceImpl implements SpecimenListService {
 			availableQty = specimen.getAvailableQuantity().stripTrailingZeros().toString();
 		}
 
-		String location = "";
-		StorageContainerPosition position = specimen.getPosition();
-		if (position != null) {
-			location = position.getContainer().getName();
-			location += ": (" + position.getPosTwo() + ", " + position.getPosOne() + ")";
-		}
-
 		return new String[] {
 			specimen.getLabel(),
 			specimen.getCollectionProtocol().getShortTitle(),
@@ -631,7 +624,7 @@ public class SpecimenListServiceImpl implements SpecimenListService {
 			specimen.getSpecimenClass(),
 			specimen.getSpecimenType(),
 			specimen.getPathologicalStatus(),
-			location,
+			StorageContainerPosition.getDisplayString(specimen.getPosition()),
 			availableQty
 		};
 	}
