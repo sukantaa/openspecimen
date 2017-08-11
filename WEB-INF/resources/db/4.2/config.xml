@@ -74,4 +74,45 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="mdnasim" id="Scheduled job to cleanup old files" dbms="mysql">
+    <sql>
+      select identifier into @userId from catissue_user where login_name = '$system';
+
+      insert into os_scheduled_jobs
+        (identifier, name, created_by, start_date, end_date, scheduled_minute, scheduled_hour, scheduled_day_of_week,
+        scheduled_day_of_month, activity_status, repeat_schedule, type, command, task_impl_fqn, rt_args_provided, rt_args_help_text)
+      values
+        (default, 'Old files backlog cleaner', @userId, now(), null, 50, 0, 'SUNDAY',
+        null, 'Active', 'WEEKLY', 'INTERNAL', null, 'com.krishagni.catissueplus.core.administrative.services.impl.FilesBacklogCleaner', 0, null)
+    </sql>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Scheduled job to cleanup old files" dbms="oracle">
+    <sql endDelimiter="//">
+      declare
+        userId number;
+      begin
+        select identifier into userId from catissue_user where login_name like '$system';
+
+        insert into os_scheduled_jobs
+          (identifier, name, created_by, start_date, end_date, scheduled_minute, scheduled_hour, scheduled_day_of_week,
+          scheduled_day_of_month, activity_status, repeat_schedule, type, command, task_impl_fqn, rt_args_provided, rt_args_help_text)
+        values
+          (OS_SCHEDULED_JOBS_SEQ.nextVal, 'Old files backlog cleaner', userId, SYSDATE, null, 50, 0, 'SUNDAY',
+          null, 'Active', 'WEEKLY', 'INTERNAL', null, 'com.krishagni.catissueplus.core.administrative.services.impl.FilesBacklogCleaner', 0, 1);
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="mdnasim" id="Config setting to specify the period for which the log files should be retained">
+    <sql>
+      call add_cfg_prop(
+        'common', 'log_files_retain_period',
+        'log_files_retain_period', 'log_files_retain_period_desc',
+        'INT', '30'
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

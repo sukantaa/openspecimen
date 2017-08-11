@@ -2256,7 +2256,9 @@
         "cont_spmns_report_query": "Container Specimens Report",
         "cont_spmns_report_query_desc": "Saved query to use for generating container specimens report",
         "toast_disp_time": "Toast Display Time",
-        "toast_disp_time_desc": "Duration, in seconds, for which the success or error notification toasts should be displayed."
+        "toast_disp_time_desc": "Duration, in seconds, for which the success or error notification toasts should be displayed.",
+        "log_files_retain_period": "Log Files Retain Period",
+        "log_files_retain_period_desc": "Number of days to retain the log files after which they are deleted."
       },
 
       "email": {

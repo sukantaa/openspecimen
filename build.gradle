@@ -138,6 +138,7 @@ dependencies {
   compile group: 'org.liquibase', name: 'liquibase-core', version:'3.3.3'
   compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.12'
   compile group: 'log4j', name: 'log4j', version:'1.2.16'
+  compile group: 'log4j', name: 'apache-log4j-extras', version: '1.2.17'
   compile group: 'quartz', name: 'quartz', version:'1.5.2'
   compile group: 'org.springframework', name: 'spring-aop', version:springVersion
   compile group: 'org.springframework', name: 'spring-beans', version:springVersion
