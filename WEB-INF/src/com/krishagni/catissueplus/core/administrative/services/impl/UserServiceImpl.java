@@ -462,7 +462,7 @@ public class UserServiceImpl implements UserService, InitializingBean, UserDetai
 
 			User user = userDao.getUser(req.getPayload(), DEFAULT_AUTH_DOMAIN);
 			if (user == null || user.isPending() || user.isClosed()) {
-				return ResponseEvent.userError(UserErrorCode.NOT_FOUND);
+				return ResponseEvent.userError(UserErrorCode.NOT_FOUND_IN_OS_DOMAIN, req.getPayload());
 			} else if (user.isLocked()) {
 				return ResponseEvent.userError(AuthErrorCode.USER_LOCKED);
 			}
