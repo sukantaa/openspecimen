@@ -64,6 +64,7 @@ import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.events.SubjectRoleDetail;
+import com.krishagni.rbac.events.SubjectRoleOpNotif;
 import com.krishagni.rbac.service.RbacService;
 
 public class UserServiceImpl implements UserService, InitializingBean, UserDetailsService, SAMLUserDetailsService {
@@ -255,7 +256,7 @@ public class UserServiceImpl implements UserService, InitializingBean, UserDetai
 			daoFactory.getUserDao().saveOrUpdate(user);
 			
 			if (user.isInstituteAdmin()) {
-				addDefaultSiteAdminRole(user);
+				addDefaultSiteAdminRole(user, "CREATE");
 			}
 
 			if (isSignupReq) {
@@ -461,7 +462,7 @@ public class UserServiceImpl implements UserService, InitializingBean, UserDetai
 
 			User user = userDao.getUser(req.getPayload(), DEFAULT_AUTH_DOMAIN);
 			if (user == null || user.isPending() || user.isClosed()) {
-				return ResponseEvent.userError(UserErrorCode.NOT_FOUND);
+				return ResponseEvent.userError(UserErrorCode.NOT_FOUND_IN_OS_DOMAIN, req.getPayload());
 			} else if (user.isLocked()) {
 				return ResponseEvent.userError(AuthErrorCode.USER_LOCKED);
 			}
@@ -602,9 +603,9 @@ public class UserServiceImpl implements UserService, InitializingBean, UserDetai
 		}
 
 		if (!wasInstituteAdmin && existingUser.isInstituteAdmin()) {
-			addDefaultSiteAdminRole(existingUser);
+			addDefaultSiteAdminRole(existingUser, "UPDATE");
 		} else if (wasInstituteAdmin && !existingUser.isInstituteAdmin()) {
-			removeDefaultSiteAdminRole(existingUser);
+			removeDefaultSiteAdminRole(existingUser, "UPDATE");
 		}
 
 		return UserDetail.from(existingUser);
@@ -631,18 +632,31 @@ public class UserServiceImpl implements UserService, InitializingBean, UserDetai
 		return user;
 	}
 
-	private void addDefaultSiteAdminRole(User user) {
-		rbacSvc.addSubjectRole(null, null, user, getDefaultSiteAdminRole());
+	private void addDefaultSiteAdminRole(User user, String userOp) {
+		rbacSvc.addSubjectRole(null, null, user, getDefaultSiteAdminRole(), getNotifReq(user, userOp, "ADD"));
 	}
-	
-	private void removeDefaultSiteAdminRole(User user) {
-		rbacSvc.removeSubjectRole(null, null, user, getDefaultSiteAdminRole());
+
+	private void removeDefaultSiteAdminRole(User user, String userOp) {
+		rbacSvc.removeSubjectRole(null, null, user, getDefaultSiteAdminRole(), getNotifReq(user, userOp, "REMOVE"));
 	}
-	
+
+	private SubjectRoleOpNotif getNotifReq(User user, String userOp, String roleOp) {
+		SubjectRoleOpNotif notifReq = new SubjectRoleOpNotif();
+		notifReq.setEndUserOp(userOp);
+		notifReq.setAdmins(AccessCtrlMgr.getInstance().getSuperAdmins());
+		notifReq.setAdminNotifMsg("admin_notif_role_" + roleOp.toLowerCase());
+		notifReq.setAdminNotifParams(new Object[] { user.getFirstName(), user.getLastName(), user.getInstitute().getName() });
+		notifReq.setUser(user);
+		notifReq.setSubjectNotifMsg("user_notif_role_" + roleOp.toLowerCase());
+		notifReq.setSubjectNotifParams(new Object[] { user.getInstitute().getName() });
+		return notifReq;
+	}
+
+
 	private String[] getDefaultSiteAdminRole() {
 		return new String[] {"Administrator"};
 	}
-	
+
 	private void sendForgotPasswordLinkEmail(User user, String token) {
 		Map<String, Object> props = new HashMap<String, Object>();
 		props.put("user", user);
@@ -735,6 +749,10 @@ public class UserServiceImpl implements UserService, InitializingBean, UserDetai
 	}
 
 	private void addNotification(User tgtUser, List<User> notifyUsers, String op, String message) {
+		if (notifyUsers.contains(tgtUser)) {
+			notifyUsers.remove(tgtUser);
+		}
+
 		User triggeredBy = AuthUtil.getCurrentUser();
 
 		Notification notif = new Notification();

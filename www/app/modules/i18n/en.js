@@ -138,7 +138,7 @@
     "specimenQty": "Invalid quantity",
     "match": "This field does not match with above field",
     "dist_qty_gt_avail_qty": "Distribution quantity greater than available",
-    "dist_qty_le_zero": "Distribution quantity cannot be less than or equals zero",
+    "dist_qty_lt_zero": "Distribution quantity cannot be less than zero",
     "ret_qty_gt_dist_qty": "Return quantity greater than distributed",
     "ret_qty_le_zero": "Return quantity cannot be less than or equals zero",
     "nan": "Not a valid number",
@@ -359,7 +359,6 @@
     "middle_name": "Middle Name",
     "birth_date": "Birth Date",
     "uid": "National ID",
-    "uid_short": "NIN",
     "mpi": "Master Patient Index",
     "gender": "Gender",
     "vital_status": "Vital Status",
@@ -374,6 +373,7 @@
     "site": "Site",
     "select_site": "Select Site",
     "pmis": "Medical Identifiers",
+    "registered_cps": "Registered Protocols",
     "protocol_id": "PPID",
     "filter_title": "Filters",
     "spmn_label_or_barcode": "Specimen Label / Barcode",
@@ -412,6 +412,8 @@
 
     "similar_participants": "Following matching participant(s) found",
     "no_matching_participant": "No matching participant found",
+    "review_match_n_save": "Following matching participant found. Please review the details and save.",
+
     "already_reg": "Already Registered?",
     "matched_attrs": "Matched Attributes",
     "matching_attr": {
@@ -433,6 +435,8 @@
       "update_registration": "Update",
       "register_selected_participant": "Register Selected Participant",
       "merge_participants": "Merge Participants",
+      "use_selected_participant": "Use Selected Participant",
+      "merge_with_selected_participant": "Merge with Selected Participant",
       "ignore_matches": "Ignore Matches and Proceed",
       "lookup": "Lookup",
       "bulk_register": "Bulk Register",
@@ -1850,7 +1854,8 @@
     "creation_success": "Distribution Order {{name}} successfully created",
 
     "menu": {
-      "overview": "Overview"
+      "overview": "Overview",
+      "items": "Specimens"
     },
 
     "spec": {
@@ -1888,7 +1893,9 @@
     },
 
     "errors": {
-      "insufficient_qty": "The distribution quantity of {{count}} {{ count == 1 ? 'specimen' : 'specimens' }} is more than the available quantity. Do you want to proceed?"
+      "insufficient_qty": "The distribution quantity of {{count}} {{ count == 1 ? 'specimen' : 'specimens' }} is more than the available quantity. Do you want to proceed?",
+      "no_qty_spmns_confirm": "The order contains {{spmnCount}} {{ spmnCount == 1 ? 'specimen' : 'specimens' }} with unspecified or zero available quantity. Do you want to proceed?",
+      "no_qty_spmns_msg": "The order contains one or more specimens with unspecified or zero available quantity"
     },
 
     "specimen_validation": {
@@ -2121,7 +2128,9 @@
         "password_rule": "Password Complexity Description",
         "password_rule_desc": "User friendly description of password complexity requirements.",
         "forgot_password": "Forgot Password",
-        "forgot_password_desc": "Allow or prevent users who have forgotten their passwords to set new password by using 'Forgot Password' feature."
+        "forgot_password_desc": "Allow or prevent users who have forgotten their passwords to set new password by using 'Forgot Password' feature.",
+        "default_domain": "Default Domain",
+        "default_domain_desc": "The user domain to be pre-selected for authentication on the user sign-in page."
       },
       
       "administrative": {
@@ -2247,7 +2256,9 @@
         "cont_spmns_report_query": "Container Specimens Report",
         "cont_spmns_report_query_desc": "Saved query to use for generating container specimens report",
         "toast_disp_time": "Toast Display Time",
-        "toast_disp_time_desc": "Duration, in seconds, for which the success or error notification toasts should be displayed."
+        "toast_disp_time_desc": "Duration, in seconds, for which the success or error notification toasts should be displayed.",
+        "log_files_retain_period": "Log Files Retain Period",
+        "log_files_retain_period_desc": "Number of days to retain the log files after which they are deleted."
       },
 
       "email": {

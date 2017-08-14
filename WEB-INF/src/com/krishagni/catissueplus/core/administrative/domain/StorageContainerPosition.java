@@ -7,6 +7,7 @@ import org.hibernate.envers.Audited;
 import org.springframework.beans.BeanUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.common.util.MessageUtil;
 
 @Audited
 public class StorageContainerPosition implements Comparable<StorageContainerPosition> {
@@ -168,6 +169,29 @@ public class StorageContainerPosition implements Comparable<StorageContainerPosi
 		return cmp;
 	}
 
+	public String toString() {
+		StringBuilder result = new StringBuilder(getContainer().getName());
+		if (getContainer().isDimensionless()) {
+			return result.toString();
+		}
+
+		switch (getContainer().getPositionLabelingMode()) {
+			case LINEAR:
+				result.append("(").append(getPosition()).append(")");
+				break;
+
+			case TWO_D:
+				result.append("(").append(getPosTwo()).append(" x ").append(getPosOne()).append(")");
+				break;
+		}
+
+		return result.toString();
+	}
+
+	public static String getDisplayString(StorageContainerPosition position) {
+		return position == null ? MessageUtil.getInstance().getMessage(NOT_STORED) : position.toString();
+	}
+
 	public static boolean areSame(StorageContainerPosition p1, StorageContainerPosition p2) {
 		if (p1 == p2) {
 			return true;
@@ -187,5 +211,5 @@ public class StorageContainerPosition implements Comparable<StorageContainerPosi
 			"occupyingContainer"
 	};
 
-
+	private static final String NOT_STORED = "storage_container_not_stored";
 }

@@ -55,7 +55,9 @@ public enum UserErrorCode implements ErrorCode {
 
 	SIGN_UP_NOT_ALLOWED,
 
-	FORGOT_PASSWD_DISABLED;
+	FORGOT_PASSWD_DISABLED,
+
+	NOT_FOUND_IN_OS_DOMAIN;
 	
 	public String code() {
 		return "USER_" + this.name();

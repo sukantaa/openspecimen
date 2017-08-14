@@ -110,7 +110,7 @@
                     "caption": "Location"
                 }
             ],
-            "criteria": "Specimen.availableQty > 0 and Specimen.collectionStatus = \"Collected\"",
+            "criteria": "Specimen.collectionStatus = \"Collected\" and Specimen.activityStatus = \"Active\"",
             "orderBy": [
                 {
                     "expr": "Specimen.createdOn",

@@ -148,7 +148,7 @@ public class ObjectSchema {
 		}
 
 		public List<Field> getFields() {
-			return fields == null ? Collections.<Field>emptyList() : fields;
+			return fields == null ? Collections.emptyList() : fields;
 		}
 
 		public void setFields(List<Field> fields) {
@@ -163,6 +163,8 @@ public class ObjectSchema {
 		private String attribute;
 		
 		private String type;
+
+		private String file;
 		
 		private boolean multiple;
 		
@@ -190,6 +192,14 @@ public class ObjectSchema {
 
 		public void setType(String type) {
 			this.type = type;
+		}
+
+		public String getFile() {
+			return file;
+		}
+
+		public void setFile(String file) {
+			this.file = file;
 		}
 
 		public boolean isMultiple() {

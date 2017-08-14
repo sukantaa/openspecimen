@@ -368,11 +368,11 @@ public class DistributionOrderFactoryImpl implements DistributionOrderFactory {
 		if (detail.getQuantity() == null) {
 			ose.addError(DistributionOrderErrorCode.ITEM_QTY_REQ, specimen.getLabel());
 			return null;
-		} else if (NumUtil.lessThanEqualsZero(detail.getQuantity())) {
+		} else if (NumUtil.lessThanZero(detail.getQuantity())) {
 			ose.addError(DistributionOrderErrorCode.ITEM_INVALID_QTY, specimen.getLabel());
 			return null;
 		}
-				
+
 		DistributionOrderItem orderItem = new DistributionOrderItem();
 		orderItem.setQuantity(detail.getQuantity());
 		orderItem.setSpecimen(specimen);

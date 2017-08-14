@@ -115,7 +115,6 @@ angular.module('os.biospecimen.models.participant', ['os.common.models'])
       this.pmis = pmis.length == 0 ? [] : pmis;
 
       serBirthDate(this);
-
       return this;
     };
 

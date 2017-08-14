@@ -40,6 +40,8 @@ public class SpecimenListCriteria extends AbstractListCriteria<SpecimenListCrite
 
 	private boolean available;
 
+	private boolean noQty;
+
 	public SpecimenListCriteria() {
 		exactMatch(true);
 	}
@@ -199,6 +201,15 @@ public class SpecimenListCriteria extends AbstractListCriteria<SpecimenListCrite
 
 	public SpecimenListCriteria available(boolean available) {
 		this.available = available;
+		return self();
+	}
+
+	public boolean noQty() {
+		return this.noQty;
+	}
+
+	public SpecimenListCriteria noQty(boolean noQty) {
+		this.noQty = noQty;
 		return self();
 	}
 }

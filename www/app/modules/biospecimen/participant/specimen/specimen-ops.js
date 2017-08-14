@@ -18,7 +18,7 @@ angular.module('os.biospecimen.specimen')
       if ($injector.has('spmnReqCfgUtil')) {
         $injector.get('spmnReqCfgUtil').isReqBasedDistOrShippingEnabled().then(
           function(result) {
-            scope.reqBasedDistOrShip = result;
+            scope.reqBasedDistOrShip.value = (result.value == 'true');
           }
         );
       }

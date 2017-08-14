@@ -296,6 +296,30 @@ angular.module('os.biospecimen.participant',
             return hasSde && (cpDict.length > 0 || sysDict.length > 0);
           },
 
+          sysLookupFields: function(CpConfigSvc) {
+            return CpConfigSvc.getWorkflowData(-1, 'participantLookup', []);
+          },
+
+          lookupFieldsCfg: function(hasSde, twoStepReg, sysLookupFields, cpDict) {
+            var configured = true;
+            if (!hasSde) {
+              return {configured: twoStepReg, fields: []};
+            }
+
+            var cprFields = cpDict.filter(function(field) { return field.name.indexOf('cpr.') == 0; });
+            var lookupFields = cprFields.filter(function(field) { return field.participantLookup == true; });
+            if (lookupFields.length == 0) {
+              configured = false;
+              lookupFields = cprFields;
+            }
+
+            if (lookupFields.length > 0) {
+              return {configured: configured, fields: lookupFields};
+            }
+
+            return {configured: sysLookupFields.length > 0, fields: sysLookupFields};
+          },
+
           hasFieldsFn: function($injector, hasDict, sysDict, cpDict) {
             return function(inObjs, exObjs) {
               if (!hasDict) {

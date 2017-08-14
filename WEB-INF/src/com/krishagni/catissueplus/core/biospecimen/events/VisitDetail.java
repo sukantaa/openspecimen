@@ -1,6 +1,7 @@
 
 package com.krishagni.catissueplus.core.biospecimen.events;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -9,6 +10,7 @@ import java.util.Set;
 import java.util.HashSet;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
@@ -73,6 +75,9 @@ public class VisitDetail extends AttributeModifiedSupport {
 	// transient variables specifying action to be performed
 	//
 	private boolean forceDelete;
+
+	@JsonIgnore
+	File sprFile;
 
 	public Long getCprId() {
 		return cprId;
@@ -280,6 +285,14 @@ public class VisitDetail extends AttributeModifiedSupport {
 
 	public void setForceDelete(boolean forceDelete) {
 		this.forceDelete = forceDelete;
+	}
+
+	public File getSprFile() {
+		return sprFile;
+	}
+
+	public void setSprFile(File sprFile) {
+		this.sprFile = sprFile;
 	}
 
 	public static VisitDetail from(Visit visit) {

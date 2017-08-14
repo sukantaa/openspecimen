@@ -172,6 +172,46 @@ angular.module('os.biospecimen.participant.specimen-tree',
       }
     }
 
+    function getDp(scope) {
+      var dpQ;
+      if (scope.cp.distributionProtocols.length == 1) {
+        dpQ = $q.defer();
+        dpQ.resolve(scope.cp.distributionProtocols[0]);
+        dpQ = dpQ.promise;
+      } else {
+        dpQ = $modal.open({
+          templateUrl: 'modules/biospecimen/participant/specimen/distribute.html',
+          controller: function($scope, $modalInstance, distributionProtocols) {
+            function init() {
+              $scope.ctx = {dps: distributionProtocols};
+            }
+
+            $scope.cancel = function() {
+              $modalInstance.dismiss('cancel');
+            }
+
+            $scope.distribute = function() {
+              $modalInstance.close($scope.ctx.dp);
+            }
+
+            init();
+          },
+
+          resolve: {
+            distributionProtocols: function() {
+              return allowedDps;
+            }
+          }
+        }).result;
+      }
+
+      return dpQ;
+    }
+
+    function selectDpAndDistributeSpmns(scope, specimens) {
+      getDp(scope).then(function(selectedDp) { distributeSpmns(selectedDp, specimens); });
+    }
+
     function distributeSpmns(dp, specimens) {
       new DistributionOrder({
         name: dp.shortTitle + '_' + new Date().toLocaleString(),
@@ -362,47 +402,30 @@ angular.module('os.biospecimen.participant.specimen-tree',
 
           var spmnsToDistribute = specimens.filter(
             function(spmn) {
-              return (spmn.availableQty == undefined || spmn.availableQty > 0) &&
-                spmn.activityStatus == 'Active';
+              return spmn.activityStatus == 'Active';
             }
           );
+
           if (spmnsToDistribute.length == 0) {
             return;
           }
 
-          var dpQ;
-          if (scope.cp.distributionProtocols.length == 1) {
-            dpQ = $q.defer();
-            dpQ.resolve(scope.cp.distributionProtocols[0]);
-            dpQ = dpQ.promise;
+          var noQtySpmns = spmnsToDistribute.filter(function(spmn) { return !spmn.availableQty; });
+          if (noQtySpmns.length == 0) {
+            selectDpAndDistributeSpmns(scope, spmnsToDistribute);
           } else {
-            dpQ = $modal.open({
-              templateUrl: 'modules/biospecimen/participant/specimen/distribute.html',
-              controller: function($scope, $modalInstance, distributionProtocols) {
-                function init() {
-                  $scope.ctx = {dps: distributionProtocols};
-                }
-
-                $scope.cancel = function() {
-                  $modalInstance.dismiss('cancel');
-                }
-
-                $scope.distribute = function() {
-                  $modalInstance.close($scope.ctx.dp);
-                }
-
-                init();
+            Util.showConfirm({
+              ok: function () {
+                selectDpAndDistributeSpmns(scope, spmnsToDistribute);
               },
-
-              resolve: {
-                distributionProtocols: function() {
-                  return allowedDps;
-                }
+              title: "common.warning",
+              isWarning: true,
+              confirmMsg: "orders.errors.no_qty_spmns_confirm",
+              input: {
+                spmnCount: noQtySpmns.length
               }
-            }).result;
+            });
           }
-
-          dpQ.then(function(selectedDp) { distributeSpmns(selectedDp, spmnsToDistribute); });
         }
 
         scope.addSpecimensToSpecimenList = function(list) {

@@ -122,9 +122,18 @@ public class AccessCtrlMgr {
 	}
 
 	public List<User> getSuperAndSiteAdmins(Site site, CollectionProtocol cp) {
-		UserListCriteria crit = new UserListCriteria().activityStatus("Active").type("SUPER");
-		List<User> result = bsDaoFactory.getUserDao().getUsers(crit);
+		List<User> result = getSuperAdmins();
+		result.addAll(getSiteAdmins(site, cp));
+		return result;
+	}
 
+	public List<User> getSuperAdmins() {
+		UserListCriteria crit = new UserListCriteria().activityStatus("Active").type("SUPER");
+		return bsDaoFactory.getUserDao().getUsers(crit);
+	}
+
+	public List<User> getSiteAdmins(Site site, CollectionProtocol cp) {
+		List<User> result = new ArrayList<>();
 		if (site != null) {
 			result.addAll(site.getCoordinators());
 		} else if (cp != null) {

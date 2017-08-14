@@ -11,15 +11,15 @@
                 <p style="margin:10px 0 0 0">
                   Hello $rcpt.firstName $rcpt.lastName,
                   <br><br>
-                  #if ($op == 1)
+                  #if ($op == 0 || $op == -1)
                     Your site $siteName is assigned as the repository for $cp.shortTitle collection protocol by $currentUser.firstName $currentUser.lastName.
-                  #elseif ($op == 2)
+                  #else
                     Your site $siteName is removed as the repository for $cp.shortTitle collection protocol by $currentUser.firstName $currentUser.lastName.
                   #end
                 </p>
               </td>
             </tr>
-            #if ($op != 2)
+            #if ($op == 0 || $op == -1)
               <tr>
                 <td style="border-collapse:collapse;padding-bottom:10px">
                   <table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;color:#333">

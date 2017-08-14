@@ -2,7 +2,7 @@
 angular.module('os.administrative.order.addedit', ['os.administrative.models', 'os.biospecimen.models'])
   .controller('OrderAddEditCtrl', function(
     $scope, $state, $translate, order, spmnRequest,
-    Institute, Specimen, SpecimensHolder, Site, DistributionProtocol, DistributionOrder, Alerts, Util, SpecimenUtil) {
+    Institute, Specimen, SpecimensHolder, Site, DistributionProtocol, DistributionOrder, SpecimenList, Alerts, Util, SpecimenUtil) {
     
     var ignoreQtyWarning = false;
 
@@ -22,7 +22,7 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
       $scope.siteList = [];
       $scope.userFilterOpts = {};
 
-      $scope.input = {allItemStatus: false};
+      $scope.input = {allItemStatus: false, noQtySpmnsPresent: false};
 
       if (!spmnRequest) {
         loadDps();
@@ -45,6 +45,7 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
       }
       
       setHeaderStatus();
+      setNoQtySpmnPresent();
     }
 
     function loadDps(name) {
@@ -92,8 +93,7 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
     function getOrderItems(specimens) {
       return specimens.filter(
         function(specimen) {
-          return (specimen.availableQty == undefined || specimen.availableQty > 0) &&
-                 specimen.activityStatus == 'Active';
+          return specimen.activityStatus == 'Active';
         }
       ).map(
         function(specimen) {
@@ -146,7 +146,7 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
 
       var moreQtyItems = order.orderItems.filter(
         function(item) {
-          return item.specimen.availableQty && item.specimen.availableQty < item.quantity;
+          return angular.isNumber(item.specimen.availableQty) && item.specimen.availableQty < item.quantity;
         }
       );
 
@@ -225,6 +225,28 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
       }
     }
 
+    function setNoQtySpmnPresent() {
+      if (!!$scope.order.orderItems && $scope.order.orderItems.length > 0) {
+        $scope.input.noQtySpmnsPresent = anyNoQtySpmns($scope.order.orderItems);
+      } else if (!!$scope.order.specimenList && !!$scope.order.specimenList.id) {
+        $scope.order.specimenList.getSpecimens({noQty: true, maxResults: 1}).then(
+          function(specimens) {
+            if (!!specimens && specimens.length > 0) {
+              $scope.input.noQtySpmnsPresent = true;
+            }
+          }
+        );
+      }
+    }
+
+    function anyNoQtySpmns(items) {
+      return (items || []).some(
+        function(item) {
+          return !item.specimen.availableQty;
+        }
+      );
+    }
+
     function getValidationMsgKeys(useBarcode) {
       return {
         title:         'orders.specimen_validation.title',
@@ -263,14 +285,21 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
       }
 
       ignoreQtyWarning = false;
-      Util.addIfAbsent($scope.order.orderItems, getOrderItems(specimens), 'specimen.id');
+      var newItems = getOrderItems(specimens);
+      Util.addIfAbsent($scope.order.orderItems, newItems, 'specimen.id');
+      $scope.input.noQtySpmnsPresent = $scope.input.noQtySpmnsPresent || anyNoQtySpmns(newItems);
       return true;
     }
 
     $scope.removeOrderItem = function(orderItem) {
       var idx = order.orderItems.indexOf(orderItem);
-      if (idx != -1) {
-        order.orderItems.splice(idx, 1);
+      if (idx == -1) {
+        return;
+      }
+
+      order.orderItems.splice(idx, 1);
+      if ($scope.input.noQtySpmnsPresent && !orderItem.specimen.availableQty) {
+        $scope.input.noQtySpmnsPresent = anyNoQtySpmns(order.orderItems);
       }
     }
 

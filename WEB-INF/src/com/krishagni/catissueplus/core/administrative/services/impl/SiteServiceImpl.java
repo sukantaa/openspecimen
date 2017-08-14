@@ -43,6 +43,7 @@ import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
+import com.krishagni.rbac.events.SubjectRoleOpNotif;
 import com.krishagni.rbac.service.RbacService;
 
 
@@ -136,7 +137,7 @@ public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver, 
 			ose.checkAndThrow();
 			daoFactory.getSiteDao().saveOrUpdate(site, true);
 			site.addOrUpdateExtension();
-			addDefaultCoordinatorRoles(site, site.getCoordinators());
+			addDefaultCoordinatorRoles(site, site.getCoordinators(), "CREATE");
 			return ResponseEvent.response(SiteDetail.from(site));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -211,7 +212,7 @@ public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver, 
 
 			AccessCtrlMgr.getInstance().ensureCreateUpdateDeleteSiteRights(existing);
 			
-			removeDefaultCoordinatorRoles(existing, existing.getCoordinators());
+			removeDefaultCoordinatorRoles(existing, existing.getCoordinators(), "DELETE");
 			existing.delete(deleteOp.isClose());
 			return ResponseEvent.response(SiteDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
@@ -294,10 +295,10 @@ public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver, 
 		existing.addOrUpdateExtension();
 
 		if (Status.isClosedOrDisabledStatus(existing.getActivityStatus())) {
-			removeDefaultCoordinatorRoles(existing, existing.getCoordinators());
+			removeDefaultCoordinatorRoles(existing, existing.getCoordinators(), "UPDATE");
 		} else {
-			removeDefaultCoordinatorRoles(existing, removedCoordinators);
-			addDefaultCoordinatorRoles(existing, addedCoordinators);
+			removeDefaultCoordinatorRoles(existing, removedCoordinators, "UPDATE");
+			addDefaultCoordinatorRoles(existing, addedCoordinators, "UPDATE");
 		}
 
 		return SiteDetail.from(existing);
@@ -324,16 +325,32 @@ public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver, 
 		return site;
 	}
 
-	private void addDefaultCoordinatorRoles(Site site, Collection<User> users) {
-		for (User user: users) {
-			rbacSvc.addSubjectRole(site, null, user, getDefaultCoordinatorRoles());
+	private void addDefaultCoordinatorRoles(Site site, Collection<User> users, String siteOp) {
+		SubjectRoleOpNotif notifReq = getNotifReq(site, siteOp, "ADD");
+		for (User user : users) {
+			notifReq.setUser(user);
+			notifReq.setAdminNotifParams(new Object[] { user.getFirstName(), user.getLastName(), site.getName() });
+			rbacSvc.addSubjectRole(site, null, user, getDefaultCoordinatorRoles(), notifReq);
 		}
 	}
 	
-	private void removeDefaultCoordinatorRoles(Site site, Collection<User> users) {
+	private void removeDefaultCoordinatorRoles(Site site, Collection<User> users, String siteOp) {
+		SubjectRoleOpNotif notifReq = getNotifReq(site, siteOp, "REMOVE");
 		for (User user: users) {
-			rbacSvc.removeSubjectRole(site, null, user, getDefaultCoordinatorRoles());
+			notifReq.setUser(user);
+			notifReq.setAdminNotifParams(new Object[]{user.getFirstName(), user.getLastName(), site.getName()});
+			rbacSvc.removeSubjectRole(site, null, user, getDefaultCoordinatorRoles(), notifReq);
 		}
+	}
+
+	private SubjectRoleOpNotif getNotifReq(Site site, String siteOp, String roleOp) {
+		SubjectRoleOpNotif notifReq = new SubjectRoleOpNotif();
+		notifReq.setEndUserOp(siteOp);
+		notifReq.setAdmins(AccessCtrlMgr.getInstance().getSuperAdmins());
+		notifReq.setAdminNotifMsg("site_admin_notif_role_" + roleOp.toLowerCase());
+		notifReq.setSubjectNotifMsg(siteOp.equals("DELETE") ? "site_delete_user_notif": "site_user_notif_role_" + roleOp.toLowerCase());
+		notifReq.setSubjectNotifParams(new Object[] { site.getName() });
+		return notifReq;
 	}
 	
 	private String[] getDefaultCoordinatorRoles() {

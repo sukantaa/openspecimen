@@ -11,7 +11,7 @@
                 <p style="margin:10px 0 0 0">
                   Hello $rcpt.firstName $rcpt.lastName,
                   <br><br>
-                  #if ($op == 1)
+                  #if ($op == 0)
                     A new collection protocol $cp.shortTitle has been created by $currentUser.firstName $currentUser.lastName.
                   #else
                     The collection protocol <b> $cp.shortTitle </b> and its data is deleted by $currentUser.firstName $currentUser.lastName.
@@ -19,7 +19,7 @@
                 </p>
               </td>
             </tr>
-            #if ($op == 1)
+            #if ($op == 0)
               <tr>
                 <td style="border-collapse:collapse;padding-bottom:10px">
                   <table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;color:#333">

@@ -71,9 +71,12 @@ angular.module('openspecimen')
       $scope.domains = [];
       AuthDomain.getDomainNames().then(
         function(domains) {
+          var defaultDomain = $scope.global.appProps.default_domain;
           $scope.domains = domains;
-          if ($scope.domains.length == 1) {
-            $scope.loginData.domainName = $scope.domains[0];
+          if (domains.length == 1) {
+            $scope.loginData.domainName = domains[0];
+          } else if (!!defaultDomain && domains.indexOf(defaultDomain) >= 0) {
+            $scope.loginData.domainName = defaultDomain;
           }
         }
       );

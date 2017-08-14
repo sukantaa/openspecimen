@@ -71,6 +71,8 @@
     <field>
       <caption>#getMessage("visit_spr_file_name")</caption>
       <attribute>sprName</attribute>
+      <type>file</type>
+      <file>sprFile</file>
     </field>  
 
     <record>

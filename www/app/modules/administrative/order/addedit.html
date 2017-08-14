@@ -34,6 +34,13 @@
 <script type="text/ng-template" id="orders/addedit-detail.html">
   <form name="ordForm" class="form-horizontal" 
     os-form-validator="ordForm" validator="ordFormValidator" novalidate>
+
+    <div class="alert alert-warning" ng-if="doWizard.isLastStep() && input.noQtySpmnsPresent">
+      <span translate="orders.errors.no_qty_spmns_msg">
+        The order contains one or more specimens with unspecified or zero available quantity
+      </span>
+    </div>
+
     <div class="form-group">
       <label class="col-xs-3 control-label" translate="orders.name">Name</label>
       <div class="col-xs-6">
@@ -169,6 +176,12 @@
       </span>
     </div>
 
+    <div class="alert alert-warning" ng-if="input.noQtySpmnsPresent">
+      <span translate="orders.errors.no_qty_spmns_msg">
+        The order contains one or more specimens with unspecified or zero available quantity
+      </span>
+    </div>
+
     <div ng-if="!order.request">
       <os-add-specimens ctrl="input" on-add="addSpecimens(specimens)"
         placeholder="{{'orders.enter_specimen_label' | translate}}">
@@ -256,7 +269,7 @@
           </td>
           <td class="col">
             <os-spmn-measure name="qty" specimen="specimen" quantity="item.quantity" md-input
-              ensure-range="[{tgt: 0, cmp: 'gt', errorKey: 'distQtyLeZero'}]"
+              ensure-range="[{tgt: 0, cmp: 'gte', errorKey: 'distQtyLtZero'}]"
               on-change="setStatus(item)" required>
             </os-spmn-measure>
             <div os-field-error field="sform.qty"></div>

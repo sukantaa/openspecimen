@@ -157,6 +157,7 @@
     <property name="cfgSvc" ref="cfgSvc"/>
     <property name="visitNameGenerator" ref="visitNameGenerator"/>
     <property name="sprText2PdfGenerator" ref="sprText2PdfGenerator"/>
+    <property name="exportSvc" ref="exportSvc"/>
   </bean>
 
   <bean id="cpCopier" class="com.krishagni.catissueplus.core.biospecimen.services.impl.CollectionProtocolCopier"/>
@@ -243,6 +244,7 @@
     <property name="labelGenerator" ref="ppidGenerator"/>
     <property name="anonymizer" ref="participantAnonymizer"/>
     <property name="specimenKitSvc" ref="specimenKitSvc"/>
+    <property name="exportSvc" ref="exportSvc"/>
   </bean>
   
   <bean id="ppidTokensRegistrar" class="com.krishagni.catissueplus.core.common.domain.DefaultLabelTmplTokenRegistrar">

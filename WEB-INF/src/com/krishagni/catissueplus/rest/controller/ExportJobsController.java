@@ -7,6 +7,7 @@ import java.io.InputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -42,9 +43,9 @@ public class ExportJobsController {
 	@ResponseBody
 	public void getExportJobOutputFile(@PathVariable("id") Long jobId, HttpServletResponse httpResp) {
 		String outputFile = response(exportSvc.getExportFile(request(jobId)));
-
-		httpResp.setContentType("application/csv");
-		httpResp.setHeader("Content-Disposition", "attachment;filename=ExportJob_" + jobId + ".csv");
+		String fileExtn = FilenameUtils.getExtension(outputFile);
+		httpResp.setContentType("application/" + fileExtn);
+		httpResp.setHeader("Content-Disposition", "attachment;filename=ExportJob_" + jobId + "." + fileExtn);
 
 		InputStream in = null;
 		try {

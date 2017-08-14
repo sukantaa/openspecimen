@@ -1,6 +1,7 @@
 
 package com.krishagni.catissueplus.core.biospecimen.events;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,13 +42,16 @@ public class ConsentDetail extends AttributeModifiedSupport implements Mergeable
 	private List<ConsentTierResponseDetail> consentTierResponses = new ArrayList<ConsentTierResponseDetail>();
 	
 	private String consentDocumentName;
-	
+
 	//For BO
 	@JsonIgnore
 	private String statement;
 	
 	@JsonIgnore
 	private String response;
+
+	@JsonIgnore
+	private File documentFile;
 
 	public Long getCprId() {
 		return cprId;
@@ -137,8 +141,18 @@ public class ConsentDetail extends AttributeModifiedSupport implements Mergeable
 		this.response = response;
 	}
 
+	public File getDocumentFile() {
+		return documentFile;
+	}
+
+	public void setDocumentFile(File documentFile) {
+		this.documentFile = documentFile;
+	}
+
 	public static ConsentDetail fromCpr(CollectionProtocolRegistration cpr, boolean excludePhi) {
 		ConsentDetail consent = new ConsentDetail();
+		consent.setCpShortTitle(cpr.getCpShortTitle());
+		consent.setPpid(cpr.getPpid());
 		consent.setConsentSignatureDate(cpr.getConsentSignDate());
 		consent.setComments(cpr.getConsentComments());
 		

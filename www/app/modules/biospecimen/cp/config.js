@@ -56,11 +56,11 @@ angular.module('openspecimen')
       );
     }
 
-    function getWorkflowData(cpId, name) {
+    function getWorkflowData(cpId, name, defVal) {
       return loadWorkflows(cpId).then(
         function(cfg) {
           var workflow = cfg.workflows[name];
-          return workflow ? (workflow.data || {}) : {};
+          return workflow ? (workflow.data || defVal || {}) : (defVal || {});
         }
       );
     }
