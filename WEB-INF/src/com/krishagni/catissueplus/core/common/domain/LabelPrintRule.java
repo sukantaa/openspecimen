@@ -194,6 +194,8 @@ public class LabelPrintRule {
 		try {
 			rule = BeanUtils.describe(this);
 			rule.replace("dataTokens", getTokenNames());
+			rule.replace("ipAddressMatcher", getIpAddressRange(ipAddressMatcher));
+			rule.replace("cmdFileFmt", cmdFileFmt.fmt);
 		} catch (Exception e) {
 			throw new RuntimeException("Error in creating map from print rule ", e);
 		}
@@ -213,5 +215,14 @@ public class LabelPrintRule {
 		return dataTokens.stream()
 			.map(token -> token.getName())
 			.collect(Collectors.joining(","));
+	}
+
+	private String getIpAddressRange(IpAddressMatcher ipRange) {
+		if (ipRange == null) {
+			return null;
+		}
+
+		JSONObject JsonObj = new JSONObject(new Gson().toJson(ipRange));
+		return JsonObj.getString("requiredAddress") + "/" + JsonObj.getInt("nMaskBits");
 	}
 }
