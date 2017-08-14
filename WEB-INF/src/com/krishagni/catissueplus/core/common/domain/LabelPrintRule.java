@@ -9,9 +9,11 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
 import org.springframework.context.MessageSource;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
 
+import com.google.gson.Gson;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 
@@ -191,6 +193,7 @@ public class LabelPrintRule {
 		Map<String, String> rule = null;
 		try {
 			rule = BeanUtils.describe(this);
+			rule.replace("dataTokens", getTokenNames());
 		} catch (Exception e) {
 			throw new RuntimeException("Error in creating map from print rule ", e);
 		}
@@ -204,5 +207,11 @@ public class LabelPrintRule {
 
 	private String getMessageStr(String name) {
 		return messageSource.getMessage("print_" + name, null, Locale.getDefault());
+	}
+
+	private String getTokenNames() {
+		return dataTokens.stream()
+			.map(token -> token.getName())
+			.collect(Collectors.joining(","));
 	}
 }

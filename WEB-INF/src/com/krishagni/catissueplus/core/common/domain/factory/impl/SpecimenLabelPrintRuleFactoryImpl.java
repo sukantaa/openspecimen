@@ -1,28 +1,39 @@
 package com.krishagni.catissueplus.core.common.domain.factory.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
-import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenLabelPrintRule;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
+import com.krishagni.catissueplus.core.common.domain.LabelTmplToken;
+import com.krishagni.catissueplus.core.common.domain.LabelTmplTokenRegistrar;
 import com.krishagni.catissueplus.core.common.domain.factory.LabelPrintRuleFactory;
-import com.krishagni.catissueplus.core.common.errors.PrintRuleConfigErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.errors.PrintRuleConfigErrorCode;
 import com.krishagni.catissueplus.core.common.service.PvValidator;
 
 public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory {
 	private DaoFactory daoFactory;
 
+	private LabelTmplTokenRegistrar printLabelTokensRegistrar;
+
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
+	}
+
+	public void setPrintLabelTokensRegistrar(LabelTmplTokenRegistrar printLabelTokensRegistrar) {
+		this.printLabelTokensRegistrar = printLabelTokensRegistrar;
 	}
 
 	@Override
@@ -36,6 +47,8 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 		setCpShortTitle(def, rule, ose);
 		setSpecimenClass(def, rule, ose);
 		setSpecimenType(def, rule, ose);
+		setDataTokens(def, rule, ose);
+		ose.checkAndThrow();
 		return rule;
 	}
 
@@ -130,5 +143,28 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 		}
 
 		rule.setSpecimenType(specimenType);
+	}
+
+	private void setDataTokens(Map<String, String> input, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
+		if (StringUtils.isBlank(input.get("dataTokens"))) {
+			ose.addError(PrintRuleConfigErrorCode.LABEL_TOKENS_REQ);
+			return;
+		}
+
+		Set<String> tokenNames = new HashSet<String>(Arrays.asList(input.get("dataTokens").split(",")));
+		List<LabelTmplToken> dataTokens = new ArrayList<>();
+		for (String key : tokenNames) {
+			LabelTmplToken token = printLabelTokensRegistrar.getToken(key);
+			if (token != null) {
+				dataTokens.add(token);
+			}
+		}
+
+		if (tokenNames.size() != dataTokens.size()) {
+			dataTokens.forEach(token -> tokenNames.remove(token.getName()));
+			ose.addError(PrintRuleConfigErrorCode.LABEL_TOKEN_NOT_FOUND, tokenNames, tokenNames.size());
+		}
+
+		rule.setDataTokens(dataTokens);
 	}
 }
