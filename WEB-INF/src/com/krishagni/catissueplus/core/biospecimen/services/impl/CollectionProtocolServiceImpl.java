@@ -326,6 +326,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			AccessCtrlMgr.getInstance().ensureReadCpRights(existing);
 			
 			CollectionProtocol cp = createCollectionProtocol(opDetail.getCp(), existing, true);
+			notifyUsersOnCpCreate(cp);
 			return ResponseEvent.response(CollectionProtocolDetail.from(cp));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
