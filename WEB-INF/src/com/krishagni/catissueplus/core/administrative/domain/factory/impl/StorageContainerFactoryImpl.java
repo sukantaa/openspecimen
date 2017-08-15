@@ -486,6 +486,7 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 		if (StringUtils.isNotBlank(posOne) && StringUtils.isNotBlank(posTwo)) {
 			if (parentContainer.canContainerOccupyPosition(container.getId(), posOne, posTwo)) {
 				position = parentContainer.createPosition(posOne, posTwo);
+				parentContainer.setLastAssignedPos(position);
 			} else {
 				ose.addError(StorageContainerErrorCode.NO_FREE_SPACE, parentContainer.getName());
 			}

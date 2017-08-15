@@ -421,6 +421,11 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			AccessCtrlMgr.getInstance().ensureCreateContainerRights(container);
 			container.validateRestrictions();
 
+			StorageContainer parentContainer = container.getParentContainer();
+			if (parentContainer != null && !parentContainer.hasFreePositionsForReservation(input.getNumOfContainers())) {
+				return ResponseEvent.userError(StorageContainerErrorCode.NO_FREE_SPACE, parentContainer.getName());
+			}
+
 			boolean setCapacity = true;
 			for (int i = 1; i <= input.getNumOfContainers(); i++) {
 				StorageContainer cloned = null;
