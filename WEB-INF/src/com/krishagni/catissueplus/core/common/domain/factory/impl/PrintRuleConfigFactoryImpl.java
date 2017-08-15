@@ -109,9 +109,7 @@ public class PrintRuleConfigFactoryImpl implements PrintRuleConfigFactory {
 			return;
 		}
 
-		ruleMap.put("userLogin", rule.getUpdatedBy().getLoginName());
 		ruleMap.put("instituteName",rule.getInstitute().getName());
-		ruleMap.put("domainName", rule.getUpdatedBy().getAuthDomain().getName());
 		rule.setRule(factory.createLabelPrintRule(ruleMap));
 	}
 }

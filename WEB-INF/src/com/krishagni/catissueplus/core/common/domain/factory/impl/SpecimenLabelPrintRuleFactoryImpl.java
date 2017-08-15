@@ -12,6 +12,8 @@ import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
+import com.krishagni.catissueplus.core.administrative.events.UserDetail;
+import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
@@ -251,17 +253,33 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 
 	private void setUserLogin(Map<String, String> input, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
 		String userLogin = input.get("userLogin");
+		String domainName = input.get("domainName");
+		User user = null;
 
-		User user = daoFactory.getUserDao().getUser(userLogin, input.get("domainName"));
+		user = daoFactory.getUserDao().getUser(userLogin, domainName);
 		if (user == null) {
-			if (userLogin != null) {
+			if (StringUtils.isNotBlank(userLogin) | StringUtils.isNotBlank(domainName) | isValidAuthDomain(domainName, ose)) {
 				ose.addError(UserErrorCode.NOT_FOUND);
 			}
 
 			return;
 		}
 
+		rule.setDomainName(domainName);
 		rule.setUserLogin(user.getLoginName());
+	}
+
+	private Boolean isValidAuthDomain(String domainName, OpenSpecimenException ose) {
+		AuthDomain authDomain = daoFactory.getAuthDao().getAuthDomainByName(domainName);
+		if (authDomain == null) {
+			if (StringUtils.isNotBlank(domainName)) {
+				ose.addError(UserErrorCode.DOMAIN_NOT_FOUND);
+			}
+
+			return false;
+		}
+
+		return true;
 	}
 
 	private void ensureSiteBelongsToInstitute(Site site, String instituteName, OpenSpecimenException ose) {
