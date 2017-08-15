@@ -2295,8 +2295,6 @@
         "email_specimen_list_shared_desc": "Send an email when a specimen cart is shared with one or more users.",
         "email_users_created": "User Created",
         "email_users_created_desc": "Send an email when a new user is created.",
-        "email_users_forgot_password_link": "Forgot Password Link",
-        "email_users_forgot_password_link_desc": "Send forgot password link email.",
         "email_users_new_user_request": "User Signup Request",
         "email_users_new_user_request_desc": "Send an email to admnistrator when a new user signs up.",
         "email_users_passwd_changed": "User Password Changed",

@@ -115,4 +115,10 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="mdnasim" id="Remove config setting to enable/disable email notification on password reset request">
+    <sql>
+      call remove_cfg_prop('notifications', 'email_users_forgot_password_link');
+    </sql>
+  </changeSet>
 </databaseChangeLog>
