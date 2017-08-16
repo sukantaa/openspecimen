@@ -57,8 +57,6 @@ public class LabelPrintRule {
 
 	private CmdFileFmt cmdFileFmt = CmdFileFmt.KEY_VALUE;
 
-	private String domainName;
-
 	public String getLabelType() {
 		return labelType;
 	}
@@ -136,14 +134,6 @@ public class LabelPrintRule {
 		if (this.cmdFileFmt == null) {
 			throw new IllegalArgumentException("Invalid command file format: " + fmt);
 		}
-	}
-
-	public String getDomainName() {
-		return domainName;
-	}
-
-	public void setDomainName(String domainName) {
-		this.domainName = domainName;
 	}
 
 	public boolean isApplicableFor(User user, String ipAddr) {
