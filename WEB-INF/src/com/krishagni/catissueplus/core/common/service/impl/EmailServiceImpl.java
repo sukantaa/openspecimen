@@ -174,7 +174,7 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 		props.put("footer", getFooterTmpl());
 		props.put("appUrl", getAppUrl());
 		props.put("adminEmailAddress", adminEmailId);
-		props.put("adminPhone", "1234567890");//TODO: will be replaced by property file
+		props.put("adminPhone", cfgSvc.getStrSetting("email", "admin_phone_no", "Not Specified"));
 		props.put("dateFmt", new SimpleDateFormat(ConfigUtil.getInstance().getDateTimeFmt()));
 		props.put("urlEncoder", URLEncoder.class);
 		String subject = getSubject(tmplKey, (Object[]) props.get("$subject"));

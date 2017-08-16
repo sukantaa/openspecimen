@@ -121,4 +121,14 @@
       call remove_cfg_prop('notifications', 'email_users_forgot_password_link');
     </sql>
   </changeSet>
+
+  <changeSet author="mdnasim" id="Setting to specify OpenSpecimen administrator phone number">
+    <sql>
+      call add_cfg_prop(
+        'email', 'admin_phone_no',
+        'admin_phone_no', 'admin_phone_no_desc',
+        'STRING', ''
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

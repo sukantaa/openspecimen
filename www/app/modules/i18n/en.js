@@ -2279,7 +2279,9 @@
         "server_port": "Email Server Port",
         "server_port_desc": "Email server port.",
         "starttls_enabled": "StartTLS",
-        "starttls_enabled_desc": "Enable if StartTLS is to be used for your email server."
+        "starttls_enabled_desc": "Enable if StartTLS is to be used for your email server.",
+        "admin_phone_no": "Administrator Phone Number",
+        "admin_phone_no_desc": "Phone number of the OpenSpecimen administrator displayed in emails sent from OpenSpecimen. Users can call on this number to receive help, log support tickets etc."
       },
 
       "notifications": {
