@@ -14,6 +14,8 @@ import java.util.function.Function;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -92,6 +94,8 @@ import krishagni.catissueplus.beans.FormRecordEntryBean;
 import krishagni.catissueplus.beans.FormRecordEntryBean.Status;
 
 public class FormServiceImpl implements FormService, InitializingBean {
+	private static Log logger = LogFactory.getLog(FormServiceImpl.class);
+
 	private static final String CP_FORM = "CollectionProtocol";
 
 	private static final String PARTICIPANT_FORM = "Participant";
@@ -1072,6 +1076,9 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 			private void initParams(ExportJob job) {
 				Map<String, String> params = job.getParams();
+				if (params == null) {
+					params = Collections.emptyMap();
+				}
 
 				String formName = params.get("formName");
 				if (StringUtils.isBlank(formName)) {
@@ -1089,14 +1096,13 @@ public class FormServiceImpl implements FormService, InitializingBean {
 					throw OpenSpecimenException.userError(FormErrorCode.ENTITY_TYPE_REQUIRED);
 				}
 
-				String cpShortTitle = params.get("cpShortTitle");
-				if (StringUtils.isNotBlank(cpShortTitle)) {
-					cp = daoFactory.getCollectionProtocolDao().getCpByShortTitle(cpShortTitle);
-					if (cp == null) {
-						throw OpenSpecimenException.userError(CpErrorCode.NOT_FOUND, cpShortTitle);
+				String cpIdStr = params.get("cpId");
+				if (StringUtils.isNotBlank(cpIdStr)) {
+					try {
+						cpId = Long.parseLong(cpIdStr);
+					} catch (Exception e) {
+						logger.error("Invalid CP ID: " + cpIdStr, e);
 					}
-
-					cpId = cp.getId();
 				}
 
 				paramsInited = true;
