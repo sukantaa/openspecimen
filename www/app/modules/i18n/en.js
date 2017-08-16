@@ -1127,6 +1127,7 @@
     "auto_name": "Auto",
     "name": "Name",
     "barcode": "Barcode",
+    "name_or_barcode": "Name / Barcode",
     "type": "Type",
     "create_container": "Create Storage Container",
     "parent_container": "Parent Container",

@@ -5,6 +5,8 @@ public class ContainerQueryCriteria {
 	
 	private String name;
 
+	private String barcode;
+
 	private boolean includeStats;
 	
 	public ContainerQueryCriteria(Long id) {
@@ -15,12 +17,21 @@ public class ContainerQueryCriteria {
 		this.name = name;
 	}
 
+	public ContainerQueryCriteria(String name, String barcode) {
+		this.name = name;
+		this.barcode = barcode;
+	}
+
 	public Long getId() {
 		return id;
 	}
 
 	public String getName() {
 		return name;
+	}
+
+	public String getBarcode() {
+		return barcode;
 	}
 
 	public boolean includeStats() {

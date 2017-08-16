@@ -17,7 +17,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -395,7 +395,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			ContainerReplicationDetail replDetail = req.getPayload();
 			StorageContainer srcContainer = getContainer(
 					replDetail.getSourceContainerId(), 
-					replDetail.getSourceContainerName(), 
+					replDetail.getSourceContainerName(),
+					null,
 					StorageContainerErrorCode.SRC_ID_OR_NAME_REQ);
 			
 			for (DestinationDetail dest : replDetail.getDestinations()) {
@@ -825,31 +826,42 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	}
 
 	private StorageContainer getContainer(ContainerQueryCriteria crit) {
-		return getContainer(crit.getId(), crit.getName());
+		return getContainer(crit.getId(), crit.getName(), crit.getBarcode());
 	}
-	
+
 	private StorageContainer getContainer(Long id, String name) {
-		return getContainer(id, name, StorageContainerErrorCode.ID_OR_NAME_REQ);
+		return getContainer(id, name, null);
 	}
 	
-	private StorageContainer getContainer(Long id, String name, ErrorCode requiredErrCode) {
-		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+	private StorageContainer getContainer(Long id, String name, String barcode) {
+		return getContainer(id, name, barcode, StorageContainerErrorCode.ID_NAME_OR_BARCODE_REQ);
+	}
+	
+	private StorageContainer getContainer(Long id, String name, String barcode, ErrorCode requiredErrCode) {
 		StorageContainer container = null;
+		Object key = null;
+
 		if (id != null) {
 			container = daoFactory.getStorageContainerDao().getById(id);
-			if (container == null) {
-				ose.addError(StorageContainerErrorCode.NOT_FOUND, id);
+			key = id;
+		} else {
+			if (StringUtils.isNotBlank(name)) {
+				container = daoFactory.getStorageContainerDao().getByName(name);
+				key = name;
 			}
-		} else if (StringUtils.isNotBlank(name)) {
-			container = daoFactory.getStorageContainerDao().getByName(name);
-			if (container == null) {
-				ose.addError(StorageContainerErrorCode.NOT_FOUND, name);
+
+			if (container == null && StringUtils.isNotBlank(barcode)) {
+				container = daoFactory.getStorageContainerDao().getByBarcode(barcode);
+				key = barcode;
 			}
-		} else if (requiredErrCode != null) {
-			ose.addError(requiredErrCode);
 		}
-		
-		ose.checkAndThrow();
+
+		if (key == null) {
+			throw OpenSpecimenException.userError(requiredErrCode);
+		} else if (container == null) {
+			throw OpenSpecimenException.userError(StorageContainerErrorCode.NOT_FOUND, key, 1);
+		}
+
 		return container;
 	}
 

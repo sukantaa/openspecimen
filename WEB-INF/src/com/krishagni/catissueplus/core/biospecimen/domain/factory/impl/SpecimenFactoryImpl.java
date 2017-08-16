@@ -819,7 +819,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		} 
 		
 		if (container == null) {
-			ose.addError(StorageContainerErrorCode.NOT_FOUND, key);
+			ose.addError(StorageContainerErrorCode.NOT_FOUND, key, 1);
 			return;
 		}
 		

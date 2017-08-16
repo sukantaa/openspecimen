@@ -855,7 +855,7 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 			}
 
 			if (container == null) {
-				raiseError(StorageContainerErrorCode.NOT_FOUND, key);
+				raiseError(StorageContainerErrorCode.NOT_FOUND, key, 1);
 			}
 
 			containersMap.put(location.getName(), container);

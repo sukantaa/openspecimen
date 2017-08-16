@@ -188,10 +188,11 @@ angular.module('os.administrative.container',
       caption: 'entities.container',
       order: 4,
       search: function(searchData) {
-        Container.getByName(searchData.containerName).then(
+        var nameOrBarcode = searchData.containerName;
+        Container.getByName(nameOrBarcode, nameOrBarcode).then(
           function(container) {
             if (container == undefined) {
-              Alerts.error('search.error', {entity: 'Container', key: searchData.containerName});
+              Alerts.error('search.error', {entity: 'Container', key: nameOrBarcode});
               return;
             }
 

@@ -251,13 +251,16 @@ public class StorageContainersController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public StorageContainerDetail getStorageContainer(
-		@RequestParam(value = "name", required = true)
+		@RequestParam(value = "name", required = false)
 		String name,
+
+		@RequestParam(value = "barcode", required = false)
+		String barcode,
 
 		@RequestParam(value = "includeStats", required = false, defaultValue = "false")
 		boolean includeStats) {
 
-		return getContainer(new ContainerQueryCriteria(name).includeStats(includeStats));
+		return getContainer(new ContainerQueryCriteria(name, barcode).includeStats(includeStats));
 	}
 
 	@RequestMapping(method = RequestMethod.POST)

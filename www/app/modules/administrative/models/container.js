@@ -174,8 +174,8 @@ angular.module('os.administrative.models.container', ['os.common.models'])
       return Container._flatten(containers, 'childContainers');
     };
 
-    Container.getByName = function(name) {
-      return $http.get(Container.url() + '/byname/', {params: {name: name}}).then(
+    Container.getByName = function(name, barcode) {
+      return $http.get(Container.url() + '/byname/', {params: {name: name, barcode: barcode}}).then(
         function(result) {
           return new Container(result.data);
         }
