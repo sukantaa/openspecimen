@@ -16,9 +16,12 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
@@ -27,6 +30,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.ConsentResponses;
+import com.krishagni.catissueplus.core.biospecimen.domain.ConsentTierResponse;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
@@ -54,6 +58,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.SpecimenDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.VisitDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.VisitSpecimensQueryCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.VisitSummary;
+import com.krishagni.catissueplus.core.biospecimen.repository.CprListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.VisitsListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.Anonymizer;
@@ -68,6 +73,7 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.service.LabelGenerator;
 import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
 import com.krishagni.catissueplus.core.common.service.impl.ConfigurationServiceImpl;
@@ -79,6 +85,8 @@ import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class CollectionProtocolRegistrationServiceImpl implements CollectionProtocolRegistrationService, ObjectStateParamsResolver, InitializingBean {
+	private Log logger = LogFactory.getLog(CollectionProtocolRegistrationServiceImpl.class);
+
 	private DaoFactory daoFactory;
 
 	private CollectionProtocolRegistrationFactory cprFactory;
@@ -524,6 +532,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
+		exportSvc.registerObjectsGenerator("cpr", this::getCprsGenerator);
 		exportSvc.registerObjectsGenerator("consent", this::getConsentsGenerator);
 	}
 
@@ -1066,35 +1075,195 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		}
 	}
 
-	private Function<ExportJob, List<? extends Object>> getConsentsGenerator() {
-		return new Function<ExportJob, List<? extends Object>>() {
-			private boolean endOfConsents;
+	private Long getCpId(Map<String, String> params) {
+		String cpIdStr = params.get("cpId");
+		if (StringUtils.isNotBlank(cpIdStr)) {
+			try {
+				return Long.parseLong(cpIdStr);
+			} catch (Exception e) {
+				logger.error("Invalid CP ID: " + cpIdStr, e);
+			}
+		}
 
-			@Override
-			public List<? extends Object> apply(ExportJob exportJob) {
-				if (endOfConsents) {
-					return Collections.emptyList();
+		return null;
+	}
+
+	private abstract class AbstractCprsGenerator implements Function<ExportJob, List<? extends Object>> {
+		private boolean endOfCprs;
+
+		private CprListCriteria crit;
+
+		private int startAt;
+
+		private boolean paramsInited;
+
+		List<CollectionProtocolRegistration> nextCprs(ExportJob job) {
+			initParams(job);
+
+			if (endOfCprs) {
+				return Collections.emptyList();
+			}
+
+			List<CollectionProtocolRegistration> cprs = daoFactory.getCprDao().getCprs(crit.startAt(startAt));
+			startAt += cprs.size();
+			if (CollectionUtils.isNotEmpty(crit.ppids()) || cprs.size() < 100) {
+				endOfCprs = true;
+			}
+
+			return cprs;
+		}
+
+		//
+		// -1: error, 0: full access, 1: access without PHI
+		//
+		int canRead(CollectionProtocolRegistration cpr) {
+			try {
+				return AccessCtrlMgr.getInstance().ensureReadCprRights(cpr) ? 0 : 1;
+			} catch (OpenSpecimenException ose) {
+				if (!ose.containsError(RbacErrorCode.ACCESS_DENIED)) {
+					logger.error("Error checking participant record access", ose);
 				}
 
-				String consentFileDir = ConfigParams.getConsentsDirPath();
-				Map<String, String> params = exportJob.getParams();
-				String cpShortTitle = params.get("cpShortTitle");
-				List<String> ppids = Utility.csvToStringList(params.get("ppid"));
+				return -1;
+			}
+		}
 
-				List<ConsentDetail> consents = ppids.stream()
-					.map(ppid -> getCpr(null, null, cpShortTitle, ppid))
-					.map(cpr -> getConsentWithFile(cpr, consentFileDir))
-					.collect(Collectors.toList());
+		private void initParams(ExportJob job) {
+			if (paramsInited) {
+				return;
+			}
 
-				endOfConsents = true;
-				return consents;
+			Map<String, String> params = job.getParams();
+			if (params == null) {
+				params = Collections.emptyMap();
+			}
+
+			Long cpId = getCpId(params);
+			AccessCtrlMgr.ParticipantReadAccess access = AccessCtrlMgr.getInstance().getParticipantReadAccess(cpId);
+			if (!access.admin && access.noAccessibleSites()) {
+				endOfCprs = true;
+				return;
+			}
+
+			crit = new CprListCriteria()
+				.cpId(cpId)
+				.ppids(Utility.csvToStringList(params.get("ppids")))
+				.siteCps(access.siteCps)
+				.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn());
+
+			if (CollectionUtils.isNotEmpty(crit.ppids())) {
+				crit.limitItems(false);
+			} else {
+				crit.limitItems(true).maxResults(100);
+			}
+
+			paramsInited = true;
+		}
+	}
+
+	private Function<ExportJob, List<? extends Object>> getCprsGenerator() {
+		return new AbstractCprsGenerator() {
+			@Override
+			public List<? extends Object> apply(ExportJob job) {
+				List<CollectionProtocolRegistrationDetail> records = new ArrayList<>();
+				for (CollectionProtocolRegistration cpr : nextCprs(job)) {
+					int accessType = canRead(cpr);
+					if (accessType >= 0) {
+						records.add(CollectionProtocolRegistrationDetail.from(cpr, accessType == 1));
+					}
+				}
+
+				return records;
 			}
 		};
 	}
 
-	private ConsentDetail getConsentWithFile(CollectionProtocolRegistration cpr, String consentFileDir) {
-		ConsentDetail consent = ConsentDetail.fromCpr(cpr, false);
-		consent.setDocumentFile(new File(consentFileDir, cpr.getSignedConsentDocumentName()));
-		return consent;
+	private Function<ExportJob, List<? extends Object>> getConsentsGenerator() {
+		return new AbstractCprsGenerator() {
+			@Override
+			public List<? extends Object> apply(ExportJob job) {
+				List<ConsentDetail> records = new ArrayList<>();
+
+				boolean endOfWork = false;
+				while (!endOfWork) {
+					List<CollectionProtocolRegistration> cprs = nextCprs(job);
+					if (cprs.isEmpty()) {
+						break;
+					}
+
+					for (CollectionProtocolRegistration cpr : cprs) {
+						int accessType = canRead(cpr);
+						if (accessType < 0 || !hasConsent(cpr, accessType == 0)) {
+							continue;
+						}
+
+						ConsentDetail detail = toConsentDetail(cpr, accessType == 0);
+						records.add(detail);
+
+						boolean firstResp = true;
+						for (ConsentTierResponse resp : getSortedResponses(cpr)) {
+							if (!firstResp) {
+								detail = copyOf(detail);
+								records.add(detail);
+							}
+
+							detail.setStatement(resp.getStatement());
+							detail.setResponse(resp.getResponse());
+							firstResp = false;
+						}
+					}
+
+					endOfWork = !records.isEmpty();
+				}
+
+				return records;
+			}
+
+			private boolean hasConsent(CollectionProtocolRegistration cpr, boolean hasPhi) {
+				return cpr.getConsentSignDate() != null ||
+					cpr.getConsentWitness() != null ||
+					StringUtils.isNotBlank(cpr.getConsentComments()) ||
+					(hasPhi && StringUtils.isNotBlank(cpr.getSignedConsentDocumentName())) ||
+					CollectionUtils.isNotEmpty(cpr.getConsentResponses());
+			}
+
+			private ConsentDetail toConsentDetail(CollectionProtocolRegistration cpr, boolean hasPhi) {
+				ConsentDetail detail = new ConsentDetail();
+				detail.setCpShortTitle(cpr.getCpShortTitle());
+				detail.setPpid(cpr.getPpid());
+				detail.setConsentSignatureDate(cpr.getConsentSignDate());
+				detail.setComments(cpr.getConsentComments());
+
+				if (cpr.getConsentWitness() != null) {
+					detail.setWitness(UserSummary.from(cpr.getConsentWitness()));
+				}
+
+				if (cpr.getSignedConsentDocumentName() != null && hasPhi) {
+					detail.setConsentDocumentName(cpr.getSignedConsentDocumentName());
+					detail.setDocumentFile(new File(ConfigParams.getConsentsDirPath(), cpr.getSignedConsentDocumentName()));
+				}
+
+				return detail;
+			}
+
+			private Collection<ConsentTierResponse> getSortedResponses(CollectionProtocolRegistration cpr) {
+				return cpr.getConsentResponses().stream()
+					.filter(r1 -> StringUtils.isNotBlank(r1.getResponse()))
+					.sorted((r1, r2) -> r1.getConsentTier().getId().compareTo(r2.getConsentTier().getId()))
+					.collect(Collectors.toList());
+			}
+
+			private ConsentDetail copyOf(ConsentDetail input) {
+				try {
+					ConsentDetail output = new ConsentDetail();
+					BeanUtilsBean.getInstance().copyProperties(output, input);
+					output.setConsentDocumentName(null);
+					output.setDocumentFile(null);
+					return output;
+				} catch (Exception e) {
+					throw new RuntimeException("Error cloning consent detail object", e);
+				}
+			}
+		};
 	}
 }

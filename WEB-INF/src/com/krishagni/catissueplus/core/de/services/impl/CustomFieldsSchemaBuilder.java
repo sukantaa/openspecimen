@@ -38,6 +38,10 @@ public class CustomFieldsSchemaBuilder extends ExtensionSchemaBuilder {
 	@Override
 	@PlusTransactional
 	public ObjectSchema getObjectSchema(Map<String, String> params) {
+		if (params == null) {
+			params = Collections.emptyMap();
+		}
+
 		String cpIdStr = params.get("cpId");
 		if (StringUtils.isBlank(cpIdStr)) {
 			cpIdStr = "-1";

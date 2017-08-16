@@ -4,6 +4,7 @@ package com.krishagni.catissueplus.core.biospecimen.services.impl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
@@ -22,11 +25,13 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitFactory;
+import com.krishagni.catissueplus.core.biospecimen.events.CollectionEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpEntityDeleteCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDownloadDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.LabelPrintJobSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.PrintVisitNameDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.ReceivedEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SprDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SprLockDetail;
@@ -60,8 +65,11 @@ import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
+import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver, InitializingBean {
+	private Log logger = LogFactory.getLog(VisitServiceImpl.class);
+
 	private DaoFactory daoFactory;
 
 	private VisitFactory visitFactory;
@@ -759,23 +767,89 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 		return new Function<ExportJob, List<? extends Object>>() {
 			private boolean endOfVisits;
 
+			private boolean paramsInited;
+
+			private VisitsListCriteria crit;
+
+			private int startAt;
+
 			@Override
 			public List<? extends Object> apply(ExportJob exportJob) {
+				initParams(exportJob);
+
 				if (endOfVisits) {
 					return Collections.emptyList();
 				}
 
-				Map<String, String> params = exportJob.getParams();
-				List<String> visitNames = Utility.csvToStringList(params.get("visitName"));
+				List<Visit> visits = daoFactory.getVisitsDao().getVisitsList(crit.startAt(startAt));
+				startAt += visits.size();
+				if (CollectionUtils.isNotEmpty(crit.names()) || visits.size() < 100) {
+					endOfVisits = true;
+				}
 
-				List<VisitDetail> visits = visitNames.stream()
-					.map(name -> getVisit(null, name))
-					.map(VisitDetail::from)
-					.map(visit -> {visit.setSprFile(getSprFile(visit.getId())); return visit;})
-					.collect(Collectors.toList());
+				List<VisitDetail> records = new ArrayList<>();
+				for (Visit visit : visits) {
+					try {
+						boolean hasPhi = AccessCtrlMgr.getInstance().ensureReadVisitRights(visit, true);
+						VisitDetail detail = VisitDetail.from(visit, false, !hasPhi);
+						if (hasPhi) {
+							detail.setSprFile(getSprFile(visit.getId()));
+						}
 
-				endOfVisits = true;
-				return visits;
+						records.add(detail);
+					} catch (OpenSpecimenException ose) {
+						if (!ose.containsError(RbacErrorCode.ACCESS_DENIED)) {
+							logger.error("Encountered error exporting visit record", ose);
+						}
+					}
+				}
+
+				return records;
+			}
+
+			private void initParams(ExportJob job) {
+				if (paramsInited) {
+					return;
+				}
+
+				Map<String, String> params = job.getParams();
+				if (params == null) {
+					params = Collections.emptyMap();
+				}
+
+				Long cpId = getCpId(params);
+				List<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps(cpId);
+				if (siteCps != null && siteCps.isEmpty()) {
+					endOfVisits = true;
+					return;
+				}
+
+				crit = new VisitsListCriteria()
+					.cpId(cpId)
+					.names(Utility.csvToStringList(params.get("visitNames")))
+					.siteCps(siteCps)
+					.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn());
+
+				if (!crit.names().isEmpty()) {
+					crit.limitItems(false);
+				} else {
+					crit.limitItems(true).maxResults(100);
+				}
+
+				paramsInited = true;
+			}
+
+			private Long getCpId(Map<String, String> params) {
+				String cpIdStr = params.get("cpId");
+				if (StringUtils.isNotBlank(cpIdStr)) {
+					try {
+						return Long.parseLong(cpIdStr);
+					} catch (Exception e) {
+						logger.error("Invalid CP ID: " + cpIdStr, e);
+					}
+				}
+
+				return null;
 			}
 		};
 	}

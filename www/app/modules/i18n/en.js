@@ -232,8 +232,9 @@
     "deleting_event": "Deleting Event...",
     "confirm_delete_event": "Collection Protocol Event and its specimen requirements will be deleted. Are you sure you want to proceed?",
 
-    "bulk_import": "Biospecimen Data",
+    "bulk_import": "Import",
     "bulk_import_biospecimen_obj_jobs": "Import Biospecimen Objects Job List",
+    "export": "Export",
 
     "show_site_coding": "Show Site Code Information",
     "hide_site_coding": "Hide Site Code Information",
@@ -392,6 +393,8 @@
     "confirm_anonymize": "Are you sure you want to erase all PHI data of participant?",
     "anonymized_successfully": "Successfully erased participant PHI data",
     "other_cps": "Other Registered Protocols",
+    "ppids": "Participant Protocol IDs",
+    "ppids_csv": "Comma separated list of participant protocol IDs",
 
     "bulk_registration": "Bulk Participant Registration",
     "num_of_participants": "Number of Participants",
@@ -497,6 +500,8 @@
     "reason_for_missed_visit": "Reason for Missed Visit",
     "comments": "Comments",
     "unplanned_visit": "Unplanned Visit",
+    "names": "Visit Names",
+    "names_csv": "Comma separated list of visit names",
 
     "names_print_job_created": "Visit names print job {{jobId}} created successfully",
 
@@ -615,6 +620,8 @@
     "aliquot_specs": "Aliquots Specifications",
     "review_locations": "Review Locations",
     "assign_locations": "Choose Locations",
+    "labels": "Specimen Labels",
+    "labels_csv": "Comma separated list of specimen labels",
 
     "reason_for_closing": "Reason for closing",
 
@@ -1704,7 +1711,12 @@
   },
 
   "export": {
-    "job_submitted": "Export job {{id}} submitted. Link to download records file will be sent by email."
+    "title": "Export Records",
+    "initiated": "Export records has been initiated. Records file download should start in few moments...",
+    "downloading_file": "Downloading records file",
+    "file_will_be_emailed": "Export records job {{id}} is taking longer time to finish. Link to download records file will be sent to you by e-mail",
+    "failed": "Export job {{id}} failed with errors. Please contact system administrator for help!",
+    "select_record_type": "Record Type"
   },
 
   "specimen_kit": {

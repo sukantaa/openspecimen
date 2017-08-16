@@ -1,6 +1,8 @@
 package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
 
+import java.util.List;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Disjunction;
@@ -11,23 +13,23 @@ import org.hibernate.sql.JoinType;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.common.Pair;
 
-public class SpecimenDaoHelper {
+public class BiospecimenDaoHelper {
 
-	private static final SpecimenDaoHelper instance = new SpecimenDaoHelper();
+	private static final BiospecimenDaoHelper instance = new BiospecimenDaoHelper();
 
-	private SpecimenDaoHelper() {
+	private BiospecimenDaoHelper() {
 	}
 
-	public static SpecimenDaoHelper getInstance() {
+	public static BiospecimenDaoHelper getInstance() {
 		return instance;
 	}
 
 	public void addSiteCpsCond(Criteria query, SpecimenListCriteria crit) {
-		addSiteCpsCond(query, crit, query.getAlias().equals("visit") ? "cpr" : "visit");
+		addSiteCpsCond(query, crit.siteCps(), crit.useMrnSites(), query.getAlias().equals("visit") ? "cpr" : "visit");
 	}
 
-	public void addSiteCpsCond(Criteria query, SpecimenListCriteria crit, String startAlias) {
-		if (CollectionUtils.isEmpty(crit.siteCps())) {
+	public void addSiteCpsCond(Criteria query, List<Pair<Long, Long>> siteCps, boolean useMrnSites, String startAlias) {
+		if (CollectionUtils.isEmpty(siteCps)) {
 			return;
 		}
 
@@ -49,12 +51,12 @@ public class SpecimenDaoHelper {
 			.createAlias("pmi.site", "mrnSite", JoinType.LEFT_OUTER_JOIN);
 
 		Disjunction cpSitesCond = Restrictions.disjunction();
-		for (Pair<Long, Long> siteCp : crit.siteCps()) {
+		for (Pair<Long, Long> siteCp : siteCps) {
 			Long siteId = siteCp.first();
 			Long cpId = siteCp.second();
 
 			Junction siteCond = Restrictions.disjunction();
-			if (crit.useMrnSites()) {
+			if (useMrnSites) {
 				//
 				// When MRNs exist, site ID should be one of the MRN site
 				//

@@ -9,23 +9,27 @@ import com.krishagni.catissueplus.core.biospecimen.events.CprSummary;
 import com.krishagni.catissueplus.core.common.repository.Dao;
 
 public interface CollectionProtocolRegistrationDao extends Dao<CollectionProtocolRegistration> {	
-	public List<CprSummary> getCprList(CprListCriteria listCrit);
+	List<CprSummary> getCprList(CprListCriteria crit);
 
-	public Long getCprCount(CprListCriteria cprCrit);
+	Long getCprCount(CprListCriteria crit);
 
-	public List<CollectionProtocolRegistration> getCprsByCpId(Long cpId, int startAt, int maxResults);
+	List<CollectionProtocolRegistration> getCprs(CprListCriteria crit);
 
-	public CollectionProtocolRegistration getCprByPpid(Long cpId, String ppid);
+	List<CollectionProtocolRegistration> getCprsByCpId(Long cpId, int startAt, int maxResults);
+
+	CollectionProtocolRegistration getCprByPpid(Long cpId, String ppid);
 	
-	public CollectionProtocolRegistration getCprByPpid(String cpTitle, String ppid);
+	CollectionProtocolRegistration getCprByPpid(String cpTitle, String ppid);
 	
-	public CollectionProtocolRegistration getCprByCpShortTitleAndPpid(String cpShortTitle, String ppid);
+	CollectionProtocolRegistration getCprByCpShortTitleAndPpid(String cpShortTitle, String ppid);
 
-	public CollectionProtocolRegistration getCprByCpShortTitleAndEmpi(String cpShortTitle, String empi);
+	CollectionProtocolRegistration getCprByCpShortTitleAndEmpi(String cpShortTitle, String empi);
 
-	public CollectionProtocolRegistration getCprByBarcode(String barcode);
+	CollectionProtocolRegistration getCprByBarcode(String barcode);
 
-	public CollectionProtocolRegistration getCprByParticipantId(Long cpId, Long participantId);
+	CollectionProtocolRegistration getCprByParticipantId(Long cpId, Long participantId);
 
-	public Map<String, Object> getCprIds(String key, Object value);
+	Map<String, Object> getCprIds(String key, Object value);
+
+
 }

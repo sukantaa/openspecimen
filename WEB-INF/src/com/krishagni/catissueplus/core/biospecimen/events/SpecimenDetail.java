@@ -261,28 +261,34 @@ public class SpecimenDetail extends SpecimenInfo {
 	}
 
 	public static SpecimenDetail from(Specimen specimen, boolean partial, boolean excludePhi) {
+		return from(specimen, partial, excludePhi, false);
+	}
+
+	public static SpecimenDetail from(Specimen specimen, boolean partial, boolean excludePhi, boolean excludeChildren) {
 		SpecimenDetail result = new SpecimenDetail();
 		SpecimenInfo.fromTo(specimen, result);
 		
 		SpecimenRequirement sr = specimen.getSpecimenRequirement();
-		if (sr == null) {
-			List<SpecimenDetail> children = from(specimen.getChildCollection());
-			sort(children);
-			result.setChildren(children);
-		} else {
-			if (sr.isPooledSpecimenReq()) {
-				result.setSpecimensPool(getSpecimens(sr.getSpecimenPoolReqs(), specimen.getSpecimensPool()));
-			}
-			result.setPoolSpecimen(sr.isSpecimenPoolReq());
+		if (!excludeChildren) {
+			if (sr == null) {
+				List<SpecimenDetail> children = from(specimen.getChildCollection());
+				sort(children);
+				result.setChildren(children);
+			} else {
+				if (sr.isPooledSpecimenReq()) {
+					result.setSpecimensPool(getSpecimens(sr.getSpecimenPoolReqs(), specimen.getSpecimensPool()));
+				}
+				result.setPoolSpecimen(sr.isSpecimenPoolReq());
 
-			result.setChildren(getSpecimens(sr.getChildSpecimenRequirements(), specimen.getChildCollection()));
+				result.setChildren(getSpecimens(sr.getChildSpecimenRequirements(), specimen.getChildCollection()));
+			}
+
+			if (specimen.getPooledSpecimen() != null) {
+				result.setPooledSpecimenId(specimen.getPooledSpecimen().getId());
+				result.setPooledSpecimenLabel(specimen.getPooledSpecimen().getLabel());
+			}
 		}
-		
-		if (specimen.getPooledSpecimen() != null) {
-			result.setPooledSpecimenId(specimen.getPooledSpecimen().getId());
-			result.setPooledSpecimenLabel(specimen.getPooledSpecimen().getLabel());
-		}
-		
+
 		result.setLabelFmt(specimen.getLabelTmpl());
 		if (sr != null && sr.getLabelAutoPrintModeToUse() != null) {
 			result.setLabelAutoPrintMode(sr.getLabelAutoPrintModeToUse().name());

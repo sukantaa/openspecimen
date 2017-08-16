@@ -380,7 +380,7 @@ public class AccessCtrlMgr {
 				sites = getUserInstituteSites(userId);
 			}
 
-			Set<Long> siteIds = sites.stream().map(s -> s.getId()).collect(Collectors.toSet());
+			Set<Long> siteIds = sites.stream().map(Site::getId).collect(Collectors.toSet());
 			Long cpId = access.getCollectionProtocol() != null ? access.getCollectionProtocol().getId() : null;
 			if (Resource.PARTICIPANT.getName().equals(access.getResource())) {
 				phiSiteCps.add(Pair.make(siteIds, cpId));
@@ -424,9 +424,9 @@ public class AccessCtrlMgr {
 
 			if (accessSite != null) {
 				siteCps.add(Pair.make(Collections.singleton(accessSite.getId()), cpId));
-			} else if (accessSite == null) {
+			} else {
 				Set<Site> sites = getUserInstituteSites(userId);
-				siteCps.add(Pair.make(sites.stream().map(s -> s.getId()).collect(Collectors.toSet()), cpId));
+				siteCps.add(Pair.make(sites.stream().map(Site::getId).collect(Collectors.toSet()), cpId));
 			}
 		}
 

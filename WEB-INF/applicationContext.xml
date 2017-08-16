@@ -303,6 +303,7 @@
     <property name="specimenResolver" ref="specimenResolver"/>
     <property name="cfgSvc" ref="cfgSvc"/>
     <property name="labelGenerator" ref="specimenLabelGenerator"/>
+    <property name="exportSvc" ref="exportSvc"/>
   </bean>
 
   <bean id="spmnTypePropsSvc" class="com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenTypePropsServiceImpl">
@@ -373,6 +374,7 @@
   <bean id="formSvc" class="com.krishagni.catissueplus.core.de.services.impl.FormServiceImpl">
     <property name="formDao" ref="formDao"/>
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="exportSvc" ref="exportSvc"/>
     <property name="ctxtProcs">
       <map>
         <entry key="ParticipantExtension">

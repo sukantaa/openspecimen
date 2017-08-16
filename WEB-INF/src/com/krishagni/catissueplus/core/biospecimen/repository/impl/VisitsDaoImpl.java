@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
@@ -89,7 +91,37 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 		Collections.sort(visits);
 		return visits;
 	}
-	
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Visit> getVisitsList(VisitsListCriteria crit) {
+		Criteria query = getCurrentSession().createCriteria(Visit.class, "visit");
+
+		String startAlias = "cpr";
+		if (crit.cpId() != null) {
+			startAlias = "cpSite";
+			query.createAlias("visit.registration", "cpr")
+				.createAlias("cpr.collectionProtocol", "cp")
+				.add(Restrictions.eq("cp.id", crit.cpId()));
+		}
+
+		boolean limitItems = true;
+		if (CollectionUtils.isNotEmpty(crit.names())) {
+			query.add(Restrictions.in("name", crit.names()));
+			limitItems = false;
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.siteCps())) {
+			BiospecimenDaoHelper.getInstance().addSiteCpsCond(query, crit.siteCps(), crit.useMrnSites(), startAlias);
+		}
+
+		if (limitItems) {
+			query.setFirstResult(crit.startAt()).setMaxResults(crit.maxResults());
+		}
+
+		return query.addOrder(Order.asc("id")).list();
+	}
+
 	@Override
 	public Visit getByName(String name) {
 		List<Visit> visits = getByName(Collections.singleton(name));

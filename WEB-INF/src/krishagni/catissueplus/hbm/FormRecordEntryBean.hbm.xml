@@ -136,5 +136,83 @@
             re.objectId = :objectId and
             re.activityStatusStr = 'ACTIVE'
         </query>
+
+        <sql-query name="getRegistrationRecords">
+          select
+            cp.identifier as cpId, cp.short_title as cpShortTitle,
+            cpr.identifier as cprId, cpr.protocol_participant_id as ppid, re.record_id as recordId
+          from
+            catissue_coll_prot_reg cpr
+            inner join catissue_collection_protocol cp on cp.identifier = cpr.collection_protocol_id
+            inner join catissue_form_context fc on (fc.cp_id = cp.identifier or fc.cp_id = -1) and fc.entity_type = 'Participant'
+            inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier and re.object_id = cpr.identifier
+          where
+            cpr.activity_status != 'Disabled' and
+            fc.deleted_on is null and
+            re.activity_status = 'ACTIVE' and
+            fc.container_id = :formId and
+            (:cpId is null or cp.identifier = :cpId)
+          order by
+            cprId, recordId
+        </sql-query>
+
+        <sql-query name="getParticipantRecords">
+          select
+            cp.identifier as cpId, cp.short_title as cpShortTitle,
+            cpr.identifier as cprId, cpr.participant_id as participantId, cpr.protocol_participant_id as ppid, re.record_id as recordId
+          from
+            catissue_coll_prot_reg cpr
+            inner join catissue_collection_protocol cp on cp.identifier = cpr.collection_protocol_id
+            inner join catissue_form_context fc on fc.cp_id = -1 and fc.entity_type = 'CommonParticipant'
+            inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier and re.object_id = cpr.participant_id
+          where
+            cpr.activity_status != 'Disabled' and
+            fc.deleted_on is null and
+            re.activity_status = 'ACTIVE' and
+            fc.container_id = :formId and
+            (:cpId is null or cp.identifier = :cpId)
+          order by
+            participantId, recordId
+        </sql-query>
+
+        <sql-query name="getVisitRecords">
+          select
+            cp.identifier as cpId, cp.short_title as cpShortTitle,
+            v.identifier as visitId, v.name as visitName, re.record_id as recordId
+          from
+            catissue_specimen_coll_group v
+            inner join catissue_coll_prot_reg cpr on cpr.identifier = v.collection_protocol_reg_id
+            inner join catissue_collection_protocol cp on cp.identifier = cpr.collection_protocol_id
+            inner join catissue_form_context fc on (fc.cp_id = cp.identifier or fc.cp_id = -1) and fc.entity_type = 'SpecimenCollectionGroup'
+            inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier and re.object_id = v.identifier
+          where
+            v.activity_status != 'Disabled' and
+            fc.deleted_on is null and
+            re.activity_status = 'ACTIVE' and
+            fc.container_id = :formId and
+            (:cpId is null or cp.identifier = :cpId)
+          order by
+            visitId, recordId
+        </sql-query>
+
+        <sql-query name="getSpecimenRecords">
+          select
+            cp.identifier as cpId, cp.short_title as cpShortTitle,
+            s.identifier as spmnId, s.label as spmnLabel, s.barcode as spmnBarcode,
+            re.record_id as recordId
+          from
+            catissue_specimen s
+            inner join catissue_collection_protocol cp on cp.identifier = s.collection_protocol_id
+            inner join catissue_form_context fc on (fc.cp_id = cp.identifier or fc.cp_id = -1) and fc.entity_type = :entityType
+            inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier and re.object_id = s.identifier
+          where
+            s.activity_status != 'Disabled' and
+            fc.deleted_on is null and
+            re.activity_status = 'ACTIVE' and
+            fc.container_id = :formId and
+            (:cpId is null or cp.identifier = :cpId)
+          order by
+            spmnId, recordId
+        </sql-query>
     </class>
 </hibernate-mapping>

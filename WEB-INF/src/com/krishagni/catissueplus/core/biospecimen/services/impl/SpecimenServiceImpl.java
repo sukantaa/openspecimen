@@ -11,11 +11,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -28,6 +31,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.events.CollectionEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpEntityDeleteCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.LabelPrintJobSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.PrintSpecimenLabelDetail;
@@ -63,8 +67,14 @@ import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
+import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsResolver, ConfigChangeListener, InitializingBean {
+
+	private static Log logger = LogFactory.getLog(SpecimenServiceImpl.class);
 
 	private DaoFactory daoFactory;
 
@@ -75,6 +85,8 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 	private ConfigurationService cfgSvc;
 
 	private LabelGenerator labelGenerator;
+
+	private ExportService exportSvc;
 
 	private int precision = 6;
 
@@ -97,7 +109,11 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 	public void setLabelGenerator(LabelGenerator labelGenerator) {
 		this.labelGenerator = labelGenerator;
 	}
-	
+
+	public void setExportSvc(ExportService exportSvc) {
+		this.exportSvc = exportSvc;
+	}
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<SpecimenDetail> getSpecimen(RequestEvent<SpecimenQueryCriteria> req) {
@@ -512,6 +528,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		cfgSvc.registerChangeListener(ConfigParams.MODULE, this);
+		exportSvc.registerObjectsGenerator("specimen", this::getSpecimensGenerator);
 	}
 
 	private List<Specimen> getSpecimens(SpecimenListCriteria crit) {
@@ -886,5 +903,94 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 		}
 
 		return disposalDate;
+	}
+
+	private Function<ExportJob, List<? extends Object>> getSpecimensGenerator() {
+		return new Function<ExportJob, List<? extends Object>>() {
+			private boolean endOfSpecimens;
+
+			private boolean paramsInited;
+
+			private int startAt;
+
+			private SpecimenListCriteria crit;
+
+			@Override
+			public List<? extends Object> apply(ExportJob job) {
+				initParams(job);
+
+				if (endOfSpecimens) {
+					return Collections.emptyList();
+				}
+
+				List<Specimen> specimens = daoFactory.getSpecimenDao().getSpecimens(crit.startAt(startAt));
+				startAt += specimens.size();
+				if (CollectionUtils.isNotEmpty(crit.labels()) || specimens.size() < 100) {
+					endOfSpecimens = true;
+				}
+
+				List<SpecimenDetail> records = new ArrayList<>();
+				for (Specimen specimen : specimens) {
+					try {
+						boolean hasPhi = AccessCtrlMgr.getInstance().ensureReadSpecimenRights(specimen, true);
+
+						SpecimenDetail detail = SpecimenDetail.from(specimen, false, !hasPhi, true);
+						if (specimen.isPrimary()) {
+							detail.setCollectionEvent(CollectionEventDetail.from(specimen.getCollectionEvent()));
+							detail.setReceivedEvent(ReceivedEventDetail.from(specimen.getReceivedEvent()));
+						}
+
+						records.add(detail);
+					} catch (OpenSpecimenException ose) {
+						if (!ose.containsError(RbacErrorCode.ACCESS_DENIED)) {
+							logger.error("Encountered error exporting specimen record", ose);
+						}
+					}
+				}
+
+				return records;
+			}
+
+			private void initParams(ExportJob job) {
+				if (paramsInited) {
+					return;
+				}
+
+				Map<String, String> params = job.getParams();
+				if (params == null) {
+					params = Collections.emptyMap();
+				}
+
+				Long cpId = null;
+				String cpIdStr = params.get("cpId");
+				if (StringUtils.isNotBlank(cpIdStr)) {
+					try {
+						cpId = Long.parseLong(cpIdStr);
+					} catch (Exception e) {
+						logger.error("Invalid CP ID: " + cpIdStr, e);
+					}
+				}
+
+				List<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps(cpId);
+				if (siteCps != null && siteCps.isEmpty()) {
+					endOfSpecimens = true;
+					return;
+				}
+
+				crit = new SpecimenListCriteria()
+					.labels(Utility.csvToStringList(params.get("specimenLabels")))
+					.siteCps(siteCps)
+					.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn())
+					.cpId(cpId);
+
+				if (CollectionUtils.isNotEmpty(crit.labels())) {
+					crit.limitItems(false);
+				} else {
+					crit.limitItems(true).maxResults(100);
+				}
+
+				paramsInited = true;
+			}
+		};
 	}
 }

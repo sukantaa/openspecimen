@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.biospecimen.events;
 
 import java.util.Date;
 
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 
 public class SpecimenEventDetail {
@@ -63,5 +64,12 @@ public class SpecimenEventDetail {
 
 	public void setSpecimenId(Long specimenId) {
 		this.specimenId = specimenId;
-	}	
+	}
+
+	public static void fromTo(SpecimenEvent se, SpecimenEventDetail detail) {
+		detail.setId(se.getId());
+		detail.setUser(UserSummary.from(se.getUser()));
+		detail.setTime(se.getTime());
+		detail.setComments(se.getComments());
+	}
 }

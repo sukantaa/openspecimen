@@ -123,6 +123,10 @@ public class Utility {
 	}
 
 	public static List<String> csvToStringList(String value) {
+		if (StringUtils.isBlank(value)) {
+			return Collections.emptyList();
+		}
+
 		CsvReader reader = null;
 		try {
 			reader = CsvFileReader.createCsvFileReader(new StringReader(value), false);

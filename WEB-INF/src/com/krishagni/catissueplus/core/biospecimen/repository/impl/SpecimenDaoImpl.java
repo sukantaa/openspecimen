@@ -42,16 +42,16 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		Criteria query = getCurrentSession().createCriteria(Specimen.class, "specimen")
 			.add(Subqueries.propertyIn("specimen.id", getSpecimenIdsQuery(crit)));
 
-		if (crit.limitItems()) {
-			if (crit.specimenListId() != null) {
-				query.createAlias("specimen.specimenListItems", "listItem")
-					.createAlias("listItem.list", "list")
-					.add(Restrictions.eq("list.id", crit.specimenListId()))
-					.addOrder(Order.asc("listItem.id"));
-			} else {
-				query.addOrder(Order.asc("specimen.id"));
-			}
+		if (crit.specimenListId() != null) {
+			query.createAlias("specimen.specimenListItems", "listItem")
+				.createAlias("listItem.list", "list")
+				.add(Restrictions.eq("list.id", crit.specimenListId()))
+				.addOrder(Order.asc("listItem.id"));
+		} else {
+			query.addOrder(Order.asc("specimen.id"));
+		}
 
+		if (crit.limitItems()) {
 			query.setFirstResult(crit.startAt()).setMaxResults(crit.maxResults());
 		}
 
@@ -388,7 +388,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	}
 
 	private void addSiteCpsCond(Criteria query, SpecimenListCriteria crit) {
-		SpecimenDaoHelper.getInstance().addSiteCpsCond(query, crit);
+		BiospecimenDaoHelper.getInstance().addSiteCpsCond(query, crit);
 	}
 
 	private void addCpCond(Criteria query, SpecimenListCriteria crit) {

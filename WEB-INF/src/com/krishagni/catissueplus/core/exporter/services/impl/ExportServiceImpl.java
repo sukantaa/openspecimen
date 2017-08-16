@@ -11,9 +11,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.BeanUtilsBean2;
 import org.apache.commons.collections.CollectionUtils;
@@ -25,7 +30,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
+import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
@@ -46,6 +53,7 @@ import com.krishagni.catissueplus.core.importer.domain.ObjectSchema;
 import com.krishagni.catissueplus.core.importer.services.ObjectSchemaFactory;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
+import edu.common.dynamicextensions.nutility.DeConfiguration;
 import edu.common.dynamicextensions.nutility.IoUtil;
 
 public class ExportServiceImpl implements ExportService {
@@ -58,6 +66,8 @@ public class ExportServiceImpl implements ExportService {
 	private ObjectSchemaFactory schemaFactory;
 
 	private ThreadPoolTaskExecutor taskExecutor;
+
+	private int ONLINE_EXPORT_TIMEOUT_SECS = 30;
 
 	public void setSchemaFactory(ObjectSchemaFactory schemaFactory) {
 		this.schemaFactory = schemaFactory;
@@ -72,35 +82,21 @@ public class ExportServiceImpl implements ExportService {
 	}
 
 	@Override
-	@PlusTransactional
 	public ResponseEvent<ExportJobDetail> exportObjects(RequestEvent<ExportDetail> req) {
-		if (!AuthUtil.isAdmin() && !AuthUtil.isInstituteAdmin()) {
-			return ResponseEvent.userError(RbacErrorCode.INST_ADMIN_RIGHTS_REQ, AuthUtil.getCurrentUserInstitute().getName());
+		Pair<ExportJob, Future<Integer>> result = exportObjects(req.getPayload());
+
+		try {
+			result.second().get(ONLINE_EXPORT_TIMEOUT_SECS, TimeUnit.SECONDS);
+		} catch (TimeoutException te) {
+			//
+			// Timed out waiting for the export job to finish.
+			// An email with export status will be sent to user.
+			//
+		} catch (Exception e) {
+			throw OpenSpecimenException.serverError(e);
 		}
 
-		ExportDetail detail = req.getPayload();
-
-		ObjectSchema schema = schemaFactory.getSchema(detail.getObjectType());
-		if (schema == null) {
-			return ResponseEvent.userError(ExportErrorCode.INVALID_OBJECT_TYPE, detail.getObjectType());
-		}
-
-		Supplier<Function<ExportJob, List<? extends Object>>> generator = genFactories.get(detail.getObjectType());
-		if (generator == null) {
-			return ResponseEvent.userError(ExportErrorCode.NO_GEN_FOR_OBJECT_TYPE, detail.getObjectType());
-		}
-
-		ExportJob job = new ExportJob();
-		job.setName(detail.getObjectType());
-		job.setCreatedBy(AuthUtil.getCurrentUser());
-		job.setCreationTime(Calendar.getInstance().getTime());
-		job.setParams(detail.getParams());
-		job.setSchema(schema);
-		job.setRecordIds(detail.getRecordIds());
-		exportJobDao.saveOrUpdate(job.markInProgress(), true);
-
-		taskExecutor.execute(new ExportTask(job));
-		return ResponseEvent.response(ExportJobDetail.from(job));
+		return ResponseEvent.response(ExportJobDetail.from(result.first()));
 	}
 
 	@Override
@@ -124,7 +120,36 @@ public class ExportServiceImpl implements ExportService {
 		genFactories.put(type, genFactory);
 	}
 
-	private class ExportTask implements Runnable {
+	@PlusTransactional
+	private Pair<ExportJob, Future<Integer>> exportObjects(ExportDetail detail) {
+		if (!AuthUtil.isAdmin() && !AuthUtil.isInstituteAdmin()) {
+			throw OpenSpecimenException.userError(RbacErrorCode.INST_ADMIN_RIGHTS_REQ, AuthUtil.getCurrentUserInstitute().getName());
+		}
+
+		ObjectSchema schema = schemaFactory.getSchema(detail.getObjectType(), detail.getParams());
+		if (schema == null) {
+			throw OpenSpecimenException.userError(ExportErrorCode.INVALID_OBJECT_TYPE, detail.getObjectType());
+		}
+
+		Supplier<Function<ExportJob, List<? extends Object>>> generator = genFactories.get(detail.getObjectType());
+		if (generator == null) {
+			throw  OpenSpecimenException.userError(ExportErrorCode.NO_GEN_FOR_OBJECT_TYPE, detail.getObjectType());
+		}
+
+		ExportJob job = new ExportJob();
+		job.setName(detail.getObjectType());
+		job.setCreatedBy(AuthUtil.getCurrentUser());
+		job.setCreationTime(Calendar.getInstance().getTime());
+		job.setParams(detail.getParams());
+		job.setSchema(schema);
+		job.setRecordIds(detail.getRecordIds());
+		exportJobDao.saveOrUpdate(job.markInProgress(), true);
+
+		Future<Integer> result = taskExecutor.submit(new ExportTask(job));
+		return Pair.make(job, result);
+	}
+
+	private class ExportTask implements Callable<Integer> {
 		private ExportJob job;
 
 		private Function<ExportJob, List<? extends Object>> generator;
@@ -154,11 +179,12 @@ public class ExportServiceImpl implements ExportService {
 			tf = new SimpleDateFormat(dateFmt + " " + ConfigUtil.getInstance().getTimeFmt());
 		}
 
-		@Override
-		public void run() {
+
+		public Integer call() {
 			if (!new File(getJobDir(job)).mkdirs()) {
+				logger.error("Unable to create jobs directory");
 				failed();
-				return;
+				return -1;
 			}
 
 			try {
@@ -167,9 +193,11 @@ public class ExportServiceImpl implements ExportService {
 				generateOutputFile();
 				generateOutputZip(job);
 				completed();
+				return 0;
 			} catch (Exception e) {
 				failed();
 				logger.error("Error exporting records", e);
+				return -1;
 			} finally {
 				AuthUtil.clearCurrentUser();
 				cleanupFiles(job);
@@ -180,7 +208,6 @@ public class ExportServiceImpl implements ExportService {
 		private void generateRawRecordsFile()
 		throws IOException {
 			ObjectSchema.Record record = job.getSchema().getRecord();
-			List<ObjectSchema.Field> fileFields = getFileFields(record);
 
 			try {
 				openWriter(getRawDataFile(job));
@@ -230,7 +257,7 @@ public class ExportServiceImpl implements ExportService {
 					updateFieldCount(namePrefix + field.getAttribute(), count);
 				} else {
 					String value = getString(object, field);
-					if ("file".equals(field.getType()) && StringUtils.isNotBlank(value)) {
+					if (("file".equals(field.getType()) || "defile".equals(field.getType())) && StringUtils.isNotBlank(value)) {
 						value = ++filesCount + "_" + value;
 						writeFileData(object, field, value);
 					}
@@ -276,14 +303,26 @@ public class ExportServiceImpl implements ExportService {
 					filesDir = new File(getJobDir(job), "files");
 				}
 
+				File srcFile = null;
 				File destFile = new File(filesDir, filename);
-				String fileVar = field.getFile();
-				if (StringUtils.isBlank(fileVar)) {
-					fileVar = "documentFile";
+				if (field.getType().equals("file")) {
+					String fileVar = field.getFile();
+					if (StringUtils.isBlank(fileVar)) {
+						fileVar = "documentFile";
+					}
+
+					srcFile = (File) getObject(object, fileVar);
+				} else if (field.getType().equals("defile")) {
+					Map<String, String> fcv = (Map<String, String>) getObject(object, field.getAttribute());
+					String fileId = fcv.get("fileId");
+					srcFile = new File(DeConfiguration.getInstance().fileUploadDir(), fileId);
 				}
 
-				Object value = getObject(object, fileVar);
-				FileUtils.copyFile((File) value, destFile);
+				if (srcFile != null && srcFile.exists()) {
+					FileUtils.copyFile(srcFile, destFile);
+				} else {
+					FileUtils.write(destFile, "File does not exists");
+				}
 			} catch (IOException ioe) {
 				throw new RuntimeException("Error writing to file", ioe);
 			}
@@ -450,10 +489,13 @@ public class ExportServiceImpl implements ExportService {
 				String result;
 
 				Object value = getObject(object, field.getAttribute());
-				if (object instanceof Date && "date".equals(field.getType())) {
+				if ("date".equals(field.getType())) {
 					result = getDateString(value);
-				} else if (object instanceof Date && "datetime".equals(field.getType())) {
+				} else if ("datetime".equals(field.getType())) {
 					result = getDateTimeString(value);
+				} else if ("defile".equals(field.getType()) && value instanceof Map) {
+					Map<String, String> fcv = (Map<String, String>)value;
+					result = fcv.get("filename");
 				} else {
 					result = ObjectUtils.toString(value);
 				}
@@ -475,18 +517,44 @@ public class ExportServiceImpl implements ExportService {
 		private Collection<Object> getCollection(Object object, String propertyName) {
 			try {
 				Object value = getObject(object, propertyName);
-				return (value == null) ? Collections.emptyList() : (Collection<Object>) value;
+				if (value == null) {
+					return Collections.emptyList();
+				} else if (value.getClass().isArray()) {
+					return Stream.of((Object[]) value).collect(Collectors.toList());
+				} else if (value instanceof Collection) {
+					return (Collection<Object>)value;
+				} else {
+					logger.error("Unknown collection type for " + propertyName + ": " + value.getClass());
+					return Collections.emptyList();
+				}
 			} catch (Exception e) {
 				throw new IllegalArgumentException("Error obtaining value of property: " + propertyName, e);
 			}
 		}
 
 		private String getDateString(Object input) {
-			return input == null ? null : df.format(input);
+			return getFormattedDateTimeString(df, input);
 		}
 
 		private String getDateTimeString(Object input) {
-			return input == null ? null : tf.format(input);
+			return getFormattedDateTimeString(tf, input);
+		}
+
+		private String getFormattedDateTimeString(SimpleDateFormat formatter, Object input) {
+			Date dateObj = null;
+			if (input instanceof String) {
+				try {
+					dateObj = new Date(Long.parseLong((String) input));
+				} catch (Exception e) {
+					return (String) input;
+				}
+			} else if (input instanceof Number) {
+				dateObj = new Date(((Number) input).longValue());
+			} else if (input instanceof Date) {
+				dateObj = (Date) input;
+			}
+
+			return dateObj == null ? null : formatter.format(dateObj);
 		}
 
 		private void updateRecordsCount(long recordsCnt) {
@@ -535,8 +603,13 @@ public class ExportServiceImpl implements ExportService {
 	}
 
 	private void cleanupFiles(ExportJob job) {
-		new File(getRawDataFile(job)).delete();
-		new File(getOutputCsvFile(job)).delete();
+		try {
+			new File(getRawDataFile(job)).delete();
+			new File(getOutputCsvFile(job)).delete();
+			FileUtils.deleteDirectory(new File(getJobDir(job), "files"));
+		} catch (Exception e) {
+			logger.error("Error cleaning up export job output directory", e);
+		}
 	}
 
 	private void generateOutputZip(ExportJob job) throws IOException {
@@ -547,7 +620,7 @@ public class ExportServiceImpl implements ExportService {
 	}
 
 	private void sendJobStatusNotification(ExportJob job) {
-		String entityName = getMsg("export_entities_" + job.getName());
+		String entityName = getEntityName(job);
 
 		String [] subjParams = {job.getId().toString(), entityName};
 
@@ -559,6 +632,18 @@ public class ExportServiceImpl implements ExportService {
 
 		String[] rcpts = {job.getCreatedBy().getEmailAddress()};
 		EmailUtil.getInstance().sendEmail(JOB_STATUS_EMAIL_TMPL, rcpts, null, props);
+	}
+
+	private String getEntityName(ExportJob job) {
+		String entityName;
+
+		if (job.getName().equals(EXTENSIONS)) {
+			entityName = job.getParams().get("formName") + " (" + job.getParams().get("entityType") + ")";
+		} else {
+			entityName = getMsg("export_entities_" + job.getName());
+		}
+
+		return entityName;
 	}
 
 
@@ -575,4 +660,6 @@ public class ExportServiceImpl implements ExportService {
 	private static final String JOB_STATUS_EMAIL_TMPL = "export_job_status_notif";
 
 	private static final String ID_ATTR = "id";
+
+	private static final String EXTENSIONS = "extensions";
 }

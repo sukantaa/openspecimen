@@ -115,7 +115,7 @@ public class ExtensionDetail {
 							.map(ExtensionDetail::getAttrsMap).collect(Collectors.toList());
 					attrsMap.put(attr.getName(), sfAttrsMap);
 				}
-			} else if (attr.getValue() instanceof List) {
+			} else if ("fileUpload".equals(attr.getType()) || attr.getValue() instanceof List) {
 				attrsMap.put(attr.getName(), attr.getValue());
 			} else {
 				Object value = attr.getDisplayValue();

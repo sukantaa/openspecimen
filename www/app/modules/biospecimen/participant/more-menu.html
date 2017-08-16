@@ -13,42 +13,44 @@
   <span translate="participant.buttons.specimen_catalog">Specimen Catalog</span>
 </a>
 
-<div ng-if="cpViewCtx.visitSpecimenImportAllowed || (!cp.specimenCentric && cpViewCtx.participantImportAllowed)"
-  dropdown class="os-inline-btn">
-  <button class="default dropdown-toggle">
-    <span translate="common.buttons.import">Import</span>
-    <span class="fa fa-caret-down"></span>
-  </button>
-
-  <ul class="dropdown-menu dropdown-menu-right">
-    <li>
-      <a ui-sref="import-cp-objs">
-        <span class="fa fa-upload"></span>
-        <span translate="cp.bulk_import">Biospecimen Data</span>
-      </a>
-    </li>
-
-    <li>
-      <a ui-sref="import-cp-jobs">
-        <span class="fa fa-list-alt"></span>
-        <span translate="bulk_imports.view_jobs">View Past Imports</span>
-      </a>
-    </li>
-  </ul>
-</div>
-
 <div os-show-if-menu-items-present dropdown class="os-inline-btn">
   <button class="default dropdown-toggle">
     <span translate="common.buttons.more">More</span>
     <span class="fa fa-caret-down"></span>
   </button>
   <ul class="dropdown-menu dropdown-menu-right">
+    <li ng-if="listViewCtx.showImport">
+      <a ui-sref="import-cp-objs">
+        <span class="fa fa-upload"></span>
+        <span translate="cp.bulk_import">Import Biospecimen Data</span>
+      </a>
+    </li>
+
+    <li ng-if="listViewCtx.showImport">
+      <a ui-sref="import-cp-jobs">
+        <span class="fa fa-list-alt"></span>
+        <span translate="bulk_imports.view_jobs">View Past Imports</span>
+      </a>
+    </li>
+
+    <li class="divider" ng-if="listViewCtx.showImport"></li>
+
+    <li ng-if="listViewCtx.showExport">
+      <a ui-sref="export-cp-objs">
+        <span class="fa fa-download"></span>
+        <span translate="cp.export">Export Biospecimen Data</span>
+      </a>
+    </li>
+
+    <li class="divider" ng-if="listViewCtx.showExport"></li>
+
     <li>
       <a ng-click="generateCpReport()">
         <span class="fa fa-file-text-o"></span>
         <span translate="participant.generate_report">Generate Report</span>
       </a>
     </li>
+
     <li ng-if="!!cp.bulkPartRegEnabled">
       <a ui-sref="specimen-kit-list">
         <span class="fa fa-medkit"></span>

@@ -183,6 +183,21 @@ angular.module('openspecimen')
       );
     }
 
+    function downloadFile(fileUrl) {
+      var link = angular.element('<a/>').attr({href: fileUrl, target: '_blank'});
+      angular.element($document[0].body).append(link);
+
+      if (typeof link[0].click == "function") {
+        link[0].click();
+      } else { // Safari fix
+        var dispatch = document.createEvent("HTMLEvents");
+        dispatch.initEvent("click", true, true);
+        link[0].dispatchEvent(dispatch);
+      }
+
+      link.remove();
+    }
+
     function booleanPromise(condition) {
       var deferred = $q.defer();
       if (condition) {
@@ -416,6 +431,8 @@ angular.module('openspecimen')
       parseDate: parseDate,
 
       downloadReport : downloadReport,
+
+      downloadFile: downloadFile,
 
       booleanPromise: booleanPromise,
 

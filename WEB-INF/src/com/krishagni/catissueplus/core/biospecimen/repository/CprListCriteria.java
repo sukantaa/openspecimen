@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.biospecimen.repository;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,8 @@ public class CprListCriteria extends AbstractListCriteria<CprListCriteria> {
 	private Set<Pair<Set<Long>, Long>> siteCps;
 
 	private boolean useMrnSites;
+
+	private List<String> ppids;
 
 	@Override
 	public CprListCriteria self() {
@@ -163,6 +166,15 @@ public class CprListCriteria extends AbstractListCriteria<CprListCriteria> {
 			return Collections.emptySet();
 		}
 
-		return phiSiteCps().stream().map(siteCp -> siteCp.second()).collect(Collectors.toSet());
+		return phiSiteCps().stream().map(Pair::second).collect(Collectors.toSet());
+	}
+
+	public List<String> ppids() {
+		return ppids;
+	}
+
+	public CprListCriteria ppids(List<String> ppids) {
+		this.ppids = ppids;
+		return self();
 	}
 }

@@ -121,6 +121,8 @@ public class ExtensionSchemaBuilder implements ObjectSchemaBuilder {
 			} else {
 				field.setType("date");
 			}
+		} else if (ctrl instanceof FileUploadControl) {
+			field.setType("defile");
 		}
 
 		return field;

@@ -1,5 +1,7 @@
 package com.krishagni.catissueplus.core.biospecimen.events;
 
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionEvent;
+
 public class CollectionEventDetail extends SpecimenEventDetail {
 	private String procedure;
 	
@@ -19,5 +21,14 @@ public class CollectionEventDetail extends SpecimenEventDetail {
 
 	public void setContainer(String container) {
 		this.container = container;
+	}
+
+	public static CollectionEventDetail from(SpecimenCollectionEvent ce) {
+		CollectionEventDetail detail = new CollectionEventDetail();
+		fromTo(ce, detail);
+
+		detail.setContainer(ce.getContainer());
+		detail.setProcedure(ce.getProcedure());
+		return detail;
 	}
 }
