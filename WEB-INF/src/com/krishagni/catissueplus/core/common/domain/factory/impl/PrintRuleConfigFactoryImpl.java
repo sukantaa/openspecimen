@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.common.domain.factory.impl;
 
 
 import java.util.Calendar;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -96,7 +97,8 @@ public class PrintRuleConfigFactoryImpl implements PrintRuleConfigFactory {
 	}
 
 	private void setRule(PrintRuleConfigDetail detail, PrintRuleConfig rule, OpenSpecimenException ose) {
-		if (detail.getRule() == null || detail.getRule().isEmpty()) {
+		Map<String, String> ruleMap = detail.getRule();
+		if (ruleMap == null || ruleMap.isEmpty()) {
 			ose.addError(PrintRuleConfigErrorCode.RULES_REQ);
 			return;
 		}
@@ -107,6 +109,7 @@ public class PrintRuleConfigFactoryImpl implements PrintRuleConfigFactory {
 			return;
 		}
 
-		rule.setRule(factory.createLabelPrintRule(detail.getRule()));
+		ruleMap.put("instituteName", rule.getInstitute().getName());
+		rule.setRule(factory.createLabelPrintRule(ruleMap));
 	}
 }

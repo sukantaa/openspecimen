@@ -1114,6 +1114,7 @@
         <entry key="SPECIMEN">
           <bean class="com.krishagni.catissueplus.core.common.domain.factory.impl.SpecimenLabelPrintRuleFactoryImpl">
             <property name="daoFactory" ref="biospecimenDaoFactory"/>
+            <property name="printLabelTokensRegistrar" ref="specimenPrintLabelTokensRegistrar"/>
           </bean>
         </entry>
       </map>

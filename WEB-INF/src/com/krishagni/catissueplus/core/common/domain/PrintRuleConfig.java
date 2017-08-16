@@ -100,6 +100,7 @@ public class PrintRuleConfig extends BaseEntity {
 
 	public void setRuleDef(Map<String, String> rule) {
 		LabelPrintRuleFactory factory = LabelPrintRuleFactoryRegistrar.getInstance().getFactory(objectType);
+		rule.put("instituteName", this.institute.getName());
 		if (factory != null) {
 			setRule(factory.createLabelPrintRule(rule));
 		}
