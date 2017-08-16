@@ -11,15 +11,7 @@ public enum PrintRuleConfigErrorCode implements ErrorCode{
 
 	RULES_REQ,
 
-	CMD_FILES_DIR_REQ,
-
-	LABEL_TOKEN_NOT_FOUND,
-
-	LABEL_TOKENS_REQ,
-
-	INVALID_IP_RANGE,
-
-	INVALID_CMD_FILE_FMT;
+	CMD_FILES_DIR_REQ;
 
 	@Override
 	public String code() {

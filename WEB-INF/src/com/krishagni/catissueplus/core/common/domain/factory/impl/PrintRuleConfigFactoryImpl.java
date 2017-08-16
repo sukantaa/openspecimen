@@ -2,7 +2,6 @@ package com.krishagni.catissueplus.core.common.domain.factory.impl;
 
 
 import java.util.Calendar;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -97,8 +96,7 @@ public class PrintRuleConfigFactoryImpl implements PrintRuleConfigFactory {
 	}
 
 	private void setRule(PrintRuleConfigDetail detail, PrintRuleConfig rule, OpenSpecimenException ose) {
-		Map<String, String> ruleMap = detail.getRule();
-		if (ruleMap == null || ruleMap.isEmpty()) {
+		if (detail.getRule() == null || detail.getRule().isEmpty()) {
 			ose.addError(PrintRuleConfigErrorCode.RULES_REQ);
 			return;
 		}
@@ -109,9 +107,6 @@ public class PrintRuleConfigFactoryImpl implements PrintRuleConfigFactory {
 			return;
 		}
 
-		ruleMap.put("userLogin", rule.getUpdatedBy().getLoginName());
-		ruleMap.put("instituteName",rule.getInstitute().getName());
-		ruleMap.put("domainName", rule.getUpdatedBy().getAuthDomain().getName());
-		rule.setRule(factory.createLabelPrintRule(ruleMap));
+		rule.setRule(factory.createLabelPrintRule(detail.getRule()));
 	}
 }
