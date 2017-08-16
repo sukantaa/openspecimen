@@ -20,6 +20,8 @@ import com.krishagni.catissueplus.core.common.util.Utility;
 
 @Audited
 public class SpecimenList extends BaseEntity {
+	private static final String ENTITY_NAME = "specimen_list";
+
 	private String name;
 	
 	private User owner;
@@ -35,6 +37,10 @@ public class SpecimenList extends BaseEntity {
 	private Set<SpecimenListItem> specimens = new HashSet<>();
 	
 	private Date deletedOn;
+
+	public static String getEntityName() {
+		return ENTITY_NAME;
+	}
 
 	public String getName() {
 		return name;

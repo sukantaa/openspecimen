@@ -59,4 +59,8 @@ angular.module('os.biospecimen.specimenlist',
         },
         parent: 'specimen-list-root'
       });
+  })
+
+  .run(function(UrlResolver) {
+    UrlResolver.regUrlState('specimen-list', 'specimen-list', 'listId');
   });

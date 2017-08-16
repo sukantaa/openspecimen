@@ -4,14 +4,21 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -33,6 +40,7 @@ import com.krishagni.catissueplus.core.biospecimen.services.SpecimenListService;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
+import com.krishagni.catissueplus.core.common.domain.Notification;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.ExportedFileDetail;
@@ -43,7 +51,9 @@ import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.CsvFileWriter;
 import com.krishagni.catissueplus.core.common.util.CsvWriter;
+import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.catissueplus.core.common.util.NotifUtil;
 
 
 public class SpecimenListServiceImpl implements SpecimenListService {
@@ -131,6 +141,7 @@ public class SpecimenListServiceImpl implements SpecimenListService {
 
 			daoFactory.getSpecimenListDao().saveOrUpdate(specimenList);
 			saveListItems(specimenList, listDetails.getSpecimenIds(), true);
+			notifyUsersOnCreate(specimenList);
 			return ResponseEvent.response(SpecimenListDetail.from(specimenList));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -156,8 +167,17 @@ public class SpecimenListServiceImpl implements SpecimenListService {
 	public ResponseEvent<SpecimenListDetail> deleteSpecimenList(RequestEvent<Long> req) {
 		try {
 			SpecimenList existing = getSpecimenList(req.getPayload(), null);
+
+			//
+			// copy of deleted list
+			//
+			SpecimenList deletedSpecimenList = new SpecimenList();
+			BeanUtils.copyProperties(existing, deletedSpecimenList);
+
 			existing.delete();
 			daoFactory.getSpecimenListDao().saveOrUpdate(existing);
+
+			notifyUsersOnDelete(deletedSpecimenList);
 			return ResponseEvent.response(SpecimenListDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -381,9 +401,15 @@ public class SpecimenListServiceImpl implements SpecimenListService {
 			
 			ensureUniqueName(existing, specimenList);
 			ensureValidSpecimensAndUsers(listDetails, specimenList, null);
+
+			Collection<User> addedUsers   = CollectionUtils.subtract(specimenList.getSharedWith(), existing.getSharedWith());
+			Collection<User> removedUsers = CollectionUtils.subtract(existing.getSharedWith(), specimenList.getSharedWith());
+
 			existing.update(specimenList);
 			daoFactory.getSpecimenListDao().saveOrUpdate(existing);
 			saveListItems(existing, listDetails.getSpecimenIds(), false);
+
+			notifyUsersOnUpdate(existing, addedUsers, removedUsers);
 			return ResponseEvent.response(SpecimenListDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -629,6 +655,57 @@ public class SpecimenListServiceImpl implements SpecimenListService {
 		};
 	}
 
+	private void notifyUsersOnCreate(SpecimenList specimenList) {
+		notifyUsersOnListOp(specimenList, specimenList.getSharedWith(), "ADD");
+	}
+
+	private void notifyUsersOnUpdate(SpecimenList existing, Collection<User> addedUsers, Collection<User> removedUsers) {
+		notifyUsersOnListOp(existing, addedUsers, "ADD");
+		notifyUsersOnListOp(existing, removedUsers, "REMOVE");
+	}
+
+	private void notifyUsersOnDelete(SpecimenList specimenList) {
+		notifyUsersOnListOp(specimenList, specimenList.getSharedWith(), "DELETE");
+	}
+
+	private void notifyUsersOnListOp(SpecimenList specimenList, Collection<User> notifyUsers, String op) {
+		if (CollectionUtils.isEmpty(notifyUsers)) {
+			return;
+		}
+
+		String notifMsg = getNotifMsg(specimenList, op);
+
+		// Send email notification
+		Map<String, Object> emailProps = new HashMap<>();
+		emailProps.put("$subject", new String[] { notifMsg });
+		emailProps.put("emailText", notifMsg);
+		emailProps.put("specimenList", specimenList);
+		emailProps.put("currentUser", AuthUtil.getCurrentUser());
+		emailProps.put("ccAdmin", false);
+		emailProps.put("op", op);
+
+		Set<User> rcpts = new HashSet<>(notifyUsers);
+		for (User rcpt : rcpts) {
+			emailProps.put("rcpt", rcpt);
+			EmailUtil.getInstance().sendEmail(SPECIMEN_LIST_SHARED_TMPL, new String[] { rcpt.getEmailAddress() }, null, emailProps);
+		}
+
+		// UI notification
+		Notification notif = new Notification();
+		notif.setEntityType(SpecimenList.getEntityName());
+		notif.setEntityId(specimenList.getId());
+		notif.setOperation("UPDATE");
+		notif.setCreatedBy(AuthUtil.getCurrentUser());
+		notif.setCreationTime(Calendar.getInstance().getTime());
+		notif.setMessage(notifMsg);
+		NotifUtil.getInstance().notify(notif, Collections.singletonMap("specimen-list", rcpts));
+	}
+
+	private String getNotifMsg(SpecimenList specimenList, String op) {
+		String msgKey = "specimen_list_user_notif_" + op.toLowerCase();
+		return MessageUtil.getInstance().getMessage(msgKey, new String[] { specimenList.getName() });
+	}
+
 	private String getMsg(String code) {
 		return MessageUtil.getInstance().getMessage(code);
 	}
@@ -654,4 +731,6 @@ public class SpecimenListServiceImpl implements SpecimenListService {
 	private static final String SPMN_LOC       = "specimen_location";
 
 	private static final String SPMN_LINEAGE   = "specimen_lineage";
+
+	private static final String SPECIMEN_LIST_SHARED_TMPL = "specimen_list_shared";
 }
