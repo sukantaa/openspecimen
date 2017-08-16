@@ -35,7 +35,7 @@
                 </p>
               </td>
             </tr>
-            #if ($operation != "rejected" || $operation != "deleted")
+            #if ($operation != "rejected" && $operation != "deleted")
               <tr>
                 <td style="border-collapse:collapse;padding-bottom:10px">
                   <table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;color:#333">
