@@ -109,6 +109,7 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		setLabelFormats(input, cp, ose);
 		setBarcodeSetting(input, cp, ose);
 		setContainerSelectionStrategy(input, cp, ose);
+		setVisitCollectionMode(input, cp, ose);
 		setVisitNamePrintMode(input, cp, ose);
 		cp.setVisitNamePrintCopies(input.getVisitNamePrintCopies());
 		setSpecimenLabelPrePrintMode(input, cp, ose);
@@ -367,6 +368,18 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 
 		result.setContainerSelectionStrategy(strategy);
 		result.setAliquotsInSameContainer(input.getAliquotsInSameContainer());
+	}
+
+	private void setVisitCollectionMode(CollectionProtocolDetail input, CollectionProtocol cp, OpenSpecimenException ose) {
+		if (StringUtils.isBlank(input.getVisitCollectionMode())) {
+			return;
+		}
+
+		try {
+			cp.setVisitCollectionMode(CollectionProtocol.VisitCollectionMode.valueOf(input.getVisitCollectionMode()));
+		} catch (IllegalArgumentException iae) {
+			ose.addError(CpErrorCode.INVALID_VISIT_COLL_MODE, input.getVisitCollectionMode());
+		}
 	}
 
 	private void setVisitNamePrintMode(CollectionProtocolDetail input, CollectionProtocol cp, OpenSpecimenException ose) {

@@ -34,20 +34,25 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	public enum SpecimenLabelPrePrintMode {
 		ON_REGISTRATION,
 		ON_VISIT,
-		NONE;
+		NONE
 	}
 
 	public enum SpecimenLabelAutoPrintMode {
 		PRE_PRINT,
 		ON_COLLECTION,
-		NONE;
+		NONE
 	}
 
 
 	public enum VisitNamePrintMode {
 		PRE_PRINT,
 		ON_COMPLETION,
-		NONE;
+		NONE
+	}
+
+	public enum VisitCollectionMode {
+		PRIMARY_SPMNS,
+		ALL_SPMNS
 	}
 
 	public static final String EXTN = "CollectionProtocolExtension";
@@ -111,6 +116,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	private String containerSelectionStrategy;
 
 	private Boolean aliquotsInSameContainer;
+
+	private VisitCollectionMode visitCollectionMode = VisitCollectionMode.ALL_SPMNS;
 
 	private VisitNamePrintMode visitNamePrintMode = VisitNamePrintMode.NONE;
 
@@ -361,6 +368,14 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		this.aliquotsInSameContainer = aliquotsInSameContainer;
 	}
 
+	public VisitCollectionMode getVisitCollectionMode() {
+		return visitCollectionMode == null ? VisitCollectionMode.ALL_SPMNS : visitCollectionMode;
+	}
+
+	public void setVisitCollectionMode(VisitCollectionMode visitCollectionMode) {
+		this.visitCollectionMode = visitCollectionMode;
+	}
+
 	public VisitNamePrintMode getVisitNamePrintMode() {
 		return visitNamePrintMode != null ? visitNamePrintMode : VisitNamePrintMode.NONE;
 	}
@@ -518,6 +533,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setBarcodingEnabled(cp.isBarcodingEnabled());
 		setContainerSelectionStrategy(cp.getContainerSelectionStrategy());
 		setAliquotsInSameContainer(cp.getAliquotsInSameContainer());
+		setVisitCollectionMode(cp.getVisitCollectionMode());
 		setVisitNamePrintMode(cp.getVisitNamePrintMode());
 		setVisitNamePrintCopies(cp.getVisitNamePrintCopies());
 		setUnsignedConsentDocumentURL(cp.getUnsignedConsentDocumentURL());
@@ -557,6 +573,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		cp.setManualSpecLabelEnabled(isManualSpecLabelEnabled());
 		cp.setBulkPartRegEnabled(isBulkPartRegEnabled());
 		cp.setBarcodingEnabled(isBarcodingEnabled());
+		cp.setVisitCollectionMode(getVisitCollectionMode());
 		cp.setVisitNamePrintMode(getVisitNamePrintMode());
 		cp.setVisitNamePrintCopies(getVisitNamePrintCopies());
 		cp.setSpmnLabelPrePrintMode(getSpmnLabelPrePrintMode());

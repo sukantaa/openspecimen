@@ -44,4 +44,11 @@
       <column name="specimenList_MOD" type="${bit.type}"/>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Track visit collection mode setting changes">
+    <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
+      <column name="VISIT_COLLECTION_MODE" type="${text.type}(16)"/>
+      <column name="visitCollectionMode_MOD" type="${bit.type}"/>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

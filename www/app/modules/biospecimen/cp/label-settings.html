@@ -70,6 +70,14 @@
           {{settingCtx.cp.barcodingEnabled | osBoolValue: 'common.enabled': 'common.disabled': 'common.not_specified'}}
         </span>
       </li>
+
+      <li class="item" ng-if="!cp.specimenCentric">
+        <strong class="key key-sm" translate="cp.on_visit_completion">On Visit Completion</strong>
+        <span class="value value-md" ng-switch on="settingCtx.cp.visitCollectionMode">
+          <span ng-switch-when="PRIMARY_SPMNS" translate="cp.coll_primary_spmns">Collect Primary Specimens</span>
+          <span ng-switch-when="ALL_SPMNS" translate="cp.coll_all_spmns">Collect All Specimens</span>
+        </span>
+      </li>
     </ul>
 
     <div class="os-section os-line-section" ng-if="!cp.specimenCentric">
@@ -241,6 +249,22 @@
         <label class="radio-inline">
           <input type="radio" name="barcoding" ng-model="settingCtx.cp.barcodingEnabled" ng-value="false">
           <span translate="common.disabled">Disabled</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group" ng-if="!cp.specimenCentric">
+      <label class="control-label col-xs-3">
+        <span translate="cp.on_visit_completion">On Visit Completion</span>
+      </label>
+      <div class="col-xs-6">
+        <label class="radio-inline">
+          <input type="radio" name="onVisitCompl" ng-model="settingCtx.cp.visitCollectionMode" ng-value="'PRIMARY_SPMNS'">
+          <span translate="cp.coll_primary_spmns">Collect Primary Specimens</span>
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="onVisitCompl" ng-model="settingCtx.cp.visitCollectionMode" ng-value="'ALL_SPMNS'">
+          <span translate="cp.coll_all_spmns">Collect All Specimens</span>
         </label>
       </div>
     </div>

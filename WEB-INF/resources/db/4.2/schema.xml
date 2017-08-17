@@ -153,4 +153,10 @@
       <column name="STATE" type="${tinyint.type}"/>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Collection protocol setting to specify visit collection mode">
+    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
+      <column name="VISIT_COLLECTION_MODE" type="${text.type}(16)"/>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>
