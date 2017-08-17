@@ -75,6 +75,10 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
     }
 
     function loadUsers(filterOpts) {
+      if (!currentUser.admin) {
+        $scope.userFilterOpts.institute = currentUser.instituteName;
+      }
+
       User.query(filterOpts).then(function(result) {
         if (!$scope.users && result.length > 12) {
           //
