@@ -124,8 +124,8 @@ angular.module('os.biospecimen.participant.collect-specimens',
     function(
       $scope, $translate, $state, $document, $q, $parse, $injector,
       cpr, visit, latestVisit, cpDict, spmnCollFields,
-      Visit, Specimen, PvManager,
-      CollectSpecimensSvc, Container, Alerts, Util, SpecimenUtil) {
+      Visit, Specimen, PvManager, CollectSpecimensSvc, Container,
+      ExtensionsUtil, Alerts, Util, SpecimenUtil) {
 
       var ignoreQtyWarning = false;
 
@@ -434,13 +434,22 @@ angular.module('os.biospecimen.participant.collect-specimens',
         return result;
       }
 
+      function collected(specimens) {
+        return (specimens || []).filter(
+          function(specimen) {
+            return specimen.status == 'Collected';
+          }
+        );
+      }
+
       function displayCustomFieldGroups(specimens, navigateTo) {
         var groups = $scope.customFieldGroups = SpecimenUtil.sdeGroupSpecimens(
-          cpDict, spmnCollFields.fieldGroups || [], flatten(specimens, []));
+          cpDict, spmnCollFields.fieldGroups || [], collected(flatten(specimens, [])));
 
         var visitFieldsGrp = getVisitFieldsGroup(spmnCollFields);
         if (visitFieldsGrp) {
           groups.unshift(visitFieldsGrp);
+          ExtensionsUtil.createExtensionFieldMap(visit)
         }
 
         if (groups.length == 0 || (groups.length == 1 && groups[0].noMatch)) {
