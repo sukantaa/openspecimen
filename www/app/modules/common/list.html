@@ -19,7 +19,7 @@
           </os-checkbox>
         </div>
       </td>
-      <td class="col" ng-repeat="col in row.data track by $index">
+      <td class="col text-wrap" ng-repeat="col in row.data track by $index">
         <span ng-switch on="data.columns[$index].metainfo.showLink == 'true'">
           <span ng-switch-when="true">
             <a ui-sref="{{itemSref}}">

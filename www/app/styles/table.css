@@ -113,3 +113,8 @@
   background: #d9534f!important;
   color: #fff!important;
 }
+
+.os-table .os-table-body .col.text-wrap {
+  word-wrap: break-word;
+  max-width: 200px;
+}
