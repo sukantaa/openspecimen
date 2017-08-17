@@ -1,7 +1,7 @@
 angular.module('os.biospecimen.specimen.detail', [])
   .controller('SpecimenDetailCtrl', function(
     $scope, $state, $modal, $stateParams, currentUser,
-    cpr, visit, specimen, Specimen, SpecimenLabelPrinter, SpecimensHolder, DeleteUtil, Alerts) {
+    cp, listView, cpr, visit, specimen, Specimen, SpecimenLabelPrinter, SpecimensHolder, DeleteUtil, Alerts) {
 
     function init() {
       $scope.cpr = cpr;
@@ -54,7 +54,7 @@ angular.module('os.biospecimen.specimen.detail', [])
         {
           onDeletion: function() {
             if (!parentId) {
-              $state.go('visit-detail.overview', params);
+              $state.go(!cp.specimenCentric ? 'visit-detail.overview' : listView, params);
             } else {
               $state.go('specimen-detail.overview', angular.extend({specimenId: parentId}, params));
             }
