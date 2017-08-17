@@ -3,7 +3,7 @@ angular.module('os.biospecimen.participant.collect-specimens',
   [ 
     'os.biospecimen.models'
   ])
-  .factory('CollectSpecimensSvc', function($state, $parse, CpConfigSvc, Container) {
+  .factory('CollectSpecimensSvc', function($state, $parse, CpConfigSvc, Specimen, Container) {
     var data = {opts: {}};
 
     function getReservePositionsOp(cpId, cprId, allocRules, specimens) {
@@ -68,27 +68,49 @@ angular.module('os.biospecimen.participant.collect-specimens',
       );
     }
 
-    return {
-      //
-      // opts: {ignoreQtyWarning: [true | false], showCollVisitDetails: [true | false]}
-      //
-      collect: function(stateDetail, visit, specimens, opts) {
-        data.stateDetail = stateDetail;
-        data.visit = visit;
-        data.specimens = specimens;
-        data.opts = opts || {};
+    //
+    // opts: {ignoreQtyWarning: [true | false], showCollVisitDetails: [true | false]}
+    //
+    function collect(stateDetail, visit, specimens, opts) {
+      data.stateDetail = stateDetail;
+      data.visit = visit;
+      data.specimens = specimens;
+      data.opts = opts || {};
 
-        CpConfigSvc.getWorkflowData(visit.cpId, 'auto-allocation').then(
-          function(data) {
-            var resvOp = getReservePositionsOp(visit.cpId, visit.cprId, data.rules || [], specimens);
-            Container.getReservedPositions(resvOp).then(
-              function(positions) {
-                if (positions.length > 0) {
-                  assignReservedPositions(resvOp, positions);
-                }
-                $state.go('participant-detail.collect-specimens', {visitId: visit.id, eventId: visit.eventId});
+      CpConfigSvc.getWorkflowData(visit.cpId, 'auto-allocation').then(
+        function(data) {
+          var resvOp = getReservePositionsOp(visit.cpId, visit.cprId, data.rules || [], specimens);
+          Container.getReservedPositions(resvOp).then(
+            function(positions) {
+              if (positions.length > 0) {
+                assignReservedPositions(resvOp, positions);
               }
-            )
+              $state.go('participant-detail.collect-specimens', {visitId: visit.id, eventId: visit.eventId});
+            }
+          )
+        }
+      );
+    }
+
+    return {
+      collect: collect,
+
+      collectVisit: function(returnState, cp, cprId, visit) {
+        var visitDetail = {visitId: visit.id, eventId: visit.eventId};
+        Specimen.listFor(cprId, visitDetail).then(
+          function(specimens) {
+            var spmnsToCollect = Specimen.flatten(specimens);
+            if (cp.visitCollectionMode == 'PRIMARY_SPMNS') {
+              spmnsToCollect = spmnsToCollect.filter(function(spmn) { return spmn.lineage == 'New'; });
+            }
+
+            angular.forEach(spmnsToCollect,
+              function(specimen) {
+                specimen.isOpened = specimen.selected = true;
+              }
+            );
+
+            collect(returnState, visit, spmnsToCollect);
           }
         );
       },

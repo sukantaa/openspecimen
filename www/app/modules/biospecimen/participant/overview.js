@@ -1,6 +1,9 @@
 
 angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
-  .controller('ParticipantOverviewCtrl', function($scope, hasFieldsFn, visits, Visit, ExtensionsUtil, Util, Alerts) {
+  .controller('ParticipantOverviewCtrl', function(
+    $scope, $state, $stateParams, hasFieldsFn, cp, cpr, visits,
+    Visit, CollectSpecimensSvc, ExtensionsUtil, Util, Alerts) {
+
     function init() {
       $scope.occurredVisits    = Visit.completedVisits(visits);
       $scope.anticipatedVisits = Visit.anticipatedVisits(visits);
@@ -33,6 +36,11 @@ angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
           )
         }
       });
+    }
+
+    $scope.collect = function(visit) {
+      var retSt = {state: $state.current, params: $stateParams};
+      CollectSpecimensSvc.collectVisit(retSt, cp, cpr.id, visit);
     }
 
     init();

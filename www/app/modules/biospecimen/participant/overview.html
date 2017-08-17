@@ -209,59 +209,65 @@
         <h3 class="os-sub-section-title" translate="visits.anticipated_visits">Anticipated Visits</h3>
         <div collapse="avCollapsed">
           <span ng-if="anticipatedVisits.length == 0" translate="common.none">None</span>
-          <div class="os-table os-table-muted-hdr os-border" ng-if="anticipatedVisits.length > 0">
-            <div class="os-table-head">
-              <div class="row">
-                <div class="col col-xs-5" translate="visits.title">Visit</div>
-                <div class="col col-xs-3" translate="common.date">Date</div>
-                <div class="col col-xs-3" translate="visits.anticipated_specimens">Anticipated Specimens</div>
-                <div class="col col-xs-1">&nbsp;</div>
-              </div>
-            </div>
-            <div class="os-table-body">
-              <div ng-repeat="visit in anticipatedVisits"
-                ng-class="{'os-inplace-form-edit-po': addVisitIdx == $index}">
-                <div class="row title">
-                  <div class="col col-xs-5">
-                    <a ui-sref="participant-detail.visits({visitId: visit.id, eventId: visit.eventId})">
-                      <os-event-desc event-point="visit.eventPoint" event-label="visit.eventLabel"></os-event-desc>
-                    </a>
+          <table class="os-table os-table-muted-hdr os-border" ng-if="anticipatedVisits.length > 0">
+            <thead class="os-table-head">
+              <tr class="row">
+                <td class="col col-xs-5" translate="visits.title">Visit</div>
+                <td class="col col-xs-3" translate="common.date">Date</div>
+                <td class="col col-xs-3" translate="visits.anticipated_specimens">Anticipated Specimens</div>
+                <td class="col col-xs-1">&nbsp;</div>
+              </tr>
+            </thead>
+            <tbody class="os-table-body">
+              <tr class="row" ng-repeat="visit in anticipatedVisits">
+                <td class="col col-xs-5">
+                  <a ui-sref="participant-detail.visits({visitId: visit.id, eventId: visit.eventId})">
+                    <os-event-desc event-point="visit.eventPoint" event-label="visit.eventLabel"></os-event-desc>
+                  </a>
+                </td>
+                <td class="col col-xs-3">
+                  <span>{{visit.anticipatedVisitDate | date: global.dateFmt | osNoValue}}</span>
+                </td>
+                <td class="col col-xs-3">
+                  <span>{{visit.anticipatedSpecimens}}</span>
+                </td>
+                <td class="col col-xs-1">
+                  <div class="os-more-option-btns">
+                    <button class="btn btn-xs btn-default" ng-click="collect(visit)">
+                      <span class="fa fa-flask"></span>
+                    </button>
+                    <span class="os-more-options">
+                      <div dropdown dropdown-append-to-body>
+                        <button class="btn btn-default dropdown-toggle" style="margin-top: -8px!important">
+                          <span class="fa fa-ellipsis-v"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                          <li show-if-allowed="specimenResource.updateOpts">
+                            <a ui-sref="visit-addedit({visitId: visit.id, eventId: visit.eventId})">
+                              <i class="fa fa-plus"></i>
+                              <span translate="visits.ctx_menu.add_visit">Add Visit</span>
+                            </a> 
+                          </li>
+                          <li show-if-allowed="specimenResource.updateOpts">
+                            <a ui-sref="visit-addedit({visitId: visit.id, eventId: visit.eventId, missedVisit: true})">
+                              <i class="fa fa-ban"></i>
+                              <span translate="visits.ctx_menu.missed_visit">Missed Visit</span>
+                            </a>
+                          </li>
+                          <li>
+                            <a ui-sref="visit-detail.overview({visitId: visit.id, eventId: visit.eventId})">
+                              <i class="fa fa-eye"></i>
+                              <span translate="visits.ctx_menu.view_visit">View Visit</span>
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    </span>
                   </div>
-                  <div class="col col-xs-3">
-                    <span>{{visit.anticipatedVisitDate | date: global.dateFmt | osNoValue}}</span>
-                  </div>
-                  <div class="col col-xs-3">{{visit.anticipatedSpecimens}}</div>
-                  <div class="col col-xs-1 os-more-options">
-                    <div dropdown>
-                      <button class="dropdown-toggle">
-                        <span class="fa fa-ellipsis-v"></span>
-                      </button>
-                      <ul class="dropdown-menu" role="menu">
-                        <li show-if-allowed="specimenResource.updateOpts">
-                          <a ui-sref="visit-addedit({visitId: visit.id, eventId: visit.eventId})">
-                            <i class="fa fa-plus"></i>
-                            <span translate="visits.ctx_menu.add_visit">Add Visit</span>
-                          </a> 
-                        </li>
-                        <li show-if-allowed="specimenResource.updateOpts">
-                          <a ui-sref="visit-addedit({visitId: visit.id, eventId: visit.eventId, missedVisit: true})">
-                            <i class="fa fa-ban"></i>
-                            <span translate="visits.ctx_menu.missed_visit">Missed Visit</span>
-                          </a>
-                        </li>
-                        <li>
-                          <a ui-sref="visit-detail.overview({visitId: visit.id, eventId: visit.eventId})">
-                            <i class="fa fa-eye"></i>
-                            <span translate="visits.ctx_menu.view_visit">View Visit</span>
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
