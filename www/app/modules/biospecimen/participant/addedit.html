@@ -56,6 +56,9 @@
           <span ng-switch-when="true" translate="participant.buttons.lookup">Lookup</span>
           <span ng-switch-default translate="participant.buttons.register">Register</span>
         </button>
+        <button class="btn btn-primary" os-form-submit="lookup(true)" ng-if="!partCtx.twoStep && !!partCtx.firstCpEvent">
+          <span translate="participant.buttons.register_n_collect">Register & Collect</span>
+        </button>
         <button class="btn os-btn-text" ng-click="back()">
           <span translate="common.buttons.discard">Discard</span>
         </button>
@@ -248,6 +251,9 @@
             <button class="btn btn-primary" os-form-submit="register()" ng-switch on="!!cpr.id">
               <span ng-switch-when="true" translate="participant.buttons.update_registration"> Update </span>
               <span ng-switch-default translate="participant.buttons.register"> Register </span>
+            </button>
+            <button class="btn btn-primary" os-form-submit="register(true)" ng-if="!cpr.id && !!partCtx.firstCpEvent">
+              <span translate="participant.buttons.register_n_collect">Register & Collect</span>
             </button>
             <button class="btn os-btn-text" ng-click="previous()">
               <span translate="common.buttons.back">Back</span>

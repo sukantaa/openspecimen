@@ -417,6 +417,17 @@ angular.module('os.biospecimen.participant',
           lockedFields: function(cpr, CpConfigSvc) {
             var participant = cpr.participant || {};
             return CpConfigSvc.getLockedParticipantFields(participant.source || 'OpenSpecimen');
+          },
+          firstCpEvent: function(cp, cpr, CollectionProtocolEvent) {
+            if (!!cpr.id) {
+              return null;
+            }
+
+            return CollectionProtocolEvent.listFor(cp.id).then(
+              function(events) {
+                return events.length > 0 ? events[0] : null;
+              }
+            );
           }
         },
         parent: 'participant-root'

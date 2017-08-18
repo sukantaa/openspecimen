@@ -437,6 +437,7 @@
     
     "buttons": {
       "register": "Add Participant",
+      "register_n_collect": "Proceed to Collection",
       "lookup_add_part": "Lookup and Add Participant",
       "update_registration": "Update",
       "register_selected_participant": "Register Selected Participant",
@@ -469,7 +470,8 @@
       "collected_specimens_count": "Count of Collected Specimens",
       "search": "Click to filter Participants",
       "bulk_register": "Click to register participants",
-      "specimen_catalog": "Click to view collection protocol specimens"
+      "specimen_catalog": "Click to view collection protocol specimens",
+      "collect_spmns": "Collect Specimens"
     },
 
     "specimen_kit": {

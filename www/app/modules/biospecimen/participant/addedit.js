@@ -3,9 +3,10 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
   .controller('ParticipantAddEditCtrl', function(
     $scope, $state, $stateParams, $translate, $modal, $q,
     cp, cpr, extensionCtxt, hasDict, cpDict, twoStepReg,
-    mrnAccessRestriction, addPatientOnLookupFail, lookupFieldsCfg, lockedFields,
+    mrnAccessRestriction, addPatientOnLookupFail, lookupFieldsCfg,
+    lockedFields, firstCpEvent,
     CpConfigSvc, CollectionProtocolRegistration, Participant,
-    Site, PvManager, ExtensionsUtil, Alerts) {
+    Visit, CollectSpecimensSvc, Site, PvManager, ExtensionsUtil, Alerts) {
 
     var availableSites = [];
     var inputParticipant = null;
@@ -18,6 +19,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
       setBirthDate($scope.cpr);
 
       $scope.partCtx = {
+        firstCpEvent: firstCpEvent,
         fieldOpts: {lockedFields: lockedFields},
         twoStep: lookupFieldsCfg.configured,
         edit: !!cpr.id,
@@ -123,7 +125,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
       $scope.vitalStatuses = PvManager.getPvs('vital-status');
     };
 
-    function registerParticipant() {
+    function registerParticipant(proceedToSpmnColl) {
       var formCtrl = $scope.deFormCtrl.ctrl;
       if (formCtrl && !formCtrl.validate()) {
         return;
@@ -142,13 +144,24 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
             var registeredCps = cpr.participant.registeredCps;
             angular.extend(cpr, savedCpr);
             cpr.participant.registeredCps = registeredCps;
-            $state.go('participant-detail.overview', {cprId: savedCpr.id});
+
+            if (proceedToSpmnColl) {
+              gotoSpmnCollection(savedCpr);
+            } else {
+              $state.go('participant-detail.overview', {cprId: savedCpr.id});
+            }
           } else {
             $state.go('participant-list', {cpId: $scope.cp.id});
           }
         }
       );
     };
+
+    function gotoSpmnCollection(cpr) {
+      var state = $state.get('participant-detail.overview');
+      var visit = new Visit({cpId: cp.id, cprId: cpr.id, eventId: firstCpEvent.id});
+      CollectSpecimensSvc.collectVisit({state: state, params: {cprId: cpr.id}}, cp, cpr.id, visit);
+    }
 
     function updateUsingSelectedParticipant(match) {
       var selectedPart = match.participant;
@@ -220,7 +233,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
       );
     }
 
-    function handleParticipantMatches(matches) {
+    function handleParticipantMatches(matches, proceedToSpmnColl) {
       $scope.partCtx.matches = matches;
       $scope.partCtx.matchAutoSelected = false;
       $scope.partCtx.allowIgnoreMatches = matches.every(
@@ -250,7 +263,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
           Alerts.error('participant.no_matching_participant');
         } else {
           if (!lookupFieldsCfg.configured) {
-            registerParticipant();
+            registerParticipant(proceedToSpmnColl);
           } else {
             $scope.partCtx.step = 'registerParticipant';
           }
@@ -411,18 +424,22 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
       }
     };
 
-    $scope.register = function() {
+    $scope.register = function(proceedToSpmnColl) {
       if ($scope.partCtx.edit) {
         cacheInputParticipant();
         $scope.cpr.participant.getMatchingParticipants().then(handleParticipantMatches);
       } else {
-        registerParticipant();
+        registerParticipant(proceedToSpmnColl);
       }
     };
 
-    $scope.lookup = function() {
+    $scope.lookup = function(proceedToSpmnColl) {
       cacheInputParticipant();
-      $scope.cpr.participant.getMatchingParticipants().then(handleParticipantMatches);
+      $scope.cpr.participant.getMatchingParticipants().then(
+        function(matches) {
+          handleParticipantMatches(matches, proceedToSpmnColl)
+        }
+      );
     }
 
     $scope.useSelectedMatch = function() {
