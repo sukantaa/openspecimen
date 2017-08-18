@@ -12,7 +12,6 @@ import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
-import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
@@ -95,10 +94,6 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 		String cpShortTile = input.get("cpShortTitle");
 		String cpTitle = input.get("cpTitle");
 
-		if (StringUtils.isBlank(cpId) && StringUtils.isBlank(cpShortTile) && StringUtils.isBlank(cpTitle)) {
-			return;
-		}
-
 		CollectionProtocol cp = null;
 		Object key = null;
 
@@ -164,20 +159,21 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 			return;
 		}
 
-		List<String> tokenNames = Utility.csvToStringList(input.get("dataTokens"));
+		List<String> invalidTokenNames = new ArrayList<>();
 		List<LabelTmplToken> dataTokens = new ArrayList<>();
-		List<String> wrongTokenNames = new ArrayList<>();
+
+		List<String> tokenNames = Utility.csvToStringList(input.get("dataTokens"));
 		for (String key : tokenNames) {
 			LabelTmplToken token = printLabelTokensRegistrar.getToken(key);
 			if (token == null) {
-				wrongTokenNames.add(key);
+				invalidTokenNames.add(key);
 			} else {
 				dataTokens.add(token);
 			}
 		}
 
-		if (CollectionUtils.isNotEmpty(wrongTokenNames)) {
-			ose.addError(PrintRuleConfigErrorCode.LABEL_TOKEN_NOT_FOUND, wrongTokenNames, wrongTokenNames.size());
+		if (CollectionUtils.isNotEmpty(invalidTokenNames)) {
+			ose.addError(PrintRuleConfigErrorCode.LABEL_TOKEN_NOT_FOUND, invalidTokenNames, invalidTokenNames.size());
 		}
 
 		rule.setDataTokens(dataTokens);
@@ -192,7 +188,7 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 		IpAddressMatcher ipAddressMatcher = null;
 		try {
 			ipAddressMatcher = new IpAddressMatcher(ipRange);
-		} catch (Exception e) {
+		} catch (IllegalArgumentException e) {
 			ose.addError(PrintRuleConfigErrorCode.INVALID_IP_RANGE, ipRange);
 			return;
 		}
@@ -210,12 +206,12 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 
 	private void setCmdFileFmt(Map<String, String> input, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
 		String cmdFileFmt = input.get("cmdFileFmt");
-		if (CmdFileFmt.get(cmdFileFmt) == null) {
-			if (StringUtils.isNotBlank(cmdFileFmt)) {
-				ose.addError(PrintRuleConfigErrorCode.INVALID_CMD_FILE_FMT, cmdFileFmt);
-			}
-
+		if (StringUtils.isBlank(cmdFileFmt)) {
 			return;
+		}
+
+		if (CmdFileFmt.get(cmdFileFmt) == null) {
+			ose.addError(PrintRuleConfigErrorCode.INVALID_CMD_FILE_FMT, cmdFileFmt);
 		}
 
 		rule.setCmdFileFmt(cmdFileFmt);
@@ -223,12 +219,12 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 
 	private void setLineage(Map<String, String> input, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
 		String lineage = input.get("lineage");
-		if (!Specimen.isValidLineage(lineage)) {
-			if (StringUtils.isNotBlank(lineage)) {
-				ose.addError(SpecimenErrorCode.INVALID_LINEAGE);
-			}
-
+		if (StringUtils.isBlank(lineage)) {
 			return;
+		}
+
+		if (!Specimen.isValidLineage(lineage)) {
+			ose.addError(SpecimenErrorCode.INVALID_LINEAGE, lineage);
 		}
 
 		rule.setLineage(lineage);
@@ -236,54 +232,37 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 
 	private void setVisitSite(Map<String, String> input, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
 		String visitSite = input.get("visitSite");
-
-		Site site = daoFactory.getSiteDao().getSiteByName(visitSite);
-		if (site == null) {
-			if (visitSite != null) {
-				ose.addError(SiteErrorCode.NOT_FOUND, visitSite);
-			}
-
+		if (StringUtils.isBlank(visitSite)) {
 			return;
 		}
 
-		ensureSiteBelongsToInstitute(site, input.get("instituteName"), ose);
+		Site site = daoFactory.getSiteDao().getSiteByName(visitSite);
+		if (site == null) {
+			ose.addError(SiteErrorCode.NOT_FOUND, visitSite);
+			return;
+		}
+
 		rule.setVisitSite(site.getName());
 	}
 
 	private void setUserLogin(Map<String, String> input, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
 		String userLogin = input.get("userLogin");
+		if (StringUtils.isBlank(userLogin)) {
+			return;
+		}
+
 		String domainName = input.get("domainName");
-		User user = null;
+		if (StringUtils.isBlank(domainName)) {
+			domainName = User.DEFAULT_AUTH_DOMAIN;
+		}
 
-		user = daoFactory.getUserDao().getUser(userLogin, domainName);
+		User user = daoFactory.getUserDao().getUser(userLogin, domainName);
 		if (user == null) {
-			if (StringUtils.isNotBlank(userLogin) | StringUtils.isNotBlank(domainName) | isValidAuthDomain(domainName, ose)) {
-				ose.addError(UserErrorCode.NOT_FOUND);
-			}
-
+			ose.addError(UserErrorCode.NOT_FOUND);
 			return;
 		}
 
 		rule.setDomainName(domainName);
 		rule.setUserLogin(user.getLoginName());
-	}
-
-	private Boolean isValidAuthDomain(String domainName, OpenSpecimenException ose) {
-		AuthDomain authDomain = daoFactory.getAuthDao().getAuthDomainByName(domainName);
-		if (authDomain == null) {
-			if (StringUtils.isNotBlank(domainName)) {
-				ose.addError(UserErrorCode.DOMAIN_NOT_FOUND);
-			}
-
-			return false;
-		}
-
-		return true;
-	}
-
-	private void ensureSiteBelongsToInstitute(Site site, String instituteName, OpenSpecimenException ose) {
-		if (!site.getInstitute().getName().equals(instituteName)) {
-			ose.addError(SiteErrorCode.INVALID_SITE_INSTITUTE, site.getName(), instituteName);
-		}
 	}
 }

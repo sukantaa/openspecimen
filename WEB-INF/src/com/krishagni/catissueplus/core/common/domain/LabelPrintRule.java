@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.common.domain;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.springframework.context.MessageSource;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
+import org.springframework.util.ReflectionUtils;
 
 import com.google.gson.Gson;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -42,7 +44,9 @@ public class LabelPrintRule {
 	private String labelType;
 	
 	private IpAddressMatcher ipAddressMatcher;
-	
+
+	private String domainName;
+
 	private String userLogin;
 	
 	private String printerName;
@@ -56,8 +60,6 @@ public class LabelPrintRule {
 	private MessageSource messageSource;
 
 	private CmdFileFmt cmdFileFmt = CmdFileFmt.KEY_VALUE;
-
-	private String domainName;
 
 	public String getLabelType() {
 		return labelType;
@@ -73,6 +75,14 @@ public class LabelPrintRule {
 
 	public void setIpAddressMatcher(IpAddressMatcher ipAddressMatcher) {
 		this.ipAddressMatcher = ipAddressMatcher;
+	}
+
+	public String getDomainName() {
+		return domainName;
+	}
+
+	public void setDomainName(String domainName) {
+		this.domainName = domainName;
 	}
 
 	public String getUserLogin() {
@@ -138,14 +148,6 @@ public class LabelPrintRule {
 		}
 	}
 
-	public String getDomainName() {
-		return domainName;
-	}
-
-	public void setDomainName(String domainName) {
-		this.domainName = domainName;
-	}
-
 	public boolean isApplicableFor(User user, String ipAddr) {
 		if (!isWildCard(userLogin) && !user.getLoginName().equals(userLogin)) {
 			return false;
@@ -203,9 +205,10 @@ public class LabelPrintRule {
 		Map<String, String> rule = null;
 		try {
 			rule = BeanUtils.describe(this);
-			rule.replace("dataTokens", getTokenNames());
-			rule.replace("ipAddressMatcher", getIpAddressRange(ipAddressMatcher));
-			rule.replace("cmdFileFmt", cmdFileFmt.fmt);
+			rule.put("dataTokens", getTokenNames());
+			rule.put("ipAddressMatcher", getIpAddressRange(ipAddressMatcher));
+			rule.put("cmdFileFmt", cmdFileFmt.fmt);
+			rule.remove("messageSource");
 		} catch (Exception e) {
 			throw new RuntimeException("Error in creating map from print rule ", e);
 		}
@@ -222,9 +225,7 @@ public class LabelPrintRule {
 	}
 
 	private String getTokenNames() {
-		return dataTokens.stream()
-			.map(token -> token.getName())
-			.collect(Collectors.joining(","));
+		return dataTokens.stream().map(LabelTmplToken::getName).collect(Collectors.joining(","));
 	}
 
 	private String getIpAddressRange(IpAddressMatcher ipRange) {
@@ -232,7 +233,18 @@ public class LabelPrintRule {
 			return null;
 		}
 
-		JSONObject JsonObj = new JSONObject(new Gson().toJson(ipRange));
-		return JsonObj.getString("requiredAddress") + "/" + JsonObj.getInt("nMaskBits");
+		String address = getFieldValue(ipAddressMatcher, "requiredAddress").toString();
+		int maskBits = getFieldValue(ipAddressMatcher, "nMaskBits");
+		if (maskBits > 0) {
+			address += "/" + maskBits;
+		}
+
+		return address;
+	}
+
+	private <T> T getFieldValue(Object obj, String fieldName) {
+		Field field = ReflectionUtils.findField(obj.getClass(), fieldName);
+		field.setAccessible(true);
+		return (T)ReflectionUtils.getField(field, obj);
 	}
 }

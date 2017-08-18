@@ -23,9 +23,9 @@ public class PrintRuleConfigDaoImpl extends AbstractDao<PrintRuleConfig> impleme
 	@Override
 	public List<PrintRuleConfig> getPrintRules(PrintRuleConfigsListCriteria crit) {
 		return getPrintRulesConfigListQuery(crit)
+			.addOrder(Order.desc("pr.id"))
 			.setFirstResult(crit.startAt())
 			.setMaxResults(crit.maxResults())
-			.addOrder(Order.desc("pr.updatedBy"))
 			.list();
 	}
 

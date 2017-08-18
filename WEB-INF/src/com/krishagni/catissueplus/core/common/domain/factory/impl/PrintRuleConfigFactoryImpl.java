@@ -109,7 +109,7 @@ public class PrintRuleConfigFactoryImpl implements PrintRuleConfigFactory {
 			return;
 		}
 
-		ruleMap.put("instituteName", rule.getInstitute().getName());
+//		ruleMap.put("instituteName", rule.getInstitute().getName());
 		rule.setRule(factory.createLabelPrintRule(ruleMap));
 	}
 }

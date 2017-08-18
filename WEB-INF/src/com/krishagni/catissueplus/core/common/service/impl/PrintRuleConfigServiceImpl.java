@@ -1,6 +1,5 @@
 package com.krishagni.catissueplus.core.common.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -126,13 +125,8 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 				throw OpenSpecimenException.userError(PrintRuleConfigErrorCode.NOT_FOUND, ruleIds, ruleIds.size());
 			}
 
-			List<PrintRuleConfigDetail> deletedRules = new ArrayList<>();
-			for (PrintRuleConfig rule : rules) {
-				rule.delete();
-				deletedRules.add(PrintRuleConfigDetail.from(rule));
-			}
-
-			return ResponseEvent.response(deletedRules);
+			rules.forEach(PrintRuleConfig::delete);
+			return ResponseEvent.response(PrintRuleConfigDetail.from(rules));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {

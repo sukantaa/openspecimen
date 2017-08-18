@@ -15,7 +15,7 @@ public class PrintRuleConfigsListCriteria extends AbstractListCriteria<PrintRule
 	}
 
 	public String objectType() {
-		return this.objectType;
+		return objectType;
 	}
 
 	public PrintRuleConfigsListCriteria objectType(String objectType) {
@@ -24,7 +24,7 @@ public class PrintRuleConfigsListCriteria extends AbstractListCriteria<PrintRule
 	}
 
 	public String instituteName() {
-		return this.instituteName;
+		return instituteName;
 	}
 
 	public PrintRuleConfigsListCriteria instituteName(String instituteName) {
@@ -33,7 +33,7 @@ public class PrintRuleConfigsListCriteria extends AbstractListCriteria<PrintRule
 	}
 
 	public String userName() {
-		return this.userName;
+		return userName;
 	}
 
 	public PrintRuleConfigsListCriteria userName(String userName) {
