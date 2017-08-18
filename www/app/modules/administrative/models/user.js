@@ -10,6 +10,26 @@ angular.module('os.administrative.models.user', ['os.common.models'])
         }
       );
 
+    function saveRoleProps() {
+      var userRole = angular.copy(this);
+      var all = $translate.instant('user.role.all');
+      if (userRole.site == all) {
+        delete userRole.site;
+      } else {
+        userRole.site = {name: userRole.site};
+      }
+
+      if (userRole.collectionProtocol == all) {
+        delete userRole.collectionProtocol;
+      } else {
+        userRole.collectionProtocol = {shortTitle: userRole.collectionProtocol};
+      }
+
+      userRole.role = {name: userRole.role};
+      delete userRole.isUpdateAllowed;
+      return userRole;
+    }
+
     User.prototype.getType = function() {
       return 'user';
     }
@@ -34,24 +54,9 @@ angular.module('os.administrative.models.user', ['os.common.models'])
       return new this.roleModel(role);
     }
 
-    var saveRoleProps = function() {
-      var userRole = angular.copy(this);
-      var all = $translate.instant('user.role.all');
-      if (userRole.site == all) {
-        delete userRole.site;
-      } else {
-        userRole.site = {name: userRole.site};
-      }
-
-      if (userRole.collectionProtocol == all) {
-        delete userRole.collectionProtocol;
-      } else {
-        userRole.collectionProtocol = {shortTitle: userRole.collectionProtocol};
-      }
-
-      userRole.role = {name: userRole.role};
-      delete userRole.isUpdateAllowed;
-      return userRole;
+    User.prototype.updateStatus = function(status) {
+      return $http.put(User.url() + this.$id() + '/activity-status', {activityStatus: status})
+        .then(User.modelRespTransform);
     }
 
     User.sendPasswordResetLink = function(user) {

@@ -7,6 +7,10 @@
           <span class="fa fa-pencil"></span>
           <span translate="common.buttons.edit">Edit</span>
         </button>
+        <button show-if-allowed="userResource.updateOpts" class="default" ng-click="lock()" ng-if="user.activityStatus != 'Locked'">
+          <span class="fa fa-lock"></span>
+          <span translate="user.lock_users">Lock</span>
+        </button>
         <button show-if-allowed="userResource.deleteOpts" class="default" ng-click="deleteUser()">
           <span class="fa fa-trash"></span>
           <span translate="common.buttons.delete">Delete</span>

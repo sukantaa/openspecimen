@@ -17,6 +17,15 @@ angular.module('os.administrative.user.detail', ['os.administrative.models'])
       })
     }
 
+    function updateStatus(status, msgKey) {
+      $scope.user.updateStatus(status).then(
+        function(savedUser) {
+          $scope.user = savedUser;
+          Alerts.success(msgKey);
+        }
+      );
+    }
+
     $scope.editUser = function(property, value) {
       var d = $q.defer();
       d.resolve({});
@@ -25,12 +34,11 @@ angular.module('os.administrative.user.detail', ['os.administrative.models'])
 
     $scope.activate = function() {
       var msgKey = $scope.user.activityStatus == 'Locked' ? 'user.user_unlocked' : 'user.user_request_approved';
-      User.activate($scope.user.id).then(
-        function(user) {
-          $scope.user = user;
-          Alerts.success(msgKey);
-        }
-      );
+      updateStatus('Active', msgKey);
+    }
+
+    $scope.lock = function() {
+      updateStatus('Locked', 'user.user_locked');
     }
 
     $scope.deleteUser = function() {

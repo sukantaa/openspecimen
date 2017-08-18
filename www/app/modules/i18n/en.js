@@ -1024,6 +1024,9 @@
     "delete_users":  "Are you sure you want to delete selected users?",
     "users_deleted": "Users deleted successfully",
     "admin_access_req": "Super administrator rights required to delete admin users: {{adminUsers}}.",
+    "lock_users": "Lock",
+    "user_locked": "User locked successfully",
+    "users_locked": "Users locked successfully",
 
     "user_roles": "User Roles",
     "bulk_import_users": "Import Users",
@@ -1074,7 +1077,8 @@
       "cp_count": "Collection Protocol(s)",
       "last_login": "Last logged date",
       "user_since": "User since (years)",
-      "search": "Click to search Users"
+      "search": "Click to search Users",
+      "lock_users": "Click to lock selected users"
     },
       
     "menu": {

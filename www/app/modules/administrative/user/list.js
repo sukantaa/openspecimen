@@ -98,9 +98,9 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
       return User.getCount($scope.userFilterOpts)
     }
 
-    function activateUsers(msgKey) {
+    function updateStatus(status, msgKey) {
       var users = $scope.ctx.checkList.getSelectedItems();
-      User.bulkUpdate({detail: {activityStatus: 'Active'}, ids: getUserIds(users)}).then(
+      User.bulkUpdate({detail: {activityStatus: status}, ids: getUserIds(users)}).then(
         function(savedUsers) {
           Alerts.success(msgKey);
 
@@ -164,11 +164,15 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
     }
 
     $scope.unlockUsers = function() {
-      activateUsers('user.users_unlocked');
+      updateStatus('Active', 'user.users_unlocked');
     }
 
     $scope.approveUsers = function() {
-      activateUsers('user.users_approved');
+      updateStatus('Active', 'user.users_approved');
+    }
+
+    $scope.lockUsers = function() {
+      updateStatus('Locked', 'user.users_locked');
     }
 
     init();

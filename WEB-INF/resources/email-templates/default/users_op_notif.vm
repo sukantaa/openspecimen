@@ -23,19 +23,25 @@
                     #if ($user.emailAddress == $updatedUser.emailAddress)
                       Your account has been deleted by $currentUser.firstName $currentUser.lastName.
                     #else
-                      The user $updatedUser.firstName $updatedUser.lastName account has been deleted by $currentUser.firstName $currentUser.lastName.
+                      The user $updatedUser.firstName $updatedUser.lastName's account has been deleted by $currentUser.firstName $currentUser.lastName.
                     #end
                   #elseif ($operation == "unlocked")
                     #if ($user.emailAddress == $updatedUser.emailAddress)
                       Your account has been unlocked by $currentUser.firstName $currentUser.lastName.
                     #else
-                      The user $updatedUser.firstName $updatedUser.lastName account has been unlocked by $currentUser.firstName $currentUser.lastName.
+                      The user $updatedUser.firstName $updatedUser.lastName's account has been unlocked by $currentUser.firstName $currentUser.lastName.
+                    #end
+                  #elseif ($operation == "locked")
+                    #if ($user.emailAddress == $updatedUser.emailAddress)
+                      Your account has been locked by $currentUser.firstName $currentUser.lastName.
+                    #else
+                      The user $updatedUser.firstName $updatedUser.lastName's account has been locked by $currentUser.firstName $currentUser.lastName.
                     #end
                   #end
                 </p>
               </td>
             </tr>
-            #if ($operation != "rejected" && $operation != "deleted")
+            #if (($operation == "created" || $operation == "approved" || $operation == "unlocked") || ($operation == "locked" && $user.emailAddress != $updatedUser.emailAddress))
               <tr>
                 <td style="border-collapse:collapse;padding-bottom:10px">
                   <table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;color:#333">

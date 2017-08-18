@@ -315,6 +315,7 @@ public class UserServiceImpl implements UserService, InitializingBean, UserDetai
 				onAccountActivation(user, currentStatus);
 			} else if (isLocked(currentStatus, newStatus)) {
 				user.setActivityStatus(Status.ACTIVITY_STATUS_LOCKED.getStatus());
+				notifyUserUpdated(user, "locked");
 			}
 
 			return ResponseEvent.response(UserDetail.from(user));
@@ -600,6 +601,8 @@ public class UserServiceImpl implements UserService, InitializingBean, UserDetai
 
 		if (isActivated(prevStatus, user.getActivityStatus())) {
 			onAccountActivation(user, prevStatus);
+		} else if (isLocked(prevStatus, user.getActivityStatus())) {
+			notifyUserUpdated(user, "locked");
 		}
 
 		if (!wasInstituteAdmin && existingUser.isInstituteAdmin()) {
