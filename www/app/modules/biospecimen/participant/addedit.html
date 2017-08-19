@@ -31,7 +31,7 @@
 </div>
 
 <script type="text/ng-template" id="modules/biospecimen/participant/lookup.html">
-  <form name="lform" class="form-horizontal" os-form-validator="lform" validator="lformValidator" novalidate>
+  <form name="pform" class="form-horizontal" os-form-validator="pform" validator="pformValidator" novalidate>
     <div ng-switch on="fieldsCtx.lookupFields && fieldsCtx.lookupFields.length > 0">
       <div ng-switch-when="true">
         <sde-form-fields base-fields="fieldsCtx.sysDict" fields="fieldsCtx.lookupFields"
@@ -126,7 +126,7 @@
 </script>
 
 <script type="text/ng-template" id="modules/biospecimen/participant/choose-match.html">
-  <form name="lform" class="form-horizontal" os-form-validator="lform" validator="lformValidator" novalidate>
+  <form name="pform" class="form-horizontal" os-form-validator="pform" validator="pformValidator" novalidate>
     <div class="alert alert-warning os-participant-matching-msg">
       <span translate="participant.similar_participants">
         Following matching participant(s) found 
