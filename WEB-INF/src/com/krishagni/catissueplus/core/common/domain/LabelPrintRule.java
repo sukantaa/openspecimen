@@ -10,12 +10,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
 import org.springframework.context.MessageSource;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
 import org.springframework.util.ReflectionUtils;
 
-import com.google.gson.Gson;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 
@@ -233,7 +231,7 @@ public class LabelPrintRule {
 			return null;
 		}
 
-		String address = getFieldValue(ipAddressMatcher, "requiredAddress").toString();
+		String address = StringUtils.remove(getFieldValue(ipAddressMatcher, "requiredAddress").toString(), "/");
 		int maskBits = getFieldValue(ipAddressMatcher, "nMaskBits");
 		if (maskBits > 0) {
 			address += "/" + maskBits;
