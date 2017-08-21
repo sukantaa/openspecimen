@@ -272,6 +272,12 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 			EmailUtil.getInstance().sendEmail(ACCOUNT_LOCKED_NOTIF_TMPL, new String[] {rcpt.getEmailAddress()}, null, emailProps);
 		}
 
+
+		//
+		// remove the user who is locked as they can't see the UI notification
+		//
+		rcpts.remove(lockedUser);
+
 		Notification notif = new Notification();
 		notif.setEntityId(lockedUser.getId());
 		notif.setEntityType(User.getEntityName());
