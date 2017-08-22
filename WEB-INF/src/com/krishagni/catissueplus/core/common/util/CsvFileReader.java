@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import au.com.bytecode.opencsv.CSVReader;
 
 public class CsvFileReader implements CsvReader {
-	private Map<String, Integer> columnNameIdxMap = new HashMap<String, Integer>();
+	private Map<String, Integer> columnNameIdxMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
 	private String[] currentRow;
 
