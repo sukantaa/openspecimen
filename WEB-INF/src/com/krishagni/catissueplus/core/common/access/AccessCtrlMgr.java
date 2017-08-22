@@ -103,7 +103,7 @@ public class AccessCtrlMgr {
 		//
 		// ensure the role site belongs to user's institute
 		//
-		if (roleSite != null && roleSite.getInstitute().equals(user.getInstitute())) {
+		if (roleSite != null && !roleSite.getInstitute().equals(user.getInstitute())) {
 			throw OpenSpecimenException.userError(
 				SiteErrorCode.INVALID_SITE_INSTITUTE, roleSite.getName(), user.getInstitute().getName());
 		}
