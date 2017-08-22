@@ -19,6 +19,8 @@ import com.krishagni.catissueplus.core.administrative.domain.Shipment;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.factory.InstituteErrorCode;
+import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
 import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -98,6 +100,14 @@ public class AccessCtrlMgr {
 	}
 
 	public void ensureCreateUpdateUserRolesRights(User user, Site roleSite) {
+		//
+		// ensure the role site belongs to user's institute
+		//
+		if (roleSite != null && roleSite.getInstitute().equals(user.getInstitute())) {
+			throw OpenSpecimenException.userError(
+				SiteErrorCode.INVALID_SITE_INSTITUTE, roleSite.getName(), user.getInstitute().getName());
+		}
+
 		if (AuthUtil.isAdmin()) {
 			return;
 		}
