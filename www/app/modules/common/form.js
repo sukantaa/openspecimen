@@ -18,10 +18,55 @@ function osRequired($timeout) {
   };
 }
 
+function linker(scope, element, attrs, controller) {
+  scope.$watch(attrs.osFormValidator, function(form) {
+    controller.setForm(form);
+  });
+
+  scope.$watch(attrs.name + ".$dirty", function(dirty) {
+    if (dirty) {
+      LocationChangeListener.preventChange();
+    } else {
+      LocationChangeListener.allowChange();
+    }
+  });
+
+  if (attrs.validator) {
+    scope[attrs.validator] = controller;
+  }
+
+  if (attrs.parentValidator) {
+    scope.$watch(attrs.parentValidator, function(parentValidator) {
+      controller.setParentValidator(parentValidator);
+    });
+  }
+
+  element.find("input, select, .os-select-container").keypress(
+    function(e){
+      if ( e.which == 13 ) { // Enter key = keycode 13
+        return false;
+      }
+  });
+}
+
 angular.module('os.common.form', [])
   .directive('osFormValidator', function(LocationChangeListener) {
     return {
       restrict: 'A',
+
+      compile: function(tElem, tAttrs){
+        var elements = angular.element(document.querySelectorAll("[required]"));
+        angular.forEach(elements, 
+        function(element){
+          element.setAttribute("placeholder", "Mandatory");
+        });
+        var elements1 = angular.element(document.querySelectorAll("[placeholder]:not([required])"));
+        angular.forEach(elements1, 
+        function(element){
+          element.setAttribute("placeholder", "");
+        });
+        return linker;
+      },
 
       controller: function($scope) {
         this._cachedValues = {};
@@ -72,37 +117,6 @@ angular.module('os.common.form', [])
 
           return this._cachedValues[key];
         }
-      },
-
-      link: function(scope, element, attrs, controller) {
-        scope.$watch(attrs.osFormValidator, function(form) {
-          controller.setForm(form);
-        });
-
-        scope.$watch(attrs.name + ".$dirty", function(dirty) {
-          if (dirty) {
-            LocationChangeListener.preventChange();
-          } else {
-            LocationChangeListener.allowChange();
-          }
-        });
-
-        if (attrs.validator) {
-          scope[attrs.validator] = controller;
-        }
-
-        if (attrs.parentValidator) {
-          scope.$watch(attrs.parentValidator, function(parentValidator) {
-            controller.setParentValidator(parentValidator);
-          });
-        }
-
-        element.find("input, select, .os-select-container").keypress(
-          function(e){
-            if ( e.which == 13 ) { // Enter key = keycode 13
-              return false;
-            }
-        });
       }
     };
   })
