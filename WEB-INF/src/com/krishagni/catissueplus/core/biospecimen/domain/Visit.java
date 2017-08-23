@@ -73,7 +73,7 @@ public class Visit extends BaseExtensionEntity {
 
 	private CollectionProtocolEvent cpEvent;
 
-	private Set<Specimen> specimens = new HashSet<Specimen>();
+	private Set<Specimen> specimens = new HashSet<>();
 
 	private CollectionProtocolRegistration registration;
 	

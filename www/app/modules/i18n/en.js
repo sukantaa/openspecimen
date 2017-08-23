@@ -488,6 +488,7 @@
     "list": "Visits",
     "occurred_visits": "Occurred Visits",
     "collection_status": "Collection Status",
+    "storage_utilization": "Utilization",
     "anticipated_visits": "Anticipated Visits",
     "missed_visits": "Missed Visits",
     "missed_by": "Missed By",
@@ -650,6 +651,12 @@
     "visit_name": "Visit Name",
     "visit_date": "Visit Date",
     "visit_site": "Visit Site",
+    "utilization": {
+      "stored": "Stored",
+      "virtual": "Virtual",
+      "distributed": "Distributed",
+      "no_specimens": "No Specimens"
+    },
 
     "labels_print_job_created": "Specimen labels print job {{jobId}} created successfully",
     "spmn_aliquots": "Specimen Aliquots",

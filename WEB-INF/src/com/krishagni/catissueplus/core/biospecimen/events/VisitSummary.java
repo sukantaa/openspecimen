@@ -34,6 +34,12 @@ public class VisitSummary implements Comparable<VisitSummary> {
 	
 	private int unplannedSpecimens;
 
+	private int storedSpecimens;
+
+	private int notStoredSpecimens;
+
+	private int distributedSpecimens;
+
 	private String missedReason;
 
 	private UserSummary missedBy;
@@ -140,6 +146,30 @@ public class VisitSummary implements Comparable<VisitSummary> {
 
 	public void setUnplannedSpecimens(int unplannedSpecimens) {
 		this.unplannedSpecimens = unplannedSpecimens;
+	}
+
+	public int getStoredSpecimens() {
+		return storedSpecimens;
+	}
+
+	public void setStoredSpecimens(int storedSpecimens) {
+		this.storedSpecimens = storedSpecimens;
+	}
+
+	public int getNotStoredSpecimens() {
+		return notStoredSpecimens;
+	}
+
+	public void setNotStoredSpecimens(int notStoredSpecimens) {
+		this.notStoredSpecimens = notStoredSpecimens;
+	}
+
+	public int getDistributedSpecimens() {
+		return distributedSpecimens;
+	}
+
+	public void setDistributedSpecimens(int distributedSpecimens) {
+		this.distributedSpecimens = distributedSpecimens;
 	}
 
 	public String getMissedReason() {

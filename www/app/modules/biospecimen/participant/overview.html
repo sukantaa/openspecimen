@@ -57,10 +57,11 @@
           <div class="os-table os-table-muted-hdr os-border" ng-if="occurredVisits.length > 0">
             <div class="os-table-head">
               <div class="row">
-                <div class="col os-col-25" translate="visits.event_label">Event Label</div>
-                <div class="col os-col-25" translate="visits.name">Name</div>
+                <div class="col os-col-20" translate="visits.event_label">Event Label</div>
+                <div class="col os-col-20" translate="visits.name">Name</div>
                 <div class="col os-col-15" translate="common.date">Date</div>
-                <div class="col os-col-30" translate="visits.collection_status">Collection Status</div>
+                <div class="col os-col-20" translate="visits.collection_status">Collection Status</div>
+                <div class="col os-col-20" translate="visits.storage_utilization">Utilization</div>
                 <div class="col os-col-5">&nbsp;</div>
               </div>
             </div>
@@ -68,18 +69,18 @@
               <div ng-repeat="visit in occurredVisits"
                 ng-class="{'os-inplace-form-edit-po': rptVisitIdx == $index}">
                 <div class="row title">
-                  <div class="col os-col-25">
+                  <div class="col os-col-20">
                     <a ui-sref="visit-detail.overview({visitId: visit.id, eventId: visit.eventId})">
                       <os-event-desc event-point="visit.eventPoint" event-label="visit.eventLabel"></os-event-desc>
                     </a>
                   </div>
-                  <div class="col os-col-25">
+                  <div class="col os-col-20">
                     {{visit.name}}
                   </div>
                   <div class="col os-col-15">
                     {{visit.visitDate | date: global.dateFmt}} 
                   </div>
-                  <div class="col os-col-30">
+                  <div class="col os-col-20">
                     <progress class="progress" max="visit.totalSpecimens"
                       bs-popover trigger="hover" placement="bottom" content-template="specimen-count.html">
                       <bar value="visit.collectedSpecimens" type="success">
@@ -93,6 +94,20 @@
                       </bar>
                       <bar value="visit.unplannedSpecimens" type="unplanned">
                         <span><b> {{visit.unplannedSpecimens}} </b> </span>
+                      </bar>
+                    </progress>
+                  </div>
+                  <div class="col os-col-20">
+                    <progress class="progress" max="visit.reqStorage"
+                      bs-popover trigger="hover" placement="bottom" content-template="storage-utilization.html">
+                      <bar value="visit.storedSpecimens" type="success" ng-if="!!visit.storedSpecimens">
+                        <span><b> {{visit.storedSpecimens}} </b></span>
+                      </bar>
+                      <bar value="visit.virtualSpecimens" type="warning" ng-if="!!visit.virtualSpecimens">
+                        <span><b> {{visit.virtualSpecimens}} </b></span>
+                      </bar>
+                      <bar value="visit.distributedSpecimens" type="distributed" ng-if="!!visit.distributedSpecimens">
+                        <span><b> {{visit.distributedSpecimens}} </b></span>
                       </bar>
                     </progress>
                   </div>
@@ -284,21 +299,51 @@
       </tr>
     </thead>
     <tbody>
-      <tr>
+      <tr ng-if="!!visit.collectedSpecimens">
         <td translate="specimens.status.collected">Collected</td>
         <td>{{visit.collectedSpecimens}}</td>
       </tr>
-      <tr>
+      <tr ng-if="!!visit.pendingSpecimens">
         <td translate="specimens.status.pending">Pending</td>
         <td>{{visit.pendingSpecimens}}</td>
       </tr>
-      <tr>
+      <tr ng-if="!!visit.uncollectedSpecimens">
         <td translate="specimens.status.not_collected">Not Collected</td>
         <td>{{visit.uncollectedSpecimens}}</td>
       </tr>
-      <tr>
+      <tr ng-if="!!visit.unplannedSpecimens">
         <td translate="specimens.unplanned">Unplanned</td>
         <td>{{visit.unplannedSpecimens}}</td>
+      </tr>
+    </tbody>
+  </table>
+</script>
+
+<script id="storage-utilization.html" type="text/ng-template">
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th translate="visits.storage_utilization">Utilization</th>
+        <th translate="common.count">Count</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-if="!visit.reqStorage">
+        <td colspan="2">
+          <span translate="specimens.utilization.no_specimens">No Specimens</span>
+        </td>
+      </tr>
+      <tr ng-if="!!visit.storedSpecimens">
+        <td translate="specimens.utilization.stored">Stored</td>
+        <td>{{visit.storedSpecimens}}</td>
+      </tr>
+      <tr ng-if="!!visit.virtualSpecimens">
+        <td translate="specimens.utilization.virtual">Virtual</td>
+        <td>{{visit.virtualSpecimens}}</td>
+      </tr>
+      <tr ng-if="!!visit.distributedSpecimens">
+        <td translate="specimens.utilization.distributed">Distributed</td>
+        <td>{{visit.distributedSpecimens}}</td>
       </tr>
     </tbody>
   </table>

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -86,6 +87,7 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 						
 		if (crit.includeStat() && !visitsMap.isEmpty()) {
 			getVisitsCollectionStatus(crit.cprId(), visitsMap);
+			getUtilizationStatus(visitsMap);
 		}
 	
 		Collections.sort(visits);
@@ -211,11 +213,7 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 
 	@SuppressWarnings("unchecked")
 	private void getPlannedCollectionStatus(Long cprId, Map<String, VisitSummary> visitsMap) {
-		Set<Long> eventIds = visitsMap.values().stream()
-			.map(VisitSummary::getEventId)
-			.filter(id -> id != null)
-			.collect(Collectors.toSet());
-
+		Set<Long> eventIds = getNotNullIds(visitsMap, VisitSummary::getEventId);
 		if (eventIds.isEmpty()) {
 			return;
 		}
@@ -239,11 +237,7 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 	
 	@SuppressWarnings("unchecked")
 	private void getUnplannedCollectionStatus(Long cprId, Map<String, VisitSummary> visitsMap) {
-		Set<Long> visitIds = visitsMap.values().stream()
-			.map(VisitSummary::getId)
-			.filter(id -> id != null)
-			.collect(Collectors.toSet());
-
+		Set<Long> visitIds = getNotNullIds(visitsMap, VisitSummary::getId);
 		if (visitIds.isEmpty()) {
 			return;
 		}
@@ -262,6 +256,34 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 			visit.setUnplannedSpecimens((Integer)row[2]);
 		}				
 	}
+
+	private void getUtilizationStatus(Map<String, VisitSummary> visitsMap) {
+		Set<Long> visitIds = getNotNullIds(visitsMap, VisitSummary::getId);
+		if (CollectionUtils.isEmpty(visitIds)) {
+			return;
+		}
+
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_VISITS_SPMN_STORAGE_STAT)
+			.setParameterList("visitIds", visitIds)
+			.list();
+
+		for (Object[] row : rows) {
+			Long visitId = (Long) row[0];
+			Long eventId = (Long) row[1];
+
+			VisitSummary visit = visitsMap.get(getVisitKey(visitId, eventId));
+			visit.setStoredSpecimens((Integer) row[2]);
+			visit.setNotStoredSpecimens((Integer) row[3]);
+			visit.setDistributedSpecimens((Integer) row[4]);
+		}
+	}
+
+	private Set<Long> getNotNullIds(Map<String, VisitSummary> visitsMap, Function<VisitSummary, Long> idMapper) {
+		return visitsMap.values().stream()
+			.map(idMapper)
+			.filter(id -> id != null)
+			.collect(Collectors.toSet());
+	}
 		
 	private static final String FQN = Visit.class.getName();
 	
@@ -270,6 +292,8 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 	private static final String GET_VISITS_COLLECTION_STATUS = FQN + ".getVisitsCollectionStatus";
 	
 	private static final String GET_VISITS_UNPLANNED_SPECIMENS_STAT = FQN + ".getVisitsUnplannedSpecimenCount";
+
+	private static final String GET_VISITS_SPMN_STORAGE_STAT = FQN + ".getVisitsSpmnStorageStat";
 
 	private static final String GET_VISITS_BY_IDS = FQN + ".getVisitsByIds";
 

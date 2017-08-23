@@ -13,6 +13,9 @@ angular.module('os.biospecimen.models.visit', ['os.common.models', 'os.biospecim
           visit.pendingSpecimens = 0;
           visit.totalSpecimens = actualSpecimenCnt + visit.unplannedSpecimens;
         }
+
+        visit.virtualSpecimens = visit.notStoredSpecimens - visit.distributedSpecimens;
+        visit.reqStorage = visit.storedSpecimens + visit.notStoredSpecimens;
       });
 
       return visits;

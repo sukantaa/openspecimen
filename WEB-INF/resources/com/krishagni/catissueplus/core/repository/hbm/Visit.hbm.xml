@@ -162,14 +162,16 @@
       from
         catissue_coll_prot_event cpe
         inner join catissue_cp_req_specimen sp_rq 
-          on sp_rq.collection_protocol_event_id = cpe.identifier
-        left join catissue_specimen_coll_group scg 
+          on sp_rq.collection_protocol_event_id = cpe.identifier and
+             sp_rq.lineage = 'New'
+        left join catissue_specimen_coll_group scg
           on scg.collection_protocol_event_id = cpe.identifier and 
              scg.collection_protocol_reg_id = :cprId and
              scg.activity_status != 'Disabled'
         left join catissue_specimen s 
           on s.specimen_collection_group_id = scg.identifier and 
-             s.req_specimen_id = sp_rq.identifier and 
+             s.req_specimen_id = sp_rq.identifier and
+             s.lineage = 'New' and
              s.activity_status != 'Disabled'
       where
         cpe.identifier in (:eventIds)
@@ -192,10 +194,36 @@
         scg.identifier in (:visitIds) and
         scg.collection_protocol_reg_id = :cprId and 
         s.req_specimen_id is null and
+        s.lineage = 'New' and
         scg.activity_status != 'Disabled' and
         s.activity_status != 'Disabled'
       group by 
         scg.identifier, scg.collection_protocol_event_id
+    </sql-query>
+
+    <sql-query name="getVisitsSpmnStorageStat">
+      <return-scalar column="visit_id" type="long"/>
+      <return-scalar column="event_id" type="long"/>
+      <return-scalar column="stored_spmns" type="int"/>
+      <return-scalar column="not_stored_spmns" type="int"/>
+      <return-scalar column="distributed_spmns" type="int"/>
+
+      select
+        visit.identifier as visit_id, visit.collection_protocol_event_id as event_id,
+        count(distinct case when pos.identifier is not null then spmn.identifier else null end) as stored_spmns,
+        count(distinct case when pos.identifier is null then spmn.identifier else null end) as not_stored_spmns,
+        count(distinct oi.specimen_id) as distributed_spmns
+      from
+        catissue_specimen_coll_group as visit
+        inner join catissue_specimen as spmn on spmn.specimen_collection_group_id = visit.identifier
+        left join os_container_positions as pos on pos.occupying_specimen_id = spmn.identifier
+        left join os_order_items as oi on oi.specimen_id = spmn.identifier
+        left join os_orders o on o.identifier = oi.order_id and o.status = 'EXECUTED' and o.activity_status != 'Disabled'
+      where
+        visit.identifier in (:visitIds) and
+        spmn.collection_status = 'Collected'
+      group by
+        visit.identifier, visit.collection_protocol_event_id;
     </sql-query>
   </class>
 </hibernate-mapping>
