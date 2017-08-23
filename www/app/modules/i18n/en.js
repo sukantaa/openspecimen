@@ -1800,6 +1800,7 @@
     "specimens_removed_from_user_default_list": "Specimens sucessfully removed from {{owner.firstName}} {{owner.lastName}}'s default cart",
     "specimens_removed_from_normal_list": "Specimens sucessfully removed from cart {{name}}",
     "distribute": "Distribute",
+    "distribute_all": "Distribute All",
     "ship": "Ship",
     "no_specimens_for_deletion": "Please select at least one specimen for deletion",
     "no_specimens_for_distribution": "Please select at least one specimen to create distribution order",

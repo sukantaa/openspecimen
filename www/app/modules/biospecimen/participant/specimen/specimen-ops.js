@@ -32,8 +32,7 @@ angular.module('os.biospecimen.specimen')
       scope: {
         specimens: '&',
         initList: '&',
-        resourceOpts: '=?',
-        opts: '=?'
+        resourceOpts: '=?'
       },
 
       templateUrl: 'modules/biospecimen/participant/specimen/specimen-ops.html',
@@ -74,19 +73,7 @@ angular.module('os.biospecimen.specimen')
         }
 
         scope.distributeSpecimens = function() {
-          var orderParams = {orderId: ''};
-
-          var spmns = scope.specimens();
-          if (!spmns || spmns.length == 0) {
-            var opts = scope.opts || {};
-            if (!!opts.listIdName && !!opts.listIdValue) {
-              orderParams[opts.listIdName] = opts.listIdValue;
-              $state.go('order-addedit', orderParams);
-              return;
-            }
-          }
-
-          gotoView('order-addedit', orderParams, 'no_specimens_for_distribution');
+          gotoView('order-addedit', {orderId: ''}, 'no_specimens_for_distribution');
         }
 
         scope.shipSpecimens = function() {

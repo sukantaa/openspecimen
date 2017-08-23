@@ -1,6 +1,6 @@
 angular.module('os.biospecimen.specimenlist')
   .controller('SpecimenListSpecimensCtrl', function(
-    $scope, $state, $stateParams, $timeout, $filter, currentUser, list,
+    $scope, $state, $stateParams, $timeout, $filter, $injector, currentUser, list,
     SpecimensHolder, SpecimenList, CollectionProtocol, Container, DeleteUtil, Alerts, Util) {
 
     function init() { 
@@ -14,7 +14,15 @@ angular.module('os.biospecimen.specimenlist')
         selection: {all: false, any: false, specimens: []},
         url: SpecimenList.url(),
         breadcrumbs: $stateParams.breadcrumbs,
-        opsOpts: {listIdName: 'specimenListId', listIdValue: list.id}
+        reqBasedDistOrShip: false
+      }
+
+      if ($injector.has('spmnReqCfgUtil')) {
+        $injector.get('spmnReqCfgUtil').isReqBasedDistOrShippingEnabled().then(
+          function(result) {
+            $scope.ctx.reqBasedDistOrShip = (result.value == 'true');
+          }
+        );
       }
 
       $scope.$on('osRightDrawerOpen', initFilterPvs);
@@ -216,6 +224,10 @@ angular.module('os.biospecimen.specimenlist')
 
     $scope.transferSpecimens = function() {
       gotoView('bulk-transfer-specimens', {}, 'no_specimens_to_transfer');
+    }
+
+    $scope.distributeCart = function() {
+      $state.go('order-addedit', {specimenListId: list.id});
     }
 
     $scope.clearFilters = function() {
