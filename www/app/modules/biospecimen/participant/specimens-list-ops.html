@@ -11,7 +11,8 @@
   <span translate="cp.view_participants">View Participants</span>
 </button>
 
-<button class="default" ui-sref="specimen-addedit({cpId: cp.id, visitId: -1, cprId: -1})" ng-if="cp.specimenCentric">
+<button class="default" ui-sref="specimen-addedit({cpId: cp.id, visitId: -1, cprId: -1})"
+  ng-if="cp.specimenCentric && listViewCtx.ctrl.showAddSpmn">
   <span class="fa fa-plus"></span>
   <span translate="specimens.buttons.add_specimen">Add Specimen</span>
 </button>

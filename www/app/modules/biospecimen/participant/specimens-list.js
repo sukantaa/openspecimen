@@ -1,6 +1,6 @@
 angular.module('os.biospecimen.participant')
   .controller('SpecimensListViewCtrl', function(
-    $scope, $state, currentUser, cp, spmnListCfg,
+    $scope, $state, currentUser, cp, spmnListCfg, sdeConfigured,
     Util, Specimen, SpecimensHolder, DeleteUtil, Alerts, ListPagerOpts) {
 
     var ctrl = this;
@@ -10,6 +10,8 @@ angular.module('os.biospecimen.participant')
     function init() {
       pagerOpts  = new ListPagerOpts({listSizeGetter: getSpecimensCount});
       listParams = {listName: 'specimen-list-view', maxResults: pagerOpts.recordsPerPage + 1};
+
+      ctrl.showAddSpmn = !sdeConfigured,
 
       $scope.ctx = {
         filtersCfg: angular.copy(spmnListCfg.filters),

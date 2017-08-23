@@ -199,6 +199,19 @@ angular.module('os.biospecimen.participant',
         url: '/specimens',
         templateUrl: 'modules/biospecimen/participant/specimens-list.html',
         controller: 'SpecimensListViewCtrl',
+        resolve: {
+          sdeConfigured: function($injector, cp, CpConfigSvc) {
+            if (!$injector.has('sdeFieldsSvc')) {
+              return false;
+            }
+
+            return CpConfigSvc.getWorkflowData(cp.id, 'sde').then(
+              function(data) {
+                return !!data.singlePatientSamples;
+              }
+            );
+          }
+        },
         metaInfo: {
           button: {
             icon: 'fa-flask',
