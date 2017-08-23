@@ -320,7 +320,10 @@ angular.module('os.biospecimen.participant',
             var participant = new Participant({source: 'OpenSpecimen'});
             return new CollectionProtocolRegistration({
               cpId: cp.id, cpShortTitle: cp.shortTitle,
-              registrationDate: new Date(), participant: participant
+              registrationDate: new Date(), participant: participant,
+              specimenLabelFmt: cp.specimenLabelFmt,
+              derivativeLabelFmt: cp.derivativeLabelFmt,
+              aliquotLabelFmt: cp.aliquotLabelFmt
             });
           },
 

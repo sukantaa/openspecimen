@@ -9,6 +9,7 @@ angular.module('os.biospecimen.specimen.addderivative', [])
       $scope.cpr = cpr;
       $scope.visit = visit;
       $scope.derivative = SpecimenUtil.getNewDerivative($scope);
+      $scope.derivative.labelFmt = cpr.derivativeLabelFmt;
 
       var exObjs = [
         'specimen.lineage', 'specimen.parentLabel', 'specimen.events',
