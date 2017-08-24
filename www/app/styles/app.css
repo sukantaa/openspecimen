@@ -1186,3 +1186,9 @@ h4.os-sub-section-title, h5.os-sub-section-title, h6.os-sub-section-title {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
+
+
+/** Min width classes **/
+.os-mw-200 {
+  min-width: 200px;
+}
