@@ -133,8 +133,8 @@
                           </a>
                         </li>
                         <li class="divider"></li>
-                        <li show-if-allowed="specimenResource.updateOpts" ng-if="visit.pendingSpecimens > 0">
-                          <a ui-sref="specimen-addedit({visitId: visit.id})">
+                        <li show-if-allowed="specimenResource.updateOpts" ng-if="visit.totalPendingSpmns > 0">
+                          <a ng-click="collectPending(visit)">
                             <span class="fa fa-flask"></span>
                             <span translate="visits.ctx_menu.collect_pending_specimens">
                               Collect Pending Specimens

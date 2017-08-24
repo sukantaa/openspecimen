@@ -43,5 +43,10 @@ angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
       CollectSpecimensSvc.collectVisit(retSt, cp, cpr.id, visit);
     }
 
+    $scope.collectPending = function(visit) {
+      var retSt = {state: $state.current, params: $stateParams};
+      CollectSpecimensSvc.collectPending(retSt, cp, cpr.id, visit);
+    }
+
     init();
   });

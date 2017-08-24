@@ -536,6 +536,7 @@
       "edit_visit": "Edit Visit",
       "collect_planned_specimens": "Collect Planned Specimens",
       "collect_unplanned_specimens": "Collect Unplanned Specimens",
+      "collect_pending_specimens": "Collect Pending Specimens",
       "print_specimen_labels": "Print Specimen Labels",
       "new_visit": "New Visit",
       "missed_visit": "Missed Visit"

@@ -92,8 +92,44 @@ angular.module('os.biospecimen.participant.collect-specimens',
       );
     }
 
+    function isAnyChildOrPoolSpecimenPending(spmn) {
+      if (!spmn.status || spmn.status == 'Pending') {
+        return true;
+      }
+
+      if ((spmn.specimensPool || []).some(isAnyChildOrPoolSpecimenPending)) {
+        return true;
+      }
+
+      if ((spmn.children || []).some(isAnyChildOrPoolSpecimenPending)) {
+        return true;
+      }
+
+      return false;
+    }
+
     return {
       collect: collect,
+
+      collectPending: function(returnState, cp, cprId, visit) {
+        var visitDetail = {visitId: visit.id, eventId: visit.eventId};
+        Specimen.listFor(cprId, visitDetail).then(
+          function(specimens) {
+            var spmnsToCollect = [];
+
+            angular.forEach(Specimen.flatten(specimens),
+              function(spmn) {
+                if (isAnyChildOrPoolSpecimenPending(spmn)) {
+                  spmn.isOpened = spmn.selected = true;
+                  spmnsToCollect.push(spmn);
+                }
+              }
+            );
+
+            collect(returnState, visit, spmnsToCollect);
+          }
+        );
+      },
 
       collectVisit: function(returnState, cp, cprId, visit) {
         var visitDetail = {visitId: visit.id, eventId: visit.eventId};
