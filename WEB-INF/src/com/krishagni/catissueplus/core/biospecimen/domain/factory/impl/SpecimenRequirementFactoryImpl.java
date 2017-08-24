@@ -448,17 +448,20 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		String eventLabel = detail.getEventLabel();
 		
 		CollectionProtocolEvent cpe = null;
+		Object key = null;
 		if (eventId != null) {
 			cpe = daoFactory.getCollectionProtocolDao().getCpe(eventId);
+			key = eventId;
 		} else if (StringUtils.isNotBlank(cpShortTitle) && StringUtils.isNotBlank(eventLabel)) {
 			cpe = daoFactory.getCollectionProtocolDao().getCpeByShortTitleAndEventLabel(cpShortTitle, eventLabel);
+			key = eventLabel;
 		} else {
 			ose.addError(CPE_REQUIRED);
 			return;
 		}
 		
 		if (cpe == null) {
-			ose.addError(CpeErrorCode.NOT_FOUND);
+			ose.addError(CpeErrorCode.NOT_FOUND, key, 1);
 		}
 		
 		sr.setCollectionProtocolEvent(cpe);

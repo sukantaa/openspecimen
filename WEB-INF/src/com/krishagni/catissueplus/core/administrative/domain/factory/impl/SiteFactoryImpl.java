@@ -98,7 +98,7 @@ public class SiteFactoryImpl implements SiteFactory {
 		
 		Institute institute = daoFactory.getInstituteDao().getInstituteByName(instituteName);
 		if (institute == null) {
-			ose.addError(InstituteErrorCode.NOT_FOUND, instituteName);
+			ose.addError(InstituteErrorCode.NOT_FOUND, instituteName, 1);
 			return;
 		}
 		

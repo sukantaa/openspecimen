@@ -131,7 +131,7 @@ public class ExtensionsImporter implements ObjectImporter<Map<String, Object>, M
 		String formName = params.get("formName");
 		Container form = Container.getContainer(formName);
 		if (form == null) {
-			return ResponseEvent.userError(FormErrorCode.NOT_FOUND);
+			return ResponseEvent.userError(FormErrorCode.NOT_FOUND, formName, 1);
 		}
 		
 		Long formCtxId = formDao.getFormCtxtId(form.getId(), entityType, cp.getId());
@@ -220,7 +220,7 @@ public class ExtensionsImporter implements ObjectImporter<Map<String, Object>, M
 		
 		Container form = Container.getContainer(formName);
 		if (form == null) {
-			return ResponseEvent.userError(FormErrorCode.NOT_FOUND);
+			return ResponseEvent.userError(FormErrorCode.NOT_FOUND, formName, 1);
 		}
 		
 		FormRecordCriteria crit = new FormRecordCriteria();

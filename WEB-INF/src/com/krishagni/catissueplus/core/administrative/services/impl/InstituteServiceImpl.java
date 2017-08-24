@@ -93,7 +93,7 @@ public class InstituteServiceImpl implements InstituteService, InitializingBean 
 			}
 					
 			if (institute == null) {
-				return ResponseEvent.userError(InstituteErrorCode.NOT_FOUND, key);
+				return ResponseEvent.userError(InstituteErrorCode.NOT_FOUND, key, 1);
 			}
 			
 			return ResponseEvent.response(InstituteDetail.from(institute));
@@ -144,7 +144,7 @@ public class InstituteServiceImpl implements InstituteService, InitializingBean 
 			}
 			
 			if (existing == null) {
-				return ResponseEvent.userError(InstituteErrorCode.NOT_FOUND, key);
+				return ResponseEvent.userError(InstituteErrorCode.NOT_FOUND, key, 1);
 			}
 			
 			Institute institute = instituteFactory.createInstitute(detail);
@@ -171,7 +171,7 @@ public class InstituteServiceImpl implements InstituteService, InitializingBean 
 			Long instituteId = req.getPayload();
 			Institute existing = daoFactory.getInstituteDao().getById(instituteId);
 			if (existing == null) {
-				return ResponseEvent.userError(InstituteErrorCode.NOT_FOUND, instituteId);
+				return ResponseEvent.userError(InstituteErrorCode.NOT_FOUND, instituteId, 1);
 			}
 			
 			return ResponseEvent.response(existing.getDependentEntities());

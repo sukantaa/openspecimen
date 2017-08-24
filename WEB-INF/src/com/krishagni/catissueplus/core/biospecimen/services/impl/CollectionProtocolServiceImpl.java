@@ -320,7 +320,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			Long cpId = opDetail.getCpId();
 			CollectionProtocol existing = daoFactory.getCollectionProtocolDao().getById(cpId);
 			if (existing == null) {
-				throw OpenSpecimenException.userError(CpeErrorCode.NOT_FOUND, cpId);
+				throw OpenSpecimenException.userError(CpErrorCode.NOT_FOUND);
 			}
 			
 			AccessCtrlMgr.getInstance().ensureReadCpRights(existing);
@@ -634,7 +634,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		try {
 			CollectionProtocolEvent cpe = daoFactory.getCollectionProtocolDao().getCpe(cpeId);
 			if (cpe == null) {
-				return ResponseEvent.userError(CpeErrorCode.NOT_FOUND);
+				return ResponseEvent.userError(CpeErrorCode.NOT_FOUND, cpeId, 1);
 			}
 
 			CollectionProtocol cp = cpe.getCollectionProtocol();
@@ -697,14 +697,17 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			String eventLabel = opDetail.getEventLabel();
 			
 			CollectionProtocolEvent existing = null;
+			Object key = null;
 			if (opDetail.getEventId() != null) {
 				existing = cpDao.getCpe(opDetail.getEventId());
+				key = opDetail.getEventId();
 			} else if (!StringUtils.isBlank(eventLabel) && !StringUtils.isBlank(cpTitle)) {
 				existing = cpDao.getCpeByEventLabel(cpTitle, eventLabel);
+				key = eventLabel;
 			}
 			
 			if (existing == null) {
-				throw OpenSpecimenException.userError(CpeErrorCode.NOT_FOUND);
+				throw OpenSpecimenException.userError(CpeErrorCode.NOT_FOUND, key, 1);
 			}
 			
 			CollectionProtocol cp = existing.getCollectionProtocol();
@@ -730,7 +733,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			Long cpeId = req.getPayload();
 			CollectionProtocolEvent cpe = daoFactory.getCollectionProtocolDao().getCpe(cpeId);
 			if (cpe == null) {
-				throw OpenSpecimenException.userError(CpeErrorCode.NOT_FOUND);
+				throw OpenSpecimenException.userError(CpeErrorCode.NOT_FOUND, cpeId, 1);
 			}
 			
 			CollectionProtocol cp = cpe.getCollectionProtocol();
@@ -753,7 +756,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		try {
 			CollectionProtocolEvent cpe = daoFactory.getCollectionProtocolDao().getCpe(cpeId);
 			if (cpe == null) {
-				return ResponseEvent.userError(CpeErrorCode.NOT_FOUND);
+				return ResponseEvent.userError(CpeErrorCode.NOT_FOUND, cpeId, 1);
 			}
 			
 			AccessCtrlMgr.getInstance().ensureReadCpRights(cpe.getCollectionProtocol());

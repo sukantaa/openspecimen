@@ -156,7 +156,7 @@ public class UserFactoryImpl implements UserFactory {
 		
 		Institute institute = daoFactory.getInstituteDao().getInstituteByName(instituteName);
 		if (institute == null) {
-			ose.addError(InstituteErrorCode.NOT_FOUND, instituteName);
+			ose.addError(InstituteErrorCode.NOT_FOUND, instituteName, 1);
 			return;
 		}
 		

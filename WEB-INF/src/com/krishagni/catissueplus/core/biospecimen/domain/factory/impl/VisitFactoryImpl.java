@@ -125,21 +125,26 @@ public class VisitFactoryImpl implements VisitFactory {
 		String cpTitle = visitDetail.getCpTitle(),
 				cpShortTitle = visitDetail.getCpShortTitle(),
 				eventLabel = visitDetail.getEventLabel();
-		
+
+		Object key = null;
 		if (cpeId != null) {
 			cpe = daoFactory.getCollectionProtocolDao().getCpe(cpeId);
+			key = cpeId;
 		} else if (cpId != null && StringUtils.isNotBlank(eventLabel)) {
 			cpe = daoFactory.getCollectionProtocolDao().getCpeByEventLabel(cpId, eventLabel);
+			key = eventLabel;
 		} else if (StringUtils.isNotBlank(cpTitle) && StringUtils.isNotBlank(eventLabel)) {
-			cpe = daoFactory.getCollectionProtocolDao().getCpeByEventLabel(cpTitle, eventLabel);			
+			cpe = daoFactory.getCollectionProtocolDao().getCpeByEventLabel(cpTitle, eventLabel);
+			key = eventLabel;
 		} else if (StringUtils.isNotBlank(cpShortTitle) && StringUtils.isNotBlank(eventLabel)) {
 			cpe = daoFactory.getCollectionProtocolDao().getCpeByShortTitleAndEventLabel(cpShortTitle, eventLabel);
+			key = eventLabel;
 		} else {
 			return;
 		}
 
 		if (cpe == null) {
-			ose.addError(CpeErrorCode.NOT_FOUND);
+			ose.addError(CpeErrorCode.NOT_FOUND, key, 1);
 			return;
 		}
 		

@@ -190,7 +190,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
     	Long formId = req.getPayload();
 		Container container = Container.getContainer(formId);
 		if (container == null) {
-			return ResponseEvent.userError(FormErrorCode.NOT_FOUND);
+			return ResponseEvent.userError(FormErrorCode.NOT_FOUND, formId, 1);
 		} else {
 			return ResponseEvent.response(container);
 		}
@@ -228,7 +228,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		Long formId = op.getFormId();
 		Container form = Container.getContainer(formId);
 		if (form == null) {
-			return ResponseEvent.userError(FormErrorCode.NOT_FOUND);
+			return ResponseEvent.userError(FormErrorCode.NOT_FOUND, formId, 1);
 		}
 		
 		List<FormFieldSummary> fields = getFormFields(form);
@@ -391,7 +391,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			FormRecordCriteria crit = req.getPayload();
 			Container form = Container.getContainer(crit.getFormId());
 			if (form == null) {
-				return ResponseEvent.userError(FormErrorCode.NOT_FOUND, crit.getFormId());
+				return ResponseEvent.userError(FormErrorCode.NOT_FOUND, crit.getFormId(), 1);
 			}
 
 			FormData record = getRecord(form, crit.getRecordId());
@@ -659,7 +659,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			}
 
 			if (form == null) {
-				return ResponseEvent.userError(FormErrorCode.NOT_FOUND, input.getFormId());
+				return ResponseEvent.userError(FormErrorCode.NOT_FOUND, input.getFormId(), 1);
 			}
 
 			String controlName = input.getControlName();
@@ -1087,7 +1087,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 				form = Container.getContainer(formName);
 				if (form == null) {
-					throw OpenSpecimenException.userError(FormErrorCode.NOT_FOUND, formName);
+					throw OpenSpecimenException.userError(FormErrorCode.NOT_FOUND, formName, 1);
 				}
 				formHasPhi = form.hasPhiFields();
 

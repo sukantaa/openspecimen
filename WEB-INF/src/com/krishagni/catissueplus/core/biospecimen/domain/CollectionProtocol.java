@@ -662,7 +662,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	public void updateCpe(CollectionProtocolEvent cpe) {
 		CollectionProtocolEvent existing = getCpe(cpe.getId());
 		if (existing == null) {
-			throw OpenSpecimenException.userError(CpeErrorCode.NOT_FOUND);
+			throw OpenSpecimenException.userError(CpeErrorCode.NOT_FOUND, cpe.getId(), 1);
 		}
 
 		if (!existing.getEventLabel().equals(cpe.getEventLabel())) {

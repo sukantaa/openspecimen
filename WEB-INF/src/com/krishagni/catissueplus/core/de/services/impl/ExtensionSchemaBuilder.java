@@ -46,7 +46,7 @@ public class ExtensionSchemaBuilder implements ObjectSchemaBuilder {
 		
 		Container form = Container.getContainer(formName);
 		if (form == null) {
-			throw OpenSpecimenException.userError(FormErrorCode.NOT_FOUND);
+			throw OpenSpecimenException.userError(FormErrorCode.NOT_FOUND, formName, 1);
 		}
 		
 		return getObjectSchema(form, entityType);

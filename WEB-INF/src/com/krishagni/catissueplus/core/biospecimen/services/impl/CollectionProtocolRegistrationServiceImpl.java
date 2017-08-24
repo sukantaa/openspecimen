@@ -892,7 +892,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	private List<SpecimenDetail> getAnticipatedSpecimens(Long cprId, Long eventId) {
 		CollectionProtocolEvent cpe = daoFactory.getCollectionProtocolDao().getCpe(eventId);
 		if (cpe == null) {
-			throw OpenSpecimenException.userError(CpeErrorCode.NOT_FOUND);
+			throw OpenSpecimenException.userError(CpeErrorCode.NOT_FOUND, eventId, 1);
 		}
 		
 		Set<SpecimenRequirement> anticipatedSpecimens = cpe.getTopLevelAnticipatedSpecimens();
