@@ -9,9 +9,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -41,7 +38,8 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 			.list();
 		
 		List<VisitSummary> visits = new ArrayList<>();
-		Map<String, VisitSummary> visitsMap = new HashMap<>();
+		Map<Long, VisitSummary> createdVisits = new HashMap<>();      // visitId: key
+		Map<Long, VisitSummary> anticipatedVisits = new HashMap<>();  // eventId: key
 
 		Date regDate = null;
 		int minEventPoint = 0;
@@ -65,8 +63,12 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 			visit.setCpId((Long)row[10]);
 			visits.add(visit);
 
-			if (crit.includeStat()) {				
-				visitsMap.put(getVisitKey(visit.getId(), visit.getEventId()), visit);
+			if (crit.includeStat()) {
+				if (visit.getId() != null) {
+					createdVisits.put(visitId, visit);
+				} else {
+					anticipatedVisits.put(visit.getEventId(), visit);
+				}
 			}
 
 			if (visit.getEventPoint() != null && visit.getEventPoint() < minEventPoint) {
@@ -84,12 +86,17 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 			cal.add(Calendar.DAY_OF_YEAR, visit.getEventPoint() - minEventPoint);
 			visit.setAnticipatedVisitDate(cal.getTime());
 		}
-						
-		if (crit.includeStat() && !visitsMap.isEmpty()) {
-			getVisitsCollectionStatus(crit.cprId(), visitsMap);
-			getUtilizationStatus(visitsMap);
+
+		if (crit.includeStat()) {
+			if (!createdVisits.isEmpty()) {
+				loadCreatedVisitStats(createdVisits);
+			}
+
+			if (!anticipatedVisits.isEmpty()) {
+				loadAnticipatedVisitStats(anticipatedVisits);
+			}
 		}
-	
+
 		Collections.sort(visits);
 		return visits;
 	}
@@ -195,105 +202,50 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 		return visits.isEmpty() ? null :  visits.get(0);
 	}
 
+	@SuppressWarnings("unchecked")
+	private void loadCreatedVisitStats(Map<Long, VisitSummary> visitsMap) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_VISIT_STATS)
+			.setParameterList("visitIds", visitsMap.keySet())
+			.list();
 
-	private String getVisitKey(Long visitId, Long cpeId) {
-		String key = "";
-		if (visitId != null) {
-			key += visitId;
+		for (Object[] row : rows) {
+			int idx = 0;
+			Long visitId = (Long) row[idx++];
+			VisitSummary visit = visitsMap.get(visitId);
+			visit.setTotalPendingSpmns((Integer) row[idx++]);
+			visit.setPendingPrimarySpmns((Integer) row[idx++]);
+			visit.setPlannedPrimarySpmnsColl((Integer) row[idx++]);
+			visit.setUnplannedPrimarySpmnsColl((Integer) row[idx++]);
+			visit.setUncollectedPrimarySpmns((Integer) row[idx++]);
+			visit.setStoredSpecimens((Integer) row[idx++]);
+			visit.setNotStoredSpecimens((Integer) row[idx++]);
+			visit.setDistributedSpecimens((Integer) row[idx++]);
+			visit.setClosedSpecimens((Integer) row[idx++]);
 		}
-		
-		key += "_" + cpeId;
-		return key;
-	}
-
-	private void getVisitsCollectionStatus(Long cprId, Map<String, VisitSummary> visitsMap) {
-		getPlannedCollectionStatus(cprId, visitsMap);
-		getUnplannedCollectionStatus(cprId, visitsMap);
 	}
 
 	@SuppressWarnings("unchecked")
-	private void getPlannedCollectionStatus(Long cprId, Map<String, VisitSummary> visitsMap) {
-		Set<Long> eventIds = getNotNullIds(visitsMap, VisitSummary::getEventId);
-		if (eventIds.isEmpty()) {
-			return;
-		}
-
-		List<Object[]> rows = sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_VISITS_COLLECTION_STATUS)
-			.setLong("cprId", cprId)
-			.setParameterList("eventIds", eventIds)
-			.list();
-		
-		for (Object[] row : rows) {
-			Long scgId = (Long)row[0];
-			Long eventId = (Long)row[1];
-			
-			VisitSummary visit = visitsMap.get(getVisitKey(scgId, eventId));
-			visit.setAnticipatedSpecimens((Integer)row[2]);
-			visit.setCollectedSpecimens((Integer)row[3]);
-			visit.setUncollectedSpecimens((Integer)row[4]);
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	private void getUnplannedCollectionStatus(Long cprId, Map<String, VisitSummary> visitsMap) {
-		Set<Long> visitIds = getNotNullIds(visitsMap, VisitSummary::getId);
-		if (visitIds.isEmpty()) {
-			return;
-		}
-
-		List<Object[]> rows = sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_VISITS_UNPLANNED_SPECIMENS_STAT)
-			.setLong("cprId", cprId)
-			.setParameterList("visitIds", visitIds)
-			.list();
-		
-		for (Object[] row : rows) {
-			Long scgId = (Long)row[0];	
-			Long eventId = (Long)row[1];
-			
-			VisitSummary visit = visitsMap.get(getVisitKey(scgId, eventId));
-			visit.setUnplannedSpecimens((Integer)row[2]);
-		}				
-	}
-
-	private void getUtilizationStatus(Map<String, VisitSummary> visitsMap) {
-		Set<Long> visitIds = getNotNullIds(visitsMap, VisitSummary::getId);
-		if (CollectionUtils.isEmpty(visitIds)) {
-			return;
-		}
-
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_VISITS_SPMN_STORAGE_STAT)
-			.setParameterList("visitIds", visitIds)
+	private void loadAnticipatedVisitStats(Map<Long, VisitSummary> visitsMap) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_ANTICIPATED_VISIT_STATS)
+			.setParameterList("eventIds", visitsMap.keySet())
 			.list();
 
 		for (Object[] row : rows) {
-			Long visitId = (Long) row[0];
-			Long eventId = (Long) row[1];
-
-			VisitSummary visit = visitsMap.get(getVisitKey(visitId, eventId));
-			visit.setStoredSpecimens((Integer) row[2]);
-			visit.setNotStoredSpecimens((Integer) row[3]);
-			visit.setDistributedSpecimens((Integer) row[4]);
+			int idx = 0;
+			Long eventId = (Long) row[idx++];
+			VisitSummary visit = visitsMap.get(eventId);
+			visit.setTotalPendingSpmns((Integer) row[idx++]);
+			visit.setPendingPrimarySpmns((Integer) row[idx++]);
 		}
 	}
 
-	private Set<Long> getNotNullIds(Map<String, VisitSummary> visitsMap, Function<VisitSummary, Long> idMapper) {
-		return visitsMap.values().stream()
-			.map(idMapper)
-			.filter(id -> id != null)
-			.collect(Collectors.toSet());
-	}
-		
 	private static final String FQN = Visit.class.getName();
 	
 	private static final String GET_VISITS_SUMMARY_BY_CPR_ID = FQN + ".getVisitsSummaryByCprId";
-	
-	private static final String GET_VISITS_COLLECTION_STATUS = FQN + ".getVisitsCollectionStatus";
-	
-	private static final String GET_VISITS_UNPLANNED_SPECIMENS_STAT = FQN + ".getVisitsUnplannedSpecimenCount";
 
-	private static final String GET_VISITS_SPMN_STORAGE_STAT = FQN + ".getVisitsSpmnStorageStat";
+	private static final String GET_VISIT_STATS = FQN + ".getVisitStats";
+
+	private static final String GET_ANTICIPATED_VISIT_STATS = FQN + ".getAnticipatedVisitStats";
 
 	private static final String GET_VISITS_BY_IDS = FQN + ".getVisitsByIds";
 

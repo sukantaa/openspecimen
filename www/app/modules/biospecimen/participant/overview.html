@@ -81,19 +81,19 @@
                     {{visit.visitDate | date: global.dateFmt}} 
                   </div>
                   <div class="col os-col-20">
-                    <progress class="progress" max="visit.totalSpecimens"
+                    <progress class="progress" max="visit.totalPrimarySpmns"
                       bs-popover trigger="hover" placement="bottom" content-template="specimen-count.html">
-                      <bar value="visit.collectedSpecimens" type="success">
-                        <span><b> {{visit.collectedSpecimens}} </b> </span>
+                      <bar value="visit.plannedPrimarySpmnsColl" type="success">
+                        <span><b> {{visit.plannedPrimarySpmnsColl}} </b> </span>
                       </bar>
-                      <bar value="visit.pendingSpecimens" type="warning">
-                        <span><b> {{visit.pendingSpecimens}} </b> </span>
+                      <bar value="visit.unplannedPrimarySpmnsColl" type="unplanned">
+                        <span><b> {{visit.unplannedPrimarySpmnsColl}} </b> </span>
                       </bar>
-                      <bar value="visit.uncollectedSpecimens" type="missed">
-                        <span><b> {{visit.uncollectedSpecimens}} </b> </span>
+                      <bar value="visit.uncollectedPrimarySpmns" type="missed">
+                        <span><b> {{visit.uncollectedPrimarySpmns}} </b> </span>
                       </bar>
-                      <bar value="visit.unplannedSpecimens" type="unplanned">
-                        <span><b> {{visit.unplannedSpecimens}} </b> </span>
+                      <bar value="visit.pendingPrimarySpmns" type="warning">
+                        <span><b> {{visit.pendingPrimarySpmns}} </b> </span>
                       </bar>
                     </progress>
                   </div>
@@ -103,11 +103,14 @@
                       <bar value="visit.storedSpecimens" type="success" ng-if="!!visit.storedSpecimens">
                         <span><b> {{visit.storedSpecimens}} </b></span>
                       </bar>
-                      <bar value="visit.virtualSpecimens" type="warning" ng-if="!!visit.virtualSpecimens">
-                        <span><b> {{visit.virtualSpecimens}} </b></span>
+                      <bar value="visit.notStoredSpecimens" type="warning" ng-if="!!visit.notStoredSpecimens">
+                        <span><b> {{visit.notStoredSpecimens}} </b></span>
                       </bar>
                       <bar value="visit.distributedSpecimens" type="distributed" ng-if="!!visit.distributedSpecimens">
                         <span><b> {{visit.distributedSpecimens}} </b></span>
+                      </bar>
+                      <bar value="visit.closedSpecimens" type="closed" ng-if="!!visit.closedSpecimens">
+                        <span><b> {{visit.closedSpecimens}} </b></span>
                       </bar>
                     </progress>
                   </div>
@@ -119,20 +122,28 @@
                       <ul class="dropdown-menu" role="menu">
                         <li>
                           <a ui-sref="visit-detail.overview({visitId: visit.id, eventId: visit.eventId})">
-                            <i class="fa fa-eye"></i>
+                            <span class="fa fa-eye"></span>
                             <span translate="visits.ctx_menu.view_visit">View Visit</span>
                           </a>
                         </li>
                         <li show-if-allowed="specimenResource.updateOpts">
                           <a ui-sref="visit-addedit({visitId: visit.id, eventId: visit.eventId, newVisit: true})"> 
-                            <i class="fa fa-repeat"></i>
+                            <span class="fa fa-repeat"></span>
                             <span translate="visits.ctx_menu.new_visit">New Visit</span>
                           </a>
                         </li>
                         <li class="divider"></li>
+                        <li show-if-allowed="specimenResource.updateOpts" ng-if="visit.pendingSpecimens > 0">
+                          <a ui-sref="specimen-addedit({visitId: visit.id})">
+                            <span class="fa fa-flask"></span>
+                            <span translate="visits.ctx_menu.collect_pending_specimens">
+                              Collect Pending Specimens
+                            </span>
+                          </a>
+                        </li>
                         <li show-if-allowed="specimenResource.updateOpts">
                           <a ui-sref="specimen-addedit({visitId: visit.id})">
-                            <i class="fa fa-plus"></i>
+                            <span class="fa fa-plus"></span>
                             <span translate="visits.ctx_menu.collect_unplanned_specimens">
                               Collect Unplanned Specimens
                             </span>
@@ -140,7 +151,7 @@
                         </li>
                         <li show-if-allowed="specimenResource.updateOpts">
                           <a ng-click="printSpecimenLabels({visitId: visit.id})">
-                            <i class="fa fa-print"></i>
+                            <span class="fa fa-print"></span>
                             <span translate="visits.ctx_menu.print_specimen_labels">
                               Print Specimen Labels
                             </span>
@@ -215,7 +226,6 @@
         </div>
       </div>
 
-
       <div class="os-section" ng-init="avCollapsed=false">
         <button class="os-btn-section-collapse os-btn-transparent" ng-click="avCollapsed=!avCollapsed">
           <span ng-if="!avCollapsed" class="fa fa-chevron-circle-down"></span>
@@ -227,15 +237,15 @@
           <table class="os-table os-table-muted-hdr os-border" ng-if="anticipatedVisits.length > 0">
             <thead class="os-table-head">
               <tr class="row">
-                <td class="col col-xs-5" translate="visits.title">Visit</td>
+                <td class="col col-xs-4" translate="visits.title">Visit</td>
                 <td class="col col-xs-3" translate="common.date">Date</td>
                 <td class="col col-xs-3" translate="visits.anticipated_specimens">Anticipated Specimens</td>
-                <td class="col col-xs-1">&nbsp;</td>
+                <td class="col col-xs-2">&nbsp;</td>
               </tr>
             </thead>
             <tbody class="os-table-body">
               <tr class="row" ng-repeat="visit in anticipatedVisits">
-                <td class="col col-xs-5">
+                <td class="col col-xs-4">
                   <a ui-sref="participant-detail.visits({visitId: visit.id, eventId: visit.eventId})">
                     <os-event-desc event-point="visit.eventPoint" event-label="visit.eventLabel"></os-event-desc>
                   </a>
@@ -244,13 +254,14 @@
                   <span>{{visit.anticipatedVisitDate | date: global.dateFmt | osNoValue}}</span>
                 </td>
                 <td class="col col-xs-3">
-                  <span>{{visit.anticipatedSpecimens}}</span>
+                  <span>{{visit.pendingPrimarySpmns}}</span>
                 </td>
-                <td class="col col-xs-1">
+                <td class="col col-xs-2">
                   <div class="os-more-option-btns">
                     <button class="btn btn-xs btn-default" title="{{'participant.tooltip.collect_spmns' | translate}}"
                       ng-click="collect(visit)">
                       <span class="fa fa-flask"></span>
+                      <span translate="specimens.buttons.collect">Collect</span>
                     </button>
                     <span class="os-more-options">
                       <div dropdown dropdown-append-to-body>
@@ -292,28 +303,22 @@
 
 <script id="specimen-count.html" type="text/ng-template">
   <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th translate="visits.collection_status">Collection Status</th>
-        <th translate="common.count">Count</th>
-      </tr>
-    </thead>
     <tbody>
-      <tr ng-if="!!visit.collectedSpecimens">
+      <tr ng-if="!!visit.plannedPrimarySpmnsColl">
         <td translate="specimens.status.collected">Collected</td>
-        <td>{{visit.collectedSpecimens}}</td>
+        <td>{{visit.plannedPrimarySpmnsColl}}</td>
       </tr>
-      <tr ng-if="!!visit.pendingSpecimens">
-        <td translate="specimens.status.pending">Pending</td>
-        <td>{{visit.pendingSpecimens}}</td>
-      </tr>
-      <tr ng-if="!!visit.uncollectedSpecimens">
-        <td translate="specimens.status.not_collected">Not Collected</td>
-        <td>{{visit.uncollectedSpecimens}}</td>
-      </tr>
-      <tr ng-if="!!visit.unplannedSpecimens">
+      <tr ng-if="!!visit.unplannedPrimarySpmnsColl">
         <td translate="specimens.unplanned">Unplanned</td>
-        <td>{{visit.unplannedSpecimens}}</td>
+        <td>{{visit.unplannedPrimarySpmnsColl}}</td>
+      </tr>
+      <tr ng-if="!!visit.uncollectedPrimarySpmns">
+        <td translate="specimens.status.not_collected">Not Collected</td>
+        <td>{{visit.uncollectedPrimarySpmns}}</td>
+      </tr>
+      <tr ng-if="!!visit.pendingPrimarySpmns">
+        <td translate="specimens.status.pending">Pending</td>
+        <td>{{visit.pendingPrimarySpmns}}</td>
       </tr>
     </tbody>
   </table>
@@ -321,12 +326,6 @@
 
 <script id="storage-utilization.html" type="text/ng-template">
   <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th translate="visits.storage_utilization">Utilization</th>
-        <th translate="common.count">Count</th>
-      </tr>
-    </thead>
     <tbody>
       <tr ng-if="!visit.reqStorage">
         <td colspan="2">
@@ -337,13 +336,17 @@
         <td translate="specimens.utilization.stored">Stored</td>
         <td>{{visit.storedSpecimens}}</td>
       </tr>
-      <tr ng-if="!!visit.virtualSpecimens">
-        <td translate="specimens.utilization.virtual">Virtual</td>
-        <td>{{visit.virtualSpecimens}}</td>
+      <tr ng-if="!!visit.notStoredSpecimens">
+        <td translate="specimens.virtually_located">Not Stored</td>
+        <td>{{visit.notStoredSpecimens}}</td>
       </tr>
       <tr ng-if="!!visit.distributedSpecimens">
         <td translate="specimens.utilization.distributed">Distributed</td>
         <td>{{visit.distributedSpecimens}}</td>
+      </tr>
+      <tr ng-if="!!visit.closedSpecimens">
+        <td translate="specimens.closed">Closed</td>
+        <td>{{visit.closedSpecimens}}</td>
       </tr>
     </tbody>
   </table>

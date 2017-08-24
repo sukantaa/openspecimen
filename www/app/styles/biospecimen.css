@@ -219,6 +219,10 @@
   background-color: #5bc0de;
 }
 
+.progress-bar-closed {
+  background-color: #d9534f;
+}
+
 .os-time-no-wheels tbody tr:first-child,
 .os-time-no-wheels tbody tr:last-child {
   display: none;

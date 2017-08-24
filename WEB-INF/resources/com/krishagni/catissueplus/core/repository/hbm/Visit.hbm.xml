@@ -147,83 +147,115 @@
         cpr.activity_status != 'Disabled'
     </sql-query>
 
-    <sql-query name="getVisitsCollectionStatus">
-      <return-scalar column="id" type="long"/>
-      <return-scalar column="event_id" type="long"/>
-      <return-scalar column="anticipated" type="int"/>
-      <return-scalar column="collected" type="int"/>
-      <return-scalar column="missed" type="int"/>
- 
+    <sql-query name="getVisitStats">
+      <return-scalar column="visitId" type="long"/>
+      <return-scalar column="totalPendingSpmns" type="int"/>
+      <return-scalar column="pendingPrimarySpmns" type="int"/>
+      <return-scalar column="plannedPrimarySpmnsColl" type="int"/>
+      <return-scalar column="unplannedPrimarySpmnsColl" type="int"/>
+      <return-scalar column="missedPrimarySpmnsColl" type="int"/>
+      <return-scalar column="storedSpmns" type="int"/>
+      <return-scalar column="notStoredSpmns" type="int"/>
+      <return-scalar column="distributedSpmns" type="int"/>
+      <return-scalar column="closedSpmns" type="int"/>
+
       select
-        scg.identifier as id, cpe.identifier as event_id,
-        count(case when sp_rq.activity_status != 'Disabled' then sp_rq.identifier else null end) as anticipated,
-        count(case when s.collection_status = 'Collected' then s.identifier else null end) as collected,
-        count(case when s.collection_status = 'Missed Collection' then s.identifier else null end) as missed
+        t.visit_id as visitId,
+        count(distinct case when t.status = 'Pending' then t.id else null end)
+          as totalPendingSpmns,
+        count(distinct case when t.lineage = 'New' and t.status = 'Pending' then t.id else null end)
+          as pendingPrimarySpmns,
+        count(distinct case when t.lineage = 'New' and t.planned = 'Y' and t.status = 'Collected' then t.id else null end)
+          as plannedPrimarySpmnsColl,
+        count(distinct case when t.lineage = 'New' and t.planned = 'N' and t.status = 'Collected' then t.id else null end)
+          as unplannedPrimarySpmnsColl,
+        count(distinct case when t.lineage = 'New' and t.status = 'Missed Collection' then t.id else null end)
+          as missedPrimarySpmnsColl,
+        count(distinct case when t.spmn_stored = 'Y' then t.id else null end) as storedSpmns,
+        count(distinct case when t.activity_status != 'Closed' and t.status = 'Collected' and
+              t.spmn_stored = 'N' and t.spmn_distributed = 'N' then t.id else null end)
+          as notStoredSpmns,
+        count(distinct case when t.spmn_distributed = 'Y' then t.id else null end)
+          as distributedSpmns,
+        count(distinct case when t.activity_status = 'Closed' and t.spmn_distributed = 'N' then t.id else null end)
+          as closedSpmns
+      from (
+        select
+          v.identifier as visit_id,
+          case when s.lineage is not null then s.lineage else req.lineage end as lineage,
+          s.activity_status as activity_status,
+          case when s.collection_status is not null then s.collection_status else 'Pending' end as status,
+          'Y' as planned,
+          case when p.identifier is null then 'N' else 'Y' end as spmn_stored,
+          case when oi.identifier is null then 'N' else 'Y' end as spmn_distributed,
+          case when s.identifier is not null then concat('s', s.identifier) else concat('sr', req.identifier) end as id
+        from
+          catissue_specimen_coll_group v
+          inner join catissue_cp_req_specimen req
+            on req.collection_protocol_event_id = v.collection_protocol_event_id and
+               req.activity_status != 'Disabled'
+          left join catissue_specimen s
+            on s.specimen_collection_group_id = v.identifier and
+               s.req_specimen_id = req.identifier and
+               s.activity_status != 'Disabled'
+          left join os_container_positions p
+            on p.occupying_specimen_id = s.identifier
+          left join os_order_items oi
+            on oi.specimen_id = s.identifier
+          left join os_orders o
+            on o.identifier = oi.order_id and
+               o.status = 'EXECUTED' and
+               o.activity_status != 'Disabled'
+        where
+          v.identifier in (:visitIds)
+
+      union
+        select
+          s.specimen_collection_group_id as visit_id,
+          s.lineage as lineage,
+          s.activity_status as activity_status,
+          s.collection_status as status,
+          'N' as planned,
+          case when p.identifier is null then 'N' else 'Y' end as spmn_stored,
+          case when oi.identifier is null then 'N' else 'Y' end as spmn_distributed,
+          concat('s', s.identifier) as id
+        from
+          catissue_specimen s
+          left join os_container_positions p
+            on p.occupying_specimen_id = s.identifier
+          left join os_order_items oi
+            on oi.specimen_id = s.identifier
+          left join os_orders o
+            on o.identifier = oi.order_id and
+               o.status = 'EXECUTED' and
+               o.activity_status != 'Disabled'
+        where
+          s.specimen_collection_group_id in (:visitIds) and
+          s.activity_status != 'Disabled' and
+          s.req_specimen_id is null
+      ) t
+      group by
+        t.visit_id
+    </sql-query>
+
+    <sql-query name="getAnticipatedVisitStats">
+      <return-scalar column="eventId" type="long"/>
+      <return-scalar column="totalSpmns" type="int"/>
+      <return-scalar column="primarySpmns" type="int"/>
+
+      select
+        cpe.identifier as eventId,
+        count(req.identifier) as totalSpmns,
+        count(case when req.lineage = 'New' then req.identifier else null end) as primarySpmns
       from
         catissue_coll_prot_event cpe
-        inner join catissue_cp_req_specimen sp_rq 
-          on sp_rq.collection_protocol_event_id = cpe.identifier and
-             sp_rq.lineage = 'New'
-        left join catissue_specimen_coll_group scg
-          on scg.collection_protocol_event_id = cpe.identifier and 
-             scg.collection_protocol_reg_id = :cprId and
-             scg.activity_status != 'Disabled'
-        left join catissue_specimen s 
-          on s.specimen_collection_group_id = scg.identifier and 
-             s.req_specimen_id = sp_rq.identifier and
-             s.lineage = 'New' and
-             s.activity_status != 'Disabled'
+        inner join catissue_cp_req_specimen req on req.collection_protocol_event_id = cpe.identifier
       where
-        cpe.identifier in (:eventIds)
+        cpe.identifier in (:eventIds) and
+        cpe.activity_status != 'Disabled' and
+        req.activity_status != 'Disabled'
       group by
-        scg.identifier, cpe.identifier
-    </sql-query>
-
-    <sql-query name="getVisitsUnplannedSpecimenCount">
-      <return-scalar column="id" type="long"/>
-      <return-scalar column="event_id" type="long"/>
-      <return-scalar column="unplanned" type="int"/>
- 
-      select 
-        scg.identifier as id, scg.collection_protocol_event_id as event_id,
-        count(s.identifier) as unplanned 
-      from
-        catissue_specimen_coll_group scg
-        inner join catissue_specimen s on s.specimen_collection_group_id = scg.identifier
-      where 
-        scg.identifier in (:visitIds) and
-        scg.collection_protocol_reg_id = :cprId and 
-        s.req_specimen_id is null and
-        s.lineage = 'New' and
-        scg.activity_status != 'Disabled' and
-        s.activity_status != 'Disabled'
-      group by 
-        scg.identifier, scg.collection_protocol_event_id
-    </sql-query>
-
-    <sql-query name="getVisitsSpmnStorageStat">
-      <return-scalar column="visit_id" type="long"/>
-      <return-scalar column="event_id" type="long"/>
-      <return-scalar column="stored_spmns" type="int"/>
-      <return-scalar column="not_stored_spmns" type="int"/>
-      <return-scalar column="distributed_spmns" type="int"/>
-
-      select
-        visit.identifier as visit_id, visit.collection_protocol_event_id as event_id,
-        count(distinct case when pos.identifier is not null then spmn.identifier else null end) as stored_spmns,
-        count(distinct case when pos.identifier is null then spmn.identifier else null end) as not_stored_spmns,
-        count(distinct oi.specimen_id) as distributed_spmns
-      from
-        catissue_specimen_coll_group as visit
-        inner join catissue_specimen as spmn on spmn.specimen_collection_group_id = visit.identifier
-        left join os_container_positions as pos on pos.occupying_specimen_id = spmn.identifier
-        left join os_order_items as oi on oi.specimen_id = spmn.identifier
-        left join os_orders o on o.identifier = oi.order_id and o.status = 'EXECUTED' and o.activity_status != 'Disabled'
-      where
-        visit.identifier in (:visitIds) and
-        spmn.collection_status = 'Collected'
-      group by
-        visit.identifier, visit.collection_protocol_event_id;
+        cpe.identifier
     </sql-query>
   </class>
 </hibernate-mapping>
