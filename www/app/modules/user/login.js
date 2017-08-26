@@ -29,6 +29,10 @@ angular.module('openspecimen')
         delete $window.localStorage['osAuthToken'];
         delete $http.defaults.headers.common['X-OS-API-TOKEN'];
         delete $http.defaults.headers.common['Authorization'];
+      },
+
+      refreshCookie: function() {
+        return $http.post(url() + "/refresh-cookie").then(ApiUtil.processResp);
       }
     }
   })

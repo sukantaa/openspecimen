@@ -235,7 +235,7 @@ osApp.config(function(
   })
   .run(function(
     $rootScope, $window, $document, $http, $cookies, $q,  $state, $translate, $translatePartialLoader,
-    LocationChangeListener, ApiUtil, Setting, PluginReg, Util) {
+    AuthService, LocationChangeListener, ApiUtil, Setting, PluginReg, Util) {
 
     function isRedirectAllowed(st) {
       return !st.data || st.data.redirect !== false;
@@ -256,7 +256,8 @@ osApp.config(function(
     });
 
     if ($window.localStorage['osAuthToken']) {
-      $cookies['osAuthToken'] = $window.localStorage['osAuthToken'];
+      $http.defaults.headers.common['X-OS-API-TOKEN'] = $window.localStorage['osAuthToken'];
+      AuthService.refreshCookie();
       $rootScope.loggedIn = true;
     } else if ($cookies['osAuthToken']) {
       $window.localStorage['osAuthToken'] = $cookies['osAuthToken'];

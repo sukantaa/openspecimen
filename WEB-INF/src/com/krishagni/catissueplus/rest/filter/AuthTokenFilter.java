@@ -35,8 +35,6 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 
 public class AuthTokenFilter extends GenericFilterBean {
-	private static final String OS_AUTH_TOKEN_HDR = "X-OS-API-TOKEN";
-	
 	private static final String OS_CLIENT_HDR = "X-OS-API-CLIENT";
 	
 	private static final String BASIC_AUTH = "Basic ";
@@ -117,7 +115,7 @@ public class AuthTokenFilter extends GenericFilterBean {
 		}
 
 		User userDetails = null;
-		String authToken = httpReq.getHeader(OS_AUTH_TOKEN_HDR);
+		String authToken = AuthUtil.getAuthTokenFromHeader(httpReq);
 		if (authToken == null) {
 			authToken = AuthUtil.getTokenFromCookie(httpReq);
 		}

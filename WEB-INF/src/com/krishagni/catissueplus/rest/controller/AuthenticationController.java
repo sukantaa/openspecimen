@@ -29,7 +29,7 @@ import com.krishagni.catissueplus.core.common.util.AuthUtil;
 @Controller
 @RequestMapping("/sessions")
 public class AuthenticationController {
-	
+
 	@Autowired
 	private UserAuthenticationService userAuthService;
 
@@ -76,5 +76,13 @@ public class AuthenticationController {
 		}
 
 		return Collections.singletonMap("Status", resp.getPayload());
+	}
+
+	@RequestMapping(method=RequestMethod.POST, value="/refresh-cookie")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, String> resetCookie(HttpServletRequest httpReq, HttpServletResponse httpResp) {
+		AuthUtil.resetTokenCookie(httpReq, httpResp);
+		return Collections.singletonMap("Status", "Success");
 	}
 }

@@ -22,6 +22,8 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 public class AuthUtil {
 	private static final Log logger = LogFactory.getLog(AuthUtil.class);
 
+	private static final String OS_AUTH_TOKEN_HDR = "X-OS-API-TOKEN";
+
 	public static Authentication getAuth() {
 		return SecurityContextHolder.getContext().getAuthentication();
 	}
@@ -133,5 +135,13 @@ public class AuthUtil {
 
 	public static void clearTokenCookie(HttpServletRequest httpReq, HttpServletResponse httpResp) {
 		setTokenCookie(httpReq, httpResp, null);
+	}
+
+	public static void resetTokenCookie(HttpServletRequest httpReq, HttpServletResponse httpResp) {
+		setTokenCookie(httpReq, httpResp, getAuthTokenFromHeader(httpReq));
+	}
+
+	public static String getAuthTokenFromHeader(HttpServletRequest httpReq) {
+		return httpReq.getHeader(OS_AUTH_TOKEN_HDR);
 	}
 }
