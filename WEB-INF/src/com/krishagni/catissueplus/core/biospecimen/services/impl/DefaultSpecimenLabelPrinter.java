@@ -61,6 +61,11 @@ public class DefaultSpecimenLabelPrinter extends AbstractLabelPrinter<Specimen> 
 	}
 
 	@Override
+	public List<LabelTmplToken> getTokens() {
+		return printLabelTokensRegistrar.getTokens();
+	}
+
+	@Override
 	public LabelPrintJob print(List<PrintItem<Specimen>> printItems) {		
 		try {
 			String ipAddr = AuthUtil.getRemoteAddr();

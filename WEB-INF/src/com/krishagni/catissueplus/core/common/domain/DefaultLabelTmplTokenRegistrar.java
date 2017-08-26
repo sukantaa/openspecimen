@@ -6,7 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 public class DefaultLabelTmplTokenRegistrar implements LabelTmplTokenRegistrar {
-	private Map<String, LabelTmplToken> tokenMap = new HashMap<String, LabelTmplToken>();
+	private Map<String, LabelTmplToken> tokenMap = new HashMap<>();
+
+	public List<LabelTmplToken> getTokens() {
+		return new ArrayList<>(tokenMap.values());
+	}
 
 	@Override
 	public void register(LabelTmplToken token) {
@@ -24,9 +28,5 @@ public class DefaultLabelTmplTokenRegistrar implements LabelTmplTokenRegistrar {
 		for (LabelTmplToken token : tokens) {
 			register(token);
 		}
-	}
-	
-	public List<LabelTmplToken> getTokens() {
-		return new ArrayList<LabelTmplToken>(tokenMap.values());
 	}
 }

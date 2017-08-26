@@ -1,7 +1,11 @@
 package com.krishagni.catissueplus.core.common.domain;
 
+import java.util.List;
+
 public interface LabelTmplTokenRegistrar {
-	public void register(LabelTmplToken token);
+	List<LabelTmplToken> getTokens();
+
+	void register(LabelTmplToken token);
 	
-	public LabelTmplToken getToken(String tokenName);
+	LabelTmplToken getToken(String tokenName);
 }

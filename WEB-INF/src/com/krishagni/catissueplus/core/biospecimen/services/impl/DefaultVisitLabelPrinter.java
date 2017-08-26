@@ -61,6 +61,11 @@ public class DefaultVisitLabelPrinter extends AbstractLabelPrinter<Visit> implem
 	}
 
 	@Override
+	public List<LabelTmplToken> getTokens() {
+		return printLabelTokensRegistrar.getTokens();
+	}
+
+	@Override
 	public LabelPrintJob print(List<PrintItem<Visit>> printItems) {		
 		try {
 			String ipAddr = AuthUtil.getRemoteAddr();

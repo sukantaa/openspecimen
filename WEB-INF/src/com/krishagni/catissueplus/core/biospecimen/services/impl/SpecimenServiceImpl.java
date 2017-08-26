@@ -56,6 +56,7 @@ import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
+import com.krishagni.catissueplus.core.common.events.LabelTokenDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
@@ -453,7 +454,12 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 		
 		return ResponseEvent.response(LabelPrintJobSummary.from(job));
 	}
-	
+
+	@Override
+	public ResponseEvent<List<LabelTokenDetail>> getPrintLabelTokens() {
+		return ResponseEvent.response(LabelTokenDetail.from("print_", getLabelPrinter().getTokens()));
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public LabelPrinter<Specimen> getLabelPrinter() {
