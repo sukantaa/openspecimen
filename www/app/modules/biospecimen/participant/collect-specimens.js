@@ -903,7 +903,7 @@ angular.module('os.biospecimen.participant.collect-specimens',
             }, 0);
 
           var parentQty = specimen.existingStatus == 'Collected' ? specimen.availableQty : specimen.initialQty;
-          if (parentQty != undefined && parentQty < aliquotsQty) {
+          if (parentQty != undefined && (aliquotsQty - parentQty) > 0.000001) {
             showInsufficientQtyWarning();
             return false;
           }
