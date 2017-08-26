@@ -392,6 +392,8 @@ edu.common.de.Form = function(args) {
   }
 
   this.setValue = function(formData) {
+    formData = formData || {};
+
     var recId = undefined;
     if (formData) {
       recId = formData.id;
