@@ -24,6 +24,7 @@ import com.krishagni.catissueplus.core.administrative.domain.DpDistributionSite;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.DpConsentTier;
 import com.krishagni.catissueplus.core.administrative.domain.DpRequirement;
+import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolFactory;
 import com.krishagni.catissueplus.core.administrative.domain.factory.DpRequirementErrorCode;
@@ -64,6 +65,7 @@ import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.catissueplus.core.de.services.FormService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
+import org.springframework.beans.BeanUtils;
 
 public class DistributionProtocolServiceImpl implements DistributionProtocolService, ObjectStateParamsResolver {
 	
@@ -170,7 +172,7 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 			
 			daoFactory.getDistributionProtocolDao().saveOrUpdate(dp);
 			dp.addOrUpdateExtension();
-			notifyDpRoleUpdated(dp);
+			notifyOnDpCreate(dp);
 			return ResponseEvent.response(DistributionProtocolDetail.from(dp));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -191,9 +193,11 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 			AccessCtrlMgr.getInstance().ensureCreateUpdateDpRights(dp);
 			ensureUniqueConstraints(dp, existing);
 			ensurePiCoordNotSame(dp);
-			
+
+			notifyOnDpUpdate(existing, dp);
 			existing.update(dp);
 			daoFactory.getDistributionProtocolDao().saveOrUpdate(existing);
+
 			existing.addOrUpdateExtension();
 			return ResponseEvent.response(DistributionProtocolDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
@@ -230,7 +234,8 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 			}
 
 			dps.forEach(AccessCtrlMgr.getInstance()::ensureDeleteDpRights);
-			dps.forEach(DistributionProtocol::delete);
+			dps.forEach(dp -> deleteDistributionProtocol(dp));
+
 			return ResponseEvent.response(DistributionProtocolDetail.from(dps));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -257,7 +262,7 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 			
 			if (status.equals(Status.ACTIVITY_STATUS_DISABLED.getStatus())) {
 				AccessCtrlMgr.getInstance().ensureDeleteDpRights(existing);
-				existing.delete();
+				deleteDistributionProtocol(existing);
 			} else {
 				AccessCtrlMgr.getInstance().ensureCreateUpdateDpRights(existing);
 				existing.setActivityStatus(status);
@@ -270,7 +275,6 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}
-		
 	}
 	
 	@Override
@@ -578,6 +582,13 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 		return crit;
 	}
 
+	private void deleteDistributionProtocol(DistributionProtocol dp) {
+		DistributionProtocol deletedDp = new DistributionProtocol();
+		BeanUtils.copyProperties(dp, deletedDp);
+		dp.delete();
+		notifyOnDpDelete(deletedDp);
+	}
+
 	private void ensureSpecimenPropertyPresent(DpRequirement dpr, OpenSpecimenException ose) {
 		if (StringUtils.isBlank(dpr.getSpecimenType()) && StringUtils.isBlank(dpr.getAnatomicSite()) &&
 			CollectionUtils.isEmpty(dpr.getPathologyStatuses()) && StringUtils.isBlank(dpr.getClinicalDiagnosis())) {
@@ -791,24 +802,67 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 		}
 	}
 
-	private void notifyDpRoleUpdated(DistributionProtocol dp) {
-		Map<String, Object> props = new HashMap<>();
-		props.put("dp", dp);
-		props.put("instituteSitesMap", DpDistributionSite.getInstituteSitesMap(dp.getDistributingSites()));
+	private void notifyOnDpCreate(DistributionProtocol dp) {
+		notifyDpRoleUpdated(dp, "ADD", "CREATE");
+	}
 
-		notifyDpRoleUpdated(Collections.singletonList(dp.getPrincipalInvestigator()), dp, props, null, N_USER, N_DP_PI);
-		notifyDpRoleUpdated(dp.getCoordinators(), dp, props, null, N_USER, N_DP_COORD);
+	private void notifyOnDpUpdate(DistributionProtocol existingDp, DistributionProtocol newDp) {
+		notifyDpRoleUpdated(existingDp, newDp, "UPDATE");
+	}
 
-		notifyDpRoleUpdated(getInstituteAdmins(dp.getInstitute()), dp, props, dp.getInstitute().getName(), N_INST_ADMIN, N_DP_RECV_SITE);
-		if (dp.getDefReceivingSite() != null) {
-			notifyDpRoleUpdated(dp.getDefReceivingSite().getCoordinators(), dp, props, dp.getDefReceivingSite().getName(), N_SITE_ADMIN, N_DP_RECV_SITE);
+	private void notifyOnDpDelete(DistributionProtocol dp) {
+		notifyDpRoleUpdated(dp, "REMOVE", "DELETE");
+	}
+
+	private void notifyDpRoleUpdated(DistributionProtocol dp, String roleOp, String dpOp) {
+		Map<String, Object> emailProps = getEmailProps(dp);
+
+		notifyDpRoleUpdated(Collections.singletonList(dp.getPrincipalInvestigator()), dp, emailProps, null, roleOp, dpOp, N_USER, N_DP_PI);
+		notifyDpRoleUpdated(dp.getCoordinators(), dp, emailProps, null, roleOp, dpOp, N_USER, N_DP_COORD);
+		notifyDpRoleUpdated(getInstituteAdmins(dp.getInstitute()), dp, emailProps, dp.getInstitute().getName(),
+			roleOp, dpOp, N_INST_ADMIN, N_DP_RECV_SITE);
+
+		notifyRecvSiteAdmins(dp.getDefReceivingSite(), dp, emailProps, roleOp, dpOp);
+		notifyDistSiteAdmins(dp.getDistributingSites(), dp, emailProps, roleOp, dpOp);
+	}
+
+	private void notifyDpRoleUpdated(DistributionProtocol existingDp, DistributionProtocol newDp, String op) {
+		Map<String, Object> emailProps = getEmailProps(newDp);
+
+		if (!existingDp.getPrincipalInvestigator().equals(newDp.getPrincipalInvestigator())) {
+			notifyDpRoleUpdated(Collections.singletonList(existingDp.getPrincipalInvestigator()), newDp, emailProps, null, "REMOVE", op, N_USER, N_DP_PI);
+			notifyDpRoleUpdated(Collections.singletonList(newDp.getPrincipalInvestigator()), newDp, emailProps, null, "ADD", op,  N_USER, N_DP_PI);
 		}
 
-		for (DpDistributionSite distSite : dp.getDistributingSites()) {
-			if (distSite.getSite() != null) {
-				notifyDpRoleUpdated(distSite.getSite().getCoordinators(), dp, props, distSite.getSite().getName(), 1, 1);
-			}
+		Collection<User> removedCoordinators = CollectionUtils.subtract(existingDp.getCoordinators(), newDp.getCoordinators());
+		Collection<User> addedCoordinators = CollectionUtils.subtract(newDp.getCoordinators(), existingDp.getCoordinators());
+		notifyDpRoleUpdated(removedCoordinators, newDp, emailProps, null, "REMOVE", op, N_USER, N_DP_COORD);
+		notifyDpRoleUpdated(addedCoordinators, newDp, emailProps, null, "ADD", op, N_USER, N_DP_COORD);
+
+		if (existingDp.getInstitute() != newDp.getInstitute()) {
+			notifyDpRoleUpdated(getInstituteAdmins(existingDp.getInstitute()), newDp, emailProps,
+				existingDp.getInstitute().getName(), "REMOVE", op,  N_INST_ADMIN, N_DP_RECV_SITE);
+			notifyDpRoleUpdated(getInstituteAdmins(newDp.getInstitute()), newDp, emailProps,
+				newDp.getInstitute().getName(), "ADD", op, N_INST_ADMIN, N_DP_RECV_SITE);
 		}
+
+		if (existingDp.getDefReceivingSite() != newDp.getDefReceivingSite()) {
+			notifyRecvSiteAdmins(existingDp.getDefReceivingSite(), newDp, emailProps, "REMOVE", op);
+			notifyRecvSiteAdmins(newDp.getDefReceivingSite(), newDp, emailProps, "ADD", op);
+		}
+
+		Collection<DpDistributionSite> removedDistSites = CollectionUtils.subtract(existingDp.getDistributingSites(), newDp.getDistributingSites());
+		Collection<DpDistributionSite> addedDistSites = CollectionUtils.subtract(newDp.getDistributingSites(), existingDp.getDistributingSites());
+		notifyDistSiteAdmins(removedDistSites, newDp, emailProps, "REMOVE", op);
+		notifyDistSiteAdmins(addedDistSites, newDp, emailProps, "ADD", op);
+	}
+
+	private Map<String, Object> getEmailProps(DistributionProtocol dp) {
+		Map<String, Object> emailProps = new HashMap<>();
+		emailProps.put("dp", dp);
+		emailProps.put("ccAdmin", false);
+		emailProps.put("instituteSitesMap", DpDistributionSite.getInstituteSitesMap(dp.getDistributingSites()));
+		return emailProps;
 	}
 
 	private void notifyDpRoleUpdated(
@@ -816,14 +870,16 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 		DistributionProtocol dp,
 		Map<String, Object> props,
 		String instSiteName,
-		int userOrSiteOrInst, // 0: user, 1: site, 2: institute
+		String roleOp,
+		String dpOp,
+		int notifRcptType,     // 0: user, 1: site, 2: institute
 		int roleChoice) {     // for users -  1: PI / 2: Coordinator, for others - 1: distributing / 2: receiving
 
 		if (CollectionUtils.isEmpty(notifyUsers)) {
 			return;
 		}
 
-		String notifMessage = getNotifMsg(dp.getShortTitle(), instSiteName, userOrSiteOrInst, roleChoice);
+		String notifMessage = getNotifMsg(dp.getShortTitle(), instSiteName, roleOp, dpOp, notifRcptType, roleChoice);
 		props.put("emailText", notifMessage);
 		for (User rcpt : notifyUsers) {
 			props.put("rcpt", rcpt);
@@ -840,15 +896,26 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 		NotifUtil.getInstance().notify(notif, Collections.singletonMap("dp-overview", notifyUsers));
 	}
 
-	private String getNotifMsg(String shortTitle, String instSiteName, int siteOrInst, int roleChoice) {
+	private String getNotifMsg(String shortTitle, String instSiteName, String roleOp, String dpOp, int notifRcptType, int roleChoice) {
 		String msgKey;
 		Object[] params;
-		if (siteOrInst == 0) {
-			msgKey = "dp_user_notif_role";
-			params = new Object[] { roleChoice, shortTitle};
+
+		if (dpOp == "DELETE") {
+			if (notifRcptType == N_USER) {
+				msgKey = "dp_delete_user_notif";
+				params = new Object[] { shortTitle, roleChoice};
+			} else {
+				msgKey = "dp_delete_site_inst_notif";
+				params = new Object[] {shortTitle, notifRcptType, instSiteName, roleChoice};
+			}
 		} else {
-			msgKey = "dp_site_inst_notif";
-			params = new Object[] {siteOrInst, instSiteName, roleChoice, shortTitle};
+			if (notifRcptType == N_USER) {
+				msgKey = "dp_user_notif_role_" + roleOp.toLowerCase();
+				params = new Object[] { roleChoice, shortTitle};
+			} else {
+				msgKey = "dp_site_inst_notif_" + roleOp.toLowerCase();
+				params = new Object[] {notifRcptType, instSiteName, roleChoice, shortTitle};
+			}
 		}
 
 		return MessageUtil.getInstance().getMessage(msgKey, params);
@@ -861,6 +928,23 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 				.type("INSTITUTE")
 				.activityStatus("Active")
 		);
+	}
+
+	private void notifyRecvSiteAdmins(Site recvSite, DistributionProtocol dp, Map<String, Object> emailProps, String roleOp, String dpOp) {
+		if (recvSite != null) {
+			notifyDpRoleUpdated(recvSite.getCoordinators(), dp, emailProps, recvSite.getName(), roleOp, dpOp, N_SITE_ADMIN, N_DP_RECV_SITE);
+		}
+	}
+
+	private void notifyDistSiteAdmins(Collection<DpDistributionSite> distSites, DistributionProtocol dp,
+		Map<String, Object> emailProps, String roleOp, String dpOp) {
+
+		for (DpDistributionSite distSite : distSites) {
+			if (distSite.getSite() != null) {
+				notifyDpRoleUpdated(distSite.getSite().getCoordinators(), dp, emailProps, distSite.getSite().getName(),
+					roleOp, dpOp, N_SITE_ADMIN, N_DP_DIST_SITE);
+			}
+		}
 	}
 
 	private static final String ROLE_UPDATED_EMAIL_TMPL = "users_dp_role_updated";
@@ -878,4 +962,5 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 	private static final int N_DP_DIST_SITE = 1;
 
 	private static final int N_DP_RECV_SITE = 2;
+
 }
