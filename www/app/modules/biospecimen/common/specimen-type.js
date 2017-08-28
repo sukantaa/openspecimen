@@ -67,6 +67,7 @@ angular.module('os.biospecimen.common')
       valuesQ.then(function(types) { scope.types = types; });
 
       scope.onTypeSelect = function(type) {
+        type = type || {specimenClass: '', type: ''};
         angular.extend(scope.specimen, type);
       }
 
