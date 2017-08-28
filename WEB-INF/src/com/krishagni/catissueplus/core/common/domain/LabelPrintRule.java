@@ -185,7 +185,7 @@ public abstract class LabelPrintRule {
 			.append(", printer = ").append(getPrinterName());
 
 		String tokens = getDataTokens().stream()
-			.map(token -> getMessageStr(token.getName()))
+			.map(token -> token.getName())
 			.collect(Collectors.joining(";"));
 		result.append(", tokens = ").append(tokens);
 		return result.toString();
@@ -230,8 +230,10 @@ public abstract class LabelPrintRule {
 		}
 
 		String address = getFieldValue(ipAddressMatcher, "requiredAddress").toString();
+		address = address.substring(address.indexOf("/") + 1);
+
 		int maskBits = getFieldValue(ipAddressMatcher, "nMaskBits");
-		return address + maskBits;
+		return address + "/" + maskBits;
 	}
 
 	private <T> T getFieldValue(Object obj, String fieldName) {
