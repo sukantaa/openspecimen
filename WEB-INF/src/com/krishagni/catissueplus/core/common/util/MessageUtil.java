@@ -15,7 +15,7 @@ public class MessageUtil {
 	private MessageSource messageSource;
 
 	public static MessageUtil getInstance() {
-		if (instance == null) {
+		if (instance == null || instance.messageSource == null) {
 			instance = new MessageUtil();
 		}
 

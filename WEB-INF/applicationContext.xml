@@ -664,6 +664,10 @@
     <property name="cfgSvc" ref="cfgSvc"/>
   </bean>
 
+  <bean id="changeLogSvc" class="com.krishagni.catissueplus.core.common.service.impl.ChangeLogServiceImpl">
+    <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
+
   <bean id="specimenPrintLabelTokensRegistrar" class="com.krishagni.catissueplus.core.common.domain.DefaultLabelTmplTokenRegistrar">
     <property name="tokens">
       <list>
@@ -700,11 +704,12 @@
     </property>
   </bean>
 
-  <bean id="defaultSpecimenLabelPrinter" class="com.krishagni.catissueplus.core.biospecimen.services.impl.DefaultSpecimenLabelPrinter">
+  <bean id="defaultSpecimenLabelPrinter" class="com.krishagni.catissueplus.core.biospecimen.services.impl.DefaultSpecimenLabelPrinter"
+       depends-on="labelPrintRuleFactoryRegistrar">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="cfgSvc" ref="cfgSvc"/>
     <property name="printLabelTokensRegistrar" ref="specimenPrintLabelTokensRegistrar"/>
-    <property name="messageSource" ref="messageSource"/>
+    <property name="changeLogSvc" ref="changeLogSvc"/>
   </bean>
  
   <bean id="defaultVisitLabelPrinter" class="com.krishagni.catissueplus.core.biospecimen.services.impl.DefaultVisitLabelPrinter">
@@ -713,7 +718,30 @@
     <property name="printLabelTokensRegistrar" ref="visitPrintLabelTokensRegistrar"/>
     <property name="messageSource" ref="messageSource"/>
   </bean>
- 
+
+  <bean id="printRuleConfigFactory" class="com.krishagni.catissueplus.core.common.domain.factory.impl.PrintRuleConfigFactoryImpl">
+    <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="labelPrintRuleFactoryRegistrar" ref="labelPrintRuleFactoryRegistrar"/>
+  </bean>
+
+  <bean id="printRuleConfigSvc" class="com.krishagni.catissueplus.core.common.service.impl.PrintRuleConfigServiceImpl">
+    <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="printRuleConfigFactory" ref="printRuleConfigFactory"/>
+  </bean>
+
+  <bean id="labelPrintRuleFactoryRegistrar" class="com.krishagni.catissueplus.core.common.domain.LabelPrintRuleFactoryRegistrar" factory-method="getInstance">
+    <property name="printRuleFactories">
+      <map>
+        <entry key="SPECIMEN">
+          <bean class="com.krishagni.catissueplus.core.common.domain.factory.impl.SpecimenLabelPrintRuleFactoryImpl">
+            <property name="daoFactory" ref="biospecimenDaoFactory"/>
+            <property name="printLabelTokensRegistrar" ref="specimenPrintLabelTokensRegistrar"/>
+          </bean>
+        </entry>
+      </map>
+    </property>
+  </bean>
+
   <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
     <property name="corePoolSize" value="5" />
     <property name="maxPoolSize" value="10" />

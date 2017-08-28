@@ -1,5 +1,8 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
@@ -39,6 +42,14 @@ public class VisitLabelPrintRule extends LabelPrintRule {
 		}
 
 		return true;
+	}
+
+	@Override
+	protected Map<String, String> getDefMap() {
+		Map<String, String> ruleDef = new HashMap<>();
+		ruleDef.put("cpShortTitle", getCpShortTitle());
+		ruleDef.put("visitSite", getVisitSite());
+		return ruleDef;
 	}
 
 	public String toString() {

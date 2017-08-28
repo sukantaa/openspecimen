@@ -1,5 +1,8 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
@@ -87,6 +90,17 @@ public class SpecimenLabelPrintRule extends LabelPrintRule {
 		}
 		
 		return true;
+	}
+
+	@Override
+	protected Map<String, String> getDefMap() {
+		Map<String, String> ruleDef = new HashMap<>();
+		ruleDef.put("cpShortTitle", getCpShortTitle());
+		ruleDef.put("visitSite", getVisitSite());
+		ruleDef.put("specimenClass", getSpecimenClass());
+		ruleDef.put("specimenType", getSpecimenType());
+		ruleDef.put("lineage", getLineage());
+		return ruleDef;
 	}
 
 	public String toString() {

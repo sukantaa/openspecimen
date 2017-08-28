@@ -221,7 +221,6 @@ public class DefaultVisitLabelPrinter extends AbstractLabelPrinter<Visit> implem
 				rule.setCmdFileFmt(ruleLineFields[idx - 1]);
 			}
 
-			rule.setMessageSource(messageSource);
 			return rule;
 		} catch (Exception e) {
 			logger.error("Error parsing rule: " + ruleLine, e);

@@ -154,6 +154,52 @@
     </addColumn>
   </changeSet>
 
+  <changeSet author="agosavi" id="Table for print rules">
+    <createTable tableName="OS_PRINT_RULES">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+
+      <column name="OBJECT_TYPE" type="${text.type}(32)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="INSTITUTE_ID" type="${int.type}"/>
+
+      <column name="UPDATED_BY" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="UPDATED_ON" type="${timestamp.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="RULE_DEF" type="${clob.type}">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="ACTIVITY_STATUS" type="${text.type}(32)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="agosavi" id="Print rules identifier sequence" dbms="oracle">
+    <createSequence sequenceName="OS_PRINT_RULES_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="agosavi" id="Add FK on Print rule’s institute">
+    <addForeignKeyConstraint constraintName="FK_PRINT_RULE_INST_ID"
+      baseTableName="OS_PRINT_RULES" baseColumnNames="INSTITUTE_ID"
+      referencedTableName="CATISSUE_INSTITUTION" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
+  <changeSet author="agosavi" id="Add FK on print rule’s updated by">
+    <addForeignKeyConstraint constraintName="FK_PRINT_RULE_UPDATED_BY"
+      baseTableName="OS_PRINT_RULES" baseColumnNames="UPDATED_BY"
+      referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
+
   <changeSet author="vpawar" id="Collection protocol setting to specify visit collection mode">
     <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
       <column name="VISIT_COLLECTION_MODE" type="${text.type}(16)"/>
