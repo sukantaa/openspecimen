@@ -70,7 +70,7 @@
 }
 
 .fa.os-status-virtual:before {
-  color: #99ff;
+  color: #99f;
   padding: 0px 4px;
 }
 
@@ -170,7 +170,7 @@
 }
 
 .os-key-values .value.os-status-virtual {
-  background: #99ff;
+  background: #99f;
 }
 
 .os-key-values .value.os-status-distributed {
@@ -226,7 +226,7 @@
 }
 
 .progress-bar-virtual {
-  background-color: #99ff;
+  background-color: #99f;
 }
 
 .progress-bar-distributed {
