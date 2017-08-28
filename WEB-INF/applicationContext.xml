@@ -716,7 +716,6 @@
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="cfgSvc" ref="cfgSvc"/>
     <property name="printLabelTokensRegistrar" ref="visitPrintLabelTokensRegistrar"/>
-    <property name="messageSource" ref="messageSource"/>
   </bean>
 
   <bean id="printRuleConfigFactory" class="com.krishagni.catissueplus.core.common.domain.factory.impl.PrintRuleConfigFactoryImpl">
