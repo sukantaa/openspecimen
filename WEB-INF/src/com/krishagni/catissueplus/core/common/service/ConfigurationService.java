@@ -66,4 +66,6 @@ public interface ConfigurationService {
 	boolean isOracle();
 
 	Map<String, String> getDeploymentSiteAssets();
+
+	void removeSetting(String module, String property);
 }

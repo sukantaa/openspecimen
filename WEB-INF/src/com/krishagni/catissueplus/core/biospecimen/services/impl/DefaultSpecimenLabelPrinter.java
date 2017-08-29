@@ -34,6 +34,7 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.OpenSpecimenEvent;
 import com.krishagni.catissueplus.core.common.repository.PrintRuleConfigsListCriteria;
 import com.krishagni.catissueplus.core.common.service.ChangeLogService;
+import com.krishagni.catissueplus.core.common.service.ConfigChangeListener;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 
@@ -144,6 +145,13 @@ public class DefaultSpecimenLabelPrinter extends AbstractLabelPrinter<Specimen> 
 		if (!dbMigrationDone && migrateRulesToDb()) {
 			changeLogSvc.insertChangeLog(PR_MIGRATION_ID, PR_MIGRATION_AUTHOR, PR_MIGRATION_FILE);
 		}
+
+		removePrintRulesSetting();
+		cfgSvc.registerChangeListener(ConfigParams.MODULE, (name, value) -> {
+			if (StringUtils.isBlank(name)) {
+				removePrintRulesSetting();
+			}
+		});
 	}
 
 	@Override
@@ -283,6 +291,13 @@ public class DefaultSpecimenLabelPrinter extends AbstractLabelPrinter<Specimen> 
 			logger.error("Error loading specimen label print rules", e);
 			throw new RuntimeException("Error loading specimen label print rules", e);
 		}
+	}
+
+	//
+	// TODO: remove the config from database in v4.3
+	//
+	private void removePrintRulesSetting() {
+		cfgSvc.removeSetting(ConfigParams.MODULE, ConfigParams.SPECIMEN_LABEL_PRINT_RULES);
 	}
 
 	private static final String PR_MIGRATION_ID = "Migration of specimen print rules to DB";
