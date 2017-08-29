@@ -1,6 +1,6 @@
 
 angular.module('openspecimen')
-  .factory('Util', function($rootScope, $timeout, $document, $q, $parse, $modal, $translate, QueryExecutor, Alerts) {
+  .factory('Util', function($rootScope, $timeout, $document, $q, $parse, $modal, $translate, $http, ApiUrls, Alerts) {
     var isoDateRe = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
     function clear(input) {
       input.splice(0, input.length);
@@ -171,7 +171,9 @@ angular.module('openspecimen')
           Alerts.remove(alert);
           if (result.completed) {
             Alerts.info(msgClass + '.downloading_report');
-            QueryExecutor.downloadDataFile(result.dataFile, (filename || entity.name) + '.csv');
+
+            filename = (filename || entity.name) + '.csv';
+            downloadFile(ApiUrls.getBaseUrl() + 'query/export?fileId=' + result.dataFile + '&filename=' + filename);
           } else if (result.dataFile) {
             Alerts.info(msgClass + '.report_will_be_emailed');
           }
@@ -184,18 +186,27 @@ angular.module('openspecimen')
     }
 
     function downloadFile(fileUrl) {
-      var link = angular.element('<a/>').attr({href: fileUrl, target: '_blank'});
-      angular.element($document[0].body).append(link);
+      $http({method: 'GET', url: fileUrl, responseType: 'arraybuffer'}).then(
+        function(resp) {
+          var headers = resp.headers;
 
-      if (typeof link[0].click == "function") {
-        link[0].click();
-      } else { // Safari fix
-        var dispatch = document.createEvent("HTMLEvents");
-        dispatch.initEvent("click", true, true);
-        link[0].dispatchEvent(dispatch);
-      }
+          var contentType = headers('content-type');
+          var filename = headers('content-disposition');
+          filename = filename.substr(filename.indexOf('=') + 1);
 
-      link.remove();
+          var link = angular.element('<a/>');
+          try {
+            var blob = new Blob([resp.data], { type: contentType });
+            var url = window.URL.createObjectURL(blob);
+
+            link.attr({href: url, download: filename});
+            var clickEvent = new MouseEvent("click", {"view": window, "bubbles": true, "cancelable": false});
+            link[0].dispatchEvent(clickEvent);
+          } catch (ex) {
+            console.log(ex);
+          }
+        }
+      );
     }
 
     function booleanPromise(condition) {
