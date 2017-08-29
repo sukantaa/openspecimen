@@ -1,6 +1,6 @@
 
 angular.module('os.query.executor', [])
-  .factory('QueryExecutor', function($http, $document, ApiUrls) {
+  .factory('QueryExecutor', function($http, $document, Util, ApiUrls) {
     var queryUrl = ApiUrls.getBaseUrl() + 'query';
 
     return {
@@ -65,24 +65,7 @@ angular.module('os.query.executor', [])
 
       downloadDataFile: function(fileId, filename) {
         filename = !!filename ? filename : 'QueryResults.csv';
-        var link = angular.element('<a/>').attr(
-          {
-            href: queryUrl + '/export?fileId=' + fileId + '&filename=' + filename,
-            target: '_blank'
-          }
-        );
-
-        angular.element($document[0].body).append(link);
-
-        if (typeof link[0].click == "function") {
-          link[0].click();
-        } else { // Safari fix
-          var dispatch = document.createEvent("HTMLEvents");
-          dispatch.initEvent("click", true, true);
-          link[0].dispatchEvent(dispatch);
-        }
-
-        link.remove();
+        Util.downloadFile(queryUrl + '/export?fileId=' + fileId + '&filename=' + filename);
       },
 
       getFacetValues: function(cpId, facetExprs, searchTerm, restriction) {
