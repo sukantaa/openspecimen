@@ -653,7 +653,8 @@ public class ExportServiceImpl implements ExportService {
 
 
 	private String getJobDir(ExportJob job) {
-		return ConfigUtil.getInstance().getDataDir() + File.separator +
+		File dataDir = new File(ConfigUtil.getInstance().getDataDir());
+		return dataDir.getAbsolutePath() + File.separator +
 			"export-jobs" + File.separator + job.getId();
 	}
 
