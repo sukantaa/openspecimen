@@ -537,6 +537,18 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		return result;
 	}
 
+	@Override
+	public void removeSetting(String module, String property) {
+		if (configSettings == null) {
+			return;
+		}
+
+		Map<String, ConfigSetting> moduleSettings = configSettings.get(module);
+		if (moduleSettings != null) {
+			moduleSettings.remove(property);
+		}
+	}
+
 	private boolean isValidSetting(ConfigProperty property, String setting) {
 		if (StringUtils.isBlank(setting)) {
 			return true;
