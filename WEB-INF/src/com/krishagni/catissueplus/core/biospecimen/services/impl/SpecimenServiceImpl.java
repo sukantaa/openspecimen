@@ -64,7 +64,7 @@ import com.krishagni.catissueplus.core.common.service.ConfigChangeListener;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.service.LabelGenerator;
 import com.krishagni.catissueplus.core.common.service.LabelPrinter;
-import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
+import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
@@ -73,7 +73,7 @@ import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
-public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsResolver, ConfigChangeListener, InitializingBean {
+public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, ConfigChangeListener, InitializingBean {
 
 	private static Log logger = LogFactory.getLog(SpecimenServiceImpl.class);
 
@@ -475,7 +475,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 	@PlusTransactional
 	public ResponseEvent<Map<String, Object>> getCprAndVisitIds(RequestEvent<Long> req) {
 		try {
-			Map<String, Object> ids = resolve("id", req.getPayload());
+			Map<String, Object> ids = resolveUrl("id", req.getPayload());
 			if (ids == null || ids.isEmpty()) {
 				return ResponseEvent.userError(SpecimenErrorCode.NOT_FOUND, req.getPayload());
 			}
@@ -508,12 +508,12 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectStateParamsRe
 
 	@Override
 	public String getObjectName() {
-		return "specimen";
+		return Specimen.getEntityName();
 	}
 
 	@Override
 	@PlusTransactional
-	public Map<String, Object> resolve(String key, Object value) {
+	public Map<String, Object> resolveUrl(String key, Object value) {
 		if (key.equals("id")) {
 			value = Long.valueOf(value.toString());
 		}

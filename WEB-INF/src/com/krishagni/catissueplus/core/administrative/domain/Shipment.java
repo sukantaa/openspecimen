@@ -23,6 +23,8 @@ import com.krishagni.catissueplus.core.common.util.Utility;
 
 @Audited
 public class Shipment extends BaseEntity {
+	private static final String ENTITY_NAME = "shipment";
+
 	public enum Status {
 		PENDING("Pending"),
 
@@ -90,6 +92,10 @@ public class Shipment extends BaseEntity {
 	private Set<User> notifyUsers = new HashSet<User>();
 
 	private SpecimenRequest request;
+
+	public static String getEntityName() {
+		return ENTITY_NAME;
+	}
 	
 	public String getName() {
 		return name;

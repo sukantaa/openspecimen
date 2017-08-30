@@ -4,7 +4,6 @@ package com.krishagni.catissueplus.core.biospecimen.services.impl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,13 +24,11 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitFactory;
-import com.krishagni.catissueplus.core.biospecimen.events.CollectionEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpEntityDeleteCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDownloadDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.LabelPrintJobSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.PrintVisitNameDetail;
-import com.krishagni.catissueplus.core.biospecimen.events.ReceivedEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SprDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SprLockDetail;
@@ -60,14 +57,14 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.service.LabelGenerator;
 import com.krishagni.catissueplus.core.common.service.LabelPrinter;
-import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
+import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
-public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver, InitializingBean {
+public class VisitServiceImpl implements VisitService, ObjectAccessor, InitializingBean {
 	private Log logger = LogFactory.getLog(VisitServiceImpl.class);
 
 	private DaoFactory daoFactory;
@@ -495,12 +492,12 @@ public class VisitServiceImpl implements VisitService, ObjectStateParamsResolver
 
 	@Override
 	public String getObjectName() {
-		return "visit";
+		return Visit.getEntityName();
 	}
 
 	@Override
 	@PlusTransactional
-	public Map<String, Object> resolve(String key, Object value) {
+	public Map<String, Object> resolveUrl(String key, Object value) {
 		if (key.equals("id")) {
 			value = Long.valueOf(value.toString());
 		}

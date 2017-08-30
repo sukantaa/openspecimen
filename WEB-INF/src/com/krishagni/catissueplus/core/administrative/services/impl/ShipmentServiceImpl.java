@@ -3,7 +3,6 @@ package com.krishagni.catissueplus.core.administrative.services.impl;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,7 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.EmailService;
-import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
+import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -53,7 +52,7 @@ import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 import edu.common.dynamicextensions.query.WideRowMode;
 
-public class ShipmentServiceImpl implements ShipmentService, ObjectStateParamsResolver {
+public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	private static final String SHIPMENT_SHIPPED_EMAIL_TMPL = "shipment_shipped";
 	
 	private static final String SHIPMENT_RECEIVED_EMAIL_TMPL = "shipment_received";
@@ -229,12 +228,12 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectStateParamsRe
 
 	@Override
 	public String getObjectName() {
-		return "shipment";
+		return Shipment.getEntityName();
 	}
 
 	@Override
 	@PlusTransactional
-	public Map<String, Object> resolve(String key, Object value) {
+	public Map<String, Object> resolveUrl(String key, Object value) {
 		if (key.equals("id")) {
 			value = Long.valueOf(value.toString());
 		}

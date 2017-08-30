@@ -54,7 +54,7 @@ import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
-import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
+import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.CsvFileWriter;
 import com.krishagni.catissueplus.core.common.util.CsvWriter;
@@ -67,7 +67,7 @@ import com.krishagni.catissueplus.core.de.services.FormService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 import org.springframework.beans.BeanUtils;
 
-public class DistributionProtocolServiceImpl implements DistributionProtocolService, ObjectStateParamsResolver {
+public class DistributionProtocolServiceImpl implements DistributionProtocolService, ObjectAccessor {
 	
 	private static final Map<String, String> attrDisplayKeys = new HashMap<String, String>() {
 		{
@@ -463,12 +463,12 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 
 	@Override
 	public String getObjectName() {
-		return "distributionProtocol";
+		return DistributionProtocol.getEntityName();
 	}
 
 	@Override
 	@PlusTransactional
-	public Map<String, Object> resolve(String key, Object value) {
+	public Map<String, Object> resolveUrl(String key, Object value) {
 		if (key.equals("id")) {
 			value = Long.valueOf(value.toString());
 		}

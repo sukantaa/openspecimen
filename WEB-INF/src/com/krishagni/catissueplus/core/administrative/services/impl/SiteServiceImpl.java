@@ -36,7 +36,7 @@ import com.krishagni.catissueplus.core.common.events.Operation;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.Resource;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
-import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
+import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -47,7 +47,7 @@ import com.krishagni.rbac.events.SubjectRoleOpNotif;
 import com.krishagni.rbac.service.RbacService;
 
 
-public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver, InitializingBean {
+public class SiteServiceImpl implements SiteService, ObjectAccessor, InitializingBean {
 	private SiteFactory siteFactory;
 
 	private DaoFactory daoFactory;
@@ -224,12 +224,12 @@ public class SiteServiceImpl implements SiteService, ObjectStateParamsResolver, 
 
 	@Override
 	public String getObjectName() {
-		return "site";
+		return Site.getEntityName();
 	}
 
 	@Override
 	@PlusTransactional
-	public Map<String, Object> resolve(String key, Object value) {
+	public Map<String, Object> resolveUrl(String key, Object value) {
 		if (key.equals("id")) {
 			value = Long.valueOf(value.toString());
 		}

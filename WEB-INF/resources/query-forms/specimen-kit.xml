@@ -13,7 +13,7 @@
         <udn>id</udn>
         <caption>#getMessage("kit_identifier")</caption>
         <column>IDENTIFIER</column>
-        <recordUrl>#/object-state-params-resolver?stateName=specimen-kit-detail.overview&amp;objectName=specimenKit&amp;key=id&amp;value={{$value}}</recordUrl>
+        <recordUrl>#/object-state-params-resolver?stateName=specimen-kit-detail.overview&amp;objectName=specimen_kit&amp;key=id&amp;value={{$value}}</recordUrl>
       </numberField>
     </row>
 

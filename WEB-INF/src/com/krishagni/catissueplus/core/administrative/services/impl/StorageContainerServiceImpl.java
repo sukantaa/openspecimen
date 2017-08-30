@@ -67,7 +67,7 @@ import com.krishagni.catissueplus.core.common.events.ExportedFileDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.LabelGenerator;
-import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
+import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
@@ -84,7 +84,7 @@ import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 import edu.common.dynamicextensions.query.WideRowMode;
 
-public class StorageContainerServiceImpl implements StorageContainerService, ObjectStateParamsResolver, InitializingBean {
+public class StorageContainerServiceImpl implements StorageContainerService, ObjectAccessor, InitializingBean {
 	private static final Log logger = LogFactory.getLog(StorageContainerServiceImpl.class);
 
 	private DaoFactory daoFactory;
@@ -727,12 +727,12 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 	@Override
 	public String getObjectName() {
-		return "container";
+		return StorageContainer.getEntityName();
 	}
 
 	@Override
 	@PlusTransactional
-	public Map<String, Object> resolve(String key, Object value) {
+	public Map<String, Object> resolveUrl(String key, Object value) {
 		if (key.equals("id")) {
 			value = Long.valueOf(value.toString());
 		}

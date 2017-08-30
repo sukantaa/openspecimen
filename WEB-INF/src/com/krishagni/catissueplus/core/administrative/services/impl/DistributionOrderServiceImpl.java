@@ -65,7 +65,7 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.service.EmailService;
-import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
+import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
@@ -84,7 +84,7 @@ import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 import edu.common.dynamicextensions.query.WideRowMode;
 
-public class DistributionOrderServiceImpl implements DistributionOrderService, ObjectStateParamsResolver {
+public class DistributionOrderServiceImpl implements DistributionOrderService, ObjectAccessor {
 	private static final Log logger = LogFactory.getLog(DistributionOrderServiceImpl.class);
 
 	private static final long ASYNC_CALL_TIMEOUT = 5000;
@@ -294,12 +294,12 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 
 	@Override
 	public String getObjectName() {
-		return "order";
+		return DistributionOrder.getEntityName();
 	}
 
 	@Override
 	@PlusTransactional
-	public Map<String, Object> resolve(String key, Object value) {
+	public Map<String, Object> resolveUrl(String key, Object value) {
 		if (key.equals("id")) {
 			value = Long.valueOf(value.toString());
 		}

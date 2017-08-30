@@ -12,34 +12,34 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
-import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolverFactory;
+import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
+import com.krishagni.catissueplus.core.common.service.ObjectAccessorFactory;
 
 @Controller
 @RequestMapping("/object-state-params")
 public class ObjectStateParamsResolverController {
 
 	@Autowired
-	ObjectStateParamsResolverFactory resolverFactory;
+	ObjectAccessorFactory resolverFactory;
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public Map<String, Object> getStateParams(
-		@RequestParam(value = "objectName", required = true)
+		@RequestParam(value = "objectName")
 		String objectName,
 
-		@RequestParam(value = "key", required = true)
+		@RequestParam(value = "key")
 		String key,
 
-		@RequestParam(value = "value", required = true)
+		@RequestParam(value = "value")
 		Object value) {
 
-		ObjectStateParamsResolver resolver = resolverFactory.getResolver(objectName);
-		if (resolver == null) {
+		ObjectAccessor accessor = resolverFactory.getAccessor(objectName);
+		if (accessor == null) {
 			return Collections.emptyMap();
 		}
 
-		return resolver.resolve(key, value);
+		return accessor.resolveUrl(key, value);
 	}
 }

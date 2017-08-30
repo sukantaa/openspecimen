@@ -75,7 +75,7 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.service.LabelGenerator;
-import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
+import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.service.impl.ConfigurationServiceImpl;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
@@ -84,7 +84,7 @@ import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
-public class CollectionProtocolRegistrationServiceImpl implements CollectionProtocolRegistrationService, ObjectStateParamsResolver, InitializingBean {
+public class CollectionProtocolRegistrationServiceImpl implements CollectionProtocolRegistrationService, ObjectAccessor, InitializingBean {
 	private Log logger = LogFactory.getLog(CollectionProtocolRegistrationServiceImpl.class);
 
 	private DaoFactory daoFactory;
@@ -517,12 +517,12 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	
 	@Override
 	public String getObjectName() {
-		return "cpr";
+		return CollectionProtocolRegistration.getEntityName();
 	}
 
 	@Override
 	@PlusTransactional
-	public Map<String, Object> resolve(String key, Object value) {
+	public Map<String, Object> resolveUrl(String key, Object value) {
 		if (key.equals("id")) {
 			value = Long.valueOf(value.toString());
 		}

@@ -13,6 +13,8 @@ import com.krishagni.catissueplus.core.common.CollectionUpdater;
 
 @Audited
 public class SpecimenKit extends BaseEntity {
+    private static final String ENTITY_NAME = "specimen_kit";
+
     public CollectionProtocol collectionProtocol;
 
     public Site sendingSite;
@@ -28,6 +30,10 @@ public class SpecimenKit extends BaseEntity {
     public String comments;
 
     public String activityStatus;
+
+    public static String getEntityName() {
+        return ENTITY_NAME;
+    }
 
     public CollectionProtocol getCollectionProtocol() {
         return collectionProtocol;

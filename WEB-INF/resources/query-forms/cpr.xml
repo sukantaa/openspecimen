@@ -190,7 +190,7 @@
         <udn>id</udn>
         <caption>#getMessage("cpr_id")</caption>
         <column>CPR_ID</column>
-        <recordUrl>#/object-state-params-resolver?stateName=participant-detail.overview&amp;objectName=cpr&amp;key=id&amp;value={{$value}}</recordUrl>
+        <recordUrl>#/object-state-params-resolver?stateName=participant-detail.overview&amp;objectName=collection_protocol_registration&amp;key=id&amp;value={{$value}}</recordUrl>
       </numberField>
     </row>
     <row>
@@ -209,7 +209,7 @@
         <udn>ppid</udn>
         <caption>#getMessage("participant_ppid")</caption>
         <column>PPID</column>
-        <recordUrl>#/object-state-params-resolver?stateName=participant-detail.overview&amp;objectName=cpr&amp;key=id&amp;value={{$cprId}}</recordUrl>
+        <recordUrl>#/object-state-params-resolver?stateName=participant-detail.overview&amp;objectName=collection_protocol_registration&amp;key=id&amp;value={{$cprId}}</recordUrl>
       </textField>
     </row>
     <row>

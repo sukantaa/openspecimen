@@ -96,7 +96,7 @@ import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityResp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
-import com.krishagni.catissueplus.core.common.service.ObjectStateParamsResolver;
+import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
@@ -112,7 +112,7 @@ import com.krishagni.rbac.events.SubjectRoleOpNotif;
 import com.krishagni.rbac.service.RbacService;
 
 
-public class CollectionProtocolServiceImpl implements CollectionProtocolService, ObjectStateParamsResolver {
+public class CollectionProtocolServiceImpl implements CollectionProtocolService, ObjectAccessor {
 
 	private ThreadPoolTaskExecutor taskExecutor;
 
@@ -1233,12 +1233,12 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 
 	@Override
 	public String getObjectName() {
-		return "cp";
+		return CollectionProtocol.getEntityName();
 	}
 
 	@Override
 	@PlusTransactional
-	public Map<String, Object> resolve(String key, Object value) {
+	public Map<String, Object> resolveUrl(String key, Object value) {
 		if (key.equals("id")) {
 			value = Long.valueOf(value.toString());
 		}
