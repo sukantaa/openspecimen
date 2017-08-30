@@ -255,6 +255,9 @@ osApp.config(function(
       e.stopPropagation();
     });
 
+    $http.defaults.headers.common['X-OS-API-CLIENT'] = "webui";
+    $http.defaults.withCredentials = true;
+
     if ($window.localStorage['osAuthToken']) {
       $http.defaults.headers.common['X-OS-API-TOKEN'] = $window.localStorage['osAuthToken'];
       AuthService.refreshCookie();
@@ -264,8 +267,6 @@ osApp.config(function(
       $http.defaults.headers.common['X-OS-API-TOKEN'] = $cookies['osAuthToken'];
       $rootScope.loggedIn = true;
     }
-
-    ApiUtil.initialize();
 
     $rootScope.$on('$stateChangeSuccess',
       function(event, toState, toParams, fromState, fromParams) {
