@@ -4,7 +4,16 @@ angular.module('openspecimen')
       restrict: 'A',
       link: function(scope, element, attrs) {
         scope.$watch(attrs.showIfAllowed, function(newOpts) {
-          if (!AuthorizationService.isAllowed(newOpts)) {
+          var notAllowed = false;
+          if (angular.isArray(newOpts)) {
+            var notAllowed = newOpts.some(function(opt) {
+              return !AuthorizationService.isAllowed(opt);
+            });
+          } else {
+            notAllowed = !AuthorizationService.isAllowed(newOpts);
+          }
+
+          if (notAllowed) {
             element.remove();
           }
         });
