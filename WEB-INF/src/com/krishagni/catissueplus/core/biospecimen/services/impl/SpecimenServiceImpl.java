@@ -522,6 +522,16 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 	}
 
 	@Override
+	public String getAuditTable() {
+		return "CATISSUE_SPECIMEN_AUD";
+	}
+
+	@Override
+	public void ensureReadAllowed(Long id) {
+		AccessCtrlMgr.getInstance().ensureReadSpecimenRights(id);
+	}
+
+	@Override
 	public void onConfigChange(String name, String value) {
 		if (name.equals(ConfigParams.UNIQUE_SPMN_LABEL_PER_CP) && !"true".equalsIgnoreCase(value)) {
 			boolean dupSpmnLabels = daoFactory.getSpecimenDao().areDuplicateLabelsPresent();

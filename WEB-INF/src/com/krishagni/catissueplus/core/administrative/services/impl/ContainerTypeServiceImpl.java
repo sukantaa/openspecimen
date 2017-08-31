@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.administrative.services.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -19,8 +20,9 @@ import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 
-public class ContainerTypeServiceImpl implements ContainerTypeService {
+public class ContainerTypeServiceImpl implements ContainerTypeService, ObjectAccessor {
 	private DaoFactory daoFactory;
 	
 	private ContainerTypeFactory containerTypeFactory;
@@ -140,6 +142,27 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
 			return ResponseEvent.serverError(e);
 		}
 	}
+
+	@Override
+	public String getObjectName() {
+		return ContainerType.getEntityName();
+	}
+
+	@Override
+	public Map<String, Object> resolveUrl(String key, Object value) {
+		throw new UnsupportedOperationException("Not implemented");
+	}
+
+	@Override
+	public String getAuditTable() {
+		return "OS_CONTAINER_TYPES_AUD";
+	}
+
+	@Override
+	public void ensureReadAllowed(Long id) {
+		getContainerType(id, null); // ensures container type exists
+		AccessCtrlMgr.getInstance().ensureReadContainerTypeRights();
+	}
 	
 	private ContainerType getContainerType(Long id, String name) {
 		ContainerType containerType = null;
@@ -169,5 +192,5 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
 			throw OpenSpecimenException.userError(ContainerTypeErrorCode.DUP_NAME, newContainerType.getName());
 		}
 	}
-	
+
 }

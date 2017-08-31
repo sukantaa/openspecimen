@@ -506,6 +506,16 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 	}
 
 	@Override
+	public String getAuditTable() {
+		return "CAT_SPECIMEN_COLL_GROUP_AUD";
+	}
+
+	@Override
+	public void ensureReadAllowed(Long id) {
+		AccessCtrlMgr.getInstance().ensureReadVisitRights(id);
+	}
+
+	@Override
 	public void afterPropertiesSet() {
 		exportSvc.registerObjectsGenerator("visit", this::getVisitsGenerator);
 	}

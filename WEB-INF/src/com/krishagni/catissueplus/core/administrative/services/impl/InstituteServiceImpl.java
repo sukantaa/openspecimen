@@ -3,6 +3,7 @@ package com.krishagni.catissueplus.core.administrative.services.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -28,10 +29,11 @@ import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 
-public class InstituteServiceImpl implements InstituteService, InitializingBean {
+public class InstituteServiceImpl implements InstituteService, ObjectAccessor, InitializingBean {
 	private DaoFactory daoFactory;
 
 	private InstituteFactory instituteFactory;
@@ -81,21 +83,7 @@ public class InstituteServiceImpl implements InstituteService, InitializingBean 
 	public ResponseEvent<InstituteDetail> getInstitute(RequestEvent<InstituteQueryCriteria> req) {
 		try {
 			InstituteQueryCriteria crit = req.getPayload();
-			Institute institute = null;
-			
-			Object key = null;
-			if (crit.getId() != null) {
-				institute = daoFactory.getInstituteDao().getById(crit.getId());
-				key = crit.getId();
-			} else if (StringUtils.isNotBlank(crit.getName())) {
-				institute = daoFactory.getInstituteDao().getInstituteByName(crit.getName());
-				key = crit.getName();
-			}
-					
-			if (institute == null) {
-				return ResponseEvent.userError(InstituteErrorCode.NOT_FOUND, key, 1);
-			}
-			
+			Institute institute = getInstitute(crit.getId(), crit.getName());
 			return ResponseEvent.response(InstituteDetail.from(institute));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -132,21 +120,8 @@ public class InstituteServiceImpl implements InstituteService, InitializingBean 
 			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
 			
 			InstituteDetail detail = req.getPayload();			
-			Institute existing = null;
-			
-			Object key = null;
-			if (detail.getId() != null) {
-				existing = daoFactory.getInstituteDao().getById(detail.getId());
-				key = detail.getId();
-			} else if (StringUtils.isNotBlank(detail.getName())) {
-				existing = daoFactory.getInstituteDao().getInstituteByName(detail.getName());
-				key = detail.getName();
-			}
-			
-			if (existing == null) {
-				return ResponseEvent.userError(InstituteErrorCode.NOT_FOUND, key, 1);
-			}
-			
+			Institute existing = getInstitute(detail.getId(), detail.getName());
+
 			Institute institute = instituteFactory.createInstitute(detail);
 			if (!existing.getName().equals(institute.getName())) {
 				OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
@@ -168,12 +143,7 @@ public class InstituteServiceImpl implements InstituteService, InitializingBean 
 	@PlusTransactional
 	public ResponseEvent<List<DependentEntityDetail>> getDependentEntities(RequestEvent<Long> req) {
 		try {
-			Long instituteId = req.getPayload();
-			Institute existing = daoFactory.getInstituteDao().getById(instituteId);
-			if (existing == null) {
-				return ResponseEvent.userError(InstituteErrorCode.NOT_FOUND, instituteId, 1);
-			}
-			
+			Institute existing = getInstitute(req.getPayload(), null);
 			return ResponseEvent.response(existing.getDependentEntities());
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
@@ -229,8 +199,51 @@ public class InstituteServiceImpl implements InstituteService, InitializingBean 
 	}
 
 	@Override
+	public String getObjectName() {
+		return Institute.getEntityName();
+	}
+
+	@Override
+	public Map<String, Object> resolveUrl(String key, Object value) {
+		throw new UnsupportedOperationException("Not supported for this implementation");
+	}
+
+	@Override
+	public String getAuditTable() {
+		return "CATISSUE_INSTITUTION_AUD";
+	}
+
+	@Override
+	public void ensureReadAllowed(Long id) {
+		//
+		// ensure institute object exists
+		// institute objects can be read by all
+		//
+		getInstitute(id, null);
+	}
+
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		exportSvc.registerObjectsGenerator("institute", this::getInstitutesGenerator);
+	}
+
+	private Institute getInstitute(Long id, String name) {
+		Institute institute = null;
+
+		Object key = null;
+		if (id != null) {
+			institute = daoFactory.getInstituteDao().getById(id);
+			key = id;
+		} else if (StringUtils.isNotBlank(name)) {
+			institute = daoFactory.getInstituteDao().getInstituteByName(name);
+			key = name;
+		}
+
+		if (institute == null) {
+			throw OpenSpecimenException.userError(InstituteErrorCode.NOT_FOUND, key, 1);
+		}
+
+		return institute;
 	}
 
 	private void ensureUniqueName(String name, OpenSpecimenException ose) {

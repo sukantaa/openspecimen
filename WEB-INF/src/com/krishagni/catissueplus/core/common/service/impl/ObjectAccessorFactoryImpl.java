@@ -8,14 +8,14 @@ import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.service.ObjectAccessorFactory;
 
 public class ObjectAccessorFactoryImpl implements ObjectAccessorFactory {
-	private Map<String, ObjectAccessor> resolvers = new HashMap<>();
+	private Map<String, ObjectAccessor> accessors = new HashMap<>();
 
 	@Override
 	public ObjectAccessor getAccessor(String objectName) {
-		return resolvers.get(objectName);
+		return accessors.get(objectName);
 	}
 
-	public void setResolvers(List<ObjectAccessor> resolvers) {
-		resolvers.forEach(resolver -> this.resolvers.put(resolver.getObjectName(), resolver));
+	public void setAccessors(List<ObjectAccessor> accessors) {
+		accessors.forEach(accessor -> this.accessors.put(accessor.getObjectName(), accessor));
 	}
 }

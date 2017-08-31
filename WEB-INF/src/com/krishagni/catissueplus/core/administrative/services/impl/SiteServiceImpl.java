@@ -110,14 +110,7 @@ public class SiteServiceImpl implements SiteService, ObjectAccessor, Initializin
 	@PlusTransactional		
 	public ResponseEvent<SiteDetail> getSite(RequestEvent<SiteQueryCriteria> req) {
 		SiteQueryCriteria crit = req.getPayload();
-		Site site = null;
-		
-		if (AuthUtil.isAdmin()) {
-			site = getFromDb(crit);
-		} else {
-			site = getFromAccessibleSite(crit);
-		}
-		
+		Site site = getFromAccessibleSite(crit.getId(), crit.getName());
 		if (site == null) {
 			return ResponseEvent.userError(SiteErrorCode.NOT_FOUND);
 		}
@@ -235,6 +228,19 @@ public class SiteServiceImpl implements SiteService, ObjectAccessor, Initializin
 		}
 
 		return daoFactory.getSiteDao().getSiteIds(key, value);
+	}
+
+	@Override
+	public String getAuditTable() {
+		return "CATISSUE_SITE_AUD";
+	}
+
+	@Override
+	public void ensureReadAllowed(Long id) {
+		Site site = getFromAccessibleSite(id, null);
+		if (site == null) {
+			throw OpenSpecimenException.userError(SiteErrorCode.NOT_FOUND);
+		}
 	}
 
 	@Override
@@ -425,16 +431,17 @@ public class SiteServiceImpl implements SiteService, ObjectAccessor, Initializin
 			.collect(Collectors.toList());
 	}
 	
-	private Site getFromAccessibleSite(SiteQueryCriteria crit) {
+	private Site getFromAccessibleSite(Long siteId, String siteName) {
+		if (AuthUtil.isAdmin()) {
+			return getSite(siteId, siteName);
+		}
+
+		Site result = null;
 		Set<Site> accessibleSites = AccessCtrlMgr.getInstance().getRoleAssignedSites();
-		
-		Long siteId = crit.getId();
-		String siteName = crit.getName();
-		Site result = null;		
 		for (Site site : accessibleSites) {
-			if (siteId != null && siteId.equals(site.getId())) {
+			if (site.getId().equals(siteId)) {
 				result = site;
-			} else if (StringUtils.isNotBlank(siteName) && siteName.equals(site.getName())) {
+			} else if (site.getName().equals(siteName)) {
 				result = site;
 			}
 			
@@ -446,7 +453,7 @@ public class SiteServiceImpl implements SiteService, ObjectAccessor, Initializin
 		if (result == null) {
 			try {
 				AccessCtrlMgr.getInstance().ensureCreateShipmentRights();
-				result = getFromDb(crit);
+				result = getSite(siteId, siteName);
 			} catch (OpenSpecimenException ose) {
 				
 			}
@@ -455,18 +462,6 @@ public class SiteServiceImpl implements SiteService, ObjectAccessor, Initializin
 		return result;
 	}
 	
-	private Site getFromDb(SiteQueryCriteria crit) {
-		Site result = null;
-		
-		if (crit.getId() != null) {
-			result = daoFactory.getSiteDao().getById(crit.getId());
-		} else if (crit.getName() != null) {
-			result = daoFactory.getSiteDao().getSiteByName(crit.getName());
-		}		
-		
-		return result;
-	}
-
 	private SiteDetail curateBulkUpdateFields(SiteDetail input) {
 		SiteDetail detail = new SiteDetail();
 

@@ -16,6 +16,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenKitListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenKitService;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
+import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -153,6 +154,16 @@ public class SpecimenKitServiceImpl implements SpecimenKitService, ObjectAccesso
 		}
 
 		return daoFactory.getSpecimenKitDao().getCpIds(key, value);
+	}
+
+	@Override
+	public String getAuditTable() {
+		return "OS_SPECIMEN_KITS_AUD";
+	}
+
+	@Override
+	public void ensureReadAllowed(Long id) {
+		//TODO: handle access control for kit
 	}
 
 	private SpecimenKit getKit(Long kitId) {

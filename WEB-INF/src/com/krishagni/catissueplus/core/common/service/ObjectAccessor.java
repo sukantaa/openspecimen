@@ -7,13 +7,10 @@ public interface ObjectAccessor {
 
 	Map<String, Object> resolveUrl(String key, Object value);
 
-	//
-	// More methods
-	//
-	// String getAuditTable();
-	//
-	// void ensureReadAllowed(Long objectId);
-	//
+	String getAuditTable();
+
+	void ensureReadAllowed(Long objectId);
+
 	//
 	// later: getObject(Map<String, Object> ids);
 	//

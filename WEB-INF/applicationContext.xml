@@ -286,7 +286,8 @@
   
   <bean id="auditService" class="com.krishagni.catissueplus.core.audit.services.impl.AuditServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
-  </bean> 
+    <property name="objectAccessorFactory" ref="objectAccessorFactory"/>
+  </bean>
 
   <bean id="userAuthService" class="com.krishagni.catissueplus.core.auth.services.impl.UserAuthenticationServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
@@ -1092,7 +1093,7 @@
   </bean>
 
   <bean id="objectAccessorFactory" class="com.krishagni.catissueplus.core.common.service.impl.ObjectAccessorFactoryImpl">
-    <property name="resolvers">
+    <property name="accessors">
       <list>
         <ref bean="cpSvc"/>
         <ref bean="cprSvc"/>
@@ -1104,6 +1105,9 @@
         <ref bean="distributionOrderService"/>
         <ref bean="shipmentSvc"/>
         <ref bean="specimenKitSvc"/>
+        <ref bean="instSvc"/>
+        <ref bean="userSvc"/>
+        <ref bean="containerTypeSvc"/>
       </list>
     </property>
   </bean>

@@ -475,7 +475,18 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 
 		return daoFactory.getDistributionProtocolDao().getDpIds(key, value);
 	}
-	
+
+	@Override
+	public String getAuditTable() {
+		return "CAT_DISTRIBUTION_PROTOCOL_AUD";
+	}
+
+	@Override
+	public void ensureReadAllowed(Long id) {
+		DistributionProtocol dp = getDistributionProtocol(id);
+		AccessCtrlMgr.getInstance().ensureReadDpRights(dp);
+	}
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<DpConsentTierDetail>> getConsentTiers(RequestEvent<EntityQueryCriteria> req) {

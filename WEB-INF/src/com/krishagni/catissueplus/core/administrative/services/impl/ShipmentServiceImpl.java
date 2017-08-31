@@ -119,12 +119,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	@PlusTransactional
 	public ResponseEvent<ShipmentDetail> getShipment(RequestEvent<Long> req) {
 		try {
-			Long shipmentId = req.getPayload();
-			Shipment shipment = getShipmentDao().getById(shipmentId);
-			if (shipment == null) {
-				return ResponseEvent.userError(ShipmentErrorCode.NOT_FOUND);
-			}
-			
+			Shipment shipment = getShipment(req.getPayload(), null);
 			AccessCtrlMgr.getInstance().ensureReadShipmentRights(shipment);
 			return ResponseEvent.response(ShipmentDetail.from(shipment));
 		} catch (OpenSpecimenException ose) {
@@ -133,7 +128,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			return ResponseEvent.serverError(e);
 		}
 	}
-	
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<ShipmentDetail> createShipment(RequestEvent<ShipmentDetail> req) {
@@ -178,11 +173,8 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	public ResponseEvent<ShipmentDetail> updateShipment(RequestEvent<ShipmentDetail> req) {
 		try {
 			ShipmentDetail detail = req.getPayload();
-			Shipment existing = getShipment(detail);
-			if (existing == null) {
-				return ResponseEvent.userError(ShipmentErrorCode.NOT_FOUND);
-			}
-			
+			Shipment existing = getShipment(detail.getId(), detail.getName());
+
 			Shipment newShipment = shipmentFactory.createShipment(detail, null);
 			AccessCtrlMgr.getInstance().ensureUpdateShipmentRights(newShipment);
 			
@@ -223,7 +215,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			return ResponseEvent.userError(SavedQueryErrorCode.NOT_FOUND, queryId);
 		}
 		
-		return new ResponseEvent<QueryDataExportResult>(exportShipmentReport(shipment, query));
+		return new ResponseEvent<>(exportShipmentReport(shipment, query));
 	}
 
 	@Override
@@ -239,6 +231,17 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 		}
 
 		return daoFactory.getShipmentDao().getShipmentIds(key, value);
+	}
+
+	@Override
+	public String getAuditTable() {
+		return "OS_SHIPMENTS_AUD";
+	}
+
+	@Override
+	public void ensureReadAllowed(Long id) {
+		Shipment shipment = getShipment(id, null);
+		AccessCtrlMgr.getInstance().ensureReadShipmentRights(shipment);
 	}
 
 	private ShipmentListCriteria addShipmentListCriteria(ShipmentListCriteria crit) {
@@ -389,12 +392,16 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 		}
 	}
 	
-	private Shipment getShipment(ShipmentDetail detail) {
+	private Shipment getShipment(Long id, String name) {
 		Shipment shipment = null;
-		if (detail.getId() != null) {
-			shipment = getShipmentDao().getById(detail.getId());
-		} else if (StringUtils.isNotBlank(detail.getName())) {
-			shipment = getShipmentDao().getShipmentByName(detail.getName());
+		if (id != null) {
+			shipment = getShipmentDao().getById(id);
+		} else if (StringUtils.isNotBlank(name)) {
+			shipment = getShipmentDao().getShipmentByName(name);
+		}
+
+		if (shipment == null) {
+			throw OpenSpecimenException.userError(ShipmentErrorCode.NOT_FOUND);
 		}
 		
 		return shipment;

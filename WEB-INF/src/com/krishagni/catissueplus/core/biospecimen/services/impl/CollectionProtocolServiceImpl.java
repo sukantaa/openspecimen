@@ -1246,6 +1246,17 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		return daoFactory.getCollectionProtocolDao().getCpIds(key, value);
 	}
 
+	@Override
+	public String getAuditTable() {
+		return "CAT_COLLECTION_PROTOCOL_AUD";
+	}
+
+	@Override
+	public void ensureReadAllowed(Long id) {
+		CollectionProtocol cp = getCollectionProtocol(id, null, null);
+		AccessCtrlMgr.getInstance().ensureReadCpRights(cp);
+	}
+
 	private CpListCriteria addCpListCriteria(CpListCriteria crit) {
 		Set<Long> cpIds = AccessCtrlMgr.getInstance().getReadableCpIds();
 		if (cpIds != null && cpIds.isEmpty()) {

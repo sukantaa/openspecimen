@@ -741,6 +741,17 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	}
 
 	@Override
+	public String getAuditTable() {
+		return "OS_STORAGE_CONTAINERS_AUD";
+	}
+
+	@Override
+	public void ensureReadAllowed(Long objectId) {
+		StorageContainer container = getContainer(objectId, null);
+		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
+	}
+
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		taskManager.scheduleWithFixedDelay(
 			new Runnable() {

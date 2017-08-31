@@ -307,6 +307,17 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 		return daoFactory.getDistributionOrderDao().getOrderIds(key, value);
 	}
 
+	@Override
+	public String getAuditTable() {
+		return "OS_ORDERS_AUD";
+	}
+
+	@Override
+	public void ensureReadAllowed(Long id) {
+		DistributionOrder order = getOrder(id, null);
+		AccessCtrlMgr.getInstance().ensureReadDistributionOrderRights(order);
+	}
+
 	private DistributionOrderListCriteria addOrderListCriteria(DistributionOrderListCriteria crit) {
 		Set<Long> siteIds = AccessCtrlMgr.getInstance().getReadAccessDistributionOrderSites();
 		if (siteIds != null && siteIds.isEmpty()) {

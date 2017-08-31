@@ -531,6 +531,16 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	}
 
 	@Override
+	public String getAuditTable() {
+		return "CATISSUE_COLL_PROT_REG_AUD";
+	}
+
+	@Override
+	public void ensureReadAllowed(Long id) {
+		AccessCtrlMgr.getInstance().ensureReadCprRights(id);
+	}
+
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		exportSvc.registerObjectsGenerator("cpr", this::getCprsGenerator);
 		exportSvc.registerObjectsGenerator("consent", this::getConsentsGenerator);

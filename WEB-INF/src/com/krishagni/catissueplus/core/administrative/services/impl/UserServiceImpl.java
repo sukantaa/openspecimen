@@ -53,6 +53,7 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.service.EmailService;
+import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
@@ -67,7 +68,7 @@ import com.krishagni.rbac.events.SubjectRoleDetail;
 import com.krishagni.rbac.events.SubjectRoleOpNotif;
 import com.krishagni.rbac.service.RbacService;
 
-public class UserServiceImpl implements UserService, InitializingBean, UserDetailsService, SAMLUserDetailsService {
+public class UserServiceImpl implements UserService, ObjectAccessor, InitializingBean, UserDetailsService, SAMLUserDetailsService {
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	private static final String DEFAULT_AUTH_DOMAIN = "openspecimen";
@@ -547,6 +548,27 @@ public class UserServiceImpl implements UserService, InitializingBean, UserDetai
 		} catch(Exception e) {
 			return ResponseEvent.serverError(e);
 		}
+	}
+
+
+	@Override
+	public String getObjectName() {
+		return User.getEntityName();
+	}
+
+	@Override
+	public Map<String, Object> resolveUrl(String key, Object value) {
+		throw new UnsupportedOperationException("Not implemented");
+	}
+
+	@Override
+	public String getAuditTable() {
+		return "CATISSUE_USER_AUD";
+	}
+
+	@Override
+	public void ensureReadAllowed(Long id) {
+		getUser(id, null);
 	}
 
 	@Override
