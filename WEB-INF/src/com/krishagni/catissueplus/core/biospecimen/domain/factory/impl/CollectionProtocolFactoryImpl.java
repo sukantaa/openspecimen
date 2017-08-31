@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
@@ -109,6 +110,7 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		setLabelFormats(input, cp, ose);
 		setBarcodeSetting(input, cp, ose);
 		setContainerSelectionStrategy(input, cp, ose);
+		cp.setContainerBasedAccess(BooleanUtils.isTrue(input.getContainerBasedAccess()));
 		setVisitCollectionMode(input, cp, ose);
 		setVisitNamePrintMode(input, cp, ose);
 		cp.setVisitNamePrintCopies(input.getVisitNamePrintCopies());

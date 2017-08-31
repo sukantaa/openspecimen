@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="ckhilosiya" id="Audit container based access control per CP">
+    <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
+      <column name="CONTAINER_BASED_ACCESS" type="${boolean.type}"/>
+      <column name="containerBasedAccess_MOD" type="${bit.type}"/>
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>

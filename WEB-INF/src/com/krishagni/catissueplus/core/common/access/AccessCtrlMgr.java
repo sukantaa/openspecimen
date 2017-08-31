@@ -670,6 +670,7 @@ public class AccessCtrlMgr {
 	}
 
 	public void ensureCreateOrUpdateSpecimenRights(Specimen specimen, boolean checkPhiAccess) {
+		ensureSpecimenContainerRights(specimen);
 		ensureVisitAndSpecimenObjectRights(specimen.getRegistration(), Operation.UPDATE, checkPhiAccess);
 		ensureVisitAndSpecimenImportRights(specimen.getRegistration());
 	}
@@ -695,6 +696,7 @@ public class AccessCtrlMgr {
 	}
 
 	public void ensureDeleteSpecimenRights(Specimen specimen) {
+		ensureSpecimenContainerRights(specimen);
 		ensureVisitAndSpecimenObjectRights(specimen.getRegistration(), Operation.DELETE, false);
 		ensureVisitAndSpecimenImportRights(specimen.getRegistration());
 	}
@@ -742,10 +744,18 @@ public class AccessCtrlMgr {
 		boolean phiAccess = ensureVisitAndSpecimenObjectRights(specimen.getRegistration(), op, checkPhiAccess);
 
 		if (op != Operation.READ) {
+			ensureSpecimenContainerRights(specimen);
 			ensureVisitAndSpecimenImportRights(specimen.getRegistration());
 		}
 
 		return phiAccess;
+	}
+
+	private void ensureSpecimenContainerRights(Specimen specimen) {
+		boolean checkAccess = ConfigUtil.getInstance().getBoolSetting("biospecimen", CONTAINER_BASED_ACCESS, false);
+		if ((checkAccess || specimen.getCollectionProtocol().getContainerBasedAccess()) && specimen.getPosition() != null) {
+			ensureReadContainerRights(specimen.getPosition().getContainer());
+		}
 	}
 
 	private boolean ensureVisitAndSpecimenObjectRights(CollectionProtocolRegistration cpr, Operation op, boolean checkPhiAccess) {
@@ -1452,4 +1462,6 @@ public class AccessCtrlMgr {
 	private boolean isImportOp() {
 		return ImporterContextHolder.getInstance().isImportOp();
 	}
+
+	private static final String CONTAINER_BASED_ACCESS = "container_based_access";
 }

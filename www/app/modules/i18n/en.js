@@ -296,7 +296,8 @@
     "container": {
       "title": "Container Settings",
       "auto_alloc": "Auto Allocation",
-      "store_aliquots_same_box": "Store aliquots in same box"
+      "store_aliquots_same_box": "Store aliquots in same box",
+      "container_based_access": "Container Site Based Access"
     },
 
     "visit_name_print_modes": {
@@ -2249,7 +2250,9 @@
         "rel_sorting_max_spmns": "Specimens Sorting by Relationship Limit",
         "rel_sorting_max_spmns_desc": "Maximum number of specimens that can be sorted based on their relationship",
         "staged_part_cleanup_int": "Staged Participants Retain Interval",
-        "staged_part_cleanup_int_desc": "Number of days to retain the details of participant in staging table"
+        "staged_part_cleanup_int_desc": "Number of days to retain the details of participant in staging table",
+        "container_based_access": "Container Site Based Access",
+        "container_based_access_desc": "Enable or Disable the specimen access check based on container site."
       },
 
       "common": {

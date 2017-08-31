@@ -117,6 +117,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	private Boolean aliquotsInSameContainer;
 
+	private Boolean containerBasedAccess;
+
 	private VisitCollectionMode visitCollectionMode = VisitCollectionMode.ALL_SPMNS;
 
 	private VisitNamePrintMode visitNamePrintMode = VisitNamePrintMode.NONE;
@@ -368,6 +370,14 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		this.aliquotsInSameContainer = aliquotsInSameContainer;
 	}
 
+	public Boolean getContainerBasedAccess() {
+		return containerBasedAccess;
+	}
+
+	public void setContainerBasedAccess(Boolean containerBasedAccess) {
+		this.containerBasedAccess = containerBasedAccess;
+	}
+
 	public VisitCollectionMode getVisitCollectionMode() {
 		return visitCollectionMode == null ? VisitCollectionMode.ALL_SPMNS : visitCollectionMode;
 	}
@@ -533,6 +543,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setBarcodingEnabled(cp.isBarcodingEnabled());
 		setContainerSelectionStrategy(cp.getContainerSelectionStrategy());
 		setAliquotsInSameContainer(cp.getAliquotsInSameContainer());
+		setContainerBasedAccess(cp.getContainerBasedAccess());
 		setVisitCollectionMode(cp.getVisitCollectionMode());
 		setVisitNamePrintMode(cp.getVisitNamePrintMode());
 		setVisitNamePrintCopies(cp.getVisitNamePrintCopies());

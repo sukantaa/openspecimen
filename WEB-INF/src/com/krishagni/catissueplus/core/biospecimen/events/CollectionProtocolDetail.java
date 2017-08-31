@@ -55,6 +55,8 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 
 	private Boolean aliquotsInSameContainer;
 
+	private Boolean containerBasedAccess;
+
 	private String visitCollectionMode;
 
 	private String visitNamePrintMode;
@@ -238,6 +240,14 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		this.aliquotsInSameContainer = aliquotsInSameContainer;
 	}
 
+	public Boolean getContainerBasedAccess() {
+		return containerBasedAccess;
+	}
+
+	public void setContainerBasedAccess(Boolean containerBasedAccess) {
+		this.containerBasedAccess = containerBasedAccess;
+	}
+
 	public String getVisitCollectionMode() {
 		return visitCollectionMode;
 	}
@@ -346,6 +356,7 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		result.setBarcodingEnabled(cp.isBarcodingEnabled());
 		result.setContainerSelectionStrategy(cp.getContainerSelectionStrategy());
 		result.setAliquotsInSameContainer(cp.getAliquotsInSameContainer());
+		result.setContainerBasedAccess(cp.getContainerBasedAccess());
 		result.setVisitCollectionMode(cp.getVisitCollectionMode().name());
 		result.setVisitNamePrintMode(cp.getVisitNamePrintMode().name());
 		result.setVisitNamePrintCopies(cp.getVisitNamePrintCopies());
