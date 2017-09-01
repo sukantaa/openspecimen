@@ -6,4 +6,5 @@ angular.module('os.common', [
   'os.common.delete',
   'os.common.search',
   'os.common.export',
-  'os.common.notif']);
+  'os.common.notif',
+  'os.common.audit']);

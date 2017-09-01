@@ -2028,6 +2028,14 @@
     "view_all": "View All Notifications"
   },
 
+  "audit": {
+    "activity": "Activity",
+    "created_by": "Created By",
+    "created_on": "Created On",
+    "updated_by": "Updated By",
+    "updated_on": "Updated On"
+  },
+
    "jobs": {
      "list": "Jobs",
      "create": "Create Job",

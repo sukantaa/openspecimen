@@ -23,7 +23,7 @@
   </div>
 
   <div class="clearfix">
-    <div ng-class="{true: 'col-xs-6', false: 'col-xs-12'}[!ctx.container.storageLocation.name && ctx.container.storedSpecimens > 0]">
+    <div class="col-xs-6">
       <ul class="os-key-values os-one-col">
         <li class="item">
           <strong class="key key-sm" translate="container.type">Type</strong>
@@ -145,14 +145,19 @@
         </li>
       </ul>
     </div>
-    <div class="col-xs-6" ng-if="!ctx.container.storageLocation.name && ctx.container.storedSpecimens > 0">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <span translate="container.chart.top_5_spmn_types">Top 5 specimen types</span>
-        </div>
-        <div class="panel-body">
-          <div>
-            <os-chart data="ctx.charts.spmnType.data" options="ctx.charts.spmnType.options"></os-chart>
+
+    <div class="col-xs-6">
+      <os-audit-overview object-name="'storage_container'" object-id="ctx.container.id"></os-audit-overview>
+
+      <div ng-if="!ctx.container.storageLocation.name && ctx.container.storedSpecimens > 0">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <span translate="container.chart.top_5_spmn_types">Top 5 specimen types</span>
+          </div>
+          <div class="panel-body">
+            <div>
+              <os-chart data="ctx.charts.spmnType.data" options="ctx.charts.spmnType.options"></os-chart>
+            </div>
           </div>
         </div>
       </div>

@@ -23,7 +23,7 @@
   </div>
 
   <div class="clearfix">
-    <div class="col-xs-9">
+    <div class="col-xs-8">
       <ul class="os-key-values os-one-col">
         <li class="item">
           <strong class="key key-sm" translate="container_type.name_format">Name Format</strong>
@@ -68,6 +68,10 @@
           <span ng-if="!containerType.canHold" class="value value-md" translate="common.not_specified">Not Specified</span>
         </li>
       </ul>
+    </div>
+
+    <div class="col-xs-4">
+      <os-audit-overview object-name="'container_type'" object-id="containerType.id"></os-audit-overview>
     </div>
   </div>
 </div>

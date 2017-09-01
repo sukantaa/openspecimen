@@ -43,6 +43,10 @@
         collection-date="visit.visitDate" pending-spmns-disp-interval="pendingSpmnsDispInterval">
       </os-specimen-tree>
     </div>
+
+    <div ng-if="!!visit.id" class="col-xs-4">
+      <os-audit-overview object-name="'visit'" object-id="visit.id"></os-audit-overview>
+    </div>
   </div>
 </div>
 

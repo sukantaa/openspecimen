@@ -98,6 +98,9 @@
       </os-specimen-tree>
     </div>
     <div class="col-xs-4">
+      <div ng-if="!!specimen.id">
+        <os-audit-overview object-name="'specimen'" object-id="specimen.id"></os-audit-overview>
+      </div>
       <div ng-include="'modules/biospecimen/participant/specimen/activities.html'"></div>
     </div>
   </div>

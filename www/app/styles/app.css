@@ -1192,3 +1192,13 @@ h4.os-sub-section-title, h5.os-sub-section-title, h6.os-sub-section-title {
 .os-mw-200 {
   min-width: 200px;
 }
+
+/** audit classes. move to diff file if this grows **/
+.os-audit-basic-info {
+  margin-top: -25px;
+}
+
+.os-audit-basic-info .os-key-values .item .key,
+.os-audit-basic-info .os-key-values .item .value {
+  padding-left: 0px;
+}
