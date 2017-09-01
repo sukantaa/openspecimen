@@ -317,6 +317,9 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			} else if (isLocked(currentStatus, newStatus)) {
 				user.setActivityStatus(Status.ACTIVITY_STATUS_LOCKED.getStatus());
 				notifyUserUpdated(user, "locked");
+			} else if (isDeleted(currentStatus, newStatus)) {
+				user.delete();
+				notifyUserUpdated(user, "deleted");
 			}
 
 			return ResponseEvent.response(UserDetail.from(user));
@@ -625,6 +628,8 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			onAccountActivation(user, prevStatus);
 		} else if (isLocked(prevStatus, user.getActivityStatus())) {
 			notifyUserUpdated(user, "locked");
+		} else if (isDeleted(prevStatus, user.getActivityStatus())) {
+			notifyUserUpdated(user, "deleted");
 		}
 
 		if (!wasInstituteAdmin && existingUser.isInstituteAdmin()) {
@@ -846,17 +851,23 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 
 	private boolean isStatusChangeAllowed(String newStatus) {
 		return newStatus.equals(Status.ACTIVITY_STATUS_ACTIVE.getStatus()) || 
-				newStatus.equals(Status.ACTIVITY_STATUS_LOCKED.getStatus());
+			newStatus.equals(Status.ACTIVITY_STATUS_LOCKED.getStatus()) ||
+			newStatus.equals(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 	}
 	
 	private boolean isActivated(String currentStatus, String newStatus) {
 		return !currentStatus.equals(Status.ACTIVITY_STATUS_ACTIVE.getStatus()) && 
-				newStatus.equals(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
+			newStatus.equals(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
 	}
 	
 	private boolean isLocked(String currentStatus, String newStatus) {
 		return currentStatus.equals(Status.ACTIVITY_STATUS_ACTIVE.getStatus()) &&
-				newStatus.equals(Status.ACTIVITY_STATUS_LOCKED.getStatus());
+			newStatus.equals(Status.ACTIVITY_STATUS_LOCKED.getStatus());
+	}
+
+	private boolean isDeleted(String currentStatus, String newStatus) {
+		return !currentStatus.equals(Status.ACTIVITY_STATUS_DISABLED.getStatus()) &&
+			newStatus.equals(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 	}
 		
 	private Institute getCurrUserInstitute() {
