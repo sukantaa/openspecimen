@@ -247,37 +247,37 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 	}
 	
 	private void setNoOfColumns(StorageContainerDetail detail, StorageContainer container, OpenSpecimenException ose) {
-		if (detail.getNoOfColumns() == null) {
-			return;
-		}
-
-		Integer noOfCols = detail.getNoOfColumns();
-		if (noOfCols <= 0 && container.getType() != null) {
+		Integer noOfCols = null;
+		if (detail.getNoOfColumns() != null || detail.isAttrModified("noOfColumns")) {
+			noOfCols = detail.getNoOfColumns();
+		} else if (container.getType() != null) {
 			noOfCols = container.getType().getNoOfColumns();
+		} else {
+			noOfCols = null;
 		}
 
-		if (noOfCols <= 0) {
+		if (noOfCols != null && noOfCols <= 0) {
 			ose.addError(StorageContainerErrorCode.INVALID_DIMENSION_CAPACITY);
 		}
-		
-		container.setNoOfColumns(noOfCols);		
+
+		container.setNoOfColumns(noOfCols);
 	}
 	
 	private void setNoOfRows(StorageContainerDetail detail, StorageContainer container, OpenSpecimenException ose) {
-		if (detail.getNoOfRows() == null) {
-			return;
-		}
-
-		Integer noOfRows = detail.getNoOfRows();
-		if (noOfRows <= 0 && container.getType() != null) {
+		Integer noOfRows = null;
+		if (detail.getNoOfRows() != null || detail.isAttrModified("noOfRows")) {
+			noOfRows = detail.getNoOfRows();
+		} else if (container.getType() != null) {
 			noOfRows = container.getType().getNoOfRows();
+		} else {
+			noOfRows = null;
 		}
 
-		if (noOfRows <= 0) {
+		if (noOfRows != null && noOfRows <= 0) {
 			ose.addError(StorageContainerErrorCode.INVALID_DIMENSION_CAPACITY);
 		}
-				
-		container.setNoOfRows(noOfRows);		
+
+		container.setNoOfRows(noOfRows);
 	}
 
 	private void setApproxCapacity(StorageContainerDetail detail, StorageContainer container, OpenSpecimenException ose) {
@@ -298,6 +298,8 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 		try {
 			if (StringUtils.isNotBlank(detail.getPositionLabelingMode())) {
 				container.setPositionLabelingMode(StorageContainer.PositionLabelingMode.valueOf(detail.getPositionLabelingMode()));
+			} else if (container.getType() != null) {
+				container.setPositionLabelingMode(container.getType().getPositionLabelingMode());
 			}
 
 			if (container.getPositionLabelingMode() == StorageContainer.PositionLabelingMode.NONE) {
