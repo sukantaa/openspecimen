@@ -2,7 +2,9 @@ package com.krishagni.catissueplus.core.audit.services.impl;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import com.krishagni.catissueplus.core.audit.domain.UserApiCallLog;
 import com.krishagni.catissueplus.core.audit.domain.factory.AuditErrorCode;
@@ -33,16 +35,8 @@ public class AuditServiceImpl implements AuditService {
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<AuditDetail> getAuditDetail(RequestEvent<AuditQueryCriteria> req) {
-		AuditQueryCriteria crit = req.getPayload();
-		ObjectAccessor accessor = objectAccessorFactory.getAccessor(crit.getObjectName());
-		if (accessor == null) {
-			throw OpenSpecimenException.userError(AuditErrorCode.ENTITY_NOT_FOUND, crit.getObjectName());
-		}
-
-		accessor.ensureReadAllowed(crit.getObjectId());
-		AuditDetail detail = daoFactory.getAuditDao().getAuditDetail(accessor.getAuditTable(), crit.getObjectId());
-		return ResponseEvent.response(detail);
+	public ResponseEvent<List<AuditDetail>> getAuditDetail(RequestEvent<List<AuditQueryCriteria>> req) {
+		return ResponseEvent.response(getAuditDetail(req.getPayload()));
 	}
 
 	@Override
@@ -57,5 +51,23 @@ public class AuditServiceImpl implements AuditService {
 		Date lastApiCallTime = daoFactory.getAuditDao().getLatestApiCallTime(userId, token);
 		long timeSinceLastApiCallInMilli = Calendar.getInstance().getTime().getTime() - lastApiCallTime.getTime();
 		return TimeUnit.MILLISECONDS.toMinutes(timeSinceLastApiCallInMilli);
+	}
+
+	private List<AuditDetail> getAuditDetail(List<AuditQueryCriteria> criteria) {
+		for (AuditQueryCriteria crit : criteria) {
+			ObjectAccessor accessor = objectAccessorFactory.getAccessor(crit.getObjectName());
+			if (accessor == null) {
+				throw OpenSpecimenException.userError(AuditErrorCode.ENTITY_NOT_FOUND, crit.getObjectName());
+			}
+
+			accessor.ensureReadAllowed(crit.getObjectId());
+		}
+
+		return criteria.stream().map(this::getAuditDetail).collect(Collectors.toList());
+	}
+
+	private AuditDetail getAuditDetail(AuditQueryCriteria crit) {
+		ObjectAccessor accessor = objectAccessorFactory.getAccessor(crit.getObjectName());
+		return daoFactory.getAuditDao().getAuditDetail(accessor.getAuditTable(), crit.getObjectId());
 	}
 }

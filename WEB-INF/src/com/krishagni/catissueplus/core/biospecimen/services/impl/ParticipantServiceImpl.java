@@ -3,6 +3,7 @@ package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -34,8 +35,9 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.ConfigChangeListener;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.service.MpiGenerator;
+import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 
-public class ParticipantServiceImpl implements ParticipantService, InitializingBean {
+public class ParticipantServiceImpl implements ParticipantService, ObjectAccessor, InitializingBean {
 	private static Log logger = LogFactory.getLog(ParticipantServiceImpl.class);
 
 	private DaoFactory daoFactory;
@@ -227,6 +229,26 @@ public class ParticipantServiceImpl implements ParticipantService, InitializingB
 			updateParticipant(existing, participant);
 			return ParticipantDetail.from(existing, false);
 		}
+	}
+
+	@Override
+	public String getObjectName() {
+		return Participant.getEntityName();
+	}
+
+	@Override
+	public Map<String, Object> resolveUrl(String key, Object value) {
+		throw new UnsupportedOperationException("Not implemented");
+	}
+
+	@Override
+	public String getAuditTable() {
+		return "CATISSUE_PARTICIPANT_AUD";
+	}
+
+	@Override
+	public void ensureReadAllowed(Long objectId) {
+		AccessCtrlMgr.getInstance().ensureReadParticipantRights(objectId);
 	}
 
 	@Override

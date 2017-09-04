@@ -1097,6 +1097,7 @@
       <list>
         <ref bean="cpSvc"/>
         <ref bean="cprSvc"/>
+        <ref bean="participantSvc"/>
         <ref bean="visitService"/>
         <ref bean="specimenSvc"/>
         <ref bean="storageContainerSvc"/>

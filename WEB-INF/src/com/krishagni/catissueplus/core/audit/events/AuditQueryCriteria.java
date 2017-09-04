@@ -5,16 +5,19 @@ public class AuditQueryCriteria {
 
 	private Long objectId;
 
-	public AuditQueryCriteria(String objectName, Long objectId) {
-		this.objectName = objectName;
-		this.objectId = objectId;
-	}
-
 	public String getObjectName() {
 		return objectName;
 	}
 
+	public void setObjectName(String objectName) {
+		this.objectName = objectName;
+	}
+
 	public Long getObjectId() {
 		return objectId;
+	}
+
+	public void setObjectId(Long objectId) {
+		this.objectId = objectId;
 	}
 }

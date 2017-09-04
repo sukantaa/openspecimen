@@ -1,8 +1,12 @@
 package com.krishagni.catissueplus.rest.controller;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,11 +35,22 @@ public class AuditController {
 
 		@RequestParam(value = "objectId")
 		Long objectId) {
+		AuditQueryCriteria criteriaObj = new AuditQueryCriteria();
+		criteriaObj.setObjectName(objectName);
+		criteriaObj.setObjectId(objectId);
 
-		AuditQueryCriteria crit = new AuditQueryCriteria(objectName, objectId);
-		ResponseEvent<AuditDetail> resp = auditService.getAuditDetail(new RequestEvent<>(crit));
+		List<AuditQueryCriteria> criteria = Collections.singletonList(criteriaObj);
+		ResponseEvent<List<AuditDetail>> resp = auditService.getAuditDetail(new RequestEvent<>(criteria));
+		resp.throwErrorIfUnsuccessful();
+		return resp.getPayload().iterator().next();
+	}
+
+	@RequestMapping(method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<AuditDetail> getAuditInfo(@RequestBody List<AuditQueryCriteria> criteria) {
+		ResponseEvent<List<AuditDetail>> resp = auditService.getAuditDetail(new RequestEvent<>(criteria));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}
-
 }

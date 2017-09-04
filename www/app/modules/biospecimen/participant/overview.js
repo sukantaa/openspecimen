@@ -13,7 +13,11 @@ angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
       $scope.partCtx = {
         obj: {cpr: $scope.cpr},
         inObjs: ['cpr'],
-        showEdit: hasFieldsFn(['cpr'], [])
+        showEdit: hasFieldsFn(['cpr'], []),
+        auditObjs: [
+          {objectId: cpr.id, objectName: 'collection_protocol_registration'},
+          {objectId: cpr.participant.id, objectName: 'participant'}
+        ]
       }
     }
 
