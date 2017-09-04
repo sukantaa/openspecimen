@@ -600,6 +600,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 		cp.setContainerSelectionStrategy(getContainerSelectionStrategy());
 		cp.setAliquotsInSameContainer(getAliquotsInSameContainer());
+		cp.setContainerBasedAccess(getContainerBasedAccess());
 		cp.setActivityStatus(getActivityStatus());
 	}
 	

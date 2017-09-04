@@ -3,7 +3,8 @@
     <div class="left">
       <button show-if-allowed="specimenResource.updateOpts" class="default" ui-sref="specimen-addedit"
         ng-if="!!visit.id && (!specimen.activityStatus || specimen.activityStatus == 'Active')"
-        ng-switch on="!!specimen.id">
+        ng-switch on="!!specimen.id"
+        show-if-spmn-edit-allowed cp="cp" spmn="specimen">
         <span ng-switch-when="true">
           <span class="fa fa-pencil"></span>
           <span translate="common.buttons.edit">Edit</span>
@@ -17,14 +18,16 @@
       <span ng-if="!!specimen.id">
         <button show-if-allowed="specimenResource.updateOpts" class="default" ui-sref="specimen-create-derivative(
           {eventId: visit.eventId, visitId: visit.id, specimenId: specimen.id, srId: specimen.reqId})"
-          ng-if="specimen.activityStatus == 'Active'">
+          ng-if="specimen.activityStatus == 'Active'"
+          show-if-spmn-edit-allowed cp="cp" spmn="specimen">
           <span class="fa fa-flask"></span>
           <span translate="specimens.ctx_menu.create_derivative">Create Derivative</span>
         </button>
 
         <button show-if-allowed="specimenResource.updateOpts" class="default" ui-sref="specimen-create-aliquots(
           {eventId: visit.eventId, visitId: visit.id, specimenId: specimen.id, srId: specimen.reqId})"
-          ng-if="specimen.activityStatus == 'Active'">
+          ng-if="specimen.activityStatus == 'Active'"
+          show-if-spmn-edit-allowed cp="cp" spmn="specimen">
           <span class="fa fa-share-alt"></span>
           <span translate="specimens.ctx_menu.create_aliquots">Create Aliquots</span>
         </button>
@@ -34,7 +37,8 @@
 
         <button show-if-allowed="specimenResource.updateOpts" class="default" ui-sref="specimen-detail.events(
           {eventId: visit.eventId, visitId: visit.id, specimenId: specimen.id, srId: specimen.reqId})"
-          ng-if="specimen.activityStatus == 'Active'">
+          ng-if="specimen.activityStatus == 'Active'"
+          show-if-spmn-edit-allowed cp="cp" spmn="specimen">
           <span class="fa fa-calendar-o"></span>
           <span translate="specimens.ctx_menu.add_event">Add Event</span>
         </button>
@@ -46,28 +50,32 @@
           </button>
           <ul class="dropdown-menu dropdown-menu-right">
             <li show-if-allowed="specimenResource.updateOpts"
-              ng-if="specimen.activityStatus == 'Active' && specimen.status == 'Collected'">
+              ng-if="specimen.activityStatus == 'Active' && specimen.status == 'Collected'"
+              show-if-spmn-edit-allowed cp="cp" spmn="specimen">
               <a ng-click="printSpecimenLabels()">
                 <span class="fa fa-print"></span>
                 <span translate="specimens.buttons.print">Print</span>
               </a>
             </li>
             <li show-if-allowed="specimenResource.updateOpts"
-              ng-if="specimen.activityStatus == 'Active' && specimen.status == 'Collected'">
+              ng-if="specimen.activityStatus == 'Active' && specimen.status == 'Collected'"
+              show-if-spmn-edit-allowed cp="cp" spmn="specimen">
               <a ng-click="closeSpecimen()">
                 <span class="fa fa-remove"></span>
                 <span translate="common.buttons.close">Close</span>
               </a>
             </li>
             <li show-if-allowed="specimenResource.updateOpts"
-              ng-if="specimen.activityStatus == 'Closed'">
+              ng-if="specimen.activityStatus == 'Closed'"
+              show-if-spmn-edit-allowed cp="cp" spmn="specimen">
               <a ng-click="reopen()">
                 <span class="fa fa-check"></span>
                 <span translate="specimens.buttons.reopen">Reopen</span>
               </a>
             </li>
             <li show-if-allowed="specimenResource.deleteOpts"
-              ng-if="!!specimen.id">
+              ng-if="!!specimen.id"
+              show-if-spmn-edit-allowed cp="cp" spmn="specimen">
               <a ng-click="deleteSpecimen()">
                 <span class="fa fa-trash"></span>
                 <span translate="common.buttons.delete">Delete</span>

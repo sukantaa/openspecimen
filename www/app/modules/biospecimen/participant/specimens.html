@@ -153,7 +153,8 @@
                       <span translate="specimens.ctx_menu.view_specimen">View Specimen</span>
                     </a>
                   </li>
-                  <li ng-if="(!allowedOps || allowedOps.update) && specimen.activityStatus == 'Active'">
+                  <li ng-if="(!allowedOps || allowedOps.update) && specimen.activityStatus == 'Active'"
+                      show-if-spmn-edit-allowed cp="cp" spmn="specimen">
                     <a ui-sref="specimen-addedit({
                                   eventId: visit.eventId, visitId: visit.id,
                                   specimenId: specimen.id, srId: specimen.reqId})">
@@ -164,7 +165,8 @@
                   <li class="divider"></li>
                   <li ng-if="(!allowedOps || allowedOps.update) && 
                              specimen.activityStatus == 'Active' && 
-                             !specimen.pooledSpecimen">
+                             !specimen.pooledSpecimen"
+                      show-if-spmn-edit-allowed cp="cp" spmn="specimen">
                     <a ui-sref="specimen-create-aliquots({
                                   eventId: visit.eventId, visitId: visit.id,
                                   specimenId: specimen.id, srId: specimen.reqId})">
@@ -174,7 +176,8 @@
                   </li>
                   <li ng-if="(!allowedOps || allowedOps.update) && 
                              specimen.activityStatus == 'Active' &&
-                             !specimen.pooledSpecimen">
+                             !specimen.pooledSpecimen"
+                      show-if-spmn-edit-allowed cp="cp" spmn="specimen">
                     <a ui-sref="specimen-create-derivative({
                                   eventId: visit.eventId, visitId: visit.id,
                                   specimenId: specimen.id, srId: specimen.reqId})">
@@ -183,7 +186,8 @@
                     </a>
                   </li>
                   <li class="divider"></li>
-                  <li ng-if="(!allowedOps || allowedOps.update) && specimen.activityStatus == 'Active'">
+                  <li ng-if="(!allowedOps || allowedOps.update) && specimen.activityStatus == 'Active'"
+                      show-if-spmn-edit-allowed cp="cp" spmn="specimen">
                     <a ui-sref="specimen-detail.events({
                                   eventId: visit.eventId, visitId: visit.id,
                                   specimenId: specimen.id, srId: specimen.reqId})">
@@ -191,7 +195,8 @@
                       <span translate="specimens.ctx_menu.add_event">Add Event</span>
                     </a>
                   </li>
-                  <li ng-if="(!allowedOps || allowedOps.update) && specimen.activityStatus == 'Active'">
+                  <li ng-if="(!allowedOps || allowedOps.update) && specimen.activityStatus == 'Active'"
+                      show-if-spmn-edit-allowed cp="cp" spmn="specimen">
                     <a ng-click="showCloseSpecimen(specimen)">
                       <i class="fa fa-remove"></i>
                       <span translate="specimens.ctx_menu.close">Close</span>

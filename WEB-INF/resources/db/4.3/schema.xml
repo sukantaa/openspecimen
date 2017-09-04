@@ -7,9 +7,7 @@
 
   <changeSet author="ckhilosiya" id="Container based access control per CP">
     <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
-      <column name="CONTAINER_BASED_ACCESS" type="${boolean.type}" defaultValueBoolean="false">
-        <constraints nullable="false"/>
-      </column>
+      <column name="CONTAINER_BASED_ACCESS" type="${boolean.type}"/>
     </addColumn>
   </changeSet>
 </databaseChangeLog>

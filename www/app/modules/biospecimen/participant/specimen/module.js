@@ -43,40 +43,10 @@ angular.module('os.biospecimen.specimen',
             });
           }
         },
-        controller: function($scope, specimen, cp, SettingUtil) {
+        controller: function($scope, specimen) {
           $scope.specimen = $scope.object = specimen;
           $scope.entityType = 'Specimen';
           $scope.extnState = 'specimen-detail.extensions.';
-
-          if (!!specimen.storageSite) {
-            if (cp.containerBasedAccess) {
-              updateSpecimenResources();
-            } else {
-              SettingUtil.getSetting('biospecimen', 'container_based_access').then(
-                function(setting) {
-                  if (setting.value.toLowerCase() == 'true') {
-                    updateSpecimenResources();
-                  }
-                }
-              );
-            }
-          }
-
-          function updateSpecimenResources() {
-            var containerResource = {resource: 'StorageContainer', operations: ['Read'], sites: [specimen.storageSite]};
-            var resources = {
-              updateOpts: [
-                $scope.specimenResource.updateOpts,
-                containerResource
-              ],
-              deleteOpts: [
-                $scope.specimenResource.deleteOpts,
-                containerResource
-              ]
-            };
-
-            $scope.specimenResource = resources;
-          }
         },
         abstract: true,
         parent: 'visit-root'

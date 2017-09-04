@@ -10,7 +10,7 @@
       call add_cfg_prop(
         'biospecimen', 'container_based_access',
         'container_based_access', 'container_based_access_desc',
-        'BOOLEAN', 'false'
+        'BOOLEAN', 'true'
       );
     </sql>
   </changeSet>
