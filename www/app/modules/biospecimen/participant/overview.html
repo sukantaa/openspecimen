@@ -12,7 +12,8 @@
           Register to Another Protocol
         </span>
       </a>
-      <button show-if-allowed="participantResource.updateOpts" class="default" ng-click="anonymize()">
+      <button ng-if="partCtx.showAnonymize" show-if-allowed="participantResource.updateOpts" class="default"
+        ng-click="anonymize()">
         <span class="fa fa-warning"></span>
         <span translate="participant.buttons.anonymize">Anonymize</span>
       </button>

@@ -2256,7 +2256,9 @@
         "rel_sorting_max_spmns": "Specimens Sorting by Relationship Limit",
         "rel_sorting_max_spmns_desc": "Maximum number of specimens that can be sorted based on their relationship",
         "staged_part_cleanup_int": "Staged Participants Retain Interval",
-        "staged_part_cleanup_int_desc": "Number of days to retain the details of participant in staging table"
+        "staged_part_cleanup_int_desc": "Number of days to retain the details of participant in staging table",
+        "store_phi": "Anonymize Participants",
+        "store_phi_desc": "Enable or disable feature to anonymize participant's PHI data."
       },
 
       "common": {

@@ -1,7 +1,7 @@
 
 angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
   .controller('ParticipantOverviewCtrl', function(
-    $scope, $state, $stateParams, hasFieldsFn, cp, cpr, visits,
+    $scope, $state, $stateParams, hasFieldsFn, storePhi, cp, cpr, visits,
     Visit, CollectSpecimensSvc, ExtensionsUtil, Util, Alerts) {
 
     function init() {
@@ -17,7 +17,8 @@ angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
         auditObjs: [
           {objectId: cpr.id, objectName: 'collection_protocol_registration'},
           {objectId: cpr.participant.id, objectName: 'participant'}
-        ]
+        ],
+        showAnonymize: storePhi
       }
     }
 

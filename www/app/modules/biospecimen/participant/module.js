@@ -429,7 +429,7 @@ angular.module('os.biospecimen.participant',
                 return setting.value == 'true';
               }
             );
-          }, 
+          },
           lockedFields: function(cpr, CpConfigSvc) {
             var participant = cpr.participant || {};
             return CpConfigSvc.getLockedParticipantFields(participant.source || 'OpenSpecimen');
@@ -485,6 +485,15 @@ angular.module('os.biospecimen.participant',
               return '<div ng-include src="\'' + tmpls[0] + '\'"></div>';
             }
           );
+        },
+        resolve: {
+          storePhi: function(SettingUtil) {
+            return SettingUtil.getSetting('biospecimen', 'store_phi').then(
+              function(setting) {
+                return setting.value == 'true';
+              }
+            );
+          }
         },
         controller: 'ParticipantOverviewCtrl',
         parent: 'participant-detail'
