@@ -2,12 +2,14 @@ package com.krishagni.catissueplus.rest.controller;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,28 +55,28 @@ public class UserController {
 	public List<UserSummary> getUsers(
 			@RequestParam(value = "start", required = false, defaultValue = "0") 
 			int start,
-			
+
 			@RequestParam(value = "maxResults", required = false, defaultValue = "100") 
 			int maxResults,
-			
+
 			@RequestParam(value = "searchString", required = false) 
 			String searchString,
-			
+
 			@RequestParam(value = "name", required = false)
 			String name,
-			
+
 			@RequestParam(value = "loginName", required = false)
 			String loginName,
-			
+
 			@RequestParam(value = "institute", required = false)
 			String institute,
-			
+
 			@RequestParam(value = "domainName", required = false)
 			String domainName,
-			
+
 			@RequestParam(value = "activityStatus", required = false)
 			String activityStatus,
-			
+
 			@RequestParam(value = "listAll", required = false, defaultValue = "true")
 			boolean listAll,
 
@@ -82,7 +84,11 @@ public class UserController {
 			boolean includeStats,
 
 			@RequestParam(value = "type", required = false)
-			String type) {
+			String type,
+
+			@RequestParam(value = "activeSince", required = false)
+			@DateTimeFormat(pattern="yyyy-MM-dd")
+			Date activeSince) {
 		
 		UserListCriteria crit = new UserListCriteria()
 			.startAt(start)
@@ -95,7 +101,8 @@ public class UserController {
 			.activityStatus(activityStatus)
 			.listAll(listAll)
 			.includeStat(includeStats)
-			.type(type);
+			.type(type)
+			.activeSince(activeSince);
 		
 		
 		RequestEvent<UserListCriteria> req = new RequestEvent<UserListCriteria>(crit);
@@ -128,7 +135,11 @@ public class UserController {
 			String activityStatus,
 			
 			@RequestParam(value = "listAll", required = false, defaultValue = "true")
-			boolean listAll) {
+			boolean listAll,
+
+			@RequestParam(value = "activeSince", required = false)
+			@DateTimeFormat(pattern="yyyy-MM-dd")
+			Date activeSince) {
 		
 		UserListCriteria crit = new UserListCriteria()
 			.query(searchString)
@@ -137,7 +148,8 @@ public class UserController {
 			.instituteName(institute)
 			.domainName(domainName)
 			.activityStatus(activityStatus)
-			.listAll(listAll);
+			.listAll(listAll)
+			.activeSince(activeSince);
 		
 		RequestEvent<UserListCriteria> req = new RequestEvent<>(crit);
 		ResponseEvent<Long> resp = userService.getUsersCount(req);

@@ -29,6 +29,8 @@ public class UserSummary implements Serializable {
 
 	private String instituteName;
 
+	private String primarySite;
+
 	private Boolean admin;
 	
 	private Boolean instituteAdmin;
@@ -95,6 +97,14 @@ public class UserSummary implements Serializable {
 		this.instituteName = instituteName;
 	}
 
+	public String getPrimarySite() {
+		return primarySite;
+	}
+
+	public void setPrimarySite(String primarySite) {
+		this.primarySite = primarySite;
+	}
+
 	public Boolean getAdmin() {
 		return admin;
 	}
@@ -150,6 +160,10 @@ public class UserSummary implements Serializable {
 
 		if (user.getInstitute() != null) {
 			userSummary.setInstituteName(user.getInstitute().getName());
+		}
+
+		if (user.getPrimarySite() != null) {
+			userSummary.setPrimarySite(user.getPrimarySite().getName());
 		}
 
 		return userSummary;

@@ -150,20 +150,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		}
 
 		List<User> users = daoFactory.getUserDao().getUsers(addUserListCriteria(crit));
-		List<UserSummary> result = UserSummary.from(users);
-		
-		if (req.getPayload().includeStat() && CollectionUtils.isNotEmpty(result)) {
-			Collection<Long> userIds = users.stream().map(User::getId).collect(Collectors.toList());
-			Map<Long, Integer> cpCount = daoFactory.getUserDao().getCpCount(userIds);
-			for (UserSummary user : result) {
-				Integer count = cpCount.get(user.getId());
-				if (count != null) {
-					user.setCpCount(count);
-				}
-			}
-		}
-
-		return ResponseEvent.response(result);
+		return ResponseEvent.response(UserSummary.from(users));
 	}
 	
 	@Override

@@ -24,6 +24,7 @@ import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	
@@ -192,21 +193,6 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 			.executeUpdate();
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Map<Long, Integer> getCpCount(Collection<Long> userIds) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CP_COUNT_BY_USERS)
-			.setParameterList("userIds", userIds)
-			.list();
-
-		Map<Long, Integer> result = new HashMap<>();
-		for (Object[] row : rows) {
-			result.put((Long)row[0], (Integer)row[1]);
-		}
-
-		return result;
-	}
-
 	@Override
 	public List<User> getSuperAndInstituteAdmins(String instituteName) {
 		UserListCriteria crit = new UserListCriteria().activityStatus("Active").type("SUPER");
@@ -276,6 +262,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 		addInstituteRestriction(criteria, listCrit.instituteName());
 		addDomainRestriction(criteria, listCrit.domainName());
 		addTypeRestriction(criteria, listCrit.type());
+		addActiveSinceRestriction(criteria, listCrit.activeSince());
 		return criteria;
 	}
 
@@ -333,6 +320,14 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 			.add(Restrictions.eq("domain.name", domainName));
 	}
 
+	private void addActiveSinceRestriction(Criteria criteria, Date activeSince) {
+		if (activeSince == null) {
+			return;
+		}
+
+		criteria.add(Restrictions.ge("u.creationDate", Utility.chopTime(activeSince)));
+	}
+
 	private List<DependentEntityDetail> getDependentEntities(List<Object[]> rows) {
 		List<DependentEntityDetail> dependentEntities = new ArrayList<DependentEntityDetail>();
 		
@@ -354,8 +349,6 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	private static final String FQN = User.class.getName();
 
 	private static final String GET_DEPENDENT_ENTITIES = FQN + ".getDependentEntities";
-
-	private static final String GET_CP_COUNT_BY_USERS = FQN + ".getCpCountByUsers";
 
 	private static final String TOKEN_FQN = ForgotPasswordToken.class.getName();
 	

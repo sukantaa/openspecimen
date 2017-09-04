@@ -2,6 +2,8 @@ package com.krishagni.catissueplus.core.administrative.repository;
 
 import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 
+import java.util.Date;
+
 public class UserListCriteria extends AbstractListCriteria<UserListCriteria> {
 	private String name;
 	
@@ -16,6 +18,8 @@ public class UserListCriteria extends AbstractListCriteria<UserListCriteria> {
 	private boolean listAll;
 
 	private String type;
+
+	private Date activeSince;
 	
 	@Override
 	public UserListCriteria self() {
@@ -82,6 +86,15 @@ public class UserListCriteria extends AbstractListCriteria<UserListCriteria> {
 
 	public UserListCriteria type(String type) {
 		this.type = type;
+		return self();
+	}
+
+	public Date activeSince() {
+		return activeSince;
+	}
+
+	public UserListCriteria activeSince(Date activeSince) {
+		this.activeSince = activeSince;
 		return self();
 	}
 }

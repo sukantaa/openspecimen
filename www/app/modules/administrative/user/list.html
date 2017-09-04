@@ -50,7 +50,10 @@
             <span translate="user.login_name">Login Name</span>
           </th>
           <th class="col">
-            <span translate="user.cp_count">Collection Protocols</span>
+            <span translate="user.institute">Institute</span>
+          </th>
+          <th class="col">
+            <span translate="user.primary_site">Primary Site</span>
           </th>
           <th class="col">
             <span translate="user.user_since">User Since</span>
@@ -78,11 +81,14 @@
             <span>{{user.loginName}}</span>
           </td>
           <td class="col">
-            <span>{{user.cpCount | number: 0}}</span>
+            <span>{{user.instituteName | osNoValue}}</span>
+          </td>
+          <td class="col">
+            <span>{{user.primarySite | osNoValue}}</span>
           </td>
           <td class="col" ng-switch on="!!user.creationDate">
             <span ng-switch-when="true">
-              {{user.creationDate | date: 'yyyy'}}
+              {{user.creationDate | date: global.dateFmt}}
             </span>
             <span ng-switch-when="false" translate="common.na">
               Not Available

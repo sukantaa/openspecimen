@@ -1029,7 +1029,6 @@
     "user_unlocked": "User unlocked successfully",
     "users_unlocked": "Users unlocked successfully",
     "users_approved": "Users' sign-up request approved successfully",
-    "cp_count": "Collection Protocols",
     "user_since": "User Since",
     "delete_users":  "Are you sure you want to delete selected users?",
     "users_deleted": "Users deleted successfully",

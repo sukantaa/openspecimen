@@ -97,25 +97,6 @@
         de.count > 0
     </sql-query>
 
-    <sql-query name="getCpCountByUsers">
-      <return-scalar column="userId"  type="long"/>
-      <return-scalar column="cpCount" type="int"/>
-
-      select 
-        u.identifier as userId, count(distinct cp.identifier) as cpCount 
-      from 
-        catissue_collection_protocol cp 
-        left join catissue_coll_coordinators cc on cc.collection_protocol_id = cp.identifier 
-        inner join catissue_user u 
-          on u.identifier = cp.principal_investigator_id or u.identifier = cc.user_id 
-      where 
-        u.identifier in (:userIds) and
-        cp.activity_status != 'Disabled' and
-        u.activity_status != 'Disabled'
-      group by 
-        u.identifier
-    </sql-query>
-
     <query name="getActiveUsersEmailIds">
       select
         distinct user.emailAddress
