@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -868,7 +869,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	}
 	
 	private List<FormFieldSummary> getFormFields(Container container) {
-        List<FormFieldSummary> fields = new ArrayList<FormFieldSummary>();
+        List<FormFieldSummary> fields = new ArrayList<>();
 
         for (Control control : container.getControls()) {        	
             FormFieldSummary field = new FormFieldSummary();
@@ -888,11 +889,10 @@ public class FormServiceImpl implements FormService, InitializingBean {
             	                
             	if (control instanceof SelectControl) {
             		SelectControl selectCtrl = (SelectControl)control;
-            		List<String> pvs = new ArrayList<String>();
-            		for (PermissibleValue pv : selectCtrl.getPvs()) {
-            			pvs.add(pv.getValue());
-            		}
-            		
+					List<String> pvs = selectCtrl.getPvDataSource()
+						.getPermissibleValues(Calendar.getInstance().getTime(), 100)
+						.stream().map(PermissibleValue::getValue)
+						.collect(Collectors.toList());
             		field.setPvs(pvs);
             	} else if (control instanceof LookupControl) {
             		LookupControl luCtrl = (LookupControl)control;

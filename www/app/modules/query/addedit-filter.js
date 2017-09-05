@@ -1,5 +1,5 @@
 angular.module('os.query.addeditfilter', ['os.query.models'])
-  .controller('QueryAddEditFilterCtrl', function($scope, QueryUtil, Util) {
+  .controller('QueryAddEditFilterCtrl', function($scope, QueryUtil, Util, Form) {
     $scope.onOpSelect = function() {
       QueryUtil.onOpSelect($scope.queryLocal.currFilter);
     };
@@ -206,6 +206,40 @@ angular.module('os.query.addeditfilter', ['os.query.models'])
       },
 
       methods: {}
+    }
+
+    $scope.searchPv = function(input) {
+      var filter = $scope.queryLocal.currFilter;
+      if (!input) {
+        if (!!filter.field.$$pvs) {
+          filter.field.pvs = filter.field.$$pvs;
+        }
+
+        return;
+      }
+
+      if (!filter.field.$$pvs) {
+        filter.field.$$pvs = filter.field.pvs;
+      }
+
+      if (filter.field.$$pvs.length < 100) {
+        return;
+      }
+
+      var formName  = (filter.form && filter.form.name) || $scope.openForm.name;
+      var fieldName = filter.field.name;
+      if (fieldName.indexOf('extensions.') == 0 || fieldName.indexOf('customFields.') == 0) {
+        var fieldParts = fieldName.split('.');
+        fieldParts.shift();
+        formName  = fieldParts.shift();
+        fieldName = fieldParts.join('.');
+      }
+
+      Form.getPvs(formName, fieldName, input).then(
+        function(pvs) {
+          filter.field.pvs = pvs;
+        }
+      );
     }
   }
 );

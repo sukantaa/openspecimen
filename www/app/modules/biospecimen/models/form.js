@@ -120,6 +120,15 @@ angular.module('os.biospecimen.models.form', ['os.common.models'])
         .then(Form.modelArrayRespTransform);
     }
 
+    Form.getPvs = function(formName, fieldName, search) {
+      var params = {formName: formName, controlName: fieldName, searchString: search, useUdn: true};
+      return $http.get(Form.url() + 'permissible-values', {params: params}).then(
+        function(resp) {
+          return resp.data.map(function(pv) { return pv.value; });
+        }
+      );
+    }
+
     Form.prototype.getRecords = function() {
       var result = [];
       var params = {objectId: this.objectId, entityType: this.entityType};

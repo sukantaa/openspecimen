@@ -18,14 +18,14 @@
       <div id="value" ng-switch="queryLocal.currFilter.valueType">
         <div ng-switch-when="select">
           <os-select ng-model="queryLocal.currFilter.value"
-            list="queryLocal.currFilter.field.pvs"
+            list="queryLocal.currFilter.field.pvs" refresh="searchPv"
             placeholder="{{'queries.select_cond_value' | translate}}">
           </os-select>
         </div>
         <div ng-switch-when="multiSelect">
           <os-select multiple
             ng-model="queryLocal.currFilter.value"
-            list="queryLocal.currFilter.field.pvs"
+            list="queryLocal.currFilter.field.pvs" refresh="searchPv"
             placeholder="{{'queries.select_cond_values' | translate}}">
           </os-select>
         </div>
