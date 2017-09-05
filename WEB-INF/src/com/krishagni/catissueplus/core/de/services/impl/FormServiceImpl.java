@@ -677,21 +677,9 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			String searchStr = input.getSearchString();
 			int maxResults = input.getMaxResults() <= 0 ? 100 : input.getMaxResults();
 
-			List<PermissibleValue> pvs = ((SelectControl) control).getPvs();
-			List<PermissibleValue> selectedPvs = new ArrayList<PermissibleValue>();
-			for (PermissibleValue pv : pvs) {
-				if (StringUtils.isNotBlank(searchStr) &&
-						StringUtils.lastIndexOfIgnoreCase(pv.getValue(), searchStr) == -1) {
-					continue;
-				}
-				
-				selectedPvs.add(pv);
-				if (--maxResults == 0) {
-					break;
-				}
-			}
-			
-			return ResponseEvent.response(selectedPvs);
+			SelectControl selectControl = (SelectControl) control;
+			List<PermissibleValue> pvs = selectControl.getPvDataSource().getPermissibleValues(searchStr, maxResults);
+			return ResponseEvent.response(pvs);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}
