@@ -5,7 +5,7 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-  <changeSet author="ckhilosiya" id="Audit container based access control per CP">
+  <changeSet author="ckhilosiya" id="Audit and track changes to CP container based access setting">
     <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
       <column name="CONTAINER_BASED_ACCESS" type="${boolean.type}"/>
       <column name="containerBasedAccess_MOD" type="${bit.type}"/>

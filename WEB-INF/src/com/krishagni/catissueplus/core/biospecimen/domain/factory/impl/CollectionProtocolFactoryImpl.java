@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
@@ -110,7 +109,7 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		setLabelFormats(input, cp, ose);
 		setBarcodeSetting(input, cp, ose);
 		setContainerSelectionStrategy(input, cp, ose);
-		cp.setContainerBasedAccess(BooleanUtils.isTrue(input.getContainerBasedAccess()));
+		setContainerBasedAccess(input, cp, ose);
 		setVisitCollectionMode(input, cp, ose);
 		setVisitNamePrintMode(input, cp, ose);
 		cp.setVisitNamePrintCopies(input.getVisitNamePrintCopies());
@@ -370,6 +369,14 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 
 		result.setContainerSelectionStrategy(strategy);
 		result.setAliquotsInSameContainer(input.getAliquotsInSameContainer());
+	}
+
+	private void setContainerBasedAccess(CollectionProtocolDetail input, CollectionProtocol result, OpenSpecimenException ose) {
+		if (input.getContainerBasedAccess() == null) {
+			return;
+		}
+
+		result.setContainerBasedAccess(input.getContainerBasedAccess());
 	}
 
 	private void setVisitCollectionMode(CollectionProtocolDetail input, CollectionProtocol cp, OpenSpecimenException ose) {

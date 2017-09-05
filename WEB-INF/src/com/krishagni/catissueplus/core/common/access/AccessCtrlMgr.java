@@ -19,16 +19,15 @@ import com.krishagni.catissueplus.core.administrative.domain.Shipment;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.User;
-import com.krishagni.catissueplus.core.administrative.domain.factory.InstituteErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
 import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolSite;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
-import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolSite;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CprErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantErrorCode;
@@ -752,10 +751,20 @@ public class AccessCtrlMgr {
 	}
 
 	private void ensureSpecimenContainerRights(Specimen specimen) {
-		boolean checkAccess = ConfigUtil.getInstance().getBoolSetting("biospecimen", CONTAINER_BASED_ACCESS, false);
-		if ((checkAccess || specimen.getCollectionProtocol().getContainerBasedAccess()) && specimen.getPosition() != null) {
-			ensureReadContainerRights(specimen.getPosition().getContainer());
+		if (specimen.getPosition() == null) {
+			return;
 		}
+
+		Boolean checkAccess = specimen.getCollectionProtocol().getContainerBasedAccess();
+		if (checkAccess == null) {
+			checkAccess = ConfigUtil.getInstance().getBoolSetting(ConfigParams.MODULE, ConfigParams.CONTAINER_BASED_ACCESS, false);
+		}
+
+		if (!checkAccess) {
+			return;
+		}
+
+		ensureReadContainerRights(specimen.getPosition().getContainer());
 	}
 
 	private boolean ensureVisitAndSpecimenObjectRights(CollectionProtocolRegistration cpr, Operation op, boolean checkPhiAccess) {
@@ -1462,6 +1471,4 @@ public class AccessCtrlMgr {
 	private boolean isImportOp() {
 		return ImporterContextHolder.getInstance().isImportOp();
 	}
-
-	private static final String CONTAINER_BASED_ACCESS = "container_based_access";
 }

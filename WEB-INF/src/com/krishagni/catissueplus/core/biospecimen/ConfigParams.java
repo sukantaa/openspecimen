@@ -63,6 +63,8 @@ public class ConfigParams {
 
 	public static final String ENABLE_SPMN_BARCODING     = "enable_spmn_barcoding";
 
+	public static final String CONTAINER_BASED_ACCESS    = "container_based_access";
+
 	public static String getConsentsDirPath() {
 		String path = ConfigUtil.getInstance().getStrSetting(MODULE, CONSENTS_DIR, null);
 		if (StringUtils.isBlank(path)) {

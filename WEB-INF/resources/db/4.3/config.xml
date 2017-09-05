@@ -5,7 +5,7 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-  <changeSet author="ckhilosiya" id="Setting to enable container based access control">
+  <changeSet author="ckhilosiya" id="Setting to enable or disable container based access control">
     <sql>
       call add_cfg_prop(
         'biospecimen', 'container_based_access',
