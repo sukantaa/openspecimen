@@ -11,6 +11,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
@@ -31,6 +32,10 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 	private String ppid;
 	
 	private Long eventId;
+
+	private String eventCode;
+
+	private String eventLabel;
 	
 	private Long visitId;
 	
@@ -128,6 +133,22 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 
 	public void setEventId(Long eventId) {
 		this.eventId = eventId;
+	}
+
+	public String getEventCode() {
+		return eventCode;
+	}
+
+	public void setEventCode(String eventCode) {
+		this.eventCode = eventCode;
+	}
+
+	public String getEventLabel() {
+		return eventLabel;
+	}
+
+	public void setEventLabel(String eventLabel) {
+		this.eventLabel = eventLabel;
 	}
 
 	public Long getVisitId() {
@@ -377,6 +398,12 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		result.setReqId(sr != null ? sr.getId() : null);
 		result.setReqLabel(sr != null ? sr.getName() : null);
 		result.setSortOrder(sr != null ? sr.getSortOrder() : null);
+
+		CollectionProtocolEvent cpe = sr != null ? sr.getCollectionProtocolEvent() : null;
+		result.setEventId(cpe != null ? cpe.getId() : null);
+		result.setEventCode(cpe != null ? cpe.getCode() : null);
+		result.setEventLabel(cpe != null ? cpe.getEventLabel() : null);
+
 		result.setLabel(specimen.getLabel());
 		result.setBarcode(specimen.getBarcode());
 		result.setType(specimen.getSpecimenType());
@@ -426,7 +453,11 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 	}	
 	
 	public static SpecimenInfo fromTo(SpecimenRequirement anticipated, SpecimenInfo result) {
-		result.setId(null);	
+		CollectionProtocolEvent cpe = anticipated.getCollectionProtocolEvent();
+		result.setId(null);
+		result.setEventId(cpe != null ? cpe.getId() : null);
+		result.setEventCode(cpe != null ? cpe.getCode() : null);
+		result.setEventLabel(cpe != null ? cpe.getEventLabel() : null);
 		result.setReqId(anticipated.getId());
 		result.setReqLabel(anticipated.getName());
 		result.setSortOrder(anticipated.getSortOrder());
