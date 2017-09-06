@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.krishagni.catissueplus.core.audit.events.AuditDetail;
 import com.krishagni.catissueplus.core.audit.events.AuditQueryCriteria;
+import com.krishagni.catissueplus.core.audit.events.RevisionDetail;
 import com.krishagni.catissueplus.core.audit.services.AuditService;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -35,12 +36,12 @@ public class AuditController {
 
 		@RequestParam(value = "objectId")
 		Long objectId) {
-		AuditQueryCriteria criteriaObj = new AuditQueryCriteria();
-		criteriaObj.setObjectName(objectName);
-		criteriaObj.setObjectId(objectId);
 
-		List<AuditQueryCriteria> criteria = Collections.singletonList(criteriaObj);
-		ResponseEvent<List<AuditDetail>> resp = auditService.getAuditDetail(new RequestEvent<>(criteria));
+		AuditQueryCriteria criteria = new AuditQueryCriteria();
+		criteria.setObjectName(objectName);
+		criteria.setObjectId(objectId);
+
+		ResponseEvent<List<AuditDetail>> resp = auditService.getAuditDetail(new RequestEvent<>(Collections.singletonList(criteria)));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload().iterator().next();
 	}
@@ -50,6 +51,34 @@ public class AuditController {
 	@ResponseBody
 	public List<AuditDetail> getAuditInfo(@RequestBody List<AuditQueryCriteria> criteria) {
 		ResponseEvent<List<AuditDetail>> resp = auditService.getAuditDetail(new RequestEvent<>(criteria));
+		resp.throwErrorIfUnsuccessful();
+		return resp.getPayload();
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value="/revisions")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<RevisionDetail> getRevisions(
+		@RequestParam("objectName")
+		String objectName,
+
+		@RequestParam("objectId")
+		Long objectId) {
+
+		AuditQueryCriteria criteria = new AuditQueryCriteria();
+		criteria.setObjectName(objectName);
+		criteria.setObjectId(objectId);
+
+		ResponseEvent<List<RevisionDetail>> resp = auditService.getRevisions(new RequestEvent<>(Collections.singletonList(criteria)));
+		resp.throwErrorIfUnsuccessful();
+		return resp.getPayload();
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value="/revisions")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<RevisionDetail> getRevisions(@RequestBody List<AuditQueryCriteria> criteria) {
+		ResponseEvent<List<RevisionDetail>> resp = auditService.getRevisions(new RequestEvent<>(criteria));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}

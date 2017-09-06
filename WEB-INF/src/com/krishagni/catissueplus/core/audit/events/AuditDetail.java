@@ -14,6 +14,8 @@ public class AuditDetail {
 
 	private Date lastUpdatedOn;
 
+	private Integer revisionsCount;
+
 	public UserSummary getCreatedBy() {
 		return createdBy;
 	}
@@ -44,5 +46,13 @@ public class AuditDetail {
 
 	public void setLastUpdatedOn(Date lastUpdatedOn) {
 		this.lastUpdatedOn = lastUpdatedOn;
+	}
+
+	public Integer getRevisionsCount() {
+		return revisionsCount;
+	}
+
+	public void setRevisionsCount(Integer revisionsCount) {
+		this.revisionsCount = revisionsCount;
 	}
 }
