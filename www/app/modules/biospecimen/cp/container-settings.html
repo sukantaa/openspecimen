@@ -36,14 +36,23 @@
           </div>
         </div>
 
-        <div class="form-group clearfix">
-          <div class="col-xs-offset-3 col-xs-6 os-text-checkbox">
-            <div class="checkbox">
-              <os-checkbox ng-model="contSettingsCtx.cp.containerBasedAccess"></os-checkbox>
-            </div>
-            <div class="message os-ctrl-padding-top">
-              <span translate="cp.container.container_based_access">Container Site Based Access</span>
-            </div>
+        <div class="form-group">
+          <label class="control-label col-xs-3">
+            <span translate="cp.container.container_based_access">Container Based Access</span>
+          </label>
+          <div class="col-xs-6">
+            <label class="radio-inline">
+              <input type="radio" name="containerBasedAccess" ng-model="contSettingsCtx.cp.containerBasedAccess" ng-value="true">
+              <span translate="common.yes">Yes</span>
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="containerBasedAccess" ng-model="contSettingsCtx.cp.containerBasedAccess" ng-value="false">
+              <span translate="common.no">No</span>
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="containerBasedAccess" ng-model="contSettingsCtx.cp.containerBasedAccess" ng-value="null">
+              <span translate="common.use_system_setting">Use System Setting</span>
+            </label>
           </div>
         </div>
 
@@ -78,7 +87,17 @@
             Container Site Based Access
           </strong>
           <span class="value value-md">
-            {{contSettingsCtx.cp.containerBasedAccess | osNoValue}}
+            <span ng-switch="contSettingsCtx.cp.containerBasedAccess">
+              <span ng-switch-when="true" translate="cp.container.container_based_access_true">
+                Specimen storage container site based access
+              </span>
+              <span ng-switch-when="false" translate="cp.container.container_based_access_false">
+                Specimen Collection Protocol sites based access
+              </span>
+              <span ng-switch-default translate="common.use_system_setting">
+                Use System Setting
+              </span>
+            </span>
           </span>
         </li>
       </ul>

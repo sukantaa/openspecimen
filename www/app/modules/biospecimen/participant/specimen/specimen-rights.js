@@ -1,5 +1,5 @@
 angular.module('openspecimen')
-  .directive('showIfSpmnEditAllowed', function(AuthorizationService, SettingUtil) {
+  .directive('showIfSpmnOpAllowed', function(AuthorizationService, SettingUtil) {
     function ensureEditAllowed(spmn, element) {
       var containerReadOpt = {resource: 'StorageContainer', operations: ['Read'], sites: [spmn.storageSite]}
       if (!AuthorizationService.isAllowed(containerReadOpt)) {
@@ -10,15 +10,21 @@ angular.module('openspecimen')
     return {
       restrict: 'A',
       link: function(scope, element, attrs) {
-        scope.$watchGroup([attrs.cp, attrs.spmn], function(newValues) {
-          var cp = newValues[0];
-          var spmn = newValues[1];
+        scope.$watchGroup([attrs.showIfSpmnOpAllowed, attrs.cp, attrs.spmn], function(newValues) {
+          var opAllowed = newValues[0];
+          var cp = newValues[1];
+          var spmn = newValues[2];
+
+          if (!opAllowed) {
+            element.remove();
+            return;
+          }
 
           if (!spmn.storageSite) {
             return;
           }
 
-          if (cp.containerBasedAccess != undefined || cp.containerBasedAccess != null) {
+          if (cp.containerBasedAccess != undefined && cp.containerBasedAccess != null) {
             if (cp.containerBasedAccess) {
               ensureEditAllowed(spmn, element);
             }

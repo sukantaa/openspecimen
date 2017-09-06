@@ -77,6 +77,7 @@
     "footer_note": "<a href=\"http://www.openspecimen.org\" target=\"_blank\">OpenSpecimen</a> - powered by <a href=\"http://www.krishagni.com\" target=\"_blank\">Krishagni</a>",
     "download_initiated": "Download of file initiated. Please check your download directory ...",
     "error": "Error",
+    "use_system_setting": "Use System Setting",
 
     "filters": {
       "title": "Filters",
@@ -297,7 +298,9 @@
       "title": "Container Settings",
       "auto_alloc": "Auto Allocation",
       "store_aliquots_same_box": "Store aliquots in same box",
-      "container_based_access": "Container Site Based Access"
+      "container_based_access": "Container Site Based Access",
+      "container_based_access_true": "Specimen storage container site based access",
+      "container_based_access_false": "Specimen Collection Protocol sites based access"
     },
 
     "visit_name_print_modes": {
