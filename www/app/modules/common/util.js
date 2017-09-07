@@ -47,13 +47,10 @@ angular.module('openspecimen')
 
         $scope._filterQ = $timeout(
           function() {
-            var filters = newVal;
+            var filters = angular.copy(newVal);
 
             excludeParams = excludeParams || ['includeStats', 'maxResults'];
-            if (excludeParams.length > 0) {
-              filters = angular.copy(filters);
-              angular.forEach(excludeParams, function(param) { delete filters[param]; });
-            }
+            angular.forEach(excludeParams, function(param) { delete filters[param]; });
 
             angular.forEach(filters,
               function(value, key) {

@@ -5,7 +5,6 @@ angular.module('os.query.list', ['os.query.models'])
     Util, SavedQuery, QueryFolder, Alerts) {
 
     function init() {
-      console.log("init");
       $scope.filterOpts = Util.filterOpts({searchString: ''});
       $scope.queryList = [];
       $scope.selectedQueries = [];
