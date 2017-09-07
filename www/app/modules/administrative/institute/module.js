@@ -10,7 +10,7 @@ angular.module('os.administrative.institute',
   .config(function($stateProvider) {
     $stateProvider
       .state('institute-list', {
-        url: '/institutes',
+        url: '/institutes?filters',
         templateUrl: 'modules/administrative/institute/list.html',
         controller: 'InstituteListCtrl',
         parent: 'signed-in'

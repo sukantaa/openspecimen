@@ -179,7 +179,7 @@ angular.module('os.biospecimen.participant',
         abstract: true
       })
       .state('participant-list', {
-        url: '/participants',
+        url: '/participants?filters',
         templateUrl: 'modules/biospecimen/participant/list.html',
         controller: 'ParticipantListCtrl',
         resolve: {
@@ -196,7 +196,7 @@ angular.module('os.biospecimen.participant',
         parent: 'cp-list-view-root'
       })
       .state('cp-specimens', {
-        url: '/specimens',
+        url: '/specimens?filters',
         templateUrl: 'modules/biospecimen/participant/specimens-list.html',
         controller: 'SpecimensListViewCtrl',
         resolve: {

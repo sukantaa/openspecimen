@@ -37,7 +37,7 @@ angular.module('os.query',
        parent: 'signed-in'
      })
      .state('query-list', {
-       url: '/list?folderId',
+       url: '/list?folderId&filters',
        templateUrl: 'modules/query/list.html',
        controller: 'QueryListCtrl',
        resolve: {

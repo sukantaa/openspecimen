@@ -3,7 +3,7 @@ angular.module('os.biospecimen.consentstatement', ['os.biospecimen.models'])
   .config(function($stateProvider) {
     $stateProvider
       .state('consent-statement-list', {
-        url: '/consent-statements',
+        url: '/consent-statements?filters',
         templateUrl: 'modules/biospecimen/consent-statement/list.html',
         controller: 'ConsentStatementListCtrl',
         parent: 'signed-in'

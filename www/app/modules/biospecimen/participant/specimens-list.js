@@ -15,7 +15,7 @@ angular.module('os.biospecimen.participant')
 
       $scope.ctx = {
         filtersCfg: angular.copy(spmnListCfg.filters),
-        filters: {},
+        filters: Util.filterOpts({}),
         specimens: {},
         listSize: -1,
         resourceOpts: {
@@ -34,7 +34,6 @@ angular.module('os.biospecimen.participant')
         showSearch: (spmnListCfg.filters && spmnListCfg.filters.length > 0)
       });
 
-      loadSpecimens();
       Util.filter($scope, 'ctx.filters', loadSpecimens);
     }
 
@@ -110,6 +109,7 @@ angular.module('os.biospecimen.participant')
 
     $scope.setFiltersCtrl = function($listFilters) {
       $scope.ctx.$listFilters = $listFilters;
+      loadSpecimens();
     }
 
     this.getSelectedSpecimens = function() {

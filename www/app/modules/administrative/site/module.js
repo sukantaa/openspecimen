@@ -10,7 +10,7 @@ angular.module('os.administrative.site',
   .config(function($stateProvider) {
     $stateProvider
       .state('site-list', {
-        url: '/sites',
+        url: '/sites?filters',
         templateUrl: 'modules/administrative/site/list.html',
         controller: 'SiteListCtrl',
         parent: 'signed-in'

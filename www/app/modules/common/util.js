@@ -1,6 +1,9 @@
 
 angular.module('openspecimen')
-  .factory('Util', function($rootScope, $timeout, $document, $q, $parse, $modal, $translate, $http, ApiUrls, Alerts) {
+  .factory('Util', function(
+    $rootScope, $state, $stateParams, $timeout, $document, $q,
+    $parse, $modal, $translate, $http, osRightDrawerSvc, ApiUrls, Alerts) {
+
     var isoDateRe = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
     function clear(input) {
       input.splice(0, input.length);
@@ -15,7 +18,24 @@ angular.module('openspecimen')
       unshiftAll(arr, elements);
     };
 
-    function filter($scope, varName, callback) {
+    function filterOpts(opts, filters) {
+      if (!filters) {
+        filters = $stateParams.filters;
+      }
+
+      if (!!filters) {
+        try {
+          angular.extend(opts, angular.fromJson(atob(filters)));
+          osRightDrawerSvc.open();
+        } catch (e) {
+          console.log("Invalid filter");
+        }
+      }
+
+      return opts;
+    }
+
+    function filter($scope, varName, callback, excludeParams) {
       $scope.$watch(varName, function(newVal, oldVal) {
         if (newVal == oldVal) {
           return;
@@ -27,6 +47,27 @@ angular.module('openspecimen')
 
         $scope._filterQ = $timeout(
           function() {
+            var filters = newVal;
+
+            excludeParams = excludeParams || ['includeStats', 'maxResults'];
+            if (excludeParams.length > 0) {
+              filters = angular.copy(filters);
+              angular.forEach(excludeParams, function(param) { delete filters[param]; });
+            }
+
+            angular.forEach(filters,
+              function(value, key) {
+                if (!value) { delete filters[key]; }
+              }
+            );
+
+            var fb = undefined;
+            if (Object.keys(filters).length > 0) {
+              fb = btoa(JSON.stringify(filters));
+            }
+
+            $stateParams.filters = fb;
+            $state.go($state.current.name, $stateParams, {notify: false});
             callback(newVal);
           },
           $rootScope.global.filterWaitInterval
@@ -428,6 +469,8 @@ angular.module('openspecimen')
       unshiftAll: unshiftAll,
 
       assign: assign,
+
+      filterOpts: filterOpts,
 
       filter: filter,
 

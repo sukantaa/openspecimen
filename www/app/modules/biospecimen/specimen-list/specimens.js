@@ -9,7 +9,7 @@ angular.module('os.biospecimen.specimenlist')
       $scope.ctx = {
         list: list,
         spmnsInView: [],
-        filterOpts: {},
+        filterOpts: Util.filterOpts({}),
         filterPvs: {init: false},
         selection: {all: false, any: false, specimens: []},
         url: SpecimenList.url(),

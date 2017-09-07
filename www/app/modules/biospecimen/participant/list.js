@@ -16,7 +16,7 @@ angular.module('os.biospecimen.participant.list', ['os.biospecimen.models'])
 
       $scope.ctx = {
         filtersCfg: angular.copy(participantListCfg.filters),
-        filters: {},
+        filters: Util.filterOpts({}),
         participants: {},
         listSize: -1
       };
@@ -30,7 +30,6 @@ angular.module('os.biospecimen.participant.list', ['os.biospecimen.models'])
         showSearch: (participantListCfg.filters && participantListCfg.filters.length > 0)
       });
 
-      loadParticipants();
       Util.filter($scope, 'ctx.filters', loadParticipants);
     }
 
@@ -87,6 +86,7 @@ angular.module('os.biospecimen.participant.list', ['os.biospecimen.models'])
 
     $scope.setFiltersCtrl = function($listFilters) {
       $scope.ctx.$listFilters = $listFilters;
+      loadParticipants();
     }
 
     this.pagerOpts = function() {

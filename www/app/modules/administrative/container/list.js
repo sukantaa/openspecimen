@@ -5,18 +5,18 @@ angular.module('os.administrative.container.list', ['os.administrative.models'])
 
     function init() {
       pagerOpts = $scope.pagerOpts = new ListPagerOpts({listSizeGetter: getContainersCount});
-      $scope.containerFilterOpts = {
+      $scope.containerFilterOpts = Util.filterOpts({
         maxResults: pagerOpts.recordsPerPage + 1,
         includeStats: true,
         topLevelContainers: true
-      };
+      });
 
       $scope.ctx = {
         exportDetail: { objectType: 'storageContainer' }
       }
 
       loadContainers($scope.containerFilterOpts);
-      Util.filter($scope, 'containerFilterOpts', loadContainers);
+      Util.filter($scope, 'containerFilterOpts', loadContainers, ['maxResults', 'includeStats', 'topLevelContainers']);
     }
 
     function loadContainers(filterOpts) {

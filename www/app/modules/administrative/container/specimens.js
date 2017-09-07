@@ -1,10 +1,10 @@
 angular.module('os.administrative.container')
   .controller('ContainerSpecimensCtrl', function(
-    $scope, $state, container, currentUser, Util, CollectionProtocol,
+    $scope, $state, $stateParams, container, currentUser, Util, CollectionProtocol,
     Container, SpecimensHolder, Alerts, CheckList, ListPagerOpts) {
 
     function init() {
-      $scope.ctx.showTree = true;
+      $scope.ctx.showTree = !$stateParams.filters;
       $scope.ctx.viewState = 'container-detail.specimens';
 
       var pagerOpts = new ListPagerOpts({listSizeGetter: getSpecimensCount});
@@ -13,7 +13,7 @@ angular.module('os.administrative.container')
         specimens: [],
         cps: [],
         containers: [],
-        filterOpts: {maxResults: pagerOpts.recordsPerPage + 1},
+        filterOpts: Util.filterOpts({maxResults: pagerOpts.recordsPerPage + 1}),
         checkList: new CheckList([]),
         pagerOpts: pagerOpts
       };

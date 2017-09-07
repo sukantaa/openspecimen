@@ -8,7 +8,7 @@ angular.module('os.administrative.dp.list', ['os.administrative.models'])
 
     function init() {
       pagerOpts = $scope.pagerOpts = new ListPagerOpts({listSizeGetter: getDpsCount});
-      $scope.dpFilterOpts = {includeStats: true, maxResults: pagerOpts.recordsPerPage + 1};
+      $scope.dpFilterOpts = Util.filterOpts({includeStats: true, maxResults: pagerOpts.recordsPerPage + 1});
       $scope.ctx = {};
       loadDps($scope.dpFilterOpts);
       Util.filter($scope, 'dpFilterOpts', loadDps);

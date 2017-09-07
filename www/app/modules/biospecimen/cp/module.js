@@ -58,13 +58,14 @@ angular.module('os.biospecimen.cp',
         parent: 'signed-in'
       })
       .state('cp-list', {
-        url: '', 
+        url: '?filters', 
         templateUrl: 'modules/biospecimen/cp/list.html',
         controller: 'CpListCtrl',
         parent: 'cps',
         resolve: {
-          cpList: function(CollectionProtocol, ListPagerOpts) {
-            return CollectionProtocol.list({maxResults: ListPagerOpts.MAX_PAGE_RECS + 1});
+          cpList: function($stateParams, CollectionProtocol, ListPagerOpts, Util) {
+            var filterOpts = Util.filterOpts({maxResults: ListPagerOpts.MAX_PAGE_RECS + 1}, $stateParams.filters);
+            return CollectionProtocol.list(filterOpts);
           },
           
           view: function($rootScope, $state, cpList) {

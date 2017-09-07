@@ -3,7 +3,7 @@ angular.module('os.biospecimen.specimenlist')
 
     function init() {
       pagerOpts = $scope.pagerOpts = angular.extend(pagerOpts, {listSizeGetter: getSpecimenListsCount});
-      $scope.ctx = {filterOpts: {maxResults: pagerOpts.recordsPerPage + 1}};
+      $scope.ctx = {filterOpts: Util.filterOpts({maxResults: pagerOpts.recordsPerPage + 1})};
 
       setList(lists);
       Util.filter($scope, 'ctx.filterOpts', loadLists);

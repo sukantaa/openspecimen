@@ -12,7 +12,7 @@ angular.module('os.administrative.order.list', ['os.administrative.models'])
       $scope.dps = [];
       $scope.instituteNames = [];
       pagerOpts = $scope.pagerOpts = new ListPagerOpts({listSizeGetter: getOrdersCount, recordsPerPage: 50});
-      $scope.filterOpts = {maxResults: pagerOpts.recordsPerPage + 1};
+      $scope.filterOpts = Util.filterOpts({maxResults: pagerOpts.recordsPerPage + 1});
 
       loadOrders($scope.filterOpts);
       Util.filter($scope, 'filterOpts', loadOrders);

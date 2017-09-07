@@ -13,13 +13,14 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
       $scope.ctx = {
         exportDetail: {objectType: 'user'}
       };
+
       initPvsAndFilterOpts();
       loadUsers($scope.userFilterOpts);
       ItemsHolder.setItems('users', undefined);
     }
   
     function initPvsAndFilterOpts() {
-      $scope.userFilterOpts = {includeStats: true, maxResults: pagerOpts.recordsPerPage + 1};
+      $scope.userFilterOpts = Util.filterOpts({includeStats: true, maxResults: pagerOpts.recordsPerPage + 1});
       $scope.$on('osRightDrawerOpen', function() {
         if (pvInit) {
           return;

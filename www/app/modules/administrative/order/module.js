@@ -24,7 +24,7 @@ angular.module('os.administrative.order',
         parent: 'signed-in'
       })
       .state('order-list', {
-        url: '/orders',
+        url: '/orders?filters',
         templateUrl: 'modules/administrative/order/list.html',     
         controller: 'OrderListCtrl',
         parent: 'order-root'

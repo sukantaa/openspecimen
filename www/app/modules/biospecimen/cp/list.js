@@ -8,7 +8,7 @@ angular.module('os.biospecimen.cp.list', ['os.biospecimen.models'])
 
     function init() {
       pagerOpts  = $scope.pagerOpts    = new ListPagerOpts({listSizeGetter: getCpCount});
-      filterOpts = $scope.cpFilterOpts = {maxResults: pagerOpts.recordsPerPage + 1};
+      filterOpts = $scope.cpFilterOpts = Util.filterOpts({maxResults: pagerOpts.recordsPerPage + 1});
 
       $scope.allowReadJobs = AuthorizationService.isAllowed($scope.participantResource.createOpts) ||
         AuthorizationService.isAllowed($scope.participantResource.updateOpts) ||

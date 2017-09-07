@@ -20,7 +20,7 @@ angular.module('os.administrative.form',
         parent: 'signed-in'
       })
       .state('form-list', {
-        url: '/forms',
+        url: '/forms?filters',
         templateUrl: 'modules/administrative/form/list.html',
         controller: 'FormListCtrl',
         parent: 'form-root'

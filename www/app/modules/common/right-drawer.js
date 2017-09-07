@@ -6,6 +6,8 @@ angular.module('openspecimen')
       link: function(scope, element, attrs) {
         element.addClass('os-right-drawer').removeAttr('os-right-drawer');
         osRightDrawerSvc.setDrawer(element);
+
+        scope.$on('$destroy', function() { osRightDrawerSvc.reset(); });
       }
     };
   })
@@ -21,6 +23,8 @@ angular.module('openspecimen')
   })
   .factory('osRightDrawerSvc', function() {
     var drawerEl = undefined;
+
+    var currentState;
     
     function setCardsViewWidth(width) {
       var cardsDiv = drawerEl.parent().find("div.container, div.os-cards, div.os-list-container");
@@ -28,6 +32,7 @@ angular.module('openspecimen')
     }
 
     function open() {
+      currentState = 'open';
       if (!drawerEl || drawerEl.hasClass('active')) {
         return;
       }
@@ -39,7 +44,8 @@ angular.module('openspecimen')
     }
 
     function close() {
-      if (!drawerEl.hasClass('active')) {
+      currentState = 'close';
+      if (!drawerEl || !drawerEl.hasClass('active')) {
         return;
       }
 
@@ -51,18 +57,23 @@ angular.module('openspecimen')
     return {
       setDrawer: function(drawer) {
         drawerEl = drawer;
+        if (currentState == 'open') {
+          open();
+        } else if (currentState == 'close') {
+          close();
+        }
       },
 
       toggle: function() {
-        if (drawerEl.hasClass('active')) {
-          close();
-        } else {
-          open();
-        }
+        drawerEl.hasClass('active') ? close() : open();
       },
 
       open: open,
 
-      close: close
+      close: close,
+
+      reset: function() {
+        currentState = drawerEl = undefined;
+      }
     }
   });

@@ -2,12 +2,8 @@ angular.module('os.biospecimen.consentstatement')
   .controller('ConsentStatementListCtrl', function($scope, $state, ConsentStatement, Util) {
 
     function init() {
-      $scope.ctx = {
-        statements: [],
-        filterOpts: {}
-      };
-
-      loadStmts();
+      $scope.ctx = { statements: [], filterOpts: Util.filterOpts({}) };
+      loadStmts($scope.ctx.filterOpts);
       Util.filter($scope, 'ctx.filterOpts', loadStmts);
     }
 

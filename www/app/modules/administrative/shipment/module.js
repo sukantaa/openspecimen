@@ -24,7 +24,7 @@ angular.module('os.administrative.shipment',
         parent: 'signed-in'
       })
       .state('shipment-list', {
-        url: '/shipments',
+        url: '/shipments?filters',
         templateUrl: 'modules/administrative/shipment/list.html',     
         controller: 'ShipmentListCtrl',
         parent: 'shipment-root'

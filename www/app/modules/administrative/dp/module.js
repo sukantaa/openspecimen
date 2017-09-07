@@ -24,7 +24,7 @@ angular.module('os.administrative.dp',
         parent: 'signed-in'
       })
       .state('dp-list', {
-        url: '/dps',
+        url: '/dps?filters',
         templateUrl: 'modules/administrative/dp/list.html',
         controller: 'DpListCtrl',
         parent: 'dp-root'
