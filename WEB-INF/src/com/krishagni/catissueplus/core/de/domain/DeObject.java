@@ -26,6 +26,7 @@ import com.krishagni.catissueplus.core.de.events.ExtensionDetail.AttrDetail;
 import com.krishagni.catissueplus.core.de.events.FormRecordSummary;
 import com.krishagni.catissueplus.core.de.repository.DaoFactory;
 
+import edu.common.dynamicextensions.domain.nui.CheckBox;
 import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.DatePicker;
 import edu.common.dynamicextensions.domain.nui.SubFormControl;
@@ -516,6 +517,9 @@ public abstract class DeObject {
 				DatePicker dateCtrl = (DatePicker)ctrlValue.getControl();
 				Date date = dateCtrl.fromString(displayValue);
 				displayValue = dateCtrl.isDateTimeFmt() ? Utility.getDateTimeString(date) : Utility.getDateString(date);
+			} else if (ctrlValue.getControl() instanceof CheckBox) {
+				Boolean truth = StringUtils.equals(displayValue, "1") || StringUtils.equalsIgnoreCase(displayValue, "true");
+				displayValue = StringUtils.capitalize(MessageUtil.getInstance().getBooleanMsg(truth));
 			}
 
 			return displayValue;
