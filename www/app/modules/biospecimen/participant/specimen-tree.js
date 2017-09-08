@@ -256,7 +256,6 @@ angular.module('os.biospecimen.participant.specimen-tree',
         cpr: '=',
         visit: '=',
         specimenTree: '=specimens',
-        resource: '=',
         reload: '&reload',
         collectionDate: '=?',
         pendingSpmnsDispInterval: '=?'

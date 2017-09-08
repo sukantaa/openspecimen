@@ -23,7 +23,7 @@
           <span translate="specimens.ctx_menu.create_derivative">Create Derivative</span>
         </button>
 
-        <button show-if-spmn-op-allowed="ce.updateOpts" cp="cp" spmn="specimen" class="default"
+        <button show-if-spmn-op-allowed="specimenResource.updateOpts" cp="cp" spmn="specimen" class="default"
           ui-sref="specimen-create-aliquots({eventId: visit.eventId, visitId: visit.id, specimenId: specimen.id, srId: specimen.reqId})"
           ng-if="specimen.activityStatus == 'Active'">
           <span class="fa fa-share-alt"></span>
@@ -94,8 +94,7 @@
       </div>
 
       <os-specimen-tree cp="cp" cpr="cpr" visit="visit" specimens="treeSpecimens" reload="reload()"
-        resource="specimenResource" collection-date="specimen.createdOn"
-        pending-spmns-disp-interval="pendingSpmnsDispInterval">
+        collection-date="specimen.createdOn" pending-spmns-disp-interval="pendingSpmnsDispInterval">
       </os-specimen-tree>
     </div>
     <div class="col-xs-4">

@@ -11,22 +11,47 @@ angular.module('openspecimen')
     return {
       restrict: 'A',
       link: function(scope, element, attrs) {
-        scope.$watchGroup([attrs.showIfSpmnOpAllowed, attrs.cp, attrs.spmn], function(newValues) {
-          var opts = newValues[0];
-          var cp   = newValues[1];
-          var spmn = newValues[2];
+        var watchAttrs = ['showIfSpmnOpAllowed', 'cp', 'cpr', 'spmn'];
+        for (var i = watchAttrs.length - 1; i >= 0; --i) {
+          if (!attrs[watchAttrs[i]]) {
+            watchAttrs.splice(i, 1);
+          }
+        }
 
-          if (!AuthorizationService.isAllowed(opts)) {
+        scope.$watchGroup(watchAttrs, function(newValues) {
+          var opts = {op: attrs.op};
+          angular.forEach(watchAttrs,
+            function(attr, index) {
+              opts[attr] = newValues[index];
+            }
+          );
+
+          var resourceOpts = opts.showIfSpmnOpAllowed;
+          if (!resourceOpts) {
+            var sites = undefined;
+            var cp = undefined;
+            if (opts.cp && opts.cpr) {
+              cp = opts.cp.shortTitle;
+              sites = opts.cp.cpSites.map(function(cpSite) { return cpSite.siteName; });
+              if ($root.global.appProps.mrn_restriction_enabled) {
+                sites = sites.concat(opts.cpr.getMrnSites());
+              }
+            }
+
+            resourceOpts = {resource: 'VisitAndSpecimen', operations: [op], cp: cp, sites: sites};
+          }
+
+          if (!AuthorizationService.isAllowed(resourceOpts)) {
             element.remove();
             return;
           }
 
-          if (!cp || !spmn || !spmn.storageSite) {
+          if (!opts.cp || !opts.spmn || !opts.spmn.storageSite) {
             return;
           }
 
           var q;
-          if (cp.containerBasedAccess === true) {
+          if (opts.cp.containerBasedAccess === true) {
             q = $q.defer();
             q.resolve({value: 'true'});
             q = q.promise;
@@ -37,7 +62,7 @@ angular.module('openspecimen')
           q.then(
             function(setting) {
               if (setting.value.toLowerCase() == 'true') {
-                showIfContainerReadAllowed(spmn, element);
+                showIfContainerReadAllowed(opts.spmn, element);
               }
             }
           );
