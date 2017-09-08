@@ -1,8 +1,9 @@
 angular.module('openspecimen')
-  .directive('showIfSpmnOpAllowed', function(AuthorizationService, SettingUtil) {
-    function ensureEditAllowed(spmn, element) {
-      var containerReadOpt = {resource: 'StorageContainer', operations: ['Read'], sites: [spmn.storageSite]}
-      if (!AuthorizationService.isAllowed(containerReadOpt)) {
+  .directive('showIfSpmnOpAllowed', function($q, AuthorizationService, SettingUtil) {
+
+    function showIfContainerReadAllowed(spmn, element) {
+      var opts = {resource: 'StorageContainer', operations: ['Read'], sites: [spmn.storageSite]}
+      if (!AuthorizationService.isAllowed(opts)) {
         element.remove();
       }
     }
@@ -11,32 +12,35 @@ angular.module('openspecimen')
       restrict: 'A',
       link: function(scope, element, attrs) {
         scope.$watchGroup([attrs.showIfSpmnOpAllowed, attrs.cp, attrs.spmn], function(newValues) {
-          var opAllowed = newValues[0];
-          var cp = newValues[1];
+          var opts = newValues[0];
+          var cp   = newValues[1];
           var spmn = newValues[2];
 
-          if (!opAllowed) {
+          if (!AuthorizationService.isAllowed(opts)) {
             element.remove();
             return;
           }
 
-          if (!spmn.storageSite) {
+          if (!cp || !spmn || !spmn.storageSite) {
             return;
           }
 
-          if (cp.containerBasedAccess != undefined && cp.containerBasedAccess != null) {
-            if (cp.containerBasedAccess) {
-              ensureEditAllowed(spmn, element);
-            }
+          var q;
+          if (cp.containerBasedAccess === true) {
+            q = $q.defer();
+            q.resolve({value: 'true'});
+            q = q.promise;
           } else {
-            SettingUtil.getSetting('biospecimen', 'container_based_access').then(
-              function(setting) {
-                if (setting.value.toLowerCase() == 'true') {
-                  ensureEditAllowed(spmn, element);
-                }
-              }
-            );
+            q = SettingUtil.getSetting('biospecimen', 'container_based_access');
           }
+
+          q.then(
+            function(setting) {
+              if (setting.value.toLowerCase() == 'true') {
+                showIfContainerReadAllowed(spmn, element);
+              }
+            }
+          );
         });
       }
     }

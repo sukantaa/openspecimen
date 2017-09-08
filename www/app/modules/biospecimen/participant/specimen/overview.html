@@ -1,7 +1,8 @@
 <div>
   <div class="os-page-commands">
     <div class="left">
-      <button show-if-spmn-op-allowed="specimenAllowedOps.update" cp="cp" spmn="specimen" class="default" ui-sref="specimen-addedit"
+      <button show-if-spmn-op-allowed="specimenResource.updateOpts" cp="cp" spmn="specimen"
+        class="default" ui-sref="specimen-addedit"
         ng-if="!!visit.id && (!specimen.activityStatus || specimen.activityStatus == 'Active')"
         ng-switch on="!!specimen.id">
         <span ng-switch-when="true">
@@ -15,14 +16,14 @@
       </button>
 
       <span ng-if="!!specimen.id">
-        <button show-if-spmn-op-allowed="specimenAllowedOps.update" cp="cp" spmn="specimen" class="default"
+        <button show-if-spmn-op-allowed="specimenResource.updateOpts" cp="cp" spmn="specimen" class="default"
           ui-sref="specimen-create-derivative({eventId: visit.eventId, visitId: visit.id, specimenId: specimen.id, srId: specimen.reqId})"
           ng-if="specimen.activityStatus == 'Active'">
           <span class="fa fa-flask"></span>
           <span translate="specimens.ctx_menu.create_derivative">Create Derivative</span>
         </button>
 
-        <button show-if-spmn-op-allowed="specimenAllowedOps.update" cp="cp" spmn="specimen" class="default"
+        <button show-if-spmn-op-allowed="ce.updateOpts" cp="cp" spmn="specimen" class="default"
           ui-sref="specimen-create-aliquots({eventId: visit.eventId, visitId: visit.id, specimenId: specimen.id, srId: specimen.reqId})"
           ng-if="specimen.activityStatus == 'Active'">
           <span class="fa fa-share-alt"></span>
@@ -32,7 +33,7 @@
         <os-assign-to-spmn-list on-add-to-list="addSpecimensToSpecimenList(list)" ng-if="!!specimen.id" menu-align="left">
         </os-assign-to-spmn-list>
 
-        <button show-if-spmn-op-allowed="specimenAllowedOps.update" cp="cp" spmn="specimen" class="default"
+        <button show-if-spmn-op-allowed="specimenResource.updateOpts" cp="cp" spmn="specimen" class="default"
           ui-sref="specimen-detail.events({eventId: visit.eventId, visitId: visit.id, specimenId: specimen.id, srId: specimen.reqId})"
           ng-if="specimen.activityStatus == 'Active'">
           <span class="fa fa-calendar-o"></span>
@@ -45,28 +46,28 @@
             <span class="fa fa-caret-down"></span>
           </button>
           <ul class="dropdown-menu dropdown-menu-right">
-            <li show-if-spmn-op-allowed="specimenAllowedOps.update" cp="cp" spmn="specimen"
+            <li show-if-spmn-op-allowed="specimenResource.updateOpts" cp="cp" spmn="specimen"
               ng-if="specimen.activityStatus == 'Active' && specimen.status == 'Collected'">
               <a ng-click="printSpecimenLabels()">
                 <span class="fa fa-print"></span>
                 <span translate="specimens.buttons.print">Print</span>
               </a>
             </li>
-            <li show-if-spmn-op-allowed="specimenAllowedOps.update" cp="cp" spmn="specimen"
+            <li show-if-spmn-op-allowed="specimenResource.updateOpts" cp="cp" spmn="specimen"
               ng-if="specimen.activityStatus == 'Active' && specimen.status == 'Collected'">
               <a ng-click="closeSpecimen()">
                 <span class="fa fa-remove"></span>
                 <span translate="common.buttons.close">Close</span>
               </a>
             </li>
-            <li show-if-spmn-op-allowed="specimenAllowedOps.update" cp="cp" spmn="specimen"
+            <li show-if-spmn-op-allowed="specimenResource.updateOpts" cp="cp" spmn="specimen"
               ng-if="specimen.activityStatus == 'Closed'">
               <a ng-click="reopen()">
                 <span class="fa fa-check"></span>
                 <span translate="specimens.buttons.reopen">Reopen</span>
               </a>
             </li>
-            <li show-if-spmn-op-allowed="specimenAllowedOps.delete" cp="cp" spmn="specimen"
+            <li show-if-spmn-op-allowed="specimenResource.deleteOpts" cp="cp" spmn="specimen"
               ng-if="!!specimen.id">
               <a ng-click="deleteSpecimen()">
                 <span class="fa fa-trash"></span>
@@ -92,9 +93,9 @@
         </div>
       </div>
 
-      <os-specimen-tree cp="cp" cpr="cpr" visit="visit" specimens="treeSpecimens"
-        allowed-ops="specimenAllowedOps" reload="reload()"
-        collection-date="specimen.createdOn" pending-spmns-disp-interval="pendingSpmnsDispInterval">
+      <os-specimen-tree cp="cp" cpr="cpr" visit="visit" specimens="treeSpecimens" reload="reload()"
+        resource="specimenResource" collection-date="specimen.createdOn"
+        pending-spmns-disp-interval="pendingSpmnsDispInterval">
       </os-specimen-tree>
     </div>
     <div class="col-xs-4">

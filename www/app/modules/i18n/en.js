@@ -298,9 +298,7 @@
       "title": "Container Settings",
       "auto_alloc": "Auto Allocation",
       "store_aliquots_same_box": "Store aliquots in same box",
-      "container_based_access": "Container Site Based Access",
-      "container_based_access_true": "Specimen storage container site based access",
-      "container_based_access_false": "Specimen Collection Protocol sites based access"
+      "container_based_access": "Container Site Based Access"
     },
 
     "visit_name_print_modes": {
@@ -2225,7 +2223,7 @@
         "cp_expiry_rem_rept_inter": "Repeat CP Expiry Reminder",
         "cp_expiry_rem_rept_inter_desc": "Number of days after which email notification should be repeated for collection protocol expiry.",
         "unique_spmn_label_per_cp": "Unique Specimen Label per CP",
-        "unique_spmn_label_per_cp_desc": "Enable or Disable uniqueness of Specimen labels at CP level. Enabling this setting ensures Specimen labels are unique only within Collection Protocol. Disabling this setting ensures no two specimen labels are same throughout the system.",
+        "unique_spmn_label_per_cp_desc": "Enable or disable uniqueness of specimen labels at CP level. Enabling this setting ensures specimen labels are unique only within Collection Protocol. Disabling this setting ensures no two specimen labels are same throughout the system.",
         "cp_sop_doc_dir": "SOP Documents Directory",
         "cp_sop_doc_dir_desc": "Folder on server to store collection protocol SOP documents",
         "cp_sop_doc_url": "CP SOP Link",
@@ -2255,7 +2253,7 @@
         "staged_part_cleanup_int": "Staged Participants Retain Interval",
         "staged_part_cleanup_int_desc": "Number of days to retain the details of participant in staging table",
         "container_based_access": "Container Site Based Access",
-        "container_based_access_desc": "Enable or Disable the specimen access check based on container site."
+        "container_based_access_desc": "Enable or disable the specimen access check based on container site."
       },
 
       "common": {
