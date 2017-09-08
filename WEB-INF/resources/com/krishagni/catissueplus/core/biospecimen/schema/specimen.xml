@@ -15,7 +15,8 @@
       <caption>#getMessage("specimen_cp_short")</caption>
       <attribute>cpShortTitle</attribute>
     </field>
-   
+
+    #if (!$cp || !$cp.specimenCentric)
     <field>
       <caption>#getMessage("specimen_visit_name")</caption>
       <attribute>visitName</attribute>
@@ -24,7 +25,8 @@
     <field>
       <caption>#getMessage("specimen_req_code")</caption>
       <attribute>reqCode</attribute>
-    </field>  
+    </field>
+    #end
 
     <field>
       <caption>#getMessage("specimen_label")</caption>

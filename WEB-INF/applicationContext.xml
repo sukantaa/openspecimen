@@ -857,6 +857,7 @@
           <bean class="com.krishagni.catissueplus.core.de.services.impl.CustomFieldsSchemaBuilder">
             <property name="templateService" ref="templateService"/>
             <property name="schemaResource"  value="com/krishagni/catissueplus/core/biospecimen/schema/specimen.xml"/>
+            <property name="daoFactory" ref="biospecimenDaoFactory"/>
           </bean>
         </entry>
         <entry key="specimenDerivative">

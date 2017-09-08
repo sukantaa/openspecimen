@@ -11,6 +11,8 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
+import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.TemplateService;
@@ -27,12 +29,18 @@ public class CustomFieldsSchemaBuilder extends ExtensionSchemaBuilder {
 
 	private String schemaResource;
 
+	private DaoFactory daoFactory;
+
 	public void setTemplateService(TemplateService templateService) {
 		this.templateService = templateService;
 	}
 
 	public void setSchemaResource(String schemaResource) {
 		this.schemaResource = schemaResource;
+	}
+
+	public void setDaoFactory(DaoFactory daoFactory) {
+		this.daoFactory = daoFactory;
 	}
 
 	@Override
@@ -57,21 +65,28 @@ public class CustomFieldsSchemaBuilder extends ExtensionSchemaBuilder {
 			cpId = -1L;
 		}
 
-		return addCustomFields(getSchema(), cpId);
+		CollectionProtocol cp = null;
+		if (cpId != -1L && daoFactory != null) {
+			cp = daoFactory.getCollectionProtocolDao().getById(cpId);
+		}
+
+		return addCustomFields(getSchema(cp), cpId);
 	}
 
-	private ObjectSchema getSchema() {
+	private ObjectSchema getSchema(CollectionProtocol cp) {
 		InputStream in = null;
 		try {
-			in = preprocessSchema(schemaResource);
+			in = preprocessSchema(schemaResource, cp);
 			return ObjectSchema.parseSchema(in);
 		} finally {
 			IOUtils.closeQuietly(in);
 		}
 	}
 
-	private InputStream preprocessSchema(String schemaResource) {
-		String template = templateService.render(schemaResource, new HashMap<String, Object>());
+	private InputStream preprocessSchema(String schemaResource, CollectionProtocol cp) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("cp", cp);
+		String template = templateService.render(schemaResource, params);
 		return new ByteArrayInputStream( template.getBytes() );
 	}
 
