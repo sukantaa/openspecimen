@@ -492,17 +492,38 @@ angular.module('os.biospecimen.participant.collect-specimens',
         return result;
       }
 
-      function collected(specimens) {
+      function collected(reqIds, specimens) {
         return (specimens || []).filter(
           function(specimen) {
-            return specimen.status == 'Collected';
+            return !specimen.reqId || reqIds.indexOf(specimen.reqId) != -1;
           }
         );
       }
 
-      function displayCustomFieldGroups(specimens, navigateTo) {
+      function getSpmnReqIds(spmnsToSave) {
+        var result = [];
+        angular.forEach(spmnsToSave,
+          function(spmn) {
+            if (spmn.reqId) {
+              result.push(spmn.reqId);
+            }
+
+            if (spmn.specimensPool) {
+              result = result.concat(getSpmnReqIds(spmn.specimensPool));
+            }
+
+            if (spmn.children) {
+              result = result.concat(getSpmnReqIds(spmn.children));
+            }
+          }
+        );
+
+        return result;
+      }
+
+      function displayCustomFieldGroups(spmnReqIds, specimens, navigateTo) {
         var groups = $scope.customFieldGroups = SpecimenUtil.sdeGroupSpecimens(
-          cpDict, spmnCollFields.fieldGroups || [], collected(flatten(specimens, [])));
+          cpDict, spmnCollFields.fieldGroups || [], collected(spmnReqIds, flatten(specimens, [])));
 
         var visitFieldsGrp = getVisitFieldsGroup(spmnCollFields);
         if (visitFieldsGrp) {
@@ -714,6 +735,7 @@ angular.module('os.biospecimen.participant.collect-specimens',
         }
 
         var specimensToSave = getSpecimensToSave($scope.cp, $scope.specimens, []);
+        var savedSpmnReqIds = getSpmnReqIds(specimensToSave);
         if (!!$scope.visit.id && $scope.visit.status == 'Complete') {
           Specimen.save(specimensToSave).then(
             function(savedSpecimens) {
@@ -721,7 +743,7 @@ angular.module('os.biospecimen.participant.collect-specimens',
               CollectSpecimensSvc.clear();
 
               var navigateTo = $scope.back;
-              displayCustomFieldGroups(savedSpecimens, navigateTo)
+              displayCustomFieldGroups(savedSpmnReqIds, savedSpecimens, navigateTo)
             }
           );
         } else {
@@ -741,7 +763,7 @@ angular.module('os.biospecimen.participant.collect-specimens',
               var navigateTo = function() {
                 $state.go(sd.state.name, angular.extend(sd.params, {visitId: visitId}));
               }
-              displayCustomFieldGroups(result.data.specimens, navigateTo);
+              displayCustomFieldGroups(savedSpmnReqIds, result.data.specimens, navigateTo);
             }
           );
         }
