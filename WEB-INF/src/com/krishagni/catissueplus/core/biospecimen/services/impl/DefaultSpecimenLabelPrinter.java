@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +35,6 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.OpenSpecimenEvent;
 import com.krishagni.catissueplus.core.common.repository.PrintRuleConfigsListCriteria;
 import com.krishagni.catissueplus.core.common.service.ChangeLogService;
-import com.krishagni.catissueplus.core.common.service.ConfigChangeListener;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 
@@ -211,11 +211,11 @@ public class DefaultSpecimenLabelPrinter extends AbstractLabelPrinter<Specimen> 
 
 		int idx = 0;
 		SpecimenLabelPrintRule rule = new SpecimenLabelPrintRule();
-		rule.setCpShortTitle(ruleLineFields[idx++]);
+		rule.setCps(Stream.of(ruleLineFields[idx++].split(",")).collect(Collectors.toList()));
 		rule.setVisitSite(ruleLineFields[idx++]);
 		rule.setSpecimenClass(ruleLineFields[idx++]);
 		rule.setSpecimenType(ruleLineFields[idx++]);
-		rule.setUserLogin(ruleLineFields[idx++]);
+		rule.setUsers(Stream.of(ruleLineFields[idx++].split(",")).collect(Collectors.toList()));
 
 		if (!ruleLineFields[idx++].equals("*")) {
 			rule.setIpAddressMatcher(new IpAddressMatcher(ruleLineFields[idx - 1]));
@@ -265,12 +265,12 @@ public class DefaultSpecimenLabelPrinter extends AbstractLabelPrinter<Specimen> 
 	}
 
 	private SpecimenLabelPrintRule replaceWildcardsWithNull(SpecimenLabelPrintRule rule) {
-		rule.setCpShortTitle(replaceWildcardWithNull(rule.getCpShortTitle()));
+		rule.setCps(replaceWildcardWithNull(rule.getCps()));
 		rule.setVisitSite(replaceWildcardWithNull(rule.getVisitSite()));
 		rule.setLineage(replaceWildcardWithNull(rule.getLineage()));
 		rule.setSpecimenClass(replaceWildcardWithNull(rule.getSpecimenClass()));
 		rule.setSpecimenType(replaceWildcardWithNull(rule.getSpecimenType()));
-		rule.setUserLogin(replaceWildcardWithNull(rule.getUserLogin()));
+		rule.setUsers(replaceWildcardWithNull(rule.getUsers()));
 		rule.setLabelType(replaceWildcardWithNull(rule.getLabelType()));
 		rule.setLabelDesign(replaceWildcardWithNull(rule.getLabelDesign()));
 		rule.setPrinterName(replaceWildcardWithNull(rule.getPrinterName()));
@@ -279,6 +279,14 @@ public class DefaultSpecimenLabelPrinter extends AbstractLabelPrinter<Specimen> 
 
 	private String replaceWildcardWithNull(String input) {
 		return StringUtils.equals(input, "*") ? null : input;
+	}
+
+	private List<String> replaceWildcardWithNull(List<String> input) {
+		if (input == null) {
+			return null;
+		}
+
+		return input.stream().filter(e -> e != null && !e.equals("*")).collect(Collectors.toList());
 	}
 
 	private void loadRulesFromDb() {

@@ -3,10 +3,9 @@ package com.krishagni.catissueplus.core.administrative.repository.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -67,11 +66,15 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 		
 		return criteria.list();
 	}
-	
+
 	public User getUser(String loginName, String domainName) {
-		String hql = String.format(GET_USER_BY_LOGIN_NAME_HQL, " and activityStatus != 'Disabled'");
-		List<User> users = executeGetUserByLoginNameHql(hql, loginName, domainName);
+		List<User> users = getUsers(Collections.singletonList(loginName), domainName);
 		return users.isEmpty() ? null : users.get(0);
+	}
+
+	public List<User> getUsers(List<String> loginNames, String domainName) {
+		String hql = String.format(GET_USER_BY_LOGIN_NAME_HQL, " and activityStatus != 'Disabled'");
+		return executeGetUserByLoginNameHql(hql, loginNames, domainName);
 	}
 	
 	@Override
@@ -87,7 +90,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	
 	public Boolean isUniqueLoginName(String loginName, String domainName) {
 		String hql = String.format(GET_USER_BY_LOGIN_NAME_HQL, "");
-		List<User> users = executeGetUserByLoginNameHql(hql, loginName, domainName);
+		List<User> users = executeGetUserByLoginNameHql(hql, Collections.singletonList(loginName), domainName);
 		return users.isEmpty();
 	}
 	
@@ -223,12 +226,11 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<User> executeGetUserByLoginNameHql(String hql, String loginName, String domainName) {
-		return sessionFactory.getCurrentSession()
-				.createQuery(hql)
-				.setString("loginName", loginName)
-				.setString("domainName", domainName)
-				.list();
+	private List<User> executeGetUserByLoginNameHql(String hql, Collection<String> loginNames, String domainName) {
+		return sessionFactory.getCurrentSession().createQuery(hql)
+			.setParameterList("loginNames", loginNames)
+			.setString("domainName", domainName)
+			.list();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -341,7 +343,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
  	}
 
 	private static final String GET_USER_BY_LOGIN_NAME_HQL =
-			"from com.krishagni.catissueplus.core.administrative.domain.User where loginName = :loginName and authDomain.name = :domainName  %s";
+			"from com.krishagni.catissueplus.core.administrative.domain.User where loginName in (:loginNames) and authDomain.name = :domainName  %s";
 	
 	private static final String GET_USER_BY_EMAIL_HQL = 
 			"from com.krishagni.catissueplus.core.administrative.domain.User where emailAddress = :emailAddress %s";

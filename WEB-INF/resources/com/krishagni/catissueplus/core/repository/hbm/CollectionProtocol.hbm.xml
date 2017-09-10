@@ -215,11 +215,11 @@
         cpe.eventLabel in (:labels)
     </query>
 
-    <query name="getCpByTitle">
+    <query name="getCpsByTitle">
       from 
         com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol
       where
-        title = :title and 
+        title in (:titles) and
         activityStatus = 'Active'
     </query>
 

@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.common.domain.factory.impl;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,9 +13,9 @@ import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
+import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
-import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenLabelPrintRule;
@@ -50,7 +51,7 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 		setLabelType(def, rule, ose);
 		setPrinterName(def, rule, ose);
 		setCmdFilesDir(def, rule, ose);
-		setCpShortTitle(def, rule, ose);
+		setCps(def, rule, ose);
 		setSpecimenClass(def, rule, ose);
 		setSpecimenType(def, rule, ose);
 		setDataTokens(def, rule, ose);
@@ -59,7 +60,7 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 		setCmdFileFmt(def, rule, ose);
 		setLineage(def, rule, ose);
 		setVisitSite(def, rule, ose);
-		setUserLogin(def, rule, ose);
+		setUsers(def, rule, ose);
 		ose.checkAndThrow();
 		return rule;
 	}
@@ -83,42 +84,43 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 	}
 
 	private void setCmdFilesDir(Map<String, String> input, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
-		if (StringUtils.isBlank(input.get("cmdFilesDir"))) {
+		String dirPath = input.get("cmdFilesDir");
+		if (StringUtils.isBlank(dirPath)) {
 			ose.addError(PrintRuleConfigErrorCode.CMD_FILES_DIR_REQ);
 			return;
 		}
 
-		rule.setCmdFilesDir(input.get("cmdFilesDir"));
-	}
-
-	private void setCpShortTitle(Map<String, String> input, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
-		String cpId = input.get("cpId");
-		String cpShortTile = input.get("cpShortTitle");
-		String cpTitle = input.get("cpTitle");
-
-		CollectionProtocol cp = null;
-		Object key = null;
-
-		if (StringUtils.isNotBlank(cpId)) {
-			cp = daoFactory.getCollectionProtocolDao().getById(Long.valueOf(cpId).longValue());
-			key = cpId;
-		} else if (StringUtils.isNotBlank(cpShortTile)) {
-			cp = daoFactory.getCollectionProtocolDao().getCpByShortTitle(cpShortTile);
-			key = cpShortTile;
-		} else if (StringUtils.isNotBlank(cpTitle)) {
-			cp = daoFactory.getCollectionProtocolDao().getCollectionProtocol(cpTitle);
-			key = cpTitle;
+		File dir = new File(dirPath);
+		boolean dirCreated = true;
+		if (!dir.exists()) {
+			dirCreated = dir.mkdirs();
 		}
 
-		if (cp == null) {
-			if (key != null) {
-				ose.addError(CpErrorCode.NOT_FOUND, key);
-			}
-
+		if (!dirCreated || !dir.isDirectory()) {
+			ose.addError(PrintRuleConfigErrorCode.INVALID_CMD_FILES_DIR, dir.getAbsolutePath());
 			return;
 		}
 
-		rule.setCpShortTitle(cp.getShortTitle());
+		rule.setCmdFilesDir(dirPath);
+	}
+
+	private void setCps(Map<String, String> input, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
+		List<String> cpShortTitles = Utility.csvToStringList(input.get("cps"));
+		if (cpShortTitles.isEmpty()) {
+			cpShortTitles = Utility.csvToStringList(input.get("cpShortTitle")); // backward compatibility
+		}
+
+		if (CollectionUtils.isEmpty(cpShortTitles)) {
+			return;
+		}
+
+		List<CollectionProtocol> cps = daoFactory.getCollectionProtocolDao().getCpsByShortTitle(cpShortTitles);
+		if (cps.size() != cpShortTitles.size()) {
+			ose.addError(PrintRuleConfigErrorCode.INVALID_CPS);
+			return;
+		}
+
+		rule.setCps(cpShortTitles);
 	}
 
 	private void setSpecimenClass(Map<String, String> inputMap, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
@@ -247,24 +249,35 @@ public class SpecimenLabelPrintRuleFactoryImpl implements LabelPrintRuleFactory 
 		rule.setVisitSite(site.getName());
 	}
 
-	private void setUserLogin(Map<String, String> input, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
-		String userLogin = input.get("userLogin");
-		if (StringUtils.isBlank(userLogin)) {
+	private void setUsers(Map<String, String> input, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
+		List<String> userLogins = Utility.csvToStringList(input.get("users"));
+		if (userLogins.isEmpty()) {
+			userLogins = Utility.csvToStringList(input.get("userLogin")); // backward compatibility
+		}
+
+		if (CollectionUtils.isEmpty(userLogins)) {
 			return;
+
 		}
 
 		String domainName = input.get("domainName");
-		if (StringUtils.isBlank(domainName)) {
+		if (StringUtils.isNotBlank(domainName)) {
+			AuthDomain domain = daoFactory.getAuthDao().getAuthDomainByName(domainName);
+			if (domain == null) {
+				ose.addError(UserErrorCode.DOMAIN_NOT_FOUND);
+				return;
+			}
+		} else {
 			domainName = User.DEFAULT_AUTH_DOMAIN;
 		}
 
-		User user = daoFactory.getUserDao().getUser(userLogin, domainName);
-		if (user == null) {
-			ose.addError(UserErrorCode.NOT_FOUND);
+		List<User> users = daoFactory.getUserDao().getUsers(userLogins, domainName);
+		if (users.size() != userLogins.size()) {
+			ose.addError(PrintRuleConfigErrorCode.INVALID_USERS);
 			return;
 		}
 
 		rule.setDomainName(domainName);
-		rule.setUserLogin(user.getLoginName());
+		rule.setUsers(userLogins);
 	}
 }

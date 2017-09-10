@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
@@ -47,7 +48,7 @@ public abstract class LabelPrintRule {
 
 	private String domainName;
 
-	private String userLogin;
+	private List<String> users = new ArrayList<>();
 	
 	private String printerName;
 	
@@ -83,12 +84,17 @@ public abstract class LabelPrintRule {
 		this.domainName = domainName;
 	}
 
-	public String getUserLogin() {
-		return userLogin;
+	public void setUserLogin(String userLogin) {
+		users = new ArrayList<>();
+		users.add(userLogin);
 	}
 
-	public void setUserLogin(String userLogin) {
-		this.userLogin = userLogin;
+	public List<String> getUsers() {
+		return users;
+	}
+
+	public void setUsers(List<String> users) {
+		this.users = users;
 	}
 
 	public String getPrinterName() {
@@ -139,7 +145,7 @@ public abstract class LabelPrintRule {
 	}
 
 	public boolean isApplicableFor(User user, String ipAddr) {
-		if (!isWildCard(userLogin) && !user.getLoginName().equals(userLogin)) {
+		if (CollectionUtils.isNotEmpty(users) && !users.contains(user.getLoginName())) {
 			return false;
 		}
 		
@@ -181,7 +187,7 @@ public abstract class LabelPrintRule {
 		StringBuilder result = new StringBuilder();
 		result.append("label design = ").append(getLabelDesign())
 			.append(", label type = ").append(getLabelType())
-			.append(", user = ").append(getUserLogin())
+			.append(", user = ").append(getUsers().stream().collect(Collectors.joining(",")))
 			.append(", printer = ").append(getPrinterName());
 
 		String tokens = getDataTokens().stream()
@@ -197,7 +203,7 @@ public abstract class LabelPrintRule {
 			rule.put("labelType", getLabelType());
 			rule.put("ipAddressMatcher", getIpAddressRange(getIpAddressMatcher()));
 			rule.put("domainName", getDomainName());
-			rule.put("userLogin", getUserLogin());
+			rule.put("users", getUsers().stream().collect(Collectors.joining(",")));
 			rule.put("printerName", getPrinterName());
 			rule.put("cmdFilesDir", getCmdFilesDir());
 			rule.put("labelDesign", getLabelDesign());

@@ -25,6 +25,8 @@ public interface CollectionProtocolDao extends Dao<CollectionProtocol> {
 	public Long getCpCount(CpListCriteria criteria);
 
 	public CollectionProtocol getCollectionProtocol(String title);
+
+	List<CollectionProtocol> getCpsByTitle(Collection<String> titles);
 	
 	public CollectionProtocol getCpByShortTitle(String shortTitle);
 	
@@ -79,5 +81,4 @@ public interface CollectionProtocolDao extends Dao<CollectionProtocol> {
 	public int getConsentRespsCount(Long consentId);
 
 	public boolean anyBarcodingEnabledCpExists();
-	
 }

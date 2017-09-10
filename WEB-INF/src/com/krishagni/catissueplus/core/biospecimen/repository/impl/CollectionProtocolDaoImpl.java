@@ -92,12 +92,21 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 	@SuppressWarnings(value = {"unchecked"})
 	public CollectionProtocol getCollectionProtocol(String cpTitle) {
 		List<CollectionProtocol> cpList = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_CP_BY_TITLE)
-				.setString("title" , cpTitle)
+				.getNamedQuery(GET_CPS_BY_TITLE)
+				.setParameterList("titles" , Collections.singletonList(cpTitle))
 				.list();
 		return cpList == null || cpList.isEmpty() ? null : cpList.iterator().next();
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<CollectionProtocol> getCpsByTitle(Collection<String> titles) {
+		return sessionFactory.getCurrentSession()
+				.getNamedQuery(GET_CPS_BY_TITLE)
+				.setParameterList("titles", titles)
+				.list();
+	}
+
 	@Override
 	public CollectionProtocol getCpByShortTitle(String shortTitle) {
 		List<CollectionProtocol> cpList = getCpsByShortTitle(Collections.singleton(shortTitle));
@@ -112,7 +121,7 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 				.setParameterList("shortTitles", shortTitles)
 				.list();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<CollectionProtocol> getCpsByShortTitle(Collection<String> shortTitles, String siteName) {
@@ -447,10 +456,10 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 	
 	private static final String GET_CPES_BY_CP_SHORT_TITLE_AND_LABELS = FQN + ".getCpesByShortTitleAndEventLabels";
 
-	private static final String GET_CP_BY_TITLE = FQN + ".getCpByTitle";
-	
+	private static final String GET_CPS_BY_TITLE = FQN + ".getCpsByTitle";
+
 	private static final String GET_CPS_BY_SHORT_TITLE = FQN + ".getCpsByShortTitle";
-	
+
 	private static final String GET_CPS_BY_SHORT_TITLE_N_SITE = FQN + ".getCpsByShortTitleAndSite";
 	
 	private static final String GET_EXPIRING_CPS = FQN + ".getExpiringCps";

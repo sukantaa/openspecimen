@@ -19,7 +19,13 @@ public enum PrintRuleConfigErrorCode implements ErrorCode{
 
 	INVALID_IP_RANGE,
 
-	INVALID_CMD_FILE_FMT;
+	INVALID_CMD_FILE_FMT,
+
+	INVALID_CMD_FILES_DIR,
+
+	INVALID_CPS,
+
+	INVALID_USERS;
 
 	@Override
 	public String code() {

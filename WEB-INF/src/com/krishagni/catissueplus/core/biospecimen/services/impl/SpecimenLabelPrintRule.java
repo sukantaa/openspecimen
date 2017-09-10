@@ -1,7 +1,12 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections.CollectionUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
@@ -9,7 +14,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
 
 public class SpecimenLabelPrintRule extends LabelPrintRule {
-	private String cpShortTitle;
+	private List<String> cps = new ArrayList<>();
 
 	private String visitSite;
 
@@ -18,13 +23,18 @@ public class SpecimenLabelPrintRule extends LabelPrintRule {
 	private String specimenType;
 
 	private String lineage;
-	
-	public String getCpShortTitle() {
-		return cpShortTitle;
-	}
 
 	public void setCpShortTitle(String cpShortTitle) {
-		this.cpShortTitle = cpShortTitle;
+		cps = new ArrayList<>();
+		cps.add(cpShortTitle);
+	}
+
+	public List<String> getCps() {
+		return cps;
+	}
+
+	public void setCps(List<String> cps) {
+		this.cps = cps;
 	}
 
 	public String getVisitSite() {
@@ -67,8 +77,8 @@ public class SpecimenLabelPrintRule extends LabelPrintRule {
 		if (!super.isApplicableFor(user, ipAddr)) {
 			return false;
 		}
-		
-		if (!isWildCard(cpShortTitle) && !specimen.getCollectionProtocol().getShortTitle().equals(cpShortTitle)) {
+
+		if (CollectionUtils.isNotEmpty(cps) && !cps.contains(specimen.getCollectionProtocol().getShortTitle())) {
 			return false;
 		}
 
@@ -95,7 +105,7 @@ public class SpecimenLabelPrintRule extends LabelPrintRule {
 	@Override
 	protected Map<String, String> getDefMap() {
 		Map<String, String> ruleDef = new HashMap<>();
-		ruleDef.put("cpShortTitle", getCpShortTitle());
+		ruleDef.put("cps", getCps().stream().collect(Collectors.joining(",")));
 		ruleDef.put("visitSite", getVisitSite());
 		ruleDef.put("specimenClass", getSpecimenClass());
 		ruleDef.put("specimenType", getSpecimenType());
@@ -105,7 +115,7 @@ public class SpecimenLabelPrintRule extends LabelPrintRule {
 
 	public String toString() {
 		return new StringBuilder(super.toString())
-			.append(", cp = ").append(getCpShortTitle())
+			.append(", cp = ").append(getCps().stream().collect(Collectors.joining(",")))
 			.append(", lineage = ").append(getLineage())
 			.append(", visit site = ").append(getVisitSite())
 			.append(", specimen class = ").append(getSpecimenClass())
