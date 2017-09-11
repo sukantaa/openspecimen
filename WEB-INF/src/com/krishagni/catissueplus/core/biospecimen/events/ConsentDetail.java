@@ -19,6 +19,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CpConsentTier;
 import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.catissueplus.core.common.util.Status;
 
 @ListenAttributeChanges
 public class ConsentDetail extends AttributeModifiedSupport implements Mergeable<String, ConsentDetail>, Serializable {
@@ -170,11 +171,18 @@ public class ConsentDetail extends AttributeModifiedSupport implements Mergeable
 			.collect(Collectors.toMap(ConsentTierResponse::getStatementCode, item -> item));
 
 		for (CpConsentTier consentTier : cpr.getCollectionProtocol().getConsentTier()) {
+			ConsentTierResponse answer = respMap.get(consentTier.getStatement().getCode());
+			if (consentTier.getActivityStatus().equals(Status.ACTIVITY_STATUS_CLOSED.getStatus()) && answer == null) {
+				//
+				// Don't show closed consent tiers if response is not given already.
+				//
+				continue;
+			}
+
 			ConsentTierResponseDetail response = new ConsentTierResponseDetail();
 			response.setCode(consentTier.getStatement().getCode());
 			response.setStatement(consentTier.getStatement().getStatement());
 
-			ConsentTierResponse answer = respMap.get(consentTier.getStatement().getCode());
 			if (answer != null) {
 				response.setResponse(answer.getResponse());
 			}

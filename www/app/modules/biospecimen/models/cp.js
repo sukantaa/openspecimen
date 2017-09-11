@@ -107,6 +107,19 @@ angular.module('os.biospecimen.models.cp', ['os.common.models'])
       );
     }
 
+    CollectionProtocol.prototype.activateConsentTier = function(consentTier) {
+      return this.updateConsentTierStatus(consentTier, 'Active');
+    }
+
+    CollectionProtocol.prototype.updateConsentTierStatus = function(consent, status) {
+      var consentStatus = {id: consent.id, status: status};
+      return $http.put(this.consentModel.url() + consent.$id() + '/status', consentStatus).then(
+        function(resp) {
+          return resp.data;
+        }
+      );
+    }
+
     CollectionProtocol.prototype.getWorkflows = function() {
       return CollectionProtocol.getWorkflows(this.$id());
     }

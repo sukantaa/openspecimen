@@ -38,6 +38,13 @@ angular.module('os.common.delete', [])
       $scope.entity.bulkDelete(entityProps.entityIds).then(onBulkDeletion)
     };
 
+    function afterClosing(entity) {
+      if (entity.activityStatus == 'Closed') {
+        Alerts.success("common.entity_closed", entityProps);
+        $modalInstance.close(entity);
+      }
+    }
+
     $scope.delete = function () {
       if (entityProps.entityIds) {
         bulkDelete();
@@ -45,6 +52,10 @@ angular.module('os.common.delete', [])
         $scope.entity.$remove(!!entityProps.forceDelete).then(onDeletion);
       }
     };
+
+    $scope.close = function() {
+      $scope.entity.$close().then(afterClosing);
+    }
 
     $scope.cancel = function () {
       $modalInstance.dismiss('cancel');

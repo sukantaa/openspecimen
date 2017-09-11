@@ -8,14 +8,20 @@
       <div ng-if="$index != editItemIdx">
         <div class="col-xs-10" style="padding: 0px; word-wrap: break-word;">
           <span>{{item[textAttr]}}</span>
+          <span class="btn os-status-closed" ng-if="item.activityStatus == 'Closed'" translate="common.closed">
+            Closed
+          </span>
         </div>
         <div class="col-xs-2" ng-if="allowEdit">
           <div class="btn-group pull-right">
-            <button class="btn btn-xs btn-default" ng-click="openForEdit($index)">
+            <button class="btn btn-xs btn-default" ng-click="openForEdit($index)" ng-if="item.activityStatus == 'Active'">
               <span class="fa fa-pencil"></span>
             </button>
-            <button class="btn btn-xs btn-default" ng-click="removeItem($index)">
+            <button class="btn btn-xs btn-default" ng-click="removeItem($index)" ng-if="item.activityStatus == 'Active'">
               <span class="fa fa-trash"></span>
+            </button>
+            <button class="btn btn-xs btn-default" ng-click="activateItem($index)" ng-if="item.activityStatus == 'Closed'">
+              <span class="fa fa-check"></span>
             </button>
           </div>
         </div>

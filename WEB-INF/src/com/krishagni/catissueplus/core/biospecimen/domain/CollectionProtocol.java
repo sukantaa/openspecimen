@@ -761,7 +761,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		return String.format(CP_VISIT_NAME_FMT, getId());
 	}
 
-	private CpConsentTier getConsentTierById(Long ctId) {
+	public CpConsentTier getConsentTierById(Long ctId) {
 		for (CpConsentTier ct : consentTier) {
 			if (ct.getId().equals(ctId)) {
 				return ct;

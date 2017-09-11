@@ -62,7 +62,7 @@ angular.module('os.biospecimen.participant.consents', [])
     }
 
     $scope.clearResponseSelection = function(consentTierResponse) {
-      consentTierResponse.response = undefined;
+      consentTierResponse.response = null;
     }
 
     init();

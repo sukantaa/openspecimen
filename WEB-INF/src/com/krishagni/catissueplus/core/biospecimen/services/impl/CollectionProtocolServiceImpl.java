@@ -70,6 +70,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierOp;
 import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierOp.OP;
 import com.krishagni.catissueplus.core.biospecimen.events.CopyCpOpDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CopyCpeOpDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.CpConsentTierStatusDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpQueryCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.CpReportSettingsDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
@@ -590,7 +591,37 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}		
-	}	
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<ConsentTierDetail> updateConsentTierStatus(RequestEvent<CpConsentTierStatusDetail> req) {
+		try {
+			CpConsentTierStatusDetail detail = req.getPayload();
+			CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(detail.getCpId());
+			if (cp == null) {
+				return ResponseEvent.userError(CpErrorCode.NOT_FOUND);
+			}
+
+			AccessCtrlMgr.getInstance().ensureUpdateCpRights(cp);
+
+			if (cp.isConsentsWaived()) {
+				return ResponseEvent.userError(CpErrorCode.CONSENTS_WAIVED, cp.getShortTitle());
+			}
+
+			CpConsentTier ct = cp.getConsentTierById(detail.getId());
+			if (ct == null) {
+				return ResponseEvent.userError(CpErrorCode.CONSENT_TIER_NOT_FOUND);
+			}
+
+			ct.updateStatus(detail.getStatus());
+			return ResponseEvent.response(ConsentTierDetail.from(ct));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
 	
 	@Override
 	@PlusTransactional

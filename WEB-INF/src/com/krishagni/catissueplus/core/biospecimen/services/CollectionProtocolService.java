@@ -16,6 +16,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierOp;
 import com.krishagni.catissueplus.core.biospecimen.events.CopyCpOpDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CopyCpeOpDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.CpConsentTierStatusDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpQueryCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.CpReportSettingsDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
@@ -74,6 +75,8 @@ public interface CollectionProtocolService {
 	public ResponseEvent<List<ConsentTierDetail>> getConsentTiers(RequestEvent<Long> req);
 
 	public ResponseEvent<ConsentTierDetail> updateConsentTier(RequestEvent<ConsentTierOp> req);
+
+	ResponseEvent<ConsentTierDetail> updateConsentTierStatus(RequestEvent<CpConsentTierStatusDetail> req);
 
 	public ResponseEvent<List<DependentEntityDetail>> getConsentDependentEntities(RequestEvent<ConsentTierDetail> request);
 

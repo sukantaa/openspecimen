@@ -67,12 +67,15 @@ angular.module('os.biospecimen.cp.consents', ['os.biospecimen.models'])
         var opts = {
           confirmDelete: 'cp.delete_consent_tier',
           onDeletion: function() { deferred.resolve(true); },
-          onDeleteFail: function() { deferred.reject(); }
+          onDeleteFail: function() { deferred.reject(); },
+          afterClosing: function(entity) { deferred.resolve(entity); }
         }
 
         stmt.cpShortTitle = cp.shortTitle;
         DeleteUtil.delete(stmt, opts);
         return deferred.promise;
+      } else if (action == 'activate') {
+        return cp.activateConsentTier(stmt).then(initConsentTier);
       }
 
       return undefined;

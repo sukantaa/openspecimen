@@ -22,6 +22,8 @@ public class ConsentTierDetail {
 
 	private String statement;
 
+	private String activityStatus;
+
 	public Long getId() {
 		return id;
 	}
@@ -61,7 +63,15 @@ public class ConsentTierDetail {
 	public void setStatement(String statement) {
 		this.statement = statement;
 	}
-	
+
+	public String getActivityStatus() {
+		return activityStatus;
+	}
+
+	public void setActivityStatus(String activityStatus) {
+		this.activityStatus = activityStatus;
+	}
+
 	public static ConsentTierDetail from(CpConsentTier ct) {
 		if (ct == null) {
 			return null;
@@ -72,6 +82,7 @@ public class ConsentTierDetail {
 		detail.setStatementId(ct.getStatement().getId());
 		detail.setStatementCode(ct.getStatement().getCode());
 		detail.setStatement(ct.getStatement().getStatement());
+		detail.setActivityStatus(ct.getActivityStatus());
 		return detail;
 	}
 	

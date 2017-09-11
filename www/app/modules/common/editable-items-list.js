@@ -94,7 +94,11 @@ angular.module('openspecimen')
             scope.saving = true;
             $q.when(scope.listChanged()('remove', item)).then(
               function(result) {
-                scope.items.splice(idx, 1);
+                if (result == true) {
+                  scope.items.splice(idx, 1);
+                } else {
+                  angular.extend(item, result);
+                }
                 scope.saving = false;
               },
 
@@ -106,6 +110,27 @@ angular.module('openspecimen')
             scope.items.splice(idx, 1);
           } 
         };
+
+        scope.activateItem = function(idx) {
+          if (scope.saving) {
+            return;
+          }
+
+          var item = scope.items[idx];
+          if (scope.listChanged) {
+            scope.saving = true;
+            $q.when(scope.listChanged()('activate', item)).then(
+              function(result) {
+                angular.extend(item, result);
+                scope.saving = false;
+              },
+
+              function(result) {
+                scope.saving = false;
+              }
+            );
+          }
+        }
 
         scope.revertEdit = function() {
           if (scope.saving) {

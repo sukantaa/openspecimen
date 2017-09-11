@@ -41,6 +41,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierOp;
 import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierOp.OP;
 import com.krishagni.catissueplus.core.biospecimen.events.CopyCpOpDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.CpConsentTierStatusDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpQueryCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.CpReportSettingsDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
@@ -378,6 +379,27 @@ public class CollectionProtocolsController {
 		
 		consentTier.setId(tierId);
 		return performConsentTierOp(OP.UPDATE, cpId, consentTier);
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/consent-tiers/{tierId}/status")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ConsentTierDetail updateConsentStatus(
+			@PathVariable("id")
+			Long cpId,
+
+			@PathVariable("tierId")
+			Long tierId,
+
+			@RequestBody
+			CpConsentTierStatusDetail cTStatus) {
+
+		cTStatus.setCpId(cpId);
+		cTStatus.setId(tierId);
+		RequestEvent<CpConsentTierStatusDetail> req = getRequest(cTStatus);
+		ResponseEvent<ConsentTierDetail> resp = cpSvc.updateConsentTierStatus(req);
+		resp.throwErrorIfUnsuccessful();
+		return resp.getPayload();
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value="/{id}/consent-tiers/{tierId}")
