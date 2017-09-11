@@ -2,6 +2,7 @@
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -34,6 +35,7 @@ import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.service.LabelGenerator;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.services.impl.FormUtil;
 
 @Configurable
 @Audited
@@ -341,6 +343,7 @@ public class Visit extends BaseExtensionEntity {
 		
 		setName(Utility.getDisabledValue(getName(), 255));
 		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
+		FormUtil.getInstance().deleteRecords(getCpId(), Arrays.asList("SpecimenCollectionGroup", "VisitExtension"), getId());
 	}
 
 	public void update(Visit visit) {

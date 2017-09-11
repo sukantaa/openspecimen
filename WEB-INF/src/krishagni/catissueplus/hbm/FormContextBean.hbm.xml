@@ -624,5 +624,17 @@
       where
         f.identifier = :formId
     </sql-query>
+
+    <sql-query name="deleteCpEntityForms">
+      update
+        catissue_form_context fc
+      set
+        fc.deleted_on = :deleteTime
+      where
+        fc.cp_id = :cpId and
+        fc.entity_type in (:entityTypes) and
+        fc.deleted_on is null and
+        fc.is_sys_form = 0
+    </sql-query>
   </class>
 </hibernate-mapping>

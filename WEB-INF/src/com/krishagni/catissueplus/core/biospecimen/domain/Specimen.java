@@ -3,6 +3,7 @@ package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,6 +35,7 @@ import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.services.impl.FormUtil;
 
 @Configurable
 @Audited
@@ -612,6 +614,7 @@ public class Specimen extends BaseExtensionEntity {
 		setLabel(Utility.getDisabledValue(getLabel(), 255));
 		setBarcode(Utility.getDisabledValue(getBarcode(), 255));
 		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
+		FormUtil.getInstance().deleteRecords(getCpId(), Arrays.asList("Specimen", "SpecimenEvent", "SpecimenExtension"), getId());
 	}
 	
 	public static boolean isCollected(String status) {

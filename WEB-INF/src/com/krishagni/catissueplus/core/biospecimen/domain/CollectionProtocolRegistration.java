@@ -25,6 +25,7 @@ import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.service.LabelGenerator;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.services.impl.FormUtil;
 
 @Configurable
 @Audited
@@ -239,6 +240,8 @@ public class CollectionProtocolRegistration extends BaseEntity {
 		setBarcode(Utility.getDisabledValue(getBarcode(), 255));
 		setPpid(Utility.getDisabledValue(getPpid(), 255));
 		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
+		FormUtil.getInstance().deleteRecords(getCollectionProtocol().getId(), Collections.singletonList("Participant"), getId());
+		FormUtil.getInstance().deleteRecords(getCollectionProtocol().getId(), Collections.singletonList("ParticipantExtension"), getParticipant().getId());
 
 		//
 		// If participant is registered to only this deleted registration
@@ -330,6 +333,8 @@ public class CollectionProtocolRegistration extends BaseEntity {
 				throw OpenSpecimenException.userError(ParticipantErrorCode.REF_ENTITY_FOUND);
 			}			
 		}
+
+
 	}	
 	
 	private int getActiveVisits() {

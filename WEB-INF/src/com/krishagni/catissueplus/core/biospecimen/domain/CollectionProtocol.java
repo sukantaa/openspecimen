@@ -27,6 +27,7 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.services.impl.FormUtil;
 
 @Audited
 @AuditTable(value="CAT_COLLECTION_PROTOCOL_AUD")
@@ -729,6 +730,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setShortTitle(Utility.getDisabledValue(getShortTitle(), 50));
 		setCode(Utility.getDisabledValue(getCode(), 32));
 		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
+		FormUtil.getInstance().deleteRecords(getId(), Collections.singletonList("CollectionProtocolExtension"), getId());
+		FormUtil.getInstance().deleteCpEntityForms(getId());
 	}
 	
 	@Override

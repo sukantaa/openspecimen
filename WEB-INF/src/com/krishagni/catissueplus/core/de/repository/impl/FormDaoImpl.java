@@ -597,6 +597,24 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	}
 
 	@Override
+	public int deleteRecords(Long cpId, List<String> entityTypes, Long objectId) {
+		return getCurrentSession().getNamedQuery(SOFT_DELETE_ENTITY_RECS)
+			.setParameter("cpId", cpId)
+			.setParameterList("entityTypes", entityTypes)
+			.setParameter("objectId", objectId)
+			.executeUpdate();
+	}
+
+	@Override
+	public int deleteFormContexts(Long cpId, List<String> entityTypes) {
+		return getCurrentSession().getNamedQuery(SOFT_DELETE_CP_FORMS)
+			.setParameter("deleteTime", Calendar.getInstance().getTime())
+			.setParameter("cpId", cpId)
+			.setParameterList("entityTypes", entityTypes)
+			.executeUpdate();
+	}
+
+	@Override
 	public List<Map<String, Object>> getRegistrationRecords(Long cpId, Long formId, List<String> ppids, int startAt, int maxResults) {
 		return getEntityRecords(
 			cpId, formId, GET_REG_FORM_RECORDS,
@@ -1054,6 +1072,11 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 			"where " +
 			"  form_ctxt_id = :formCtxtId and record_id in (:recordIds)";
 
+
+	private static final String SOFT_DELETE_ENTITY_RECS = RE_FQN + ".deleteEntityRecords";
+
+	private static final String SOFT_DELETE_CP_FORMS = FQN + ".deleteCpEntityForms";
+
 	private static final String GET_ALL_FORMS =
 			"select %s " +
 			"from " +
@@ -1066,11 +1089,10 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 			"    from " +
 			"      dyextn_containers ic " +
 			"      left join catissue_form_context ctxt on ctxt.container_id = ic.identifier and ctxt.deleted_on is null " +
-			"      left join catissue_collection_protocol cp on ctxt.cp_id = cp.identifier " +
+			"      left join catissue_collection_protocol cp on ctxt.cp_id = cp.identifier and cp.activity_status != 'Disabled'" +
 			"    where " +
 			"      ic.deleted_on is null and " +
-			"      (ctxt.entity_type is null or ctxt.entity_type != 'Query') and " +
-			"      (cp.identifier is null or cp.activity_status != 'Disabled') " +
+			"      (ctxt.entity_type is null or ctxt.entity_type != 'Query') " +
 			"      %s " +
 			"    group by " +
 			"      ic.identifier " +

@@ -2,6 +2,7 @@
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.MpiGenerator;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.services.impl.FormUtil;
 
 @Audited
 public class Participant extends BaseExtensionEntity {
@@ -242,7 +244,8 @@ public class Participant extends BaseExtensionEntity {
 		disableMrns();		
 		setUid(Utility.getDisabledValue(getUid(), 50));
 		setEmpi(Utility.getDisabledValue(getEmpi(), 50));
-		this.activityStatus = Status.ACTIVITY_STATUS_DISABLED.getStatus();
+		activityStatus = Status.ACTIVITY_STATUS_DISABLED.getStatus();
+		FormUtil.getInstance().deleteRecords(-1L, Collections.singletonList("CommonParticipant"), getId());
 	}
 
 	public void updatePmi(ParticipantMedicalIdentifier pmi) {
