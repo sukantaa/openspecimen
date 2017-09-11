@@ -1,0 +1,34 @@
+<div class="os-audit-revisions">
+  <div class="os-modal-header">
+    <h4 translate="audit.revisions">Revisions</h4>
+  </div>
+  <div class="os-modal-body">
+    <table class="os-table">
+      <thead class="os-table-head">
+        <tr class="row">
+          <th class="col">
+            <span translate="audit.updated_on">Updated On</span>
+          </th>
+          <th class="col">
+            <span translate="audit.updated_by">Updated By</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="os-table-body">
+        <tr class="row" ng-repeat="revision in revisions">
+          <td class="col">
+            <span>{{revision.changedOn | date: $root.global.dateTimeFmt}}</span>
+          </td>
+          <td class="col">
+            <span>{{revision.changedBy | osUserDisplayName}}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="os-modal-footer">
+    <button class="btn btn-primary" ng-click="done()">
+      <span translate="common.buttons.done">Done</span>
+    </button>
+  </div>
+</div>

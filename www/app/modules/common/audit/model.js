@@ -10,5 +10,13 @@ angular.module('os.common.audit')
       );
     }
 
+    Audit.getRevisions = function(objectsList) {
+      return $http.post(Audit.url() + "/revisions", objectsList).then(
+        function(resp) {
+          return resp.data;
+        }
+      );
+    }
+
     return Audit;
   });

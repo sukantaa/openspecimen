@@ -2032,7 +2032,10 @@
     "created_by": "Created By",
     "created_on": "Created On",
     "updated_by": "Updated By",
-    "updated_on": "Updated On"
+    "updated_on": "Updated On",
+    "no_of_revisions": "Number of Revisions",
+    "view_all": "View all",
+    "revisions": "Revisions"
   },
 
    "jobs": {

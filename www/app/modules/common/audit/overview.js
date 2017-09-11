@@ -1,5 +1,6 @@
 angular.module('os.common.audit')
-  .directive('osAuditOverview', function(Audit) {
+  .directive('osAuditOverview', function($modal, Audit) {
+
 
     function linker(scope, element, attrs) {
       var objectsList = scope.objectsList;
@@ -35,6 +36,24 @@ angular.module('os.common.audit')
           scope.audit = auditInfo;
         }
       );
+
+      scope.showRevisions = function() {
+        $modal.open({
+          templateUrl: 'modules/common/audit/revisions.html',
+          controller: function($scope, $modalInstance, revisions) {
+            $scope.revisions = revisions;
+
+            $scope.done = function() {
+              $modalInstance.close(true);
+            }
+          },
+          resolve: {
+            revisions: function() {
+              return Audit.getRevisions(objectsList);
+            }
+          }
+        });
+      }
     }
 
     return {

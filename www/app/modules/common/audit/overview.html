@@ -20,5 +20,12 @@
       <strong class="key key-sm" translate="audit.updated_on">Updated On</strong>
       <span class="value value-md">{{audit.lastUpdatedOn | date: $root.global.dateTimeFmt}}</span>
     </li>
+    <li class="item" ng-if="audit.revisionsCount > 1">
+      <strong class="key key-sm" translate="audit.no_of_revisions">Number of Revisions</strong>
+      <span class="value value-md">
+        {{audit.revisionsCount}}
+        <a ng-click="showRevisions()">(<span translate="audit.view_all">View All</span>)</a>
+      </span>
+    </li>
   </ul>
 </div>
