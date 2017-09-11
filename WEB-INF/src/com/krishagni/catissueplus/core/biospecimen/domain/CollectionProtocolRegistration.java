@@ -333,8 +333,6 @@ public class CollectionProtocolRegistration extends BaseEntity {
 				throw OpenSpecimenException.userError(ParticipantErrorCode.REF_ENTITY_FOUND);
 			}			
 		}
-
-
 	}	
 	
 	private int getActiveVisits() {
