@@ -1,5 +1,5 @@
 angular.module('openspecimen')
-  .directive('showIfSpmnOpAllowed', function($q, AuthorizationService, SettingUtil) {
+  .directive('showIfSpmnOpAllowed', function($q, $rootScope, AuthorizationService, SettingUtil) {
 
     function showIfContainerReadAllowed(spmn, element) {
       var opts = {resource: 'StorageContainer', operations: ['Read'], sites: [spmn.storageSite]}
@@ -11,20 +11,14 @@ angular.module('openspecimen')
     return {
       restrict: 'A',
       link: function(scope, element, attrs) {
-        var watchAttrs = ['showIfSpmnOpAllowed', 'cp', 'cpr', 'spmn'];
-        for (var i = watchAttrs.length - 1; i >= 0; --i) {
-          if (!attrs[watchAttrs[i]]) {
-            watchAttrs.splice(i, 1);
-          }
-        }
-
-        scope.$watchGroup(watchAttrs, function(newValues) {
-          var opts = {op: attrs.op};
-          angular.forEach(watchAttrs,
-            function(attr, index) {
-              opts[attr] = newValues[index];
-            }
-          );
+        scope.$watchGroup([attrs.showIfSpmnOpAllowed, attrs.cp, attrs.cpr, attrs.spmn], function(newValues) {
+          var opts = {
+            showIfSpmnOpAllowed: newValues[0],
+            cp: newValues[1],
+            cpr: newValues[2],
+            spmn: newValues[3],
+            op: attrs.op
+          };
 
           var resourceOpts = opts.showIfSpmnOpAllowed;
           if (!resourceOpts) {
@@ -33,12 +27,12 @@ angular.module('openspecimen')
             if (opts.cp && opts.cpr) {
               cp = opts.cp.shortTitle;
               sites = opts.cp.cpSites.map(function(cpSite) { return cpSite.siteName; });
-              if ($root.global.appProps.mrn_restriction_enabled) {
+              if ($rootScope.global.appProps.mrn_restriction_enabled) {
                 sites = sites.concat(opts.cpr.getMrnSites());
               }
             }
 
-            resourceOpts = {resource: 'VisitAndSpecimen', operations: [op], cp: cp, sites: sites};
+            resourceOpts = {resource: 'VisitAndSpecimen', operations: [opts.op], cp: cp, sites: sites};
           }
 
           if (!AuthorizationService.isAllowed(resourceOpts)) {
