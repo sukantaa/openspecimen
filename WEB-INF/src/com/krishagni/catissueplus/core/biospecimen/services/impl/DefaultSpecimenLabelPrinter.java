@@ -35,7 +35,6 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.OpenSpecimenEvent;
 import com.krishagni.catissueplus.core.common.repository.PrintRuleConfigsListCriteria;
 import com.krishagni.catissueplus.core.common.service.ChangeLogService;
-import com.krishagni.catissueplus.core.common.service.ConfigChangeListener;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 
