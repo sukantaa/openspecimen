@@ -212,6 +212,14 @@ angular.module('os.biospecimen.participant.collect-specimens',
           }
         );
 
+        if ($scope.showCollVisitDetails) {
+          $scope.showCollVisitDetails = ($scope.specimens || []).some(
+            function(specimen) {
+              return specimen.lineage == 'New'  && specimen.existingStatus != 'Collected';
+            }
+          );
+        }
+
         visit.visitDate = visit.visitDate || visit.anticipatedVisitDate || new Date();
         visit.cprId = cpr.id;
         delete visit.anticipatedVisitDate;
