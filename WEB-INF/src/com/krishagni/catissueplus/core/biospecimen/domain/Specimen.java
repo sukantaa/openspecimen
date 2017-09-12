@@ -682,10 +682,10 @@ public class Specimen extends BaseExtensionEntity {
 		setInitialQuantity(specimen.getInitialQuantity());
 		setAvailableQuantity(specimen.getAvailableQuantity());
 
-		updatePosition(specimen.getPosition());
 		updateEvent(getCollectionEvent(), specimen.getCollectionEvent());
 		updateEvent(getReceivedEvent(), specimen.getReceivedEvent());
 		updateCollectionStatus(specimen.getCollectionStatus());
+		updatePosition(specimen.getPosition());
 
 		if (isCollected()) {
 			if (isPrimary()) {
@@ -1024,6 +1024,10 @@ public class Specimen extends BaseExtensionEntity {
 	}
 	
 	public void updatePosition(StorageContainerPosition newPosition, Date time) {
+		if (!isCollected()) {
+			return;
+		}
+
 		if (newPosition != null) {
 			StorageContainer container = newPosition.getContainer();
 			if (container == null || (!container.isDimensionless() && !newPosition.isSpecified())) {
