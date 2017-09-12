@@ -45,9 +45,12 @@ angular.module('openspecimen')
           }
 
           var q;
-          if (opts.cp.containerBasedAccess === true) {
+          if (opts.cp.containerBasedAccess !== null && opts.cp.containerBasedAccess !== undefined) {
+            //
+            // Give precedence to CP specific setting and then system level setting. If CP level setting is given (defined) then use it.
+            //
             q = $q.defer();
-            q.resolve({value: 'true'});
+            q.resolve({value: opts.cp.containerBasedAccess ? 'true' : 'false'});
             q = q.promise;
           } else {
             q = SettingUtil.getSetting('biospecimen', 'container_based_access');
