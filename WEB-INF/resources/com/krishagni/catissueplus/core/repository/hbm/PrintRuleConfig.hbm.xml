@@ -23,6 +23,8 @@
 
     <property name="activityStatus" column="ACTIVITY_STATUS"/>
 
+    <property name="description" column="DESCRIPTION" not-null="true"/>
+
     <filter name="activeEntity"/>
   </class>
 </hibernate-mapping>

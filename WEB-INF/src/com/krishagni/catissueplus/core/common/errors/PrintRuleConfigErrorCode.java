@@ -25,7 +25,9 @@ public enum PrintRuleConfigErrorCode implements ErrorCode{
 
 	INVALID_CPS,
 
-	INVALID_USERS;
+	INVALID_USERS,
+
+	DESC_REQ;
 
 	@Override
 	public String code() {

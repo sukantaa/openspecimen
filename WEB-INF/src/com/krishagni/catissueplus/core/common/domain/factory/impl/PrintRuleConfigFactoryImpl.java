@@ -45,6 +45,7 @@ public class PrintRuleConfigFactoryImpl implements PrintRuleConfigFactory {
 		setObjectType(detail, rule, ose);
 		setInstitute(detail, rule, ose);
 		setActivityStatus(detail, rule, ose);
+		setDescription(detail, rule, ose);
 		setRule(detail, rule, ose);
 		ose.checkAndThrow();
 		return rule;
@@ -94,6 +95,15 @@ public class PrintRuleConfigFactoryImpl implements PrintRuleConfigFactory {
 		}
 
 		rule.setActivityStatus(activityStatus);
+	}
+
+	private void setDescription(PrintRuleConfigDetail detail, PrintRuleConfig rule, OpenSpecimenException ose) {
+		if (StringUtils.isBlank(detail.getDescription())) {
+			ose.addError(PrintRuleConfigErrorCode.DESC_REQ);
+			return;
+		}
+
+		rule.setDescription(detail.getDescription());
 	}
 
 	private void setRule(PrintRuleConfigDetail detail, PrintRuleConfig rule, OpenSpecimenException ose) {

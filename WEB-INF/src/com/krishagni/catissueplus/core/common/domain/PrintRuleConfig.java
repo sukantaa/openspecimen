@@ -25,6 +25,8 @@ public class PrintRuleConfig extends BaseEntity {
 
 	private String activityStatus;
 
+	private String description;
+
 	private LabelPrintRule rule;
 
 	public String getObjectType() {
@@ -65,6 +67,14 @@ public class PrintRuleConfig extends BaseEntity {
 
 	public void setActivityStatus(String activityStatus) {
 		this.activityStatus = activityStatus;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public LabelPrintRule getRule() {
@@ -112,6 +122,7 @@ public class PrintRuleConfig extends BaseEntity {
 		setUpdatedOn(rule.getUpdatedOn());
 		setRule(rule.getRule());
 		setActivityStatus(rule.getActivityStatus());
+		setDescription(rule.getDescription());
 	}
 
 	public void delete() {

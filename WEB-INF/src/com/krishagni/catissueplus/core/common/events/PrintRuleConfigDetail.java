@@ -26,6 +26,8 @@ public class PrintRuleConfigDetail {
 
 	private String activityStatus;
 
+	private String description;
+
 	private Map<String, String> rule;
 
 	public Long getId() {
@@ -84,6 +86,14 @@ public class PrintRuleConfigDetail {
 		this.activityStatus = activityStatus;
 	}
 
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public Map<String, String> getRule() {
 		return rule;
 	}
@@ -102,6 +112,7 @@ public class PrintRuleConfigDetail {
 		detail.setUpdatedBy(UserSummary.from(rule.getUpdatedBy()));
 		detail.setUpdatedOn(rule.getUpdatedOn());
 		detail.setActivityStatus(rule.getActivityStatus());
+		detail.setDescription(rule.getDescription());
 		detail.setRule(rule.getRuleDef());
 		return detail;
 	}
