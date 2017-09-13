@@ -184,7 +184,8 @@ angular.module('openspecimen')
       minRange = minRange || 1000000;
       fractionDigits = fractionDigits || undefined;
       
-      if (angular.isNumber(input) && input >= minRange) {
+      input = +input;
+      if (angular.isNumber(input) && !isNaN(input) && input >= minRange) {
         input = fractionDigits != undefined ? input.toExponential(fractionDigits) : input.toExponential();
       }
 

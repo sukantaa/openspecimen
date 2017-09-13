@@ -8,7 +8,6 @@ angular.module('openspecimen')
         return result;
       }
 
-
       return Util.getNumberInScientificNotation(input, 1000000);
     }
   });
