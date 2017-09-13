@@ -14,12 +14,6 @@ public enum SpecimenErrorCode implements ErrorCode {
 	
 	VISIT_REQUIRED,
 	
-	COMPL_VISIT_REQ,
-	
-	COMPL_OR_PENDING_VISIT_REQ,
-	
-	COMPL_OR_MISSED_VISIT_REQ,
-	
 	LABEL_REQUIRED,
 	
 	DUP_LABEL,

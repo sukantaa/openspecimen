@@ -27,6 +27,7 @@ import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPos
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenReturnEvent;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
@@ -752,7 +753,7 @@ public class Specimen extends BaseExtensionEntity {
 		
 		if (isMissed(collectionStatus)) {
 			if (!getVisit().isCompleted() && !getVisit().isMissed()) {
-				throw OpenSpecimenException.userError(SpecimenErrorCode.COMPL_OR_MISSED_VISIT_REQ);
+				throw OpenSpecimenException.userError(VisitErrorCode.COMPL_OR_MISSED_VISIT_REQ);
 			} else if (getParentSpecimen() != null && !getParentSpecimen().isCollected() && !getParentSpecimen().isMissed()) {
 				throw OpenSpecimenException.userError(SpecimenErrorCode.COLL_OR_MISSED_PARENT_REQ);
 			} else {
@@ -761,7 +762,7 @@ public class Specimen extends BaseExtensionEntity {
 			}
 		} else if (isPending(collectionStatus)) {
 			if (!getVisit().isCompleted() && !getVisit().isPending()) {
-				throw OpenSpecimenException.userError(SpecimenErrorCode.COMPL_OR_PENDING_VISIT_REQ);
+				throw OpenSpecimenException.userError(VisitErrorCode.COMPL_OR_PENDING_VISIT_REQ);
 			} else if (getParentSpecimen() != null && !getParentSpecimen().isCollected() && !getParentSpecimen().isPending()) {
 				throw OpenSpecimenException.userError(SpecimenErrorCode.COLL_OR_PENDING_PARENT_REQ);
 			} else {
@@ -769,7 +770,7 @@ public class Specimen extends BaseExtensionEntity {
 			}
 		} else if (isCollected(collectionStatus)) {
 			if (!getVisit().isCompleted()) {
-				throw OpenSpecimenException.userError(SpecimenErrorCode.COMPL_VISIT_REQ);
+				throw OpenSpecimenException.userError(VisitErrorCode.COMPL_VISIT_REQ);
 			} else if (getParentSpecimen() != null && !getParentSpecimen().isCollected()) {
 				throw OpenSpecimenException.userError(SpecimenErrorCode.COLL_PARENT_REQ);
 			} else {

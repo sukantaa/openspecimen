@@ -327,10 +327,8 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 		try {
 			SprDetail detail = req.getPayload();
 			Visit visit = getVisit(detail.getId(), null);
+			ensureSprCanBeUploaded(visit);
 
-			raiseErrorIfSpecimenCentric(visit);
-			ensureUpdateSprRights(visit);
-			
 			String filename = detail.getFilename();
 			if (detail.isTextContent() || (detail.isPdfContent() && isExtractSprTextEnabled(visit))) {
 				String sprText = getTextFromReq(detail);
@@ -361,9 +359,7 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 		try {
 			SprDetail detail = req.getPayload();
 			Visit visit = getVisit(detail.getId(), null);
-
-			raiseErrorIfSpecimenCentric(visit);
-			ensureUpdateSprRights(visit);
+			ensureSprCanBeUploaded(visit);
 			
 			File file = getSprFile(detail.getId());
 			if (file == null) {
@@ -762,6 +758,18 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 		}
 
 		return extractSprText;
+	}
+
+	private void ensureSprCanBeUploaded(Visit visit) {
+		ensureCompletedVisit(visit);
+		raiseErrorIfSpecimenCentric(visit);
+		ensureUpdateSprRights(visit);
+	}
+
+	private void ensureCompletedVisit(Visit visit) {
+		if (!visit.isCompleted()) {
+			throw OpenSpecimenException.userError(VisitErrorCode.COMPL_VISIT_REQ);
+		}
 	}
 
 	private void raiseErrorIfSpecimenCentric(Visit visit) {
