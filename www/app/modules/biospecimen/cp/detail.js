@@ -1,6 +1,8 @@
 
 angular.module('os.biospecimen.cp.detail', ['os.biospecimen.models'])
-  .controller('CpDetailCtrl', function($scope, $q, $translate, cp, CollectionProtocol, PvManager, DeleteUtil, CpSettingsReg) {
+  .controller('CpDetailCtrl', function(
+    $scope, $q, $translate, cp,
+    CollectionProtocol, PvManager, DeleteUtil, CpSettingsReg, SettingUtil) {
 
     function init() {
       //
@@ -14,6 +16,7 @@ angular.module('os.biospecimen.cp.detail', ['os.biospecimen.models'])
       $scope.cp.repositoryNames = cp.getRepositoryNames();
       $scope.downloadUri = CollectionProtocol.url() + cp.id + '/definition';
       $scope.sites = PvManager.getSites();
+      $scope.sysStoreSpr  = true;
 
       var opts = {sites: cp.repositoryNames, cp: cp.shortTitle};
       angular.extend($scope.cpResource.updateOpts, opts);
@@ -22,6 +25,12 @@ angular.module('os.biospecimen.cp.detail', ['os.biospecimen.models'])
       CpSettingsReg.getSettings().then(
         function(settings) {
           $scope.settings = settings;
+        }
+      );
+
+      SettingUtil.getSetting('biospecimen', 'store_spr').then(
+        function(setting) {
+          $scope.sysStoreSpr = (setting.value == 'true');
         }
       );
     }

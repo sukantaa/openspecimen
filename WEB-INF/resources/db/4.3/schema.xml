@@ -21,4 +21,10 @@
         description = concat('Print rule ', identifier);
     </sql>
   </changeSet>
+
+  <changeSet author="vgaikwad" id="Setting to specify whether SPRs are stored for CP visits">
+    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
+      <column name="STORE_SPRS" type="${boolean.type}"/>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

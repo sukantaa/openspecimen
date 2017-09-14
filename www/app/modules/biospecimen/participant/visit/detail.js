@@ -1,13 +1,15 @@
 
 angular.module('os.biospecimen.visit.detail', ['os.biospecimen.models'])
   .controller('VisitDetailCtrl', function(
-    $scope, $state,
-    cpr, visit, specimens, Specimen, VisitNamePrinter, DeleteUtil, ExtensionsUtil) {
+    $scope, $state, cpr, visit, specimens, storeSpr,
+    Specimen, VisitNamePrinter, DeleteUtil, ExtensionsUtil) {
 
     function init() {
       $scope.cpr = cpr;
       $scope.visit = visit;
       $scope.specimens = specimens;
+
+      $scope.sprUploadAllowed = storeSpr && visit.status == 'Complete';
       ExtensionsUtil.createExtensionFieldMap(visit);
     }
           

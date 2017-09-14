@@ -2,7 +2,7 @@
 angular.module('os.biospecimen.cp.addedit', ['os.biospecimen.models', 'os.administrative.models'])
   .controller('CpAddEditCtrl', function(
     $scope, $state, $stateParams, $sce, $timeout,
-    cp, extensionCtxt, CollectionProtocol, User, Site, ExtensionsUtil, PvManager) {
+    cp, extensionCtxt, CollectionProtocol, User, Site, ExtensionsUtil, PvManager, SettingUtil) {
 
     function init() {
       $scope.cp = cp;
@@ -15,6 +15,7 @@ angular.module('os.biospecimen.cp.addedit', ['os.biospecimen.models', 'os.admini
       $scope.deFormCtrl = {};
       $scope.extnOpts = ExtensionsUtil.getExtnOpts(cp, extensionCtxt);
       $scope.coordinators = [];
+      $scope.sysStoreSpr  = true;
 
       if (!!cp.id && $stateParams.mode == 'copy') {
         $scope.mode = 'copy';
@@ -28,6 +29,12 @@ angular.module('os.biospecimen.cp.addedit', ['os.biospecimen.models', 'os.admini
         if (!!cp.sopDocumentName) {
           cp.$$sopDocDispName = cp.sopDocumentName.substring(cp.sopDocumentName.indexOf("_") + 1);
         }
+
+        SettingUtil.getSetting('biospecimen', 'store_spr').then(
+          function(setting) {
+            $scope.sysStoreSpr = (setting.value == 'true');
+          }
+        );
       }
     };
 

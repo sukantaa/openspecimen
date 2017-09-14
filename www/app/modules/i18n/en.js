@@ -77,6 +77,7 @@
     "footer_note": "<a href=\"http://www.openspecimen.org\" target=\"_blank\">OpenSpecimen</a> - powered by <a href=\"http://www.krishagni.com\" target=\"_blank\">Krishagni</a>",
     "download_initiated": "Download of file initiated. Please check your download directory ...",
     "error": "Error",
+    "use_system_setting": "Use System Setting",
 
     "filters": {
       "title": "Filters",
@@ -176,6 +177,7 @@
     "sop_document": "SOP Document",
     "sop_document_url": "SOP Document URL",
     "sop_document_file": "SOP Document File",
+    "store_sprs": "Store SPRs?",
     "extract_spr_text": "Extract Text from SPR PDF Docs?",
     "view_sop": "View SOP",
     "desc_url": "Description URL",
@@ -2261,7 +2263,9 @@
         "staged_part_cleanup_int": "Staged Participants Retain Interval",
         "staged_part_cleanup_int_desc": "Number of days to retain the details of participant in staging table",
         "store_phi": "Anonymize Participants",
-        "store_phi_desc": "Enable or disable feature to anonymize participant's PHI data."
+        "store_phi_desc": "Enable or disable feature to anonymize participant's PHI data.",
+        "store_spr": "Surgical Pathology Reports",
+        "store_spr_desc": "Enable or disable uploading of surgical pathology reports for a visit."
       },
 
       "common": {

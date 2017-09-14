@@ -22,6 +22,18 @@ angular.module('os.biospecimen.visit', [
             }
 
             return null;
+          },
+
+          storeSpr: function(cp, SettingUtil) {
+            if (cp.storeSprEnabled == undefined || cp.storeSprEnabled == null) {
+              return SettingUtil.getSetting('biospecimen', 'store_spr').then(
+                function(setting) {
+                  return setting.value == 'true';
+                }
+              );
+            } else {
+              return cp.storeSprEnabled;
+            }
           }
         },
         controller: function($scope, cpr, visit) {

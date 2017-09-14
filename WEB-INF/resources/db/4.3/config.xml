@@ -14,4 +14,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vgaikwad" id="Config property to enable/disable storing surgical pathology report">
+    <sql>
+      call add_cfg_prop(
+        'biospecimen', 'store_spr',
+        'store_spr', 'store_spr_desc',
+        'BOOLEAN', 'true'
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

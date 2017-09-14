@@ -29,6 +29,8 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 
 	private String sopDocumentName;
 
+	private Boolean storeSprEnabled;
+
 	private Boolean extractSprText;
 
 	private String descriptionUrl;
@@ -132,6 +134,14 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 
 	public void setSopDocumentName(String sopDocumentName) {
 		this.sopDocumentName = sopDocumentName;
+	}
+
+	public Boolean getStoreSprEnabled() {
+		return storeSprEnabled;
+	}
+
+	public void setStoreSprEnabled(Boolean storeSprEnabled) {
+		this.storeSprEnabled = storeSprEnabled;
 	}
 
 	public Boolean getExtractSprText() {
@@ -332,6 +342,7 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		result.setAnticipatedParticipantsCount(cp.getEnrollment());
 		result.setSopDocumentUrl(cp.getSopDocumentUrl());
 		result.setSopDocumentName(cp.getSopDocumentName());
+		result.setStoreSprEnabled(cp.getStoreSprEnabled());
 		result.setExtractSprText(cp.getExtractSprText());
 		result.setDescriptionUrl(cp.getDescriptionURL());
 		result.setSpecimenLabelFmt(cp.getSpecimenLabelFormat());

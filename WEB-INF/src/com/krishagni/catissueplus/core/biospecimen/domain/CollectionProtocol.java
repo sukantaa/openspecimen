@@ -86,6 +86,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	private String sopDocumentName;
 
+	private Boolean storeSprEnabled;
+
 	private Boolean extractSprText;
 
 	private String descriptionURL;
@@ -143,7 +145,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	private Set<CollectionProtocolRegistration> collectionProtocolRegistrations = new HashSet<CollectionProtocolRegistration>();
 
 	private Set<DistributionProtocol> distributionProtocols = new HashSet<>();
-	
+
 	public static String getEntityName() {
 		return ENTITY_NAME;
 	}
@@ -234,6 +236,14 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	public void setSopDocumentName(String sopDocumentName) {
 		this.sopDocumentName = sopDocumentName;
+	}
+
+	public Boolean getStoreSprEnabled() {
+		return storeSprEnabled;
+	}
+
+	public void setStoreSprEnabled(Boolean storeSprEnabled) {
+		this.storeSprEnabled = storeSprEnabled;
 	}
 
 	public Boolean getExtractSprText() {
@@ -520,6 +530,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setEnrollment(cp.getEnrollment());
 		setSopDocumentUrl(cp.getSopDocumentUrl());
 		setSopDocumentName(cp.getSopDocumentName());
+		setStoreSprEnabled(cp.getStoreSprEnabled());
 		setExtractSprText(cp.getExtractSprText());
 		setDescriptionURL(cp.getDescriptionURL());
 		setPpidFormat(cp.getPpidFormat());
@@ -563,6 +574,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		cp.setDescriptionURL(getDescriptionURL());
 		cp.setEnrollment(getEnrollment());
 		cp.setSpecimenCentric(isSpecimenCentric());
+		cp.setStoreSprEnabled(getStoreSprEnabled());
+		cp.setExtractSprText(getExtractSprText());
 
 		cp.setPpidFormat(getPpidFormat());
 		cp.setManualPpidEnabled(isManualPpidEnabled());

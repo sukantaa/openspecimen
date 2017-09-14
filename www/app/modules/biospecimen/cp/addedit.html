@@ -187,6 +187,24 @@
       </div>
 
       <div class="form-group">
+        <label class="control-label col-xs-3" translate="cp.store_sprs"> Store Pathology Reports? </label>
+        <div class="col-xs-6">
+          <label class="radio-inline">
+            <input type="radio" name="sprEnabled" ng-model="cp.storeSprEnabled" ng-value="true">
+            <span translate="common.yes">Yes</span>
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="sprEnabled" ng-model="cp.storeSprEnabled" ng-value="false">
+            <span translate="common.no">No</span>
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="sprEnabled" ng-model="cp.storeSprEnabled" ng-value="">
+            <span translate="common.use_system_setting">Use System Setting</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group" ng-if="cp.storeSprEnabled || (cp.storeSprEnabled == undefined && sysStoreSpr)">
         <label class="col-xs-3 control-label" translate="cp.extract_spr_text">Extract Text from SPR PDF Docs?</label>
         <div class="col-xs-9">
           <label class="radio-inline"> 

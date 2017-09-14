@@ -37,6 +37,8 @@
 
     <property name="sopDocumentName" column="SOP_DOCUMENT_NAME"/>
 
+    <property name="storeSprEnabled" column="STORE_SPRS"/>
+
     <property name="extractSprText" column="EXTRACT_SPR_TEXT"/>
 
     <property name="descriptionURL" column="DESCRIPTION_URL"/>
