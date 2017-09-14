@@ -4,8 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.domain.AbstractUniqueIdToken;
 
-public class SiteUniqueIdLabelToken extends AbstractContainerLabelToken {
+public class SiteUniqueIdLabelToken extends AbstractUniqueIdToken<StorageContainer> {
 
 	@Autowired
 	private DaoFactory daoFactory;
@@ -15,8 +16,7 @@ public class SiteUniqueIdLabelToken extends AbstractContainerLabelToken {
 	}
 
 	@Override
-	public String getLabel(StorageContainer container) {
-		Long uniqueId = daoFactory.getUniqueIdGenerator().getUniqueId(getName(), container.getSite().getId().toString());
-		return uniqueId.toString();
+	public Number getUniqueId(StorageContainer container, String... args) {
+		return daoFactory.getUniqueIdGenerator().getUniqueId(getName(), container.getSite().getId().toString());
 	}
 }

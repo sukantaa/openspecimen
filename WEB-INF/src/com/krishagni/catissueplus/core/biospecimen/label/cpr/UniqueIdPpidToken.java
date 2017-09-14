@@ -4,8 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.domain.AbstractUniqueIdToken;
 
-public class UniqueIdPpidToken extends AbstractPpidToken {
+public class UniqueIdPpidToken extends AbstractUniqueIdToken<CollectionProtocolRegistration> {
 
 	@Autowired
 	private DaoFactory daoFactory;
@@ -13,19 +14,8 @@ public class UniqueIdPpidToken extends AbstractPpidToken {
 	public UniqueIdPpidToken() {
 		this.name = "SYS_UID";
 	}
-	
-	public void setDaoFactory(DaoFactory daoFactory) {
-		this.daoFactory = daoFactory;
-	}
 
-	@Override
-	public String getLabel(CollectionProtocolRegistration arg0, String... arg1) {
-		Long uniqueId = daoFactory.getUniqueIdGenerator().getUniqueId("Registration", getName());
-		return uniqueId.toString();
-	}
-
-	@Override
-	public int validate(Object object, String input, int startIdx, String ... args) {
-		return super.validateNumber(input, startIdx);
+	public Number getUniqueId(CollectionProtocolRegistration cpr, String ... args) {
+		return daoFactory.getUniqueIdGenerator().getUniqueId("Registration", getName());
 	}
 }

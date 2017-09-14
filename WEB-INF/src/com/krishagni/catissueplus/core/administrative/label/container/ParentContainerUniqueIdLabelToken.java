@@ -1,12 +1,12 @@
 package com.krishagni.catissueplus.core.administrative.label.container;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.domain.AbstractUniqueIdToken;
 
-public class ParentContainerUniqueIdLabelToken extends AbstractContainerLabelToken {
+public class ParentContainerUniqueIdLabelToken extends AbstractUniqueIdToken<StorageContainer> {
 
 	@Autowired
 	private DaoFactory daoFactory;
@@ -16,13 +16,12 @@ public class ParentContainerUniqueIdLabelToken extends AbstractContainerLabelTok
 	}
 
 	@Override
-	public String getLabel(StorageContainer container) {
+	public Number getUniqueId(StorageContainer container, String... args) {
 		StorageContainer parent = container.getParentContainer();
 		if (parent == null) {
-			return StringUtils.EMPTY;
+			return null;
 		}
 
-		Long uniqueId = daoFactory.getUniqueIdGenerator().getUniqueId(name, parent.getName());
-		return uniqueId.toString();
+		return daoFactory.getUniqueIdGenerator().getUniqueId(name, parent.getName());
 	}
 }

@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
-import com.krishagni.catissueplus.core.common.domain.LabelTmplToken;
+import com.krishagni.catissueplus.core.common.domain.AbstractUniqueIdToken;
 
-public class PpidSpecTypeLabelToken extends AbstractSpecimenLabelToken {
+public class PpidSpecTypeLabelToken extends AbstractUniqueIdToken<Specimen> {
 
 	@Autowired
 	private DaoFactory daoFactory;
@@ -15,21 +15,11 @@ public class PpidSpecTypeLabelToken extends AbstractSpecimenLabelToken {
 		this.name = "PPI_SPEC_TYPE_UID";
 	}
 
-	public DaoFactory getDaoFactory() {
-		return daoFactory;
-	}
-
-	public void setDaoFactory(DaoFactory daoFactory) {
-		this.daoFactory = daoFactory;
-	}
-
 	@Override
-	public String getLabel(Specimen specimen) {
+	public Number getUniqueId(Specimen specimen, String... args) {
 		String ppid = specimen.getVisit().getRegistration().getPpid();
 		String key = ppid + "_" + specimen.getSpecimenType();
 		Long uniqueId = daoFactory.getUniqueIdGenerator().getUniqueId(name, key);
-
-		return uniqueId == 1L ? LabelTmplToken.EMPTY_VALUE : uniqueId.toString();
+		return uniqueId == 1L ? -1 : uniqueId;
 	}
-
 }

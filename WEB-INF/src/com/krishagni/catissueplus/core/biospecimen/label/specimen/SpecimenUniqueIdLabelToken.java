@@ -4,8 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.domain.AbstractUniqueIdToken;
 
-public class SpecimenUniqueIdLabelToken extends AbstractSpecimenLabelToken {
+public class SpecimenUniqueIdLabelToken extends AbstractUniqueIdToken<Specimen> {
 
 	@Autowired
 	private DaoFactory daoFactory;
@@ -13,23 +14,9 @@ public class SpecimenUniqueIdLabelToken extends AbstractSpecimenLabelToken {
 	public SpecimenUniqueIdLabelToken() {
 		this.name = "SYS_UID";
 	}
-	
-	public DaoFactory getDaoFactory() {
-		return daoFactory;
-	}
-
-	public void setDaoFactory(DaoFactory daoFactory) {
-		this.daoFactory = daoFactory;
-	}
 
 	@Override
-	public String getLabel(Specimen specimen) {
-		Long uniqueId = daoFactory.getUniqueIdGenerator().getUniqueId("Specimen", getName());
-		return "" + uniqueId.toString();
+	public Number getUniqueId(Specimen specimen, String... args) {
+		return daoFactory.getUniqueIdGenerator().getUniqueId("Specimen", getName());
 	}
-	
-	@Override
-	public int validate(Object object, String input, int startIdx, String ... args) {
-		return super.validateNumber(input, startIdx);
-	}	
 }

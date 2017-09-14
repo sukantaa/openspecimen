@@ -1,5 +1,5 @@
 package com.krishagni.catissueplus.core.common.repository;
 
 public interface UniqueIdGenerator {
-	public Long getUniqueId(String type, String id);
+	Long getUniqueId(String type, String id);
 }

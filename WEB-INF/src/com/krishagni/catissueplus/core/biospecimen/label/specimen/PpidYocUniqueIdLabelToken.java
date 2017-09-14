@@ -4,11 +4,12 @@ import java.util.Calendar;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionEvent;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.domain.AbstractUniqueIdToken;
 
-public class PpidYocUniqueIdLabelToken extends AbstractSpecimenLabelToken {
+public class PpidYocUniqueIdLabelToken extends AbstractUniqueIdToken<Specimen> {
 
 	@Autowired
 	private DaoFactory daoFactory;
@@ -16,19 +17,10 @@ public class PpidYocUniqueIdLabelToken extends AbstractSpecimenLabelToken {
 	public PpidYocUniqueIdLabelToken() {
 		this.name = "PPI_YOC_UID";
 	}
-	
-	public DaoFactory getDaoFactory() {
-		return daoFactory;
-	}
 
-	public void setDaoFactory(DaoFactory daoFactory) {
-		this.daoFactory = daoFactory;
-	}
-	
+
 	@Override
-	public String getLabel(Specimen specimen) {
-		String ppid = specimen.getVisit().getRegistration().getPpid();
-
+	public Number getUniqueId(Specimen specimen, String... args) {
 		while (specimen.isAliquot() || specimen.isDerivative()) {
 			specimen = specimen.getParentSpecimen();
 		}
@@ -40,15 +32,10 @@ public class PpidYocUniqueIdLabelToken extends AbstractSpecimenLabelToken {
 		} else if (specimen.getCreatedOn() != null) {
 			cal.setTime(specimen.getCreatedOn());
 		}
-		
+
+		String ppid = specimen.getVisit().getRegistration().getPpid();
 		int yoc = cal.get(Calendar.YEAR);
 		String key = ppid + "_" + yoc;
-		Long uniqueId = daoFactory.getUniqueIdGenerator().getUniqueId(name, key);
-		return uniqueId.toString();
+		return daoFactory.getUniqueIdGenerator().getUniqueId(name, key);
 	}
-	
-	@Override
-	public int validate(Object object, String input, int startIdx, String ... args) {
-		return super.validateNumber(input, startIdx);
-	}	
 }

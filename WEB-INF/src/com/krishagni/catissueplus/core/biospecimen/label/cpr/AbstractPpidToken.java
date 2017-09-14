@@ -4,7 +4,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegi
 import com.krishagni.catissueplus.core.common.domain.AbstractLabelTmplToken;
 import com.krishagni.catissueplus.core.common.domain.LabelTmplToken;
 
-public abstract  class AbstractPpidToken extends AbstractLabelTmplToken implements LabelTmplToken  {
+public abstract class AbstractPpidToken extends AbstractLabelTmplToken implements LabelTmplToken  {
 	protected String name = "";
 	
 	@Override
