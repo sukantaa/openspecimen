@@ -9,6 +9,9 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collection;
@@ -343,26 +346,21 @@ public class Utility {
 	}
 
 	public static Integer getAge(Date birthDate) {
-		if (birthDate == null) {
+		return yearsBetween(birthDate, null);
+	}
+
+	public static Integer yearsBetween(Date from, Date to) {
+		if (from == null) {
 			return null;
 		}
-		
-		Calendar currentDate = Calendar.getInstance();
-		Calendar dob = Calendar.getInstance();
-		dob.setTime(birthDate);
 
-		int currentYear = currentDate.get(Calendar.YEAR);
-		int birthYear = dob.get(Calendar.YEAR);
-		int age = currentYear - birthYear;
-		
-		int currentMonth = currentDate.get(Calendar.MONTH);
-		int birthMonth = dob.get(Calendar.MONTH);
-		if (currentMonth < birthMonth  ||
-				(currentMonth == birthMonth && currentDate.get(Calendar.DAY_OF_MONTH) < dob.get(Calendar.DAY_OF_MONTH))) {
-		  age--;
+		LocalDate startDt = LocalDate.from(from.toInstant().atZone(ZoneId.systemDefault()));
+		LocalDate endDt = LocalDate.now();
+		if (to != null) {
+			endDt = LocalDate.from(to.toInstant().atZone(ZoneId.systemDefault()));
 		}
-		
-		return age;
+
+		return Period.between(startDt, endDt).getYears();
 	}
 	
 	public static boolean isEmpty(Map<?, ?> map) {

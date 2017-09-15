@@ -92,8 +92,8 @@ public class SprText2PdfGenerator implements SprPdfGenerator {
 				AuthUtil.getCurrentUser().getLastName() + ", " + AuthUtil.getCurrentUser().getFirstName());
 		headerInfo.put(getMessage("spr_visit_name"), visit.getName());
 		headerInfo.put(getMessage("spr_ppid"), visit.getRegistration().getPpid());
-		Integer age = Utility.getAge(visit.getRegistration().getParticipant().getBirthDate());
-		headerInfo.put(getMessage("spr_age"), (age != null) ? age.toString() : "-");
+		Integer ageAtColl = Utility.yearsBetween(visit.getRegistration().getParticipant().getBirthDate(), visit.getVisitDate());
+		headerInfo.put(getMessage("spr_age_at_collection"), (ageAtColl != null) ? ageAtColl.toString() : "-");
 		headerInfo.put(getMessage("spr_printed_on_date"), Utility.getDateString(new Date()));
 		headerInfo.put(getMessage("spr_participant_race"), 
 				Utility.stringListToCsv(visit.getRegistration().getParticipant().getRaces(), false));
