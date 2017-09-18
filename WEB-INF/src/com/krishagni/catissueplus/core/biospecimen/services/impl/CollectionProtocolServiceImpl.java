@@ -70,7 +70,6 @@ import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierOp;
 import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierOp.OP;
 import com.krishagni.catissueplus.core.biospecimen.events.CopyCpOpDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CopyCpeOpDetail;
-import com.krishagni.catissueplus.core.biospecimen.events.CpConsentTierStatusDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpQueryCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.CpReportSettingsDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
@@ -567,13 +566,13 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 				case ADD:
 					ensureUniqueConsentStatement(input, cp);
 					stmt = getStatement(input.getStatementId(), input.getStatementCode(), input.getStatement());
-					resp = cp.addConsentTier(getConsentTierObj(input.getId(), stmt));
+					resp = cp.addConsentTier(getConsentTierObj(input, stmt));
 					break;
 					
 				case UPDATE:
 					ensureUniqueConsentStatement(input, cp);
 					stmt = getStatement(input.getStatementId(), input.getStatementCode(), input.getStatement());
-					resp = cp.updateConsentTier(getConsentTierObj(input.getId(), stmt));
+					resp = cp.updateConsentTier(getConsentTierObj(input, stmt));
 					break;
 					
 				case REMOVE:
@@ -593,36 +592,6 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		}		
 	}
 
-	@Override
-	@PlusTransactional
-	public ResponseEvent<ConsentTierDetail> updateConsentTierStatus(RequestEvent<CpConsentTierStatusDetail> req) {
-		try {
-			CpConsentTierStatusDetail detail = req.getPayload();
-			CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(detail.getCpId());
-			if (cp == null) {
-				return ResponseEvent.userError(CpErrorCode.NOT_FOUND);
-			}
-
-			AccessCtrlMgr.getInstance().ensureUpdateCpRights(cp);
-
-			if (cp.isConsentsWaived()) {
-				return ResponseEvent.userError(CpErrorCode.CONSENTS_WAIVED, cp.getShortTitle());
-			}
-
-			CpConsentTier ct = cp.getConsentTierById(detail.getId());
-			if (ct == null) {
-				return ResponseEvent.userError(CpErrorCode.CONSENT_TIER_NOT_FOUND);
-			}
-
-			ct.updateStatus(detail.getStatus());
-			return ResponseEvent.response(ConsentTierDetail.from(ct));
-		} catch (OpenSpecimenException ose) {
-			return ResponseEvent.error(ose);
-		} catch (Exception e) {
-			return ResponseEvent.serverError(e);
-		}
-	}
-	
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<DependentEntityDetail>> getConsentDependentEntities(RequestEvent<ConsentTierDetail> req) {
@@ -1660,10 +1629,11 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		}
 	}
 
-	private CpConsentTier getConsentTierObj(Long id, ConsentStatement stmt) {
+	private CpConsentTier getConsentTierObj(ConsentTierDetail detail, ConsentStatement stmt) {
 		CpConsentTier tier = new CpConsentTier();
-		tier.setId(id);
+		tier.setId(detail.getId());
 		tier.setStatement(stmt);
+		tier.setActivityStatus(detail.getActivityStatus());
 		return tier;
 	}
 

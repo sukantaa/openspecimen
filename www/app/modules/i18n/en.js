@@ -73,7 +73,7 @@
     "close": "Close",
     "closed": "Closed",
     "close_reason": "Reason for closing",
-    "confirm_close_entity": "Do you want to close the {{entityType}} {{entityName}}?",
+    "confirm_close_entity": "Do you want to close it?",
     "entity_closed": "{{entityType}} {{entityName}} is closed successfully",
     "copy_first_to_all": "Copy first to all",
     "confirm_navigation": " You've unsaved form changes. If you navigate away from this page without submitting form, the changes will be lost. Are you sure you want to leave this page?",

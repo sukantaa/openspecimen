@@ -14,6 +14,16 @@ angular.module('os.biospecimen.models.cp', ['os.common.models'])
           cp.consentModel.prototype.getType = function() {
             return 'consent';
           }
+
+          cp.consentModel.prototype.activate = function() {
+            var consentTier = cp.newConsentTier({id: this.id, statementCode: this.statementCode, activityStatus: 'Active'});
+            return consentTier.$saveOrUpdate();
+          }
+
+          cp.consentModel.prototype.$close = function() {
+            var consentTier = cp.newConsentTier({id: this.id, statementCode: this.statementCode, activityStatus: 'Closed'});
+            return consentTier.$saveOrUpdate();
+          }
         }
       );
 
@@ -103,19 +113,6 @@ angular.module('os.biospecimen.models.cp', ['os.common.models'])
       return $http.put(CollectionProtocol.url() + this.$id() + "/consents-waived", params).then(
         function(resp) {
           return new CollectionProtocol(result.data);
-        }
-      );
-    }
-
-    CollectionProtocol.prototype.activateConsentTier = function(consentTier) {
-      return this.updateConsentTierStatus(consentTier, 'Active');
-    }
-
-    CollectionProtocol.prototype.updateConsentTierStatus = function(consent, status) {
-      var consentStatus = {id: consent.id, status: status};
-      return $http.put(this.consentModel.url() + consent.$id() + '/status', consentStatus).then(
-        function(resp) {
-          return resp.data;
         }
       );
     }

@@ -15,7 +15,7 @@ angular.module('os.common.delete')
               entityType: $translate.instant("entities." + object.getType()),
               confirmDelete: confirmDelete,
               forceDelete: !!props.forceDelete,
-              showClose: !!props.afterClosing
+              showClose: !!props.onClose
             }
           },
           dependentEntities: function() {
@@ -27,8 +27,8 @@ angular.module('os.common.delete')
       modalInstance.result.then(
         function(object) {
           if (object.activityStatus == 'Closed') {
-            if (typeof props.afterClosing == 'function') {
-              props.afterClosing(object);
+            if (typeof props.onClose == 'function') {
+              props.onClose(object);
             }
           } else if (typeof props.onDeletion == 'function') {
             props.onDeletion();

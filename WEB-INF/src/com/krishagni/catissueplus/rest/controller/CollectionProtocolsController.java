@@ -381,27 +381,6 @@ public class CollectionProtocolsController {
 		return performConsentTierOp(OP.UPDATE, cpId, consentTier);
 	}
 
-	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/consent-tiers/{tierId}/status")
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	public ConsentTierDetail updateConsentStatus(
-			@PathVariable("id")
-			Long cpId,
-
-			@PathVariable("tierId")
-			Long tierId,
-
-			@RequestBody
-			CpConsentTierStatusDetail cTStatus) {
-
-		cTStatus.setCpId(cpId);
-		cTStatus.setId(tierId);
-		RequestEvent<CpConsentTierStatusDetail> req = getRequest(cTStatus);
-		ResponseEvent<ConsentTierDetail> resp = cpSvc.updateConsentTierStatus(req);
-		resp.throwErrorIfUnsuccessful();
-		return resp.getPayload();
-	}
-
 	@RequestMapping(method = RequestMethod.DELETE, value="/{id}/consent-tiers/{tierId}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody	

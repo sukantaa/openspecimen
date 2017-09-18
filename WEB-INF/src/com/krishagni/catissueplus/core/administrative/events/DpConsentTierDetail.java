@@ -24,6 +24,8 @@ public class DpConsentTierDetail {
 
 	private String statement;
 
+	private String activityStatus;
+
 	public Long getId() {
 		return id;
 	}
@@ -80,6 +82,14 @@ public class DpConsentTierDetail {
 		this.statement = statement;
 	}
 
+	public String getActivityStatus() {
+		return activityStatus;
+	}
+
+	public void setActivityStatus(String activityStatus) {
+		this.activityStatus = activityStatus;
+	}
+
 	public static DpConsentTierDetail from(DpConsentTier ct) {
 		DpConsentTierDetail detail = new DpConsentTierDetail();
 		detail.setId(ct.getId());
@@ -89,6 +99,8 @@ public class DpConsentTierDetail {
 		detail.setDpId(ct.getDistributionProtocol().getId());
 		detail.setDpTitle(ct.getDistributionProtocol().getTitle());
 		detail.setDpShortTitle(ct.getDistributionProtocol().getShortTitle());
+		detail.setActivityStatus(ct.getActivityStatus());
+
 		return detail;
 	}
 

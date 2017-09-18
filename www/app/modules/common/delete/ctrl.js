@@ -38,7 +38,7 @@ angular.module('os.common.delete', [])
       $scope.entity.bulkDelete(entityProps.entityIds).then(onBulkDeletion)
     };
 
-    function afterClosing(entity) {
+    function onClose(entity) {
       if (entity.activityStatus == 'Closed') {
         Alerts.success("common.entity_closed", entityProps);
         $modalInstance.close(entity);
@@ -54,7 +54,7 @@ angular.module('os.common.delete', [])
     };
 
     $scope.close = function() {
-      $scope.entity.$close().then(afterClosing);
+      $scope.entity.$close().then(onClose);
     }
 
     $scope.cancel = function () {

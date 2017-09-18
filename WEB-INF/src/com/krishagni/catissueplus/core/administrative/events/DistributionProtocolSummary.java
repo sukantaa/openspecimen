@@ -25,6 +25,8 @@ public class DistributionProtocolSummary {
 
 	private int distributedSpecimensCount;
 
+	private String activityStatus;
+
 	public Long getId() {
 		return id;
 	}
@@ -88,6 +90,14 @@ public class DistributionProtocolSummary {
 	public void setDistributedSpecimensCount(int distributedSpecimensCount) {
 		this.distributedSpecimensCount = distributedSpecimensCount;
 	}
+
+	public String getActivityStatus() {
+		return activityStatus;
+	}
+
+	public void setActivityStatus(String activityStatus) {
+		this.activityStatus = activityStatus;
+	}
 	
 	public static DistributionProtocolSummary from(DistributionProtocol dp) {
 		DistributionProtocolSummary summary = new DistributionProtocolSummary();
@@ -115,6 +125,8 @@ public class DistributionProtocolSummary {
 		if (dp.getDefReceivingSite() != null) {
 			detail.setDefReceivingSiteName(dp.getDefReceivingSite().getName());
 		}
+
+		detail.setActivityStatus(dp.getActivityStatus());
 	}
 	
 }

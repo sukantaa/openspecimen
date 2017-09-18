@@ -628,6 +628,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		}
 		
 		existing.setStatement(ct.getStatement());
+		existing.setActivityStatus(ct.getActivityStatus());
 		return ct;		
 	}
 	
@@ -761,7 +762,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		return String.format(CP_VISIT_NAME_FMT, getId());
 	}
 
-	public CpConsentTier getConsentTierById(Long ctId) {
+	private CpConsentTier getConsentTierById(Long ctId) {
 		for (CpConsentTier ct : consentTier) {
 			if (ct.getId().equals(ctId)) {
 				return ct;

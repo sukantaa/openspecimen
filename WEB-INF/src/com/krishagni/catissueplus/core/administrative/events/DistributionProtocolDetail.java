@@ -21,7 +21,7 @@ public class DistributionProtocolDetail extends DistributionProtocolSummary {
 
 	private String irbId;
 
-	private String activityStatus;
+
 
 	private SavedQuerySummary report;
 	
@@ -51,14 +51,6 @@ public class DistributionProtocolDetail extends DistributionProtocolSummary {
 
 	public void setIrbId(String irbId) {
 		this.irbId = irbId;
-	}
-
-	public String getActivityStatus() {
-		return activityStatus;
-	}
-
-	public void setActivityStatus(String activityStatus) {
-		this.activityStatus = activityStatus;
 	}
 
 	public SavedQuerySummary getReport() {
@@ -93,7 +85,6 @@ public class DistributionProtocolDetail extends DistributionProtocolSummary {
 		detail.setIrbId(dp.getIrbId());
 		detail.setPrincipalInvestigator(UserSummary.from(dp.getPrincipalInvestigator()));
 		detail.setCoordinators(UserSummary.from(dp.getCoordinators()));
-		detail.setActivityStatus(dp.getActivityStatus());
 		if (dp.getReport() != null) {
 			detail.setReport(SavedQuerySummary.fromSavedQuery(dp.getReport()));
 		}

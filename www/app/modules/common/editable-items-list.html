@@ -17,10 +17,10 @@
             <button class="btn btn-xs btn-default" ng-click="openForEdit($index)" ng-if="item.activityStatus == 'Active'">
               <span class="fa fa-pencil"></span>
             </button>
-            <button class="btn btn-xs btn-default" ng-click="removeItem($index)" ng-if="item.activityStatus == 'Active'">
+            <button class="btn btn-xs btn-default" ng-click="processItem($index, 'remove')" ng-if="item.activityStatus == 'Active'">
               <span class="fa fa-trash"></span>
             </button>
-            <button class="btn btn-xs btn-default" ng-click="activateItem($index)" ng-if="item.activityStatus == 'Closed'">
+            <button class="btn btn-xs btn-default" ng-click="processItem($index, 'activate')" ng-if="item.activityStatus == 'Closed'">
               <span class="fa fa-check"></span>
             </button>
           </div>
