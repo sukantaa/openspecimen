@@ -181,7 +181,7 @@ angular.module('os.biospecimen.participant.collect-specimens',
   .controller('CollectSpecimensCtrl', 
     function(
       $scope, $translate, $state, $document, $q, $parse, $injector,
-      cpr, visit, latestVisit, cpDict, spmnCollFields,
+      cpr, visit, latestVisit, cpDict, spmnCollFields, mrnAccessRestriction,
       Visit, Specimen, PvManager, CollectSpecimensSvc, Container,
       ExtensionsUtil, Alerts, Util, SpecimenUtil) {
 
@@ -191,6 +191,7 @@ angular.module('os.biospecimen.participant.collect-specimens',
         ignoreQtyWarning = CollectSpecimensSvc.ignoreQtyWarning();
         $scope.showCollVisitDetails = CollectSpecimensSvc.showCollVisitDetails();
         $scope.customFieldGroups = [];
+        $scope.mrnAccessRestriction = mrnAccessRestriction;
 
         $scope.specimens = CollectSpecimensSvc.getSpecimens().map(
           function(specimen) {

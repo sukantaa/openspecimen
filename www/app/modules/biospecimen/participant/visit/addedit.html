@@ -99,17 +99,10 @@
 
     <div class="form-group" ng-if="currVisit.status != 'Missed Collection'">
       <label class="col-xs-3 control-label" translate="visits.visit_site">Site of Visit</label>
-      <div class="col-xs-6" ng-switch on="!!visitCtx.mrnAccessRestriction">
-        <span ng-switch-when="true">
-          <os-sites name="site" ng-model="currVisit.site"
-            ng-required="currVisit.status != 'Missed Collection'" placeholder="{{'visits.visit_site' | translate}}">
-          </os-sites>
-        </span>
-        <span ng-switch-when="false">
-          <os-sites name="site" ng-model="currVisit.site" list-all="true"
-            ng-required="currVisit.status != 'Missed Collection'" placeholder="{{'visits.visit_site' | translate}}">
-          </os-sites>
-        </span>
+      <div class="col-xs-6">
+        <os-sites name="site" ng-model="currVisit.site" list-all="{{!visitCtx.mrnAccessRestriction}}"
+          ng-required="currVisit.status != 'Missed Collection'" placeholder="{{'visits.visit_site' | translate}}">
+        </os-sites>
         <div os-field-error field="vform.site"></div>
       </div>
     </div>
