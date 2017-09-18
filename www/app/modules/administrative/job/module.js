@@ -59,4 +59,8 @@ angular.module('os.administrative.job',
         },
         parent: 'job-root'
       })
+  })
+
+  .run(function(UrlResolver) {
+    UrlResolver.regUrlState('job-run-log', 'job-run-log', 'jobId');
   });

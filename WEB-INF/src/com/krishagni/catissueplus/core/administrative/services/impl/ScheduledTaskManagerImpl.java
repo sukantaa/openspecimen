@@ -1,6 +1,8 @@
 package com.krishagni.catissueplus.core.administrative.services.impl;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +10,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
@@ -20,9 +24,11 @@ import com.krishagni.catissueplus.core.administrative.services.ScheduledTaskList
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTaskManager;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
+import com.krishagni.catissueplus.core.common.domain.Notification;
 import com.krishagni.catissueplus.core.common.service.EmailService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
-import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.catissueplus.core.common.util.NotifUtil;
 
 public class ScheduledTaskManagerImpl implements ScheduledTaskManager, ScheduledTaskListener {
 	private static final Log logger = LogFactory.getLog(ScheduledTaskManagerImpl.class);
@@ -36,7 +42,7 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 	private static final String JOB_FAILED_TEMPLATE = "scheduled_job_failed";
 	
 	private DaoFactory daoFactory;
-	
+
 	private EmailService emailSvc;
 	
 	public void setDaoFactory(DaoFactory daoFactory) {
@@ -127,7 +133,7 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 	public void completed(ScheduledJobRun jobRun) {
 		ScheduledJobRun dbRun = daoFactory.getScheduledJobDao().getJobRun(jobRun.getId());
 		dbRun.completed();
-		sendFinishedEmail(dbRun);
+		notifyJobCompleted(dbRun);
 		scheduledJobs.remove(dbRun.getScheduledJob().getId());
 		schedule(dbRun.getScheduledJob().getId());
 	}
@@ -137,7 +143,7 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 	public void failed(ScheduledJobRun jobRun, Exception e) {
 		ScheduledJobRun dbRun = daoFactory.getScheduledJobDao().getJobRun(jobRun.getId());
 		dbRun.failed(e);
-		sendFailureEmail(dbRun);
+		notifyJobFailed(dbRun);
 		scheduledJobs.remove(dbRun.getScheduledJob().getId());
 		schedule(dbRun.getScheduledJob().getId());
 	}
@@ -175,41 +181,57 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 		return daoFactory.getScheduledJobDao().getById(jobId);
 	}
 
-	private void sendFinishedEmail(ScheduledJobRun jobRun) {
-		sendEmail(jobRun, JOB_FINISHED_TEMPLATE);
+	private void notifyJobCompleted(ScheduledJobRun jobRun) {
+		sendEmail(jobRun, JOB_FINISHED_TEMPLATE, true);
 	}
 	
-	private void sendFailureEmail(ScheduledJobRun jobRun) {
-		sendEmail(jobRun, JOB_FAILED_TEMPLATE);
+	private void notifyJobFailed(ScheduledJobRun jobRun) {
+		sendEmail(jobRun, JOB_FAILED_TEMPLATE, false);
 	}
 	
-	private void sendEmail(ScheduledJobRun jobRun, String emailTmpl) {
+	private void sendEmail(ScheduledJobRun jobRun, String emailTmpl, boolean success) {
 		ScheduledJob job = jobRun.getScheduledJob();
-		
-		Map<String, Object> props = new HashMap<String, Object>();
+		Map<String, Object> props = new HashMap<>();
+		String[] subjParams = {job.getName()};
 		props.put("job", job);
 		props.put("jobRun", jobRun);
-		props.put("appUrl",  ConfigUtil.getInstance().getAppUrl());		
-		props.put("$subject", new String[] {job.getName()});
+		props.put("$subject", subjParams);
 
-		List<String> recipients = new ArrayList<String>();		
+		List<User> rcpts = new ArrayList<>(job.getRecipients());
 		if (job.isOnDemand()) {
-			props.put("fname", jobRun.getRunBy().getFirstName());
-			props.put("lname", jobRun.getRunBy().getLastName());
-			recipients.add(jobRun.getRunBy().getEmailAddress());
+			rcpts.add(jobRun.getRunBy());
 		} else {
-			props.put("fname", job.getCreatedBy().getFirstName());
-			props.put("lname", job.getCreatedBy().getLastName());			
+			rcpts.add(job.getCreatedBy());
 		}
-		
-		for (User user : job.getRecipients()) {
-			recipients.add(user.getEmailAddress());
+
+		rcpts = rcpts.stream()
+			.filter(rcpt -> !rcpt.isSysUser() && StringUtils.isNotBlank(rcpt.getEmailAddress()) && rcpt.isActive())
+			.collect(Collectors.toList());
+
+		if (!success && rcpts.isEmpty()) {
+			//
+			// failed job. need to inform at least sys admins
+			//
+			rcpts = daoFactory.getUserDao().getSuperAndInstituteAdmins(null);
 		}
-		
-		if (recipients.isEmpty()) {
-			return;
+
+		for (User rcpt : rcpts) {
+			props.put("rcpt", rcpt);
+			emailSvc.sendEmail(emailTmpl, new String[] {rcpt.getEmailAddress()}, null, props);
 		}
-		
-		emailSvc.sendEmail(emailTmpl, recipients.toArray(new String[0]), props);
-	}	
+
+		if (!success) {
+			//
+			// notification alerts are sent only for failed jobs
+			//
+			Notification notif = new Notification();
+			notif.setEntityType(ScheduledJobRun.getEntityName());
+			notif.setEntityId(job.getId());
+			notif.setOperation("ALERT");
+			notif.setMessage(MessageUtil.getInstance().getMessage(emailTmpl.toLowerCase() + "_subj", subjParams));
+			notif.setCreatedBy(AuthUtil.getCurrentUser());
+			notif.setCreationTime(Calendar.getInstance().getTime());
+			NotifUtil.getInstance().notify(notif, Collections.singletonMap("job-run-log", rcpts));
+		}
+	}
 }

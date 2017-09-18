@@ -87,7 +87,7 @@ public class TransactionalInterceptor {
 			}
 
 			logger.error("Error doing work inside " + pjp.getSignature(), t);
-			Long exceptionId = handleServerError(t.getCause(), pjp.getArgs());
+			Long exceptionId = handleServerError(t.getCause() != null ? t.getCause() : t, pjp.getArgs());
 			throw OpenSpecimenException.serverError(exceptionId, t);
 		}
 	}

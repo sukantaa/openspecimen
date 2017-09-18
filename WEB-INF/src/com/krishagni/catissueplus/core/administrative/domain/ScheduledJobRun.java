@@ -14,6 +14,8 @@ public class ScheduledJobRun extends BaseEntity {
 		FAILED
 	}
 
+	private static final String ENTITY_NAME = "scheduled_job_run";
+
 	private Date startedAt;
 	
 	private Date finishedAt;
@@ -29,6 +31,10 @@ public class ScheduledJobRun extends BaseEntity {
 	private User runBy;
 	
 	private String rtArgs;
+
+	public static String getEntityName() {
+		return ENTITY_NAME;
+	}
 
 	public Date getStartedAt() {
 		return startedAt;
