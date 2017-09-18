@@ -78,6 +78,7 @@
     "download_initiated": "Download of file initiated. Please check your download directory ...",
     "error": "Error",
     "use_system_setting": "Use System Setting",
+    "search_user_manual": "Search user manual",
 
     "filters": {
       "title": "Filters",
@@ -2425,7 +2426,9 @@
         "forum_link": "Q & A Forums",
         "forum_link_desc": "Link to Q & A forums site",
         "cp_setup_help_link": "Collection Protocol Setup",
-        "cp_setup_help_link_desc": "Link to training materials on how to setup (create, update) collection protocols, events, specimen requirements, consents, label formats, and many more"
+        "cp_setup_help_link_desc": "Link to training materials on how to setup (create, update) collection protocols, events, specimen requirements, consents, label formats, and many more",
+        "manual_search_link": "Search URL",
+        "manual_search_link_desc": "URL to use for showing results of users' online training manual search queries."
       }
     },
 

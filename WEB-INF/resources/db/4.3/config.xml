@@ -24,4 +24,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="mdnasim" id="Config property to specify user manual search URL">
+    <sql>
+      call add_cfg_prop(
+        'training', 'manual_search_link',
+        'manual_search_link', 'manual_search_link_desc',
+        'STRING', 'https://openspecimen.atlassian.net/wiki/dosearchsite.action?queryString='
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>
