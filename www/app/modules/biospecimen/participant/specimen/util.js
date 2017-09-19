@@ -30,10 +30,10 @@ angular.module('os.biospecimen.specimen')
         spec.qtyPerAliquot = Math.round(parent.availableQty / spec.noOfAliquots * 10000) / 10000;
       }
 
-      if (scope.aliquotSpec.createdOn.getTime() < scope.parentSpecimen.createdOn) {
+      if (scope.aliquotSpec.createdOn < scope.parentSpecimen.createdOn) {
         Alerts.error("specimens.errors.created_on_lt_parent");
         return;
-      } else if (scope.aliquotSpec.createdOn > new Date()) {
+      } else if (scope.aliquotSpec.createdOn > Date.now()) {
         Alerts.error("specimens.errors.created_on_gt_curr_time");
         return;
       }
@@ -88,10 +88,10 @@ angular.module('os.biospecimen.specimen')
       var closeParent = scope.derivative.closeParent;
       delete scope.derivative.closeParent;
 
-      if (scope.derivative.createdOn.getTime() < scope.parentSpecimen.createdOn) {
+      if (scope.derivative.createdOn < scope.parentSpecimen.createdOn) {
         Alerts.error("specimens.errors.created_on_lt_parent");
         return;
-      } else if (scope.derivative.createdOn > new Date()) {
+      } else if (scope.derivative.createdOn > Date.now()) {
         Alerts.error("specimens.errors.created_on_gt_curr_time");
         return;
       }
@@ -143,7 +143,7 @@ angular.module('os.biospecimen.specimen')
         anatomicSite: scope.parentSpecimen.anatomicSite,
         laterality: scope.parentSpecimen.laterality, 
         closeParent: false,
-        createdOn : new Date(),
+        createdOn : Date.now(),
         incrParentFreezeThaw: 1,
         freezeThawCycles: scope.parentSpecimen.freezeThawCycles + 1
       });
