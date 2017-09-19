@@ -269,7 +269,7 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
 
       if (!!spec.qtyPerAliquot && !!spec.noOfAliquots) {
         var requiredQty = spec.qtyPerAliquot * spec.noOfAliquots;
-        if (requiredQty > availableQty) {
+        if ((requiredQty - availableQty) > 0.000001) {
           Alerts.error("srs.errors.insufficient_qty");
           return;
         }
