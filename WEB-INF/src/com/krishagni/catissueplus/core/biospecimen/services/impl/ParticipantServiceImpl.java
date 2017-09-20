@@ -201,9 +201,9 @@ public class ParticipantServiceImpl implements ParticipantService, ObjectAccesso
 		String existingEmpi = existing.getEmpi();
 		String newEmpi = newParticipant.getEmpi();
 		MpiGenerator generator = ParticipantUtil.getMpiGenerator();
-		if (generator != null && !existingEmpi.equals(newEmpi)){
+		if (generator != null && !StringUtils.equals(newEmpi, existingEmpi)) {
 			ose.addError(ParticipantErrorCode.MANUAL_MPI_NOT_ALLOWED);
-		} else if (generator == null && StringUtils.isNotBlank(newEmpi) && !newEmpi.equals(existingEmpi)){
+		} else if (generator == null && StringUtils.isNotBlank(newEmpi) && !newEmpi.equals(existingEmpi)) {
 			ParticipantUtil.ensureUniqueEmpi(daoFactory, newEmpi, ose);
 		}
 		
