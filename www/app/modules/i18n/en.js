@@ -2220,7 +2220,7 @@
         "spmn_path_status_abbr_map": "Pathology Status Abbreviation Mapping",
         "spmn_path_status_abbr_map_desc": "CSV file containing mapping between specimen pathology status and its abbreviations. Needed for label generation.",
         "spr_deidentifier": "SPR De-identification",
-        "spr_deidentifier_desc": "Surgical pathology report de-identification",
+        "spr_deidentifier_desc": "Name of the Spring bean implementing the customised logic of de-identifying surgical pathology reports.",
         "spr_dir": "SPR Directory",
         "spr_dir_desc": "Folder on the server to store surgical pathology report files.",
         "uid_mandatory": "UID Mandatory",
