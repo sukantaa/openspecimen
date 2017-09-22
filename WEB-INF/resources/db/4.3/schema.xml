@@ -5,21 +5,23 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-  <changeSet author="mdnasim" id="Print rule description field">
+  <changeSet author="mdnasim" id="Description of print rules">
     <addColumn tableName="OS_PRINT_RULES">
-      <column name="DESCRIPTION" type="${text.type}(255)">
-        <constraints nullable="false"/>
-      </column>
+      <column name="DESCRIPTION" type="${text.type}(255)"/>
     </addColumn>
   </changeSet>
 
-  <changeSet author="mdnasim" id="Update print rule description to default string">
+  <changeSet author="mdnasim" id="Auto generate print rule descriptions using rule identifiers">
     <sql>
       update
         os_print_rules
       set
         description = concat('Print rule ', identifier);
     </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Print rule description is mandatory">
+    <addNotNullConstraint tableName="OS_PRINT_RULES" columnName="DESCRIPTION" columnDataType="${text.type}(255)"/>
   </changeSet>
 
   <changeSet author="vgaikwad" id="Setting to specify whether SPRs are stored for CP visits">
