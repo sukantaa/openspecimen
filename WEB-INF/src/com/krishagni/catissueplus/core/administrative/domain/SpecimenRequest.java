@@ -7,19 +7,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.hibernate.envers.Audited;
-
-import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
-import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
+import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 
-@Audited
-public class SpecimenRequest extends BaseEntity {
+public class SpecimenRequest extends BaseExtensionEntity {
+	private Long catalogId;
 
-	private CollectionProtocol cp;
+	private String catalogQueryDef;
 
-	private User requestor;
+	private String requestorEmailId;
+
+	private String irbId;
 
 	private Date dateOfRequest;
 
@@ -27,28 +26,46 @@ public class SpecimenRequest extends BaseEntity {
 
 	private Date dateOfProcessing;
 
-	private Set<SpecimenRequestItem> items = new LinkedHashSet<SpecimenRequestItem>();
+	private DistributionProtocol dp;
+
+	private Set<SpecimenRequestItem> items = new LinkedHashSet<>();
+
+	private String itemsCriteriaJson;
 
 	private String activityStatus;
 
 	private String comments;
 
-	private transient int specimensCount;
-
-	public CollectionProtocol getCp() {
-		return cp;
+	public Long getCatalogId() {
+		return catalogId;
 	}
 
-	public void setCp(CollectionProtocol cp) {
-		this.cp = cp;
+	public void setCatalogId(Long catalogId) {
+		this.catalogId = catalogId;
 	}
 
-	public User getRequestor() {
-		return requestor;
+	public String getCatalogQueryDef() {
+		return catalogQueryDef;
 	}
 
-	public void setRequestor(User requestor) {
-		this.requestor = requestor;
+	public void setCatalogQueryDef(String catalogQueryDef) {
+		this.catalogQueryDef = catalogQueryDef;
+	}
+
+	public String getRequestorEmailId() {
+		return requestorEmailId;
+	}
+
+	public void setRequestorEmailId(String requestorEmailId) {
+		this.requestorEmailId = requestorEmailId;
+	}
+
+	public String getIrbId() {
+		return irbId;
+	}
+
+	public void setIrbId(String irbId) {
+		this.irbId = irbId;
 	}
 
 	public Date getDateOfRequest() {
@@ -75,12 +92,28 @@ public class SpecimenRequest extends BaseEntity {
 		this.dateOfProcessing = dateOfProcessing;
 	}
 
+	public DistributionProtocol getDp() {
+		return dp;
+	}
+
+	public void setDp(DistributionProtocol dp) {
+		this.dp = dp;
+	}
+
 	public Set<SpecimenRequestItem> getItems() {
 		return items;
 	}
 
 	public void setItems(Set<SpecimenRequestItem> items) {
 		this.items = items;
+	}
+
+	public String getItemsCriteriaJson() {
+		return itemsCriteriaJson;
+	}
+
+	public void setItemsCriteriaJson(String itemsCriteriaJson) {
+		this.itemsCriteriaJson = itemsCriteriaJson;
 	}
 
 	public String getActivityStatus() {
@@ -99,16 +132,9 @@ public class SpecimenRequest extends BaseEntity {
 		this.comments = comments;
 	}
 
-	public int getSpecimensCount() {
-		return specimensCount;
-	}
-
-	public void setSpecimensCount(int specimensCount) {
-		this.specimensCount = specimensCount;
-	}
-
-	public Institute getInstitute() {
-		return requestor.getInstitute();
+	@Override
+	public String getEntityType() {
+		return "SpecimenRequest-" + catalogId;
 	}
 
 	public Map<Long, SpecimenRequestItem> getSpecimenIdRequestItemMap() {

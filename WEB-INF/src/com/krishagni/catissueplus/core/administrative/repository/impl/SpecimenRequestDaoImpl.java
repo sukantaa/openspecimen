@@ -1,24 +1,19 @@
 package com.krishagni.catissueplus.core.administrative.repository.impl;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Criteria;
-import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.administrative.domain.SpecimenRequest;
 import com.krishagni.catissueplus.core.administrative.events.SpecimenRequestSummary;
 import com.krishagni.catissueplus.core.administrative.repository.SpecimenRequestDao;
 import com.krishagni.catissueplus.core.administrative.repository.SpecimenRequestListCriteria;
-import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
-import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 
 public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> implements SpecimenRequestDao {
@@ -29,128 +24,53 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<SpecimenRequestSummary> getSpecimenRequests(SpecimenRequestListCriteria listCrit) {
-		Criteria fieldsQuery = getListQuery(listCrit);
-		addSummaryFieldsProjection(fieldsQuery);
-
-		List<SpecimenRequestSummary> results = new ArrayList<SpecimenRequestSummary>();
-		Map<Long, SpecimenRequestSummary> reqMap = new HashMap<Long, SpecimenRequestSummary>();
-		for (Object[] row : (List<Object[]>)fieldsQuery.list()) {
-			SpecimenRequestSummary req = getRequest(row);
-			results.add(req);
-
-			if (listCrit.includeStat()) {
-				reqMap.put(req.getId(), req);
-			}
-		}
-
-		if (!listCrit.includeStat()) {
-			return results;
-		}
-
-		Criteria countQuery = getListQuery(listCrit);
-		addCountProjection(countQuery);
-		for (Object[] row : (List<Object[]>)countQuery.list()) {
-			Long reqId = (Long)row[0];
-			Integer count = ((Number)row[1]).intValue();
-			reqMap.get(reqId).setRequestedSpecimensCount(count);
-		}
-
-		return results;
-	}
-
-	@Override
-	public Boolean haveRequests(SpecimenRequestListCriteria listCrit) {
-		Criteria query = getListQuery(listCrit)
-			.setFirstResult(0)
-			.setMaxResults(1)
-			.setProjection(Projections.projectionList().add(Projections.property("id")));
-		return query.uniqueResult() != null;
+		Criteria query = addSummaryFields(getListQuery(listCrit));
+		return ((List<Object[]>)query.list()).stream().map(this::getRequest).collect(Collectors.toList());
 	}
 
 	private Criteria getListQuery(SpecimenRequestListCriteria listCrit) {
-		Criteria query = getSessionFactory().getCurrentSession()
-			.createCriteria(SpecimenRequest.class)
-			.createAlias("cp", "cp")
-			.createAlias("requestor", "requestor")
+		Criteria query = getCurrentSession().createCriteria(SpecimenRequest.class)
+			.createAlias("dp", "dp", JoinType.LEFT_OUTER_JOIN)
 			.setFirstResult(listCrit.startAt())
 			.setMaxResults(listCrit.maxResults())
 			.addOrder(Order.desc("id"));
 
-		addCpCond(query, listCrit);
-		addRequestorAndSiteCond(query, listCrit);
+		return addCatalogCond(query, listCrit);
+	}
+
+	private Criteria addCatalogCond(Criteria query, SpecimenRequestListCriteria listCrit) {
+		if (listCrit.catalogId() == null) {
+			return query;
+		}
+
+		query.add(Restrictions.eq("catalogId", listCrit.catalogId()));
 		return query;
 	}
 
-	private void addCpCond(Criteria query, SpecimenRequestListCriteria listCrit) {
-		if (listCrit.cpId() == null) {
-			return;
-		}
-
-		query.add(Restrictions.eq("cp.id", listCrit.cpId()));
-	}
-
-	private void addRequestorAndSiteCond(Criteria query, SpecimenRequestListCriteria listCrit) {
-		Junction cond = Restrictions.disjunction();
-
-		if (listCrit.requestorId() != null) {
-			cond.add(Restrictions.eq("requestor.id", listCrit.requestorId()));
-		}
-
-		if (CollectionUtils.isNotEmpty(listCrit.siteIds())) {
-			query.createAlias("cp.sites", "cpSite")
-				.createAlias("cpSite.site", "site");
-			cond.add(Restrictions.in("site.id", listCrit.siteIds()));
-		}
-
-		if (cond.conditions().iterator().hasNext()) {
-			query.add(cond);
-		}
-	}
-
-	private void addSummaryFieldsProjection(Criteria query) {
-		query.setProjection(Projections.distinct(
-			Projections.projectionList()
-				.add(Projections.property("id"))
-				.add(Projections.property("dateOfRequest"))
-				.add(Projections.property("cp.id"))
-				.add(Projections.property("cp.shortTitle"))
-				.add(Projections.property("cp.title"))
-				.add(Projections.property("requestor.firstName"))
-				.add(Projections.property("requestor.lastName"))
-				.add(Projections.property("requestor.emailAddress"))
-				.add(Projections.property("activityStatus"))));
+	private Criteria addSummaryFields(Criteria query) {
+		query.setProjection(Projections.projectionList()
+			.add(Projections.property("id"))
+			.add(Projections.property("catalogId"))
+			.add(Projections.property("requestorEmailId"))
+			.add(Projections.property("irbId"))
+			.add(Projections.property("dp.id"))
+			.add(Projections.property("dp.shortTitle"))
+			.add(Projections.property("dateOfRequest"))
+			.add(Projections.property("activityStatus")));
+		return query;
 	}
 
 	private SpecimenRequestSummary getRequest(Object[] row) {
-		SpecimenRequestSummary req = new SpecimenRequestSummary();
-
 		int idx = 0;
+		SpecimenRequestSummary req = new SpecimenRequestSummary();
 		req.setId((Long)row[idx++]);
+		req.setCatalogId((Long)row[idx++]);
+		req.setRequestorEmailId((String)row[idx++]);
+		req.setIrbId((String)row[idx++]);
+		req.setDpId((Long)row[idx++]);
+		req.setDpShortTitle((String)row[idx++]);
 		req.setDateOfRequest((Date)row[idx++]);
-
-		CollectionProtocolSummary cp = new CollectionProtocolSummary();
-		cp.setId((Long)row[idx++]);
-		cp.setShortTitle((String)row[idx++]);
-		cp.setTitle((String)row[idx++]);
-		req.setCp(cp);
-
-		UserSummary user = new UserSummary();
-		user.setFirstName((String)row[idx++]);
-		user.setLastName((String)row[idx++]);
-		user.setEmailAddress((String)row[idx++]);
-		req.setRequestor(user);
-
 		req.setActivityStatus((String)row[idx++]);
 		return req;
-	}
-
-	private void addCountProjection(Criteria query) {
-		query.createAlias("items", "item");
-
-		query.setProjection(Projections.projectionList()
-			.add(Projections.property("id"))
-			.add(Projections.countDistinct("item.id"))
-			.add(Projections.groupProperty("id")))
-			.list();
 	}
 }

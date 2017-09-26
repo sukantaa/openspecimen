@@ -11,9 +11,13 @@
       </generator>
     </id>
 
-    <many-to-one name="cp" column="CP_ID"/>
+    <property name="catalogId" column="CATALOG_ID" not-null="true"/>
 
-    <many-to-one name="requestor" column="REQUESTOR_ID"/>
+    <property name="catalogQueryDef" column="CATALOG_QUERY_DEF"/>
+
+    <property name="requestorEmailId" column="REQUESTOR_EMAIL_ID" not-null="true"/>
+
+    <property name="irbId" column="IRB_ID"/>
 
     <property name="dateOfRequest" column="REQUEST_DATE"/>
 
@@ -21,11 +25,15 @@
 
     <property name="dateOfProcessing" column="PROCESSING_DATE"/>
 
+    <many-to-one name="dp" column="DP_ID"/>
+
     <property name="comments" column="COMMENTS"/>
+
+    <property name="itemsCriteriaJson" column="ITEMS_CRIT_JSON"/>
 
     <property name="activityStatus" column="ACTIVITY_STATUS"/>
 
-    <set name="items" table="OS_SPECIMEN_REQUEST_ITEMS" inverse="true" cascade="all-delete-orphan">
+    <set name="items" table="OS_SPECIMEN_REQUEST_ITEMS" inverse="true" cascade="all-delete-orphan" order-by="id">
       <key column="REQUEST_ID"/>
       <one-to-many class="com.krishagni.catissueplus.core.administrative.domain.SpecimenRequestItem"/>
     </set>

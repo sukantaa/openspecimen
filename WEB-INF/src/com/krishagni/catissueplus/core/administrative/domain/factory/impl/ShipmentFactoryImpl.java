@@ -131,11 +131,12 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 			return;
 		}
 
-		SpecimenRequest request = shipment.getRequest();
-		if (request != null && !request.getCp().getRepositories().contains(site)) {
-			ose.addError(ShipmentErrorCode.INVALID_SEND_SITE_FOR_REQ, siteName, request.getId());
-			return;
-		}
+		// TODO: Specimen request
+//		SpecimenRequest request = shipment.getRequest();
+//		if (request != null && !request.getCp().getRepositories().contains(site)) {
+//			ose.addError(ShipmentErrorCode.INVALID_SEND_SITE_FOR_REQ, siteName, request.getId());
+//			return;
+//		}
 		
 		shipment.setSendingSite(site);
 	}
@@ -153,18 +154,19 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 			return;
 		}
 
-		SpecimenRequest request = shipment.getRequest();
-		if (request != null) {
-			if (!request.getCp().getRepositories().contains(site)) {
-				ose.addError(ShipmentErrorCode.INVALID_RECV_SITE_FOR_REQ, siteName, request.getId());
-				return;
-			}
-
-			if (!request.getInstitute().equals(site.getInstitute())) {
-				ose.addError(ShipmentErrorCode.INVALID_RECV_SITE_FOR_REQ, siteName, request.getId());
-				return;
-			}
-		}
+		// TODO: Specimen request
+//		SpecimenRequest request = shipment.getRequest();
+//		if (request != null) {
+//			if (!request.getCp().getRepositories().contains(site)) {
+//				ose.addError(ShipmentErrorCode.INVALID_RECV_SITE_FOR_REQ, siteName, request.getId());
+//				return;
+//			}
+//
+//			if (!request.getInstitute().equals(site.getInstitute())) {
+//				ose.addError(ShipmentErrorCode.INVALID_RECV_SITE_FOR_REQ, siteName, request.getId());
+//				return;
+//			}
+//		}
 
 		shipment.setReceivingSite(site);
 	}

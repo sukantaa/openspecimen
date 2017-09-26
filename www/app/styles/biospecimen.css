@@ -133,6 +133,7 @@
   float: left;
 }
 
+.os-key-values .value.os-status-closed,
 .os-key-values .value.os-status-collected, 
 .os-key-values .value.os-status-not-collected, 
 .os-key-values .value.os-status-missed,
@@ -151,6 +152,10 @@
 
 .dropdown-menu .fa.os-status-pending:before {
   padding: 0px;
+}
+
+.os-key-values .value.os-status-closed {
+  background: #d9534f;
 }
 
 .os-key-values .value.os-status-collected {

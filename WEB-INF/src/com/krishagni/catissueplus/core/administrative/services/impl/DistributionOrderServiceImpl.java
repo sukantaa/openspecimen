@@ -293,6 +293,19 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 	}
 
 	@Override
+	@PlusTransactional
+	public void validateSpecimens(DistributionProtocol dp, List<Specimen> specimens) {
+		List<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps();
+		if (siteCps != null && siteCps.isEmpty()) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
+		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+		ensureValidSpecimens(specimens, dp, siteCps, ose);
+		ose.checkAndThrow();
+	}
+
+	@Override
 	public String getObjectName() {
 		return DistributionOrder.getEntityName();
 	}

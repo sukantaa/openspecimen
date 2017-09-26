@@ -116,10 +116,17 @@ public class DistributionOrderFactoryImpl implements DistributionOrderFactory {
 	}
 
 	private void setDistributionProtocol(DistributionOrderDetail detail, DistributionOrder order, OpenSpecimenException ose) {
+		if (order.getRequest() != null && order.getRequest().getDp() != null) {
+			//
+			// Use request specified DP, if any
+			//
+			order.setDistributionProtocol(order.getRequest().getDp());
+			return;
+		}
+
 		DistributionProtocolDetail dpDetail = detail.getDistributionProtocol();
 		Long dpId = dpDetail != null ? dpDetail.getId() : null;
 		String dpShortTitle = dpDetail != null ? dpDetail.getShortTitle() : null;
-		
 		if (dpId == null && StringUtils.isBlank(dpShortTitle)) {
 			ose.addError(DistributionOrderErrorCode.DP_REQUIRED);
 			return;
@@ -140,11 +147,12 @@ public class DistributionOrderFactoryImpl implements DistributionOrderFactory {
 			return;
 		}
 
-		SpecimenRequest request = order.getRequest();
-		if (request != null && !request.getInstitute().equals(dp.getInstitute())) {
-			ose.addError(DistributionOrderErrorCode.INVALID_DP_FOR_REQ, dp.getShortTitle(), request.getId());
-			return;
-		}
+		// TODO: Specimen request
+		// SpecimenRequest request = order.getRequest();
+		// if (request != null && !request.getInstitute().equals(dp.getInstitute())) {
+		//   ose.addError(DistributionOrderErrorCode.INVALID_DP_FOR_REQ, dp.getShortTitle(), request.getId());
+		// 	 return;
+		// }
 
 		Date dpEndDate = Utility.chopTime(dp.getEndDate());
 		Date today = Utility.chopTime(Calendar.getInstance().getTime());
@@ -159,16 +167,20 @@ public class DistributionOrderFactoryImpl implements DistributionOrderFactory {
 	private void setRequesterAndReceivingSite(DistributionOrderDetail detail, DistributionOrder order, OpenSpecimenException ose) {
 		SpecimenRequest request = order.getRequest();
 		User requestor = null;
-		if (request != null) {
-			requestor = request.getRequestor();
-		} else if (detail.getRequester() != null) {
-			requestor = getUser(detail.getRequester(), null, ose, DistributionOrderErrorCode.REQUESTER_NOT_FOUND);
-			if (requestor == null) {
-				return;
-			}
-		}
 
-		if (requestor == null) {
+//		TODO: Specimen request
+//		if (request != null) {
+//			requestor = request.getRequestor();
+//		} else if (detail.getRequester() != null) {
+//			requestor = getUser(detail.getRequester(), null, ose, DistributionOrderErrorCode.REQUESTER_NOT_FOUND);
+//			if (requestor == null) {
+//				return;
+//			}
+//		}
+
+		if (detail.getRequester() != null) {
+			requestor = getUser(detail.getRequester(), null, ose, DistributionOrderErrorCode.REQUESTER_NOT_FOUND);
+		} else {
 			ose.addError(DistributionOrderErrorCode.REQUESTER_REQ);
 			return;
 		}

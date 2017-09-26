@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.administrative.domain;
 
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
@@ -49,6 +50,7 @@ public class ShipmentItem extends BaseEntity {
 		this.receivedQuality = receivedQuality;
 	}
 
+	@NotAudited
 	public SpecimenRequestItem getRequestItem() {
 		return requestItem;
 	}

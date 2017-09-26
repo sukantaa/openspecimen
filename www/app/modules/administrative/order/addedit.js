@@ -1,8 +1,9 @@
 
 angular.module('os.administrative.order.addedit', ['os.administrative.models', 'os.biospecimen.models'])
   .controller('OrderAddEditCtrl', function(
-    $scope, $state, $translate, order, spmnRequest,
-    Institute, Specimen, SpecimensHolder, Site, DistributionProtocol, DistributionOrder, SpecimenList, Alerts, Util, SpecimenUtil) {
+    $scope, $state, $translate, order, spmnRequest, requestDp,
+    Institute, Specimen, SpecimensHolder, Site, DistributionProtocol,
+    DistributionOrder, SpecimenList, Alerts, Util, SpecimenUtil) {
     
     var ignoreQtyWarning = false;
 
@@ -12,9 +13,11 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
       $scope.skipSpecimensTab = (!!order.specimenList && !!order.specimenList.id);
 
       order.request = spmnRequest;
-      if (!!spmnRequest) {
-        order.requester = spmnRequest.requestor;
-        order.instituteName = spmnRequest.requestorInstitute;
+      if (requestDp) {
+        order.distributionProtocol = requestDp;
+        $scope.onDpSelect();
+      } else {
+        loadDps();
       }
 
       $scope.dpList = [];
@@ -24,17 +27,17 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
 
       $scope.input = {allItemStatus: false, noQtySpmnsPresent: false};
 
-      if (!spmnRequest) {
-        loadDps();
-        loadInstitutes();
-      }
-
+      loadInstitutes();
       setUserAndSiteList(order);
 
       if (!$scope.skipSpecimensTab) {
-        if (!order.id && angular.isArray(SpecimensHolder.getSpecimens())) {
-          order.orderItems = getOrderItems(SpecimensHolder.getSpecimens());
-          SpecimensHolder.setSpecimens(null);
+        if (!order.id) {
+          if (angular.isArray(SpecimensHolder.getSpecimens())) {
+            order.orderItems = getOrderItems(SpecimensHolder.getSpecimens());
+            SpecimensHolder.setSpecimens(null);
+          } else if (!!order.request) {
+            order.orderItems = getOrderItemsFromReq(order.request.items, []);
+          }
         } else if (!!order.id) {
           loadOrderItems();
         }
@@ -50,10 +53,6 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
 
     function loadDps(name) {
       var filterOpts = {activityStatus: 'Active', query: name, excludeExpiredDps: true};
-      if (!!spmnRequest) {
-        filterOpts.receivingInstitute = spmnRequest.requestorInstitute;
-      }
-
       DistributionProtocol.query(filterOpts).then(
         function(dps) {
           $scope.dpList = dps;
@@ -124,7 +123,7 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
             orderItem = {
               specimen: reqItem.specimen,
               quantity: reqItem.specimen.availableQty,
-              status: reqItem.selected ? 'DISTRIBUTED_AND_CLOSED' : 'DISTRIBUTED',
+              status: 'DISTRIBUTED_AND_CLOSED',
             }
 
             reqItem.specimen.selected = reqItem.selected;
@@ -193,6 +192,12 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
             items.push(item);
           }
         );
+
+        if (items.length == 0) {
+          Alerts.error('orders.no_specimens_in_list');
+          return;
+        }
+
         orderClone.orderItems = items;
       }
 
@@ -262,10 +267,6 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
     }
 
     $scope.onDpSelect = function() {
-      if (!!spmnRequest) {
-        return;
-      }
-
       $scope.order.instituteName = $scope.order.distributionProtocol.instituteName;
       $scope.order.siteName = $scope.order.distributionProtocol.defReceivingSiteName;
       $scope.order.requester = $scope.order.distributionProtocol.principalInvestigator;

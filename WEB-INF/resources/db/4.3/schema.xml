@@ -29,4 +29,29 @@
       <column name="STORE_SPRS" type="${boolean.type}"/>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Remove not null constraint on collection protocol of specimen requests">
+    <dropNotNullConstraint tableName="OS_SPECIMEN_REQUESTS" columnName="CP_ID" columnDataType="${int.type}"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Remove not null constraint on requestor of specimen requests">
+    <dropNotNullConstraint tableName="OS_SPECIMEN_REQUESTS" columnName="REQUESTOR_ID" columnDataType="${int.type}"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen request fields">
+    <addColumn tableName="OS_SPECIMEN_REQUESTS">
+      <column name="CATALOG_ID" type="${int.type}"/>
+      <column name="REQUESTOR_EMAIL_ID" type="${text.type}(255)"/>
+      <column name="IRB_ID" type="${text.type}(255)"/>
+      <column name="ITEMS_CRIT_JSON" type="${clob.type}"/>
+      <column name="CATALOG_QUERY_DEF" type="${clob.type}"/>
+      <column name="DP_ID" type="${int.type}"/>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Foreign key on requests' DP">
+    <addForeignKeyConstraint constraintName="FK_OS_SR_DP_ID"
+      baseTableName="OS_SPECIMEN_REQUESTS" baseColumnNames="DP_ID"
+      referencedTableName="CATISSUE_DISTRIBUTION_PROTOCOL" referencedColumnNames="IDENTIFIER"/>
+  </changeSet>
 </databaseChangeLog>

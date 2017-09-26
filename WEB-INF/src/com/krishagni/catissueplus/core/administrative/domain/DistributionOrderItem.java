@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
@@ -144,6 +145,7 @@ public class DistributionOrderItem extends BaseEntity {
 		return getStatus() == Status.DISTRIBUTED_AND_CLOSED;
 	}
 
+	@NotAudited
 	public SpecimenRequestItem getRequestItem() {
 		return requestItem;
 	}

@@ -334,9 +334,10 @@ public class QueryServiceImpl implements QueryService {
 			if (opDetail.getIndexOf() != null && !opDetail.getIndexOf().isEmpty()) {
 				indices = queryResult.getColumnIndices(opDetail.getIndexOf());
 			}
-			
+
 			return ResponseEvent.response(
 				new QueryExecResult()
+					.setColumnMetadata(queryResult.getColumnMetadata())
 					.setColumnLabels(queryResult.getColumnLabels())
 					.setColumnTypes(queryResult.getColumnTypes())
 					.setColumnUrls(queryResult.getColumnUrls())

@@ -34,7 +34,7 @@ public class DistributionProtocol extends BaseExtensionEntity {
 
 	private User principalInvestigator;
 
-	private Set<User> coordinators = new HashSet<User>();
+	private Set<User> coordinators = new HashSet<>();
 
 	private String title;
 

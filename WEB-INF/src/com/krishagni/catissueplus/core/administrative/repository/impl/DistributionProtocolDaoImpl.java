@@ -179,6 +179,7 @@ public class DistributionProtocolDaoImpl extends AbstractDao<DistributionProtoco
 		}
 		
 		addPiCondition(query, crit);
+		addIrbIdCondition(query, crit);
 		addInstCondition(query, crit);
 		addDistSitesCondition(query, crit);
 		addExpiredDpsCondition(query, crit);
@@ -193,6 +194,14 @@ public class DistributionProtocolDaoImpl extends AbstractDao<DistributionProtoco
 		}
 		
 		query.add(Restrictions.eq("principalInvestigator.id", piId));
+	}
+
+	private void addIrbIdCondition(Criteria query, DpListCriteria crit) {
+		if (StringUtils.isBlank(crit.irbId())) {
+			return;
+		}
+
+		query.add(Restrictions.eq("irbId", crit.irbId().trim()));
 	}
 	
 	private void addInstCondition(Criteria query, DpListCriteria crit) {

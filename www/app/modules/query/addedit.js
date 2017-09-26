@@ -6,7 +6,7 @@ angular.module('os.query.addedit', ['os.query.models', 'os.query.util', 'os.quer
     SavedQuery, QueryUtil, QueryExecutor) {
 
     var popoverOpts = {};
-    var popovers = {};
+    var popovers = [];
 
     function init() {
       $scope.openForm = undefined;

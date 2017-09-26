@@ -13,25 +13,25 @@ import com.krishagni.catissueplus.core.common.repository.Dao;
 
 public interface DistributionProtocolDao extends Dao<DistributionProtocol> {
 
-	public DistributionProtocol getByShortTitle(String shortTitle);
+	DistributionProtocol getByShortTitle(String shortTitle);
 
-	public DistributionProtocol getDistributionProtocol(String title);
+	DistributionProtocol getDistributionProtocol(String title);
 
-	public List<DistributionProtocol> getDistributionProtocols(DpListCriteria criteria);
+	List<DistributionProtocol> getDistributionProtocols(DpListCriteria criteria);
 
-	public Long getDistributionProtocolsCount(DpListCriteria criteria);
+	Long getDistributionProtocolsCount(DpListCriteria criteria);
 
-	public List<DistributionProtocol> getExpiringDps(Date fromDate, Date toDate);
+	List<DistributionProtocol> getExpiringDps(Date fromDate, Date toDate);
 
 	//
 	// At present this is only returning count of specimens distributed by protocol
 	// in future this would be extended to return other stats related to protocol
 	//	
-	public Map<Long, Integer> getSpecimensCountByDpIds(Collection<Long> dpIds);
+	Map<Long, Integer> getSpecimensCountByDpIds(Collection<Long> dpIds);
 
-	public List<DistributionOrderStat> getOrderStats(DistributionOrderStatListCriteria listCrit);
+	List<DistributionOrderStat> getOrderStats(DistributionOrderStatListCriteria listCrit);
 
-	public Map<String, Object> getDpIds(String key, Object value);
+	Map<String, Object> getDpIds(String key, Object value);
 
 	List<String> getNonConsentingSpecimens(Long dpId, List<Long> specimenIds, int stmtsCount);
 }

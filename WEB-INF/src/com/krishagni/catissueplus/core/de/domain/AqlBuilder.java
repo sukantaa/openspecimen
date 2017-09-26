@@ -28,29 +28,34 @@ public class AqlBuilder {
 	}
 	
 	public String getQuery(Object[] selectList, Filter[] filters, QueryExpressionNode[] queryExprNodes) {
-		return getQuery(selectList, filters, null, queryExprNodes);
+		return getQuery(selectList, filters, StringUtils.EMPTY, queryExprNodes);
 	}
 	
 	public String getQuery(Object[] selectList, Filter[] filters, Filter[] conjunctionFilters, QueryExpressionNode[] queryExprNodes) {
-		Map<Integer, Filter> filterMap = new HashMap<Integer, Filter>();
+		String conjunctionExpr = "";
+		if (conjunctionFilters != null) {
+			for (int i = 0; i < conjunctionFilters.length; ++i) {
+				if (i > 0) {
+					conjunctionExpr += " and ";
+				}
+
+				conjunctionExpr += buildFilterExpr(conjunctionFilters[i]);
+			}
+		}
+
+		return getQuery(selectList, filters, conjunctionExpr, queryExprNodes);
+	}
+
+	public String getQuery(Object[] selectList, Filter[] filters, String conjunction, QueryExpressionNode[] queryExprNodes) {
+		Map<Integer, Filter> filterMap = new HashMap<>();
 		for (Filter filter : filters) {
 			filterMap.put(filter.getId(), filter);
 		}
-		
+
 		String selectClause = buildSelectClause(filterMap, selectList);
 		String whereClause = buildWhereClause(filterMap, queryExprNodes);
-		if (conjunctionFilters != null && conjunctionFilters.length > 0) {
-			whereClause = "(" + whereClause + ") and (";
-			for (int i = 0; i < conjunctionFilters.length; ++i) {
-				if (i > 0) {
-					whereClause += " and ";
-				}
-				
-				whereClause += buildFilterExpr(conjunctionFilters[i]);
-				++i;
-			}
-			
-			whereClause += ")";
+		if (StringUtils.isNotBlank(conjunction)) {
+			whereClause = "(" + whereClause + ") and (" + conjunction + ")";
 		}
 
 		String query = "";

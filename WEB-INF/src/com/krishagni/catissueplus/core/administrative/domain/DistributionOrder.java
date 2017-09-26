@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionOrderErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SpecimenRequestErrorCode;
@@ -160,6 +161,7 @@ public class DistributionOrder extends BaseEntity {
 		this.comments = comments;
 	}
 
+	@NotAudited
 	public SpecimenRequest getRequest() {
 		return request;
 	}

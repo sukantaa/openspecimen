@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import com.krishagni.catissueplus.core.administrative.domain.factory.ShipmentErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SpecimenRequestErrorCode;
@@ -225,6 +226,7 @@ public class Shipment extends BaseEntity {
 		this.notifyUsers = notifyUsers;
 	}
 
+	@NotAudited
 	public SpecimenRequest getRequest() {
 		return request;
 	}

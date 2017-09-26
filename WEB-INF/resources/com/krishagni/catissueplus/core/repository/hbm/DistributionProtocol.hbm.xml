@@ -23,30 +23,18 @@
 
     <property name="activityStatus" column="ACTIVITY_STATUS"/>
 
-    <many-to-one
-      name="institute"
-      class="com.krishagni.catissueplus.core.administrative.domain.Institute"
-      column="INSTITUTE_ID"/>
+    <many-to-one name="institute" column="INSTITUTE_ID"/>
 
-    <many-to-one
-      name="defReceivingSite"
-      class="com.krishagni.catissueplus.core.administrative.domain.Site"
-      column="DEF_RECEIVING_SITE_ID"/>
+    <many-to-one name="defReceivingSite" column="DEF_RECEIVING_SITE_ID"/>
 
-    <many-to-one
-      name="principalInvestigator"
-      class="com.krishagni.catissueplus.core.administrative.domain.User"
-      column="PRINCIPAL_INVESTIGATOR_ID"/>
+    <many-to-one name="principalInvestigator" column="PRINCIPAL_INVESTIGATOR_ID"/>
       
     <set name="coordinators" table="OS_DP_COORDINATORS" inverse="false" cascade="none">
       <key column="DISTRIBUTION_PROTOCOL_ID"/>
       <many-to-many class="com.krishagni.catissueplus.core.administrative.domain.User" column="USER_ID"/>
     </set>
     
-    <many-to-one
-      name="report"
-      class="com.krishagni.catissueplus.core.de.domain.SavedQuery"
-      column="REPORT_ID"/>
+    <many-to-one name="report" column="REPORT_ID"/>
 
     <set name="distributionOrders" inverse="false" cascade="none">
       <key column="DISTRIBUTION_PROTOCOL_ID"/>

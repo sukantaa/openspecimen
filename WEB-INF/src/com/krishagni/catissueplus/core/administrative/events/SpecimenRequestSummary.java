@@ -1,26 +1,28 @@
 package com.krishagni.catissueplus.core.administrative.events;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.krishagni.catissueplus.core.administrative.domain.SpecimenRequest;
-import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
-import com.krishagni.catissueplus.core.common.events.UserSummary;
 
 public class SpecimenRequestSummary {
 	private Long id;
 
-	private CollectionProtocolSummary cp;
+	private Long catalogId;
 
-	private UserSummary requestor;
+	private String requestorEmailId;
+
+	private String irbId;
+
+	private Long dpId;
+
+	private String dpShortTitle;
 
 	private Date dateOfRequest;
 
 	private String activityStatus;
-
-	private Integer requestedSpecimensCount;
 
 	public Long getId() {
 		return id;
@@ -30,20 +32,44 @@ public class SpecimenRequestSummary {
 		this.id = id;
 	}
 
-	public CollectionProtocolSummary getCp() {
-		return cp;
+	public Long getCatalogId() {
+		return catalogId;
 	}
 
-	public void setCp(CollectionProtocolSummary cp) {
-		this.cp = cp;
+	public void setCatalogId(Long catalogId) {
+		this.catalogId = catalogId;
 	}
 
-	public UserSummary getRequestor() {
-		return requestor;
+	public String getRequestorEmailId() {
+		return requestorEmailId;
 	}
 
-	public void setRequestor(UserSummary requestor) {
-		this.requestor = requestor;
+	public void setRequestorEmailId(String requestorEmailId) {
+		this.requestorEmailId = requestorEmailId;
+	}
+
+	public String getIrbId() {
+		return irbId;
+	}
+
+	public void setIrbId(String irbId) {
+		this.irbId = irbId;
+	}
+
+	public Long getDpId() {
+		return dpId;
+	}
+
+	public void setDpId(Long dpId) {
+		this.dpId = dpId;
+	}
+
+	public String getDpShortTitle() {
+		return dpShortTitle;
+	}
+
+	public void setDpShortTitle(String dpShortTitle) {
+		this.dpShortTitle = dpShortTitle;
 	}
 
 	public Date getDateOfRequest() {
@@ -62,21 +88,18 @@ public class SpecimenRequestSummary {
 		this.activityStatus = activityStatus;
 	}
 
-	public Integer getRequestedSpecimensCount() {
-		return requestedSpecimensCount;
-	}
-
-	public void setRequestedSpecimensCount(Integer requestedSpecimensCount) {
-		this.requestedSpecimensCount = requestedSpecimensCount;
-	}
-
 	public static void copyTo(SpecimenRequest request, SpecimenRequestSummary summary) {
 		summary.setId(request.getId());
-		summary.setCp(CollectionProtocolSummary.from(request.getCp()));
-		summary.setRequestor(UserSummary.from(request.getRequestor()));
+		summary.setCatalogId(request.getCatalogId());
+		summary.setRequestorEmailId(request.getRequestorEmailId());
+		summary.setIrbId(request.getIrbId());
 		summary.setDateOfRequest(request.getDateOfRequest());
 		summary.setActivityStatus(request.getActivityStatus());
-		summary.setRequestedSpecimensCount(request.getSpecimensCount());
+
+		if (request.getDp() != null) {
+			summary.setDpId(request.getDp().getId());
+			summary.setDpShortTitle(request.getDp().getShortTitle());
+		}
 	}
 
 	public static SpecimenRequestSummary from(SpecimenRequest request) {
@@ -86,11 +109,6 @@ public class SpecimenRequestSummary {
 	}
 
 	public static List<SpecimenRequestSummary> from(Collection<SpecimenRequest> requests) {
-		List<SpecimenRequestSummary> result = new ArrayList<SpecimenRequestSummary>();
-		for (SpecimenRequest request : requests) {
-			result.add(SpecimenRequestSummary.from(request));
-		}
-
-		return result;
+		return requests.stream().map(SpecimenRequestSummary::from).collect(Collectors.toList());
 	}
 }

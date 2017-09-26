@@ -51,29 +51,32 @@ angular.module('os.administrative.order',
           },
 
           spmnRequest: function($stateParams, $injector, order) {
-            var SpecimenRequest       = undefined;
-            var SpecimenRequestHolder = undefined;
-            if ($injector.has('spmnReqSpecimenRequest')) {
-              SpecimenRequest = $injector.get('spmnReqSpecimenRequest');
-              SpecimenRequestHolder = $injector.get('spmnReqHolder');
+            var catalog;
+            if ($injector.has('scCatalog')) {
+              var scCatalog = $injector.get('scCatalog');
+              catalog = new scCatalog({id: -1});
             }
 
+            if (!catalog) {
+              return null;
+            }
 
+            var reqId = undefined;
             if (angular.isDefined(order.id)) {
-              return !!order.request ? SpecimenRequest.getById(order.request.id) : undefined;
+              reqId = !!order.request ? order.request.id : undefined;
+            } else if (angular.isDefined($stateParams.requestId)) {
+              reqId = $stateParams.requestId;
             }
 
-            if (!angular.isDefined($stateParams.requestId)) {
-              return undefined;
+            return !reqId ? null : catalog.getRequest(reqId);
+          },
+
+          requestDp: function(spmnRequest, DistributionProtocol) {
+            if (spmnRequest && spmnRequest.dpId) {
+              return DistributionProtocol.getById(spmnRequest.dpId);
             }
 
-            var request = SpecimenRequestHolder.get();
-            SpecimenRequestHolder.clear();
-            if (!request) {
-              request = SpecimenRequest.getById($stateParams.requestId);
-            }
-
-            return request;
+            return null;
           }
         },
         parent: 'order-root'
