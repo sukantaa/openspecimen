@@ -743,6 +743,16 @@ angular.module('os.biospecimen.participant.collect-specimens',
           return;
         }
 
+        var sd = CollectSpecimensSvc.getStateDetail() || {};
+        var navigateTo = function() { return $scope.back; };
+        if (sd.state && sd.state.name) {
+          navigateTo = function(visit) {
+            return function() {
+              $state.go(sd.state.name, angular.extend(sd.params, {visitId: visit.id}));
+            }
+          }
+        }
+
         var specimensToSave = getSpecimensToSave($scope.cp, $scope.specimens, []);
         var savedSpmnReqIds = getSpmnReqIds(specimensToSave);
         if (!!$scope.visit.id && $scope.visit.status == 'Complete') {
@@ -750,9 +760,7 @@ angular.module('os.biospecimen.participant.collect-specimens',
             function(savedSpecimens) {
               $scope.specimens.length = 0;
               CollectSpecimensSvc.clear();
-
-              var navigateTo = $scope.back;
-              displayCustomFieldGroups(savedSpmnReqIds, savedSpecimens, navigateTo)
+              displayCustomFieldGroups(savedSpmnReqIds, savedSpecimens, navigateTo($scope.visit))
             }
           );
         } else {
@@ -764,15 +772,9 @@ angular.module('os.biospecimen.participant.collect-specimens',
             function(result) {
               angular.extend(visit, result.data.visit);
 
-              var visitId = result.data.visit.id;
-              var sd = CollectSpecimensSvc.getStateDetail();
               $scope.specimens.length = 0;
               CollectSpecimensSvc.clear();
-
-              var navigateTo = function() {
-                $state.go(sd.state.name, angular.extend(sd.params, {visitId: visitId}));
-              }
-              displayCustomFieldGroups(savedSpmnReqIds, result.data.specimens, navigateTo);
+              displayCustomFieldGroups(savedSpmnReqIds, result.data.specimens, navigateTo(visit));
             }
           );
         }
@@ -887,15 +889,14 @@ angular.module('os.biospecimen.participant.collect-specimens',
         };
 
         if (specimen.lineage == 'New' && specimen.status == 'Collected') {
-          specimen.collectionEvent = {
-            user: $scope.collDetail.collector,
-            time: $scope.collDetail.collectionDate
-          };
+          var collEvent = specimen.collectionEvent = uiSpecimen.collectionEvent || {};
+          var recvEvent = specimen.receivedEvent = uiSpecimen.receivedEvent || {};
 
-          specimen.receivedEvent = {
-            user: $scope.collDetail.receiver,
-            time: $scope.collDetail.receiveDate
-          };
+          if ($scope.showCollVisitDetails) {
+            var collDetail = $scope.collDetail;
+            angular.extend(collEvent, {user: collDetail.collector, time: collDetail.collectionDate});
+            angular.extend(recvEvent, {user: collDetail.receiver,  time: collDetail.receiveDate});
+          }
         }
 
         if (!!specimen.reqId || specimen.lineage == 'Aliquot') {

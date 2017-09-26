@@ -568,6 +568,10 @@
     "new_spmn": "New Specimen",
 
     "id": "Identifier",
+    "create_mode": "Create",
+    "single": "Single Specimen",
+    "multiple": "Multiple Specimens",
+    "num_of_specimens": "Number of Specimens",
     "lineage": "Lineage",
     "label": "Label",
     "barcode": "Barcode",
@@ -630,7 +634,7 @@
     "aliquot_specs": "Aliquots Specifications",
     "review_locations": "Review Locations",
     "assign_locations": "Choose Locations",
-    "labels": "Specimen Labels",
+    "labels": "Labels",
     "labels_csv": "Comma separated list of specimen labels",
 
     "reason_for_closing": "Reason for closing",

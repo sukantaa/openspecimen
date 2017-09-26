@@ -83,11 +83,7 @@ angular.module('os.biospecimen.models.specimen', ['os.common.models', 'os.biospe
     };
 
     Specimen.save = function(specimens) {
-      return $http.post(Specimen.url() + 'collect', specimens).then(
-        function(result) {
-          return result.data;
-        }
-      );
+      return $http.post(Specimen.url() + 'collect', specimens).then(Specimen.modelArrayRespTransform);
     };
 
     Specimen.bulkUpdate = function(specimens) {
