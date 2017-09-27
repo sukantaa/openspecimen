@@ -346,7 +346,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 				Long spmnSiteId = spmnStorageSites.get(spmn.getId());
 				return spmnSiteId != null && !spmnSiteId.equals(sendingSite.getId());
 			})
-			.map(spmn -> spmn.getLabel())
+			.map(Specimen::getLabel)
 			.collect(Collectors.joining(", "));
 
 		if (StringUtils.isNotBlank(invalidSpmnLabels)) {

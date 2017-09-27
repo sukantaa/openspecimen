@@ -916,22 +916,23 @@ public class StorageContainer extends BaseEntity {
 	}
 
 	public void setFreezerCapacity() {
-		if (isDimensionless()) {
-			return;
-		}
-
 		List<StorageContainer> containers = new ArrayList<>();
 		StorageContainer freezer = this;
 		while (freezer.getParentContainer() != null) {
 			containers.add(freezer);
 			freezer = freezer.getParentContainer();
 		}
+		containers.add(freezer);
 
 		if (freezer.getCapacity() != null && freezer.getCapacity() > 0) {
 			return;
 		}
 
-		Integer capacity = freezer.getNoOfRows() * freezer.getNoOfColumns();
+		if (containers.stream().anyMatch(StorageContainer::isDimensionless)) {
+			return;
+		}
+
+		Integer capacity = 1;
 		for (StorageContainer container : containers) {
 			capacity *= container.getNoOfRows() * container.getNoOfColumns();
 		}
@@ -1109,7 +1110,7 @@ public class StorageContainer extends BaseEntity {
 			if (cycleExistsInHierarchy(otherParentContainer)) {
 				throw OpenSpecimenException.userError(StorageContainerErrorCode.HIERARCHY_CONTAINS_CYCLE);
 			}
-			
+
 			if (position != null) {
 				position.update(otherPos);
 			} else {

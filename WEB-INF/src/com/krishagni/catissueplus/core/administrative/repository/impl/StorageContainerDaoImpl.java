@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -275,7 +276,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 	@Override
 	@SuppressWarnings(value = "unchecked")
-	public List<StorageContainerSummary> getChildContainers(Long containerId, int noOfColumns) {
+	public List<StorageContainerSummary> getChildContainers(Long containerId, Integer noOfColumns) {
 		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CHILD_CONTAINERS)
 			.setLong("parentId", containerId)
 			.list();
@@ -340,7 +341,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			.executeUpdate();
 	}
 
-	private StorageContainerSummary createContainer(Object[] row, int noOfColumns) {
+	private StorageContainerSummary createContainer(Object[] row, Integer noOfColumns) {
 		int idx = 0;
 
 		StorageContainerSummary container = new StorageContainerSummary();
@@ -353,9 +354,15 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			StorageLocationSummary location = new StorageLocationSummary();
 			location.setId((Long)row[idx++]);
 
-			int rowNo = (Integer)row[idx++];
-			int colNo = (Integer)row[idx++];
-			location.setPosition((rowNo - 1) * noOfColumns + colNo);
+			if (row[idx] != null) {
+				//
+				// if not stored in dimensionless container
+				//
+				int rowNo = (Integer)row[idx++];
+				int colNo = (Integer)row[idx++];
+				location.setPosition((rowNo - 1) * noOfColumns + colNo);
+			}
+
 			container.setStorageLocation(location);
 		}
 
@@ -375,8 +382,10 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			//
 			// Get back actual position value based on parent container dimension
 			//
-			int rowNo = (location.getPosition() - 1) / 10000 + 1, colNo = (location.getPosition() - 1) % 10000 + 1;
-			location.setPosition((rowNo - 1) * parent.getNoOfColumns() + colNo);
+			if (location.getPosition() != null) {
+				int rowNo = (location.getPosition() - 1) / 10000 + 1, colNo = (location.getPosition() - 1) % 10000 + 1;
+				location.setPosition((rowNo - 1) * parent.getNoOfColumns() + colNo);
+			}
 
 			if (parent.getChildContainers() == null) {
 				parent.setChildContainers(new ArrayList<>());
@@ -397,7 +406,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	}
 
 	private int comparePositions(StorageContainerSummary s1, StorageContainerSummary s2) {
-		return s1.getStorageLocation().getPosition() - s2.getStorageLocation().getPosition();
+		return ObjectUtils.compare(s1.getStorageLocation().getPosition(), s2.getStorageLocation().getPosition());
 	}
 
 	private DetachedCriteria getContainerSpecimensListQuery(SpecimenListCriteria crit) {

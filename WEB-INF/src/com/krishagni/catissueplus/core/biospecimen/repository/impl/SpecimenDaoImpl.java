@@ -184,7 +184,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 			Long siteId = (Long)row[1];
 			Set<Long> siteIds = results.get(id);
 			if (siteIds == null) {
-				siteIds = new HashSet<Long>();
+				siteIds = new HashSet<>();
 				results.put(id, siteIds);
 			}
 			

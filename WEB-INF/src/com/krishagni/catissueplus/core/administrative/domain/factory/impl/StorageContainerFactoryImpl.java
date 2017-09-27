@@ -433,15 +433,11 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 			if (key != null) {
 				ose.addError(StorageContainerErrorCode.PARENT_CONT_NOT_FOUND, key);
 			}
-			
-			return null;
-		} else if (parentContainer.isDimensionless()) {
-			ose.addError(StorageContainerErrorCode.CANNOT_HOLD_CONTAINER, parentContainer.getName(), container.getName());
-			return null;
 		} else {
 			container.setParentContainer(parentContainer);
-			return parentContainer;
 		}
+
+		return parentContainer;
 	}
 
 	private void setCellDisplayProp(StorageContainerDetail detail, StorageContainer container, OpenSpecimenException ose) {
@@ -474,18 +470,18 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 	private void setPosition(StorageContainerDetail detail, StorageContainer container, OpenSpecimenException ose) {
 		StorageContainer parentContainer = container.getParentContainer();
 		StorageLocationSummary location = detail.getStorageLocation();
-		if (parentContainer == null || parentContainer.isDimensionless() || location == null) { // top-level container; therefore no position
+		if (parentContainer == null || location == null) { // top-level container; therefore no position
 			return;
 		}
 
 		String posOne = location.getPositionX(), posTwo = location.getPositionY();
-		if (parentContainer.usesLinearLabelingMode() && location.getPosition() != null && location.getPosition() != 0) {
+		if (!parentContainer.isDimensionless() && parentContainer.usesLinearLabelingMode() && location.getPosition() != null && location.getPosition() != 0) {
 			posTwo = String.valueOf((location.getPosition() - 1) / parentContainer.getNoOfColumns() + 1);
 			posOne = String.valueOf((location.getPosition() - 1) % parentContainer.getNoOfColumns() + 1);
 		}
 
 		StorageContainerPosition position = null;
-		if (StringUtils.isNotBlank(posOne) && StringUtils.isNotBlank(posTwo)) {
+		if (!parentContainer.isDimensionless() && StringUtils.isNotBlank(posOne) && StringUtils.isNotBlank(posTwo)) {
 			if (parentContainer.canContainerOccupyPosition(container.getId(), posOne, posTwo)) {
 				position = parentContainer.createPosition(posOne, posTwo);
 				parentContainer.setLastAssignedPos(position);

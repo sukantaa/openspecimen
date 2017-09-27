@@ -185,11 +185,11 @@
         <os-disp-storage-position position="lctx.entityInfo.container.storageLocation"></os-disp-storage-position>
       </span>
     </li>
-    <li class="item">
+    <li class="item" ng-if="!!lctx.entityInfo.container.noOfRows">
       <strong class="key key-sm" translate="container.dimension"> Dimension </strong>
       <span class="value value-md">{{lctx.entityInfo.container.noOfRows}} x {{lctx.entityInfo.container.noOfColumns}}</span>
     </li>
-    <li class="item">
+    <li class="item" ng-if="!!lctx.entityInfo.container.noOfRows">
       <strong class="key key-sm" translate="container.labeling_scheme"> Labeling Scheme </strong>
       <span class="value value-md">
         {{lctx.entityInfo.container.rowLabelingScheme}} x {{lctx.entityInfo.container.columnLabelingScheme}}
@@ -202,7 +202,7 @@
         <span ng-switch-default translate="common.no">No</span>
       </span>
     </li>
-    <li class="item">
+    <li class="item" ng-if="!!lctx.entityInfo.container.noOfRows">
       <strong class="key key-sm" translate="container.free_locations"> Free Locations </strong>
       <span class="value value-md">{{lctx.entityInfo.container.freePositions}}</span>
     </li>
