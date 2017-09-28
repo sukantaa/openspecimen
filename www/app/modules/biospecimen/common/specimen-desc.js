@@ -40,8 +40,8 @@ angular.module('os.biospecimen.common.specimendesc', [])
           '<span ng-if="specimen.lineage == \'Derived\' && !detailed">' +
             '<span translate="specimens.derived">Derived</span> {{specimen.type}}' +
           '</span>' +
-          '<span ng-if="!!showReqLabel && ((specimen.lineage == \'New\' && !specimen.pooledSpecimen) || specimen.lineage == \'Derived\')">' +
-            '<span ng-switch on="!!specimen.name || !!specimen.reqLabel">' +
+          '<span ng-if="!!showReqLabel">' +
+            '<span ng-switch on="(!!specimen.name || !!specimen.reqLabel) && specimen.lineage != \'Aliquot\' && !specimen.pooledSpecimen">' +
               '<span ng-switch-when="true"> ({{specimen.name || specimen.reqLabel}}) </span>' +
               '<span ng-switch-default>' +
                 '<span ng-if="!!specimen.code || !!specimen.reqCode"> ({{specimen.code || specimen.reqCode}}) </span>' +
