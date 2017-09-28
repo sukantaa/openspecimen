@@ -861,8 +861,7 @@
     },
 
     "filter": {
-      "title": "Filters",
-      "name": "Type the Name"
+      "title": "Filters"
     },
 
     "menu_options": {
