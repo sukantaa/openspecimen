@@ -476,19 +476,32 @@ public class StorageContainersController {
 	@RequestMapping(method = RequestMethod.DELETE, value="/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public StorageContainerSummary deleteStorageContainer(@PathVariable Long id) {
-		return deleteStorageContainers(new Long[] { id }).get(0);
+	public Map<String, Integer> deleteStorageContainer(
+			@PathVariable
+			Long id,
+
+			@RequestParam(value = "forceDelete", required = false, defaultValue = "false")
+			boolean forceDelete) {
+
+		return deleteStorageContainers(new Long[] { id }, forceDelete);
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public List<StorageContainerSummary> deleteStorageContainers(@RequestParam(value = "id") Long[] ids) {
+	public Map<String, Integer> deleteStorageContainers(
+			@RequestParam(value = "id")
+			Long[] ids,
+
+			@RequestParam(value = "forceDelete", required = false, defaultValue = "false")
+			boolean forceDelete) {
+
 		BulkDeleteEntityOp op = new BulkDeleteEntityOp();
 		op.setIds(new HashSet<>(Arrays.asList(ids)));
+		op.setForceDelete(forceDelete);
 
 		RequestEvent<BulkDeleteEntityOp> req = new RequestEvent<>(op);
-		ResponseEvent<List<StorageContainerSummary>> resp = storageContainerSvc.deleteStorageContainers(req);
+		ResponseEvent<Map<String, Integer>> resp = storageContainerSvc.deleteStorageContainers(req);
 		resp.throwErrorIfUnsuccessful();
 
 		return resp.getPayload();

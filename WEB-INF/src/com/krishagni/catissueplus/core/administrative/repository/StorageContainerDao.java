@@ -49,5 +49,7 @@ public interface StorageContainerDao extends Dao<StorageContainer> {
 	public int deleteReservedPositions(List<String> reservationIds);
 
 	public int deleteReservedPositionsOlderThan(Date expireTime);
+
+	List<Long> getLeafContainerIds(Long containerId, int startAt, int maxContainers);
 }
 	

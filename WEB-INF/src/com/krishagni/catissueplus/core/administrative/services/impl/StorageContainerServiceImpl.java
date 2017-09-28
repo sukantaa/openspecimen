@@ -363,24 +363,22 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	}
 	
 	@Override
-	@PlusTransactional
-	public ResponseEvent<List<StorageContainerSummary>> deleteStorageContainers(RequestEvent<BulkDeleteEntityOp> req) {
+	public ResponseEvent<Map<String, Integer>> deleteStorageContainers(RequestEvent<BulkDeleteEntityOp> req) {
 		try {
-			Set<Long> containerIds = req.getPayload().getIds();
-			List<StorageContainer> containers = daoFactory.getStorageContainerDao().getByIds(containerIds);
-			if (containerIds.size() != containers.size()) {
-				containers.forEach(container -> containerIds.remove(container.getId()));
-				throw OpenSpecimenException.userError(StorageContainerErrorCode.NOT_FOUND, containerIds, containerIds.size());
-			}
-
-			List<StorageContainer> ancestors = getAncestors(containers);
-			ancestors.forEach(AccessCtrlMgr.getInstance()::ensureDeleteContainerRights);
-			ancestors.forEach(StorageContainer::delete);
+			BulkDeleteEntityOp op = req.getPayload();
+			Set<Long> containerIds = op.getIds();
+			List<StorageContainer> ancestors = getAccessibleAncestors(containerIds);
+			int clearedSpmnCount = ancestors.stream()
+				.mapToInt(c -> deleteContainerHierarchy(c, op.isForceDelete()))
+				.sum();
 
 			//
 			// returning summary of all containers given by user instead of only ancestor containers
 			//
-			return ResponseEvent.response(StorageContainerSummary.from(containers));
+			Map<String, Integer> result = new HashMap<>();
+			result.put(StorageContainer.getEntityName(), op.getIds().size());
+			result.put(Specimen.getEntityName(), clearedSpmnCount);
+			return ResponseEvent.response(result);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -1077,6 +1075,19 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		}
 	}
 
+	@PlusTransactional
+	private List<StorageContainer> getAccessibleAncestors(Set<Long> containerIds) {
+		List<StorageContainer> containers = daoFactory.getStorageContainerDao().getByIds(containerIds);
+		if (containerIds.size() != containers.size()) {
+			containers.forEach(container -> containerIds.remove(container.getId()));
+			throw OpenSpecimenException.userError(StorageContainerErrorCode.NOT_FOUND, containerIds, containerIds.size());
+		}
+
+		List<StorageContainer> ancestors = getAncestors(containers);
+		ancestors.forEach(AccessCtrlMgr.getInstance()::ensureDeleteContainerRights);
+		return ancestors;
+	}
+
 	private List<StorageContainer> getAncestors(List<StorageContainer> containers) {
 		Set<Long> descContIds = containers.stream()
 			.flatMap(c -> c.getDescendentContainers().stream().filter(d -> !d.equals(c)))
@@ -1086,6 +1097,76 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		return containers.stream()
 			.filter(c -> !descContIds.contains(c.getId()))
 			.collect(Collectors.toList());
+	}
+
+
+	private int deleteContainerHierarchy(StorageContainer container, boolean vacateSpmns) {
+		if (!vacateSpmns) {
+			raiseErrorIfNotEmpty(container);
+		}
+
+		int clearedSpmns = 0;
+		boolean endOfContainers = false;
+		while (!endOfContainers) {
+			List<Long> leafContainers = getLeafContainerIds(container);
+			clearedSpmns += leafContainers.stream().mapToInt(cid -> deleteContainer(cid, vacateSpmns)).sum();
+			endOfContainers = (leafContainers.isEmpty());
+		}
+
+		return clearedSpmns;
+	}
+
+	@PlusTransactional
+	private void raiseErrorIfNotEmpty(StorageContainer container) {
+		int storedSpmns = daoFactory.getStorageContainerDao().getSpecimensCount(container.getId());
+		if (storedSpmns > 0) {
+			throw OpenSpecimenException.userError(StorageContainerErrorCode.REF_ENTITY_FOUND, container.getName());
+		}
+	}
+
+	@PlusTransactional
+	private List<Long> getLeafContainerIds(StorageContainer container) {
+		return daoFactory.getStorageContainerDao().getLeafContainerIds(container.getId(), 0, 100);
+	}
+
+	private int deleteContainer(Long containerId, boolean vacateSpmns) {
+		int spmns = 0;
+		if (vacateSpmns) {
+			spmns = vacateSpecimens(containerId);
+		}
+
+		deleteContainer(containerId);
+		return spmns;
+	}
+
+	private int vacateSpecimens(Long containerId) {
+		boolean endOfSpmns = false;
+		int startAt = 0, maxSpmns = 100, totalSpmns = 0;
+		SpecimenListCriteria crit = new SpecimenListCriteria()
+				.ancestorContainerId(containerId)
+				.startAt(startAt)
+				.maxResults(maxSpmns);
+
+		while(!endOfSpmns) {
+			int count = vacateSpecimensBatch(crit);
+			totalSpmns += count;
+			endOfSpmns = (count < maxSpmns);
+		}
+
+		return totalSpmns;
+	}
+
+	@PlusTransactional
+	private int vacateSpecimensBatch(SpecimenListCriteria crit) {
+		List<Specimen> specimens = daoFactory.getStorageContainerDao().getSpecimens(crit, false);
+		specimens.forEach(s -> s.updatePosition(null));
+		return specimens.size();
+	}
+
+	@PlusTransactional
+	private void deleteContainer(Long containerId) {
+		StorageContainer container = daoFactory.getStorageContainerDao().getById(containerId); // refresh from DB
+		container.delete(false);
 	}
 
 	private void generateName(StorageContainer container) {

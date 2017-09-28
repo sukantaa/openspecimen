@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.administrative.services;
 
 import java.util.List;
+import java.util.Map;
 
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.events.AssignPositionsOp;
@@ -53,7 +54,7 @@ public interface StorageContainerService {
 		
 	public ResponseEvent<List<DependentEntityDetail>> getDependentEntities(RequestEvent<Long> req);
 	
-	public ResponseEvent<List<StorageContainerSummary>> deleteStorageContainers(RequestEvent<BulkDeleteEntityOp> req);
+	ResponseEvent<Map<String, Integer>> deleteStorageContainers(RequestEvent<BulkDeleteEntityOp> req);
 	
 	public ResponseEvent<Boolean> replicateStorageContainer(RequestEvent<ContainerReplicationDetail> req);
 

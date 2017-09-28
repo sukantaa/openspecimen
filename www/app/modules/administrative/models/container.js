@@ -255,7 +255,7 @@ angular.module('os.administrative.models.container', ['os.common.models'])
     }
 
     Container.bulkDelete = function(containerIds) {
-      return $http.delete(Container.url(), {params: {id: containerIds}})
+      return $http.delete(Container.url(), {params: {id: containerIds, forceDelete: true}})
         .then(Container.modelArrayRespTransform);
     }
 

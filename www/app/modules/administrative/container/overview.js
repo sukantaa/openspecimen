@@ -42,7 +42,8 @@ angular.module('os.administrative.container.overview', ['os.administrative.model
             $scope.selectContainer(parent);
           }
         },
-        confirmDelete: 'container.confirm_delete'
+        confirmDelete: 'container.confirm_delete',
+        forceDelete: true
       });
     }
 

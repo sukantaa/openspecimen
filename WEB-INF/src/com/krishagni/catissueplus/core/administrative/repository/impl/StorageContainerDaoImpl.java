@@ -341,6 +341,16 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			.executeUpdate();
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Long> getLeafContainerIds(Long containerId, int startAt, int maxContainers) {
+		return getCurrentSession().getNamedQuery(GET_LEAF_CONTAINERS)
+			.setParameter("containerId", containerId)
+			.setFirstResult(startAt)
+			.setMaxResults(maxContainers)
+			.list();
+	}
+
 	private StorageContainerSummary createContainer(Object[] row, Integer noOfColumns) {
 		int idx = 0;
 
@@ -738,4 +748,6 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	private static final String GET_ROOT_CONT_SPMNS_COUNT = FQN + ".getRootContainerSpecimensCount";
 
 	private static final String GET_SPMNS_CNT_BY_TYPE = FQN + ".getSpecimenCountsByType";
+
+	private static final String GET_LEAF_CONTAINERS = FQN + ".getLeafContainerIds";
 }

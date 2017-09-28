@@ -811,12 +811,14 @@ public class StorageContainer extends BaseEntity {
 				Specimen.getEntityName(), getSpecimensCount());
 	}
 	
-	public void delete() {
-		int specimensCnt = getSpecimensCount();
-		if (specimensCnt > 0) {
-			throw OpenSpecimenException.userError(StorageContainerErrorCode.REF_ENTITY_FOUND);
+	public void delete(boolean checkSpecimens) {
+		if (checkSpecimens) {
+			int specimensCnt = getSpecimensCount();
+			if (specimensCnt > 0) {
+				throw OpenSpecimenException.userError(StorageContainerErrorCode.REF_ENTITY_FOUND, getName());
+			}
 		}
-		
+
 		deleteWithoutCheck();
 	}
 	
@@ -1137,7 +1139,7 @@ public class StorageContainer extends BaseEntity {
 		}
 
 		if (Status.ACTIVITY_STATUS_DISABLED.getStatus().equals(other.getActivityStatus())) {
-			delete();
+			delete(true);
 		} else {
 			List<StorageContainer> containers = new ArrayList<>();
 			containers.add(this);

@@ -173,6 +173,21 @@
       ]]>
     </query>
 
+    <sql-query name="getLeafContainerIds">
+      <return-scalar column="leafId" type="long"/>
+
+      select
+        h.descendent_id as leafId
+      from
+        os_containers_hierarchy h
+        inner join os_storage_containers p on p.identifier = h.descendent_id
+        left join os_storage_containers c on c.parent_container_id = p.identifier and c.activity_status != 'Disabled'
+      where
+        h.ancestor_id = :containerId and
+        c.identifier is null and
+        p.activity_status != 'Disabled'
+    </sql-query>
+
     <sql-query name="getAncestors">
       <return-scalar column="ancestorId" type="long"/>
       <return-scalar column="parentId"   type="long"/>
