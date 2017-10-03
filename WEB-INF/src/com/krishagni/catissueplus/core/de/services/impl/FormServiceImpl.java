@@ -429,15 +429,17 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		try{ 
 			User user = AuthUtil.getCurrentUser();
 			List<FormData> formDataList = req.getPayload();
-			List<FormData> savedFormDataList = new ArrayList<FormData>();
+			List<FormData> savedFormDataList = new ArrayList<>();
 			for (FormData formData : formDataList) {
 				FormData savedFormData = saveOrUpdateFormData(user, formData.getRecordId(), formData, false);
 				savedFormDataList.add(savedFormData);
 			}
 			
 			return ResponseEvent.response(savedFormDataList);
+		} catch (ValidationErrors ve) {
+			return ResponseEvent.userError(FormErrorCode.INVALID_DATA, ve.getMessage());
 		} catch(IllegalArgumentException ex) {
-			return ResponseEvent.userError(FormErrorCode.INVALID_DATA);
+			return ResponseEvent.userError(FormErrorCode.INVALID_DATA, ex.getMessage());
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
