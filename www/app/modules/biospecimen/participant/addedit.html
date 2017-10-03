@@ -332,65 +332,50 @@
       </div>
     </div>
 
-    <div ng-if="showAdvDemographics">
-      <div class="form-group">
-        <label class="col-xs-3 control-label" translate="participant.gender">Gender</label>
-        <div class="col-xs-9">
-          <label class="radio-inline" ng-repeat="gender in genders">
-            <input type="radio" name="gender" ng-model="cpr.participant.gender" ng-value="gender"> {{gender}}
-          </label>
-        </div>
+    <div class="form-group">
+      <label class="col-xs-3 control-label" translate="participant.gender">Gender</label>
+      <div class="col-xs-9">
+        <label class="radio-inline" ng-repeat="gender in genders">
+          <input type="radio" name="gender" ng-model="cpr.participant.gender" ng-value="gender"> {{gender}}
+        </label>
       </div>
-
-      <div class="form-group">
-        <label class="col-xs-3 control-label" translate="participant.vital_status">Vital Status</label>
-        <div class="col-xs-9">
-          <label class="radio-inline" ng-repeat="vitalStatus in vitalStatuses">
-            <input type="radio" name="vitalStatus" ng-model="cpr.participant.vitalStatus" ng-value="vitalStatus">
-            <span>{{vitalStatus}}</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="col-xs-3 control-label" translate="participant.death_date">Death Date</label>
-        <div class="col-xs-6">
-          <os-date-picker date="cpr.participant.deathDate"
-            ng-disabled="cpr.participant.vitalStatus != 'Dead'" 
-            placeholder="{{'participant.death_date' | translate}}">
-          </os-date-picker>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="col-xs-3 control-label" translate="participant.ethnicity">Ethnicity</label>
-        <div class="col-xs-6">
-          <os-pvs name="ethnicity" multiple ng-model="cpr.participant.ethnicities" attribute="ethnicity"
-            placeholder="{{'participant.ethnicity' | translate}}">
-          </os-pvs>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="col-xs-3 control-label" translate="participant.race">Race</label>
-        <div class="col-xs-6">
-          <os-pvs multiple ng-model="cpr.participant.races" attribute="race"
-            placeholder="{{'participant.select_race' | translate}}">
-          </os-pvs>
-        </div>
-      </div>
-    </div> <!-- End of Show Adv Demographics -->
+    </div>
 
     <div class="form-group">
-      <div class="col-xs-offset-3 col-xs-6">
-        <a ng-click="showAdvDemographics = !showAdvDemographics">
-          <span ng-if="!showAdvDemographics" translate="participant.more_demographics">
-            More Demographic Information
-          </span>
-          <span ng-if="showAdvDemographics" translate="participant.less_demographics">
-            Less Demographic Information
-          </span>
-        </a>
+      <label class="col-xs-3 control-label" translate="participant.vital_status">Vital Status</label>
+      <div class="col-xs-9">
+        <label class="radio-inline" ng-repeat="vitalStatus in vitalStatuses">
+          <input type="radio" name="vitalStatus" ng-model="cpr.participant.vitalStatus" ng-value="vitalStatus">
+          <span>{{vitalStatus}}</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-xs-3 control-label" translate="participant.death_date">Death Date</label>
+      <div class="col-xs-6">
+        <os-date-picker date="cpr.participant.deathDate"
+          ng-disabled="cpr.participant.vitalStatus != 'Dead'"
+          placeholder="{{'participant.death_date' | translate}}">
+        </os-date-picker>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-xs-3 control-label" translate="participant.ethnicity">Ethnicity</label>
+      <div class="col-xs-6">
+        <os-pvs name="ethnicity" multiple ng-model="cpr.participant.ethnicities" attribute="ethnicity"
+          placeholder="{{'participant.ethnicity' | translate}}">
+        </os-pvs>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-xs-3 control-label" translate="participant.race">Race</label>
+      <div class="col-xs-6">
+        <os-pvs multiple ng-model="cpr.participant.races" attribute="race"
+          placeholder="{{'participant.select_race' | translate}}">
+        </os-pvs>
       </div>
     </div>
 
