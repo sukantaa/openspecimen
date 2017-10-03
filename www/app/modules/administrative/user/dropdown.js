@@ -43,7 +43,7 @@ angular.module('os.administrative.user.dropdown', ['os.administrative.models'])
   
       link: function(scope, element, attrs, ctrl) {
         if (!scope.ngModel && attrs.hasOwnProperty('defaultCurrentUser')) {
-          var user = AuthorizationService.currentUser();
+          var user = angular.copy(AuthorizationService.currentUser() || {});
 
           if (attrs.hasOwnProperty('multiple')) {
             scope.ngModel = [user];
