@@ -409,13 +409,14 @@ angular.module('os.biospecimen.specimen')
         }
 
         if (selectedSpmns.length != 0) {
+          var cofrc = (!angular.isDefined(group.enableCofrc) || group.enableCofrc == 'true' || group.enableCofrc === true);
           result.push({
             multiple: true,
             title: group.title,
             fields: { table: group.fields },
             baseFields: baseFields,
             input: selectedSpmns,
-            opts: { static: true }
+            opts: { static: true, enableCofrc: cofrc, cofrc: cofrc }
           });
         }
       }
