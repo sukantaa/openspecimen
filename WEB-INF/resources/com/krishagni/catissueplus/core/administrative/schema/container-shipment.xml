@@ -1,53 +1,48 @@
 #macro(getMessage $code)$messageSource.getMessage($code, null, $locale)#end
 
 <object-schema>
-  <name>shipment</name>
+  <name>containerShipment</name>
   <record> 
     <name>com.krishagni.catissueplus.core.administrative.events.ShipmentDetail</name>
 
     #parse( 'com/krishagni/catissueplus/core/administrative/schema/shipment-common.xml' )
-
+    
     <record>
-      <attribute>shipmentSpecimen</attribute>
-      <caption>#getMessage("shipment_specimen")</caption>
+      <attribute>shipmentContainer</attribute>
+      <caption>#getMessage("shipment_container")</caption>
       
       <record>
-        <attribute>specimen</attribute>
+        <attribute>container</attribute>
         <multiple>false</multiple>
-        <caption>#getMessage("specimen")</caption>
+        <caption>#getMessage("container")</caption>
 
         <field>
-          <caption>#getMessage("specimen_cp_short")</caption>
-          <attribute>cpShortTitle</attribute>
-        </field>
-
-        <field>
-          <caption>#getMessage("specimen_label")</caption>
-          <attribute>label</attribute>
-        </field>
-
-        <field>
-          <caption>#getMessage("specimen_barcode")</caption>
-          <attribute>barcode</attribute>
+          <caption>#getMessage("container_name")</caption>
+          <attribute>name</attribute>
         </field>
 
         <record>
-          <caption>#getMessage("specimen_location")</caption>
+          <caption>#getMessage("container_storage_location")</caption>
           <attribute>storageLocation</attribute>
     
           <field>
-            <caption>#getMessage("specimen_location_container")</caption>
+            <caption>#getMessage("container_name")</caption>
             <attribute>name</attribute>
           </field>
     
           <field>
-            <caption>#getMessage("specimen_location_row")</caption>
+            <caption>#getMessage("container_position_row")</caption>
             <attribute>positionY</attribute>
           </field>
     
           <field>
-            <caption>#getMessage("specimen_location_column")</caption>
+            <caption>#getMessage("container_position_column")</caption>
             <attribute>positionX</attribute>
+          </field>
+
+          <field>
+            <caption>#getMessage("container_position_position")</caption>
+            <attribute>position</attribute>
           </field>
         </record>
       </record>

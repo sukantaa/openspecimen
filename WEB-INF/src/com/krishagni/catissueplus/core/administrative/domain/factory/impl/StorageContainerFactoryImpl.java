@@ -386,6 +386,14 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 		} else if (parentContainer != null && !parentContainer.getSite().equals(site)) {
 			ose.addError(StorageContainerErrorCode.INVALID_SITE_AND_PARENT_CONT);
 		}
+
+		if (container.isSiteContainer()) {
+			if (!container.isDimensionless() || parentContainer != null) {
+				ose.addError(StorageContainerErrorCode.SITE_CONT_VIOLATED);
+			} else {
+				container.addOnSaveProc(() -> container.getSite().setContainer(container));
+			}
+		}
 	}
 	
 	private void setSiteAndParentContainer(StorageContainerDetail detail, StorageContainer existing, StorageContainer container, OpenSpecimenException ose) {

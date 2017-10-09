@@ -29,6 +29,7 @@ import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
+import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.SchemeOrdinalConverterUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -36,7 +37,9 @@ import com.krishagni.catissueplus.core.common.util.Utility;
 @Audited
 public class StorageContainer extends BaseEntity {
 	private static final String ENTITY_NAME = "storage_container";
-	
+
+	private static final String DEF_SITE_CONT_NAME = "storage_container_site_cont_name";
+
 	public static final String NUMBER_LABELING_SCHEME = "Numbers";
 	
 	public static final String UPPER_CASE_ALPHA_LABELING_SCHEME = "Alphabets Upper Case";
@@ -475,6 +478,16 @@ public class StorageContainer extends BaseEntity {
 		validateRestrictions();
 	}
 
+	public void moveTo(StorageContainer newContainer) {
+		StorageContainerPosition pos = newContainer.nextAvailablePosition();
+		pos.setOccupyingContainer(this);
+		updateContainerLocation(newContainer.getSite(), newContainer, pos);
+	}
+
+	public void moveTo(Site newSite, StorageContainer newParent, StorageContainerPosition newPos) {
+		updateContainerLocation(newSite, newParent, newPos);
+	}
+
 	public Integer freePositionsCount() {
 		return isDimensionless() ? null : getNoOfColumns() * getNoOfRows() - getOccupiedPositions().size();
 	}
@@ -739,8 +752,7 @@ public class StorageContainer extends BaseEntity {
 				scheme.equals(UPPER_CASE_ROMAN_LABELING_SCHEME) ||
 				scheme.equals(LOWER_CASE_ROMAN_LABELING_SCHEME);
 	}
-	
-	
+
 	public void validateRestrictions() {
 		StorageContainer parent = getParentContainer();
 		if (parent != null && !parent.canContain(this)) {
@@ -954,17 +966,33 @@ public class StorageContainer extends BaseEntity {
 		getAutoFreezerProvider().getInstance().processList(list);
 	}
 
+	public boolean isSiteContainer(Site site) {
+		return this.equals(site.getContainer());
+	}
+
+	public boolean isSiteContainer() {
+		return isSiteContainer(getSite());
+	}
+
+	public static String getDefaultSiteContainerName(Site site) {
+		return MessageUtil.getInstance().getMessage(DEF_SITE_CONT_NAME, new Object[] { site.getName() });
+	}
+
 	private void deleteWithoutCheck() {
 		getChildContainers().forEach(StorageContainer::deleteWithoutCheck);
 
-		setName(Utility.getDisabledValue(getName(), 64));
-		setBarcode(Utility.getDisabledValue(getBarcode(), 64));
+		if (isSiteContainer()) {
+			getSite().setContainer(null);
+		}
 
-		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 		if (getParentContainer() != null) {
 			getParentContainer().removePosition(getPosition());
 			setPosition(null);
 		}
+
+		setName(Utility.getDisabledValue(getName(), 64));
+		setBarcode(Utility.getDisabledValue(getBarcode(), 64));
+		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 	}
 
 	private int getSpecimensCount() {

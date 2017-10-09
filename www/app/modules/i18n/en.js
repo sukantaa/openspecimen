@@ -1715,7 +1715,8 @@
       "specimenDerivative": "Derived Specimens",
       "masterSpecimen": "Master Specimens",
       "specimenDisposal": "Specimen Disposal",
-      "shipment": "Shipment",
+      "shipment": "Specimen Shipments",
+      "containerShipment": "Container Shipments",
       "distributionOrder": "Distribution Order"
     },
 
@@ -1960,16 +1961,24 @@
     "creation_date": "Creation Date",
     "status": "Status",
     "specimens": "Specimens",
+    "containers": "Containers",
+    "specimen_shipments": "Specimen Shipments",
+    "container_shipments": "Container Shipments",
     "sending_site": "Sending Site",
     "receiving_institute": "Receiving Institute",
     "receiving_site": "Receiving Site",
+    "received_quality": "Quality",
     "notify_users": "Notify Users",
     "sender_comments": "Sender Comments",
     "receiver_comments": "Receiver Comments",
     "details": "Shipment Details",
-    "no_specimens_in_list": "No specimens in shipment. Add at least one specimen",
+    "no_specimens_in_list": "No specimens in shipment. Add at least one specimen.",
+    "no_containers_in_list": "No containers in shipment. Add at least one container.",
     "enter_specimen_label": "To add specimens to shipment, enter labels or barcodes separated by a comma, tab or newline and click add",
+    "enter_container_names": "To add containers to shipment, enter container names separated by a comma, tab or newline and click add",
     "multi_site_specimens": "Can't ship specimens from multiple storage sites",
+    "loading_specimens": "Loading shipment specimens. Please wait for a moment ...",
+    "loading_containers": "Loading shipment containers. Please wait for a moment ...",
 
     "filters": "Filters",
     "report_gen_initiated": "Generating shipment report...",
@@ -1979,7 +1988,9 @@
     "bulk_import_jobs": "Import Shipments Job List",
 
     "menu": {
-      "overview": "Overview"
+      "overview": "Overview",
+      "containers": "Containers",
+      "specimens": "Specimens"
     },
 
     "spec": {
@@ -1989,7 +2000,6 @@
       "quantity": "Quantity",
       "location": "Location",
       "virtual": "Not Stored",
-      "quality": "Quality",
       "copy_first_to_all": "Copy First To All"
     },
 

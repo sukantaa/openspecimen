@@ -20,16 +20,7 @@
 
   <div class="clearfix">
     <div class="col-xs-8">
-      <ul class="os-key-values os-two-cols">
-        <li class="item" ng-if="!!shipment.request">
-          <strong class="key key-sm" translate="shipments.request">Request</strong>
-          <span class="value value-md">
-            <a ui-sref="specimen-request-detail.overview({requestId: shipment.request.id})">
-              <span>#{{shipment.request.id}}</span>
-            </a>
-          </span>
-        </li>
-  
+      <ul class="os-key-values os-one-col">
         <li class="item">
           <strong class="key key-sm" translate="shipments.courier_name">Courier Name</strong>
           <span class="value value-md">{{shipment.courierName | osNoValue}}</span>
@@ -99,7 +90,7 @@
   </div>
 
   <div class="clearfix">
-    <div class="col-xs-10">
+    <div class="col-xs-8">
       <div class="os-section os-line-section" ng-if="!!shipment.senderComments">
         <strong class="key key-sm">
           <span translate="shipments.sender_comments">Sender Comments</span>
@@ -114,53 +105,6 @@
           <span>&nbsp;</span>
         </strong>
         <span class="value value-md">{{shipment.receiverComments}}</span>
-      </div>
-  
-      <div class="os-section" ng-init="specSect=false">
-        <button class="os-btn-section-collapse os-btn-transparent" ng-click="specSect=!specSect">
-          <span ng-if="!specSect" class="fa fa-chevron-circle-down"></span>
-          <span ng-if="specSect" class="fa fa-chevron-circle-right"></span>
-        </button>
-        <h3 class="os-sub-section-title" translate="shipments.specimens">Specimens</h3>
-        <div collapse="specSect">
-          <table class="os-table os-table-muted-hdr os-border">
-            <thead class="os-table-head">
-              <tr class="row">
-                <th class="col" translate="shipments.spec.label">Label</th>
-                <th class="col" translate="shipments.spec.desc">Description</th>
-                <th class="col" translate="shipments.spec.cp">Collection Protocol</th>
-                <th class="col" translate="shipments.spec.quantity">Quantity</th>
-                <th class="col" ng-if="shipment.status == 'Received'" translate="shipments.spec.quality">Quality</th>
-              </tr>
-            </thead>
-            <tbody class="os-table-body">
-              <tr class="row" ng-repeat="item in shipment.shipmentItems" ng-init="specimen = item.specimen">
-                <td class="col">
-                  <a ui-sref="specimen({specimenId: specimen.id})">
-                    <span>{{specimen.label}}</span>
-                    <span ng-if="!!specimen.barcode">
-                      ({{specimen.barcode}})
-                    </span>
-                  </a>
-                </td>
-                <td class="col">
-                  <a ui-sref="specimen({specimenId: specimen.id})">
-                    <os-specimen-desc specimen="specimen" detailed="true"></os-specimen-desc>
-                  </a>
-                </td>
-                <td class="col">
-                  <span>{{specimen.cpShortTitle}}</span>
-                </td>
-                <td class="col">
-                  <os-spmn-measure-val specimen="specimen" value="specimen.availableQty"></os-spmn-measure-val>
-                </td>
-                <td class="col" ng-if="shipment.status == 'Received'">
-                  <span>{{"shipments.quality." + item.receivedQuality | translate}}</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
   </div>

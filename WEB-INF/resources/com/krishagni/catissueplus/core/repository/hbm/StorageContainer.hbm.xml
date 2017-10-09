@@ -147,14 +147,16 @@
 
     <query name="getSpecimensCount">
       select
-        count(pos)
+        c.id, count(pos)
       from
         com.krishagni.catissueplus.core.administrative.domain.StorageContainer c
         join c.descendentContainers d
         join d.occupiedPositions pos
       where
-        c.id = :containerId
+        c.id in (:containerIds)
         and pos.occupyingSpecimen is not null
+      group by
+        c.id
     </query>
 
     <query name="deletePositionsByReservationIds">
@@ -171,6 +173,19 @@
         where
           p.reservationTime < :expireTime
       ]]>
+    </query>
+
+    <query name="getShippedContainers">
+      select
+        c
+      from
+        com.krishagni.catissueplus.core.administrative.domain.Shipment s
+        join s.shipmentContainers sc
+        join sc.container c
+      where
+        c.id in (:containerIds) and
+        s.status = 'SHIPPED' and
+        s.activityStatus != 'Disabled'
     </query>
 
     <sql-query name="getLeafContainerIds">
@@ -340,6 +355,23 @@
         f.identifier = :containerId
       group by
         s.specimen_type
+    </sql-query>
+
+    <sql-query name="getDescendantContainerIds">
+      <return-scalar column="ancestorId" type="long"/>
+      <return-scalar column="descendantId" type="long"/>
+
+      select
+        a.identifier as ancestorId, d.identifier as descendantId
+      from
+        os_storage_containers a
+        inner join os_containers_hierarchy h on h.ancestor_id = a.identifier
+        inner join os_storage_containers d on d.identifier = h.descendent_id
+      where
+        a.identifier in (:containerIds) and
+        a.activity_status != 'Disabled' and
+        d.activity_status != 'Disabled' and
+        a.identifier != d.identifier
     </sql-query>
   </class>
 </hibernate-mapping>

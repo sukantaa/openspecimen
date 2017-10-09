@@ -654,7 +654,7 @@ public class ImportServiceImpl implements ImportService {
 		}
 
 		private boolean processMultipleRowsPerObj(ObjectReader objReader, CsvWriter csvWriter, ObjectImporter<Object, Object> importer) {
-			LinkedEhCacheMap<String, MergedObject> objectsMap =  new LinkedEhCacheMap<String, MergedObject>();
+			LinkedEhCacheMap<String, MergedObject> objectsMap =  new LinkedEhCacheMap<>();
 			
 			while (true) {
 				String errMsg = null;

@@ -1,21 +1,34 @@
 angular.module('os.administrative.shipment.receive', ['os.administrative.models'])
-  .controller('ShipmentReceiveCtrl', function($scope, $state, shipment, Specimen, PvManager) {
+  .controller('ShipmentReceiveCtrl', function($scope, $state, shipment, shipmentItems, Specimen, Container, PvManager) {
 
     function loadPvs() {
       $scope.qualityStatuses = PvManager.getPvs('quality-status');
     }
 
     function init() {
-      $scope.shipment = shipment;
-      angular.forEach(shipment.shipmentItems, function(item) {
-        item.specimen = new Specimen(item.specimen);
-      });
+      var attrs = getItemAttrs();
+      angular.forEach(shipmentItems,
+        function(item) {
+          item[attrs.itemKey] = attrs.newItem(item[attrs.itemKey]);
+        }
+      );
+      shipment[attrs.collName] = shipmentItems;
 
-      if (!$scope.shipment.receivedDate) {
-        $scope.shipment.receivedDate = new Date();
+      $scope.shipment = shipment;
+      $scope.spmnShipment = shipment.isSpecimenShipment();
+      if (!shipment.receivedDate) {
+        shipment.receivedDate = new Date();
       }
       
       loadPvs();
+    }
+
+    function getItemAttrs() {
+      if (shipment.isSpecimenShipment()) {
+        return {collName: 'shipmentSpmns', itemKey: 'specimen', newItem: function(i) { return new Specimen(i) }};
+      } else {
+        return {collName: 'shipmentContainers', itemKey: 'container', newItem: function(i) { return new Container(i) }};
+      }
     }
 
     $scope.passThrough = function() {
@@ -41,25 +54,30 @@ angular.module('os.administrative.shipment.receive', ['os.administrative.models'
     }
     
     $scope.applyFirstLocationToAll = function() {
-      var location = $scope.shipment.shipmentItems[0].specimen.storageLocation;
+      var attrs = getItemAttrs();
+      var location = shipment[attrs.collName][0][attrs.itemKey].storageLocation;
       if (!location.name) {
         return;
       }
 
-      angular.forEach($scope.shipment.shipmentItems, function(item, idx) {
-        if (idx == 0) {
-          return;
-        }
+      angular.forEach(shipment[attrs.collName],
+        function(item, idx) {
+          if (idx == 0) {
+            return;
+          }
 
-        item.specimen.storageLocation = {name: location.name, mode: location.mode};
-      });
+          item[attrs.itemKey].storageLocation = {name: location.name, mode: location.mode};
+        }
+      );
     }
 
     $scope.copyFirstQualityToAll = function() {
-      var quality = $scope.shipment.shipmentItems[0].receivedQuality;
-      angular.forEach($scope.shipment.shipmentItems, function(item) {
-        item.receivedQuality = quality;
-      });
+      var quality = shipment[attrs.collName][0].receivedQuality;
+      angular.forEach(shipment[attrs.collName],
+        function(item) {
+          item.receivedQuality = quality;
+        }
+      );
     }
 
     init();

@@ -5,5 +5,5 @@ import com.krishagni.catissueplus.core.administrative.domain.Shipment.Status;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentDetail;
 
 public interface ShipmentFactory {
-	public Shipment createShipment(ShipmentDetail detail, Status status);
+	Shipment createShipment(ShipmentDetail detail, Status status);
 }

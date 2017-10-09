@@ -1,7 +1,9 @@
 package com.krishagni.catissueplus.core.administrative.repository.impl;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +14,9 @@ import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.administrative.domain.Shipment;
 import com.krishagni.catissueplus.core.administrative.domain.Shipment.Status;
+import com.krishagni.catissueplus.core.administrative.domain.ShipmentContainer;
+import com.krishagni.catissueplus.core.administrative.domain.ShipmentSpecimen;
+import com.krishagni.catissueplus.core.administrative.events.ShipmentItemsListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.ShipmentDao;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
@@ -23,7 +28,7 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 	public Class<Shipment> getType() {
 		return Shipment.class;
 	}
-	
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Shipment> getShipments(ShipmentListCriteria crit) {
@@ -66,6 +71,51 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 	@Override
 	public Map<String, Object> getShipmentIds(String key, Object value) {
 		return getObjectIds("shipmentId", key, value);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<ShipmentContainer> getShipmentContainers(ShipmentItemsListCriteria crit) {
+		return getCurrentSession().createCriteria(ShipmentContainer.class, "sc")
+			.createAlias("sc.shipment", "s")
+			.add(Restrictions.eq("s.id", crit.shipmentId()))
+			.setFirstResult(crit.startAt())
+			.setMaxResults(crit.maxResults())
+			.addOrder(Order.asc("sc.id"))
+			.list();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<ShipmentSpecimen> getShipmentSpecimens(ShipmentItemsListCriteria crit) {
+		return getCurrentSession().createCriteria(ShipmentSpecimen.class, "ss")
+			.createAlias("ss.shipment", "s")
+			.add(Restrictions.eq("s.id", crit.shipmentId()))
+			.setFirstResult(crit.startAt())
+			.setMaxResults(crit.maxResults())
+			.addOrder(Order.asc("ss.id"))
+			.list();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Map<Long, Integer> getSpecimensCount(Collection<Long> shipmentIds) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SPECIMENS_COUNT)
+			.setParameterList("shipmentIds", shipmentIds)
+			.list();
+
+		return rows.stream().collect(Collectors.toMap(row -> (Long)row[0], row -> (Integer)row[1]));
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Map<Long, Integer> getSpecimensCountByContainer(Long shipmentId, Collection<Long> containerIds) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SPECIMENS_COUNT_BY_CONT)
+			.setParameter("shipmentId", shipmentId)
+			.setParameterList("containerIds", containerIds)
+			.list();
+
+		return rows.stream().collect(Collectors.toMap(row -> (Long)row[0], row -> (Integer)row[1]));
 	}
 
 	private Criteria getShipmentsQuery(ShipmentListCriteria crit) {
@@ -122,4 +172,8 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 	private static final String GET_SHIPMENT_BY_NAME = FQN + ".getShipmentByName";
 	
 	private static final String GET_SHIPPED_SPECIMENS_BY_IDS = FQN + ".getShippedSpecimensByIds";
+
+	private static final String GET_SPECIMENS_COUNT = FQN + ".getSpecimensCount";
+
+	private static final String GET_SPECIMENS_COUNT_BY_CONT = FQN + ".getSpecimensCountByContainer";
 }

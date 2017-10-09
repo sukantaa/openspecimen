@@ -13,6 +13,13 @@
     </id>
     
     <property name="name" column="NAME"/>
+
+    <property name="type" column="TYPE">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">com.krishagni.catissueplus.core.administrative.domain.Shipment$Type</param>
+        <param name="type">12</param>
+      </type>
+    </property>
     
     <property name="courierName" column="COURIER_NAME"/>
     
@@ -45,9 +52,14 @@
     
     <property name="activityStatus" column="ACTIVITY_STATUS"/>
     
-    <set name="shipmentItems" cascade="all-delete-orphan" inverse="true">
+    <set name="shipmentSpecimens" cascade="all-delete-orphan" inverse="true">
       <key column="SHIPMENT_ID" />
-      <one-to-many class="com.krishagni.catissueplus.core.administrative.domain.ShipmentItem"/>
+      <one-to-many class="com.krishagni.catissueplus.core.administrative.domain.ShipmentSpecimen"/>
+    </set>
+
+    <set name="shipmentContainers" cascade="all-delete-orphan" inverse="true">
+      <key column="SHIPMENT_ID"/>
+      <one-to-many class="com.krishagni.catissueplus.core.administrative.domain.ShipmentContainer"/>
     </set>
     
     <set name="notifyUsers" table="OS_SHIPMENT_NOTIFY_USERS">
@@ -55,8 +67,6 @@
       <many-to-many class="com.krishagni.catissueplus.core.administrative.domain.User" column="USER_ID"/>
     </set>
 
-    <many-to-one name="request" column="REQUEST_ID"/>
-    
     <filter name="activeEntity"/>
     
     <query name="getShipmentByName">
@@ -71,11 +81,60 @@
         spec
       from
         com.krishagni.catissueplus.core.administrative.domain.Shipment s
-        join s.shipmentItems item
+        join s.shipmentSpecimens item
         join item.specimen spec
       where
+        s.activityStatus != 'Disabled' and
         s.status = 'SHIPPED' and
         spec.id in (:ids)
     </query>
+
+    <sql-query name="getSpecimensCount">
+      <return-scalar column="shipmentId" type="long"/>
+      <return-scalar column="spmnsCount" type="integer"/>
+
+      select
+        s.identifier as shipmentId, count(ss.identifier) as spmnsCount
+      from
+        os_shipments s
+        inner join os_shipment_specimens ss on ss.shipment_id = s.identifier
+      where
+        (s.type = 'SPECIMEN' or s.status != 'PENDING') and
+        s.identifier in (:shipmentIds)
+      group by
+        s.identifier
+
+      union all
+
+      select
+        s.identifier as shipmentId, count(sp.identifier) as spmnsCount
+      from
+        os_shipments s
+        inner join os_shipment_containers sc on sc.shipment_id = s.identifier
+        inner join os_containers_hierarchy h on h.ancestor_id = sc.container_id
+        inner join os_container_positions sp on sp.storage_container_id = h.descendent_id
+      where
+        (s.type = 'CONTAINER' and s.status = 'PENDING') and
+        sp.occupying_specimen_id is not null and
+        s.identifier in (:shipmentIds)
+      group by
+        s.identifier;
+    </sql-query>
+
+    <sql-query name="getSpecimensCountByContainer">
+      <return-scalar column="containerId" type="long"/>
+      <return-scalar column="spmnsCount" type="integer"/>
+
+      select
+        sc.container_id as containerId, count(ss.identifier) as spmnsCount
+      from
+        os_shipment_containers sc
+        inner join os_shipment_specimens ss on ss.shipment_container_id = sc.identifier
+      where
+        sc.container_id in (:containerIds) and
+        sc.shipment_id = :shipmentId
+      group by
+        sc.container_id
+    </sql-query>
   </class>
 </hibernate-mapping>

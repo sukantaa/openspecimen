@@ -23,8 +23,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.krishagni.catissueplus.core.administrative.domain.ContainerType;
+import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
+import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerFactory;
 import com.krishagni.catissueplus.core.administrative.events.AssignPositionsOp;
@@ -719,6 +721,23 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	}
 
 	@Override
+	@PlusTransactional
+	public StorageContainer createSiteContainer(Long siteId, String siteName) {
+		Site site = getSite(siteId, siteName);
+		if (site.getContainer() != null) {
+			return site.getContainer();
+		}
+
+		StorageContainerDetail detail = new StorageContainerDetail();
+		detail.setName(StorageContainer.getDefaultSiteContainerName(site));
+		detail.setSiteName(site.getName());
+
+		StorageContainer container = containerFactory.createStorageContainer(detail);
+		daoFactory.getStorageContainerDao().saveOrUpdate(container, true);
+		return container;
+	}
+
+	@Override
 	public String getObjectName() {
 		return StorageContainer.getEntityName();
 	}
@@ -872,18 +891,18 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	private ResponseEvent<StorageContainerDetail> updateStorageContainer(RequestEvent<StorageContainerDetail> req, boolean partial) {
 		try {
 			StorageContainerDetail input = req.getPayload();			
-			StorageContainer existing = getContainer(input.getId(), input.getName());			
+			StorageContainer existing = getContainer(input.getId(), input.getName());
 			AccessCtrlMgr.getInstance().ensureUpdateContainerRights(existing);			
 			
 			input.setId(existing.getId());
-			StorageContainer container = null;
+			StorageContainer container;
 			if (partial) {
 				container = containerFactory.createStorageContainer(existing, input);
 			} else {
 				container = containerFactory.createStorageContainer(input); 
 			}
 			
-			ensureUniqueConstraints(existing, container);			
+			ensureUniqueConstraints(existing, container);
 			existing.update(container);			
 			daoFactory.getStorageContainerDao().saveOrUpdate(existing, true);
 			return ResponseEvent.response(StorageContainerDetail.from(existing));			
@@ -1205,15 +1224,35 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		copy.setColumnLabelingScheme(source.getColumnLabelingScheme());
 		copy.setRowLabelingScheme(source.getRowLabelingScheme());
 		copy.setComments(source.getComments());
-		copy.setAllowedSpecimenClasses(new HashSet<String>(source.getAllowedSpecimenClasses()));		
-		copy.setAllowedSpecimenTypes(new HashSet<String>(source.getAllowedSpecimenTypes()));
-		copy.setAllowedCps(new HashSet<CollectionProtocol>(source.getAllowedCps()));
+		copy.setAllowedSpecimenClasses(new HashSet<>(source.getAllowedSpecimenClasses()));
+		copy.setAllowedSpecimenTypes(new HashSet<>(source.getAllowedSpecimenTypes()));
+		copy.setAllowedCps(new HashSet<>(source.getAllowedCps()));
 		copy.setCompAllowedSpecimenClasses(copy.computeAllowedSpecimenClasses());
 		copy.setCompAllowedSpecimenTypes(copy.computeAllowedSpecimenTypes());
 		copy.setCompAllowedCps(copy.computeAllowedCps());
 		copy.setStoreSpecimenEnabled(source.isStoreSpecimenEnabled());
 		copy.setCreatedBy(AuthUtil.getCurrentUser());
 		return copy;
+	}
+
+	private Site getSite(Long siteId, String siteName) {
+		Site site = null;
+		Object key = null;
+		if (siteId != null) {
+			site = daoFactory.getSiteDao().getById(siteId);
+			key = siteId;
+		} else if (StringUtils.isNotBlank(siteName)) {
+			site = daoFactory.getSiteDao().getSiteByName(siteName);
+			key = siteName;
+		}
+
+		if (key == null) {
+			throw OpenSpecimenException.userError(SiteErrorCode.NAME_REQUIRED);
+		} else if (site == null) {
+			throw OpenSpecimenException.userError(SiteErrorCode.NOT_FOUND, key);
+		}
+
+		return site;
 	}
 
 	private QueryDataExportResult exportResult(final StorageContainer container, SavedQuery query) {

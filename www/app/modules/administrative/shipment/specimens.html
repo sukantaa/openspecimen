@@ -1,0 +1,60 @@
+<div>
+  <div class="clearfix">
+    <div class="col-xs-12">
+      <div ng-if="ctx.loading">
+        <span translate="shipments.loading_specimens">Loading specimens. Please wait for a moment ...</span>
+      </div>
+
+      <table class="os-table" ng-if="!ctx.loading">
+        <thead class="os-table-head">
+          <tr class="row">
+            <th class="col">
+              <span translate="specimens.label">Label</span>
+            </th>
+            <th class="col">
+              <span translate="specimens.description">Description</span>
+            </th>
+            <th class="col">
+              <span translate="specimens.cp">Collection Protocol</span>
+            </th>
+            <th class="col">
+              <span translate="specimens.qty">Quantity</span>
+            </th>
+            <th class="col" ng-if="shipment.status == 'Received'">
+              <span translate="shipments.received_quality">Quality</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="os-table-body">
+          <tr class="row" ng-repeat="item in ctx.shipmentSpmns" ng-init="specimen = item.specimen">
+            <td class="col">
+              <a ui-sref="specimen({specimenId: specimen.id})">
+                <span>{{specimen.label}}</span>
+                <span ng-if="!!specimen.barcode"> ({{specimen.barcode}}) </span>
+              </a>
+            </td>
+            <td class="col">
+              <a ui-sref="specimen({specimenId: specimen.id})">
+                <os-specimen-desc specimen="specimen" detailed="true"></os-specimen-desc>
+              </a>
+            </td>
+            <td class="col">
+              <span>{{specimen.cpShortTitle}}</span>
+            </td>
+            <td class="col">
+              <os-spmn-measure-val specimen="specimen" value="specimen.availableQty"></os-spmn-measure-val>
+            </td>
+            <td class="col" ng-if="shipment.status == 'Received'">
+              <span>{{"shipments.quality." + item.receivedQuality | translate}}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <span ng-if="!ctx.loading && ctx.shipmentSpmns.length > 0 && ctx.shipmentSpmns.length < ctx.totalItems">
+        <pager total-items="ctx.totalItems" items-per-page="ctx.itemsPerPage" ng-model="ctx.currPage">
+        </pager>
+      </span>
+    </div>
+  </div>
+</div>

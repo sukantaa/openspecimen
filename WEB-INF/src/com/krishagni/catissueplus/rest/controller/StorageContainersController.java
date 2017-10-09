@@ -315,7 +315,7 @@ public class StorageContainersController {
 	@RequestMapping(method = RequestMethod.GET, value="{id}/occupied-positions")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public List<StorageContainerPositionDetail> getStorageContainerOccupiedPositions(@PathVariable("id") Long containerId) {
+	public List<StorageContainerPositionDetail> getContainerOccupiedPositions(@PathVariable("id") Long containerId) {
 		RequestEvent<Long> req = new RequestEvent<Long>(containerId);
 		ResponseEvent<List<StorageContainerPositionDetail>> resp = storageContainerSvc.getOccupiedPositions(req);
 		resp.throwErrorIfUnsuccessful();
@@ -692,7 +692,7 @@ public class StorageContainersController {
 	}
 
 	private StorageContainerDetail getContainer(ContainerQueryCriteria crit) {
-		RequestEvent<ContainerQueryCriteria> req = new RequestEvent<ContainerQueryCriteria>(crit);
+		RequestEvent<ContainerQueryCriteria> req = new RequestEvent<>(crit);
 		ResponseEvent<StorageContainerDetail> resp = storageContainerSvc.getStorageContainer(req);
 		resp.throwErrorIfUnsuccessful();
 		

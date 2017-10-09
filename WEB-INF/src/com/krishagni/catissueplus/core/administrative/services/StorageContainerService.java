@@ -90,5 +90,7 @@ public interface StorageContainerService {
 	//
 	// Internal APIs
 	//
-	public StorageContainer createStorageContainer(StorageContainer base, StorageContainerDetail input);
+	StorageContainer createStorageContainer(StorageContainer base, StorageContainerDetail input);
+
+	StorageContainer createSiteContainer(Long siteId, String siteName);
 }

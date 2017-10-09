@@ -11,45 +11,56 @@ import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPos
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
+import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.repository.Dao;
 
 public interface StorageContainerDao extends Dao<StorageContainer> {
-	public List<StorageContainer> getStorageContainers(StorageContainerListCriteria listCrit);
+	List<StorageContainer> getStorageContainers(StorageContainerListCriteria listCrit);
 
-	public StorageContainer getByName(String name);
+	StorageContainer getByName(String name);
 	
-	public StorageContainer getByBarcode(String barcode);
+	StorageContainer getByBarcode(String barcode);
 	
-	public void delete(StorageContainerPosition position);
+	void delete(StorageContainerPosition position);
 
-	public Map<String, Object> getContainerIds(String key, Object value);
+	Map<String, Object> getContainerIds(String key, Object value);
 
-	public Long getStorageContainersCount(StorageContainerListCriteria listCrit);
+	Long getStorageContainersCount(StorageContainerListCriteria listCrit);
 
-	public List<String> getNonCompliantContainers(ContainerRestrictionsCriteria crit);
+	List<String> getNonCompliantContainers(ContainerRestrictionsCriteria crit);
 
-	public List<String> getNonCompliantSpecimens(ContainerRestrictionsCriteria crit);
+	List<String> getNonCompliantSpecimens(ContainerRestrictionsCriteria crit);
 
-	public int getSpecimensCount(Long containerId);
+	int getSpecimensCount(Long containerId);
+
+	Map<Long, Integer> getSpecimensCount(Collection<Long> containerIds);
 
 	List<Specimen> getSpecimens(SpecimenListCriteria crit, boolean orderByLocation);
 
 	Long getSpecimensCount(SpecimenListCriteria crit);
 
-	public Map<Long, Integer> getRootContainerSpecimensCount(Collection<Long> containerIds);
+	Map<Long, Integer> getRootContainerSpecimensCount(Collection<Long> containerIds);
 
-	public Map<String, Integer> getSpecimensCountByType(Long containerId);
+	Map<String, Integer> getSpecimensCountByType(Long containerId);
 
-	public StorageContainerSummary getAncestorsHierarchy(Long containerId);
+	StorageContainerSummary getAncestorsHierarchy(Long containerId);
 
-	public List<StorageContainerSummary> getChildContainers(Long containerId, Integer noOfColumns);
+	List<StorageContainerSummary> getChildContainers(Long containerId, Integer noOfColumns);
 
 	List<StorageContainer> getDescendantContainers(StorageContainerListCriteria crit);
 
-	public int deleteReservedPositions(List<String> reservationIds);
+	int deleteReservedPositions(List<String> reservationIds);
 
-	public int deleteReservedPositionsOlderThan(Date expireTime);
+	int deleteReservedPositionsOlderThan(Date expireTime);
 
 	List<Long> getLeafContainerIds(Long containerId, int startAt, int maxContainers);
+
+	Map<String, List<String>> getInaccessibleSpecimens(List<Long> containerIds, List<Pair<Long, Long>> siteCps, boolean useMrnSites, int firstN);
+
+	Map<String, List<String>> getInvalidSpecimensForSite(List<Long> containerIds, Long siteId, int firstN);
+
+	Map<Long, List<Long>> getDescendantContainerIds(Collection<Long> containerIds);
+
+	List<StorageContainer> getShippedContainers(Collection<Long> containerIds);
 }
 	

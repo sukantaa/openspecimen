@@ -31,7 +31,7 @@
       <dropDown>
         <name>receivedQuality</name>
         <udn>receivedQuality</udn>
-        <caption>#getMessage("shipment_items_recv_quality")</caption>
+        <caption>#getMessage("shipment_item_recv_quality")</caption>
         <column>RECEIVED_QUALITY</column>
         <options>
           <option><value>ACCEPTABLE</value></option>

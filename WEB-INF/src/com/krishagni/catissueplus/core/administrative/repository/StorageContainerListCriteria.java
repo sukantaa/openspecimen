@@ -2,12 +2,15 @@ package com.krishagni.catissueplus.core.administrative.repository;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 
 public class StorageContainerListCriteria extends AbstractListCriteria<StorageContainerListCriteria> {
+
+	private List<String> names;
 
 	private boolean onlyFreeContainers;
 	
@@ -39,7 +42,16 @@ public class StorageContainerListCriteria extends AbstractListCriteria<StorageCo
 	public StorageContainerListCriteria self() {
 		return this;
 	}
-	
+
+	public List<String> names() {
+		return names;
+	}
+
+	public StorageContainerListCriteria names(List<String> names) {
+		this.names = names;
+		return self();
+	}
+
 	public boolean onlyFreeContainers() {
 		return onlyFreeContainers;
 	}

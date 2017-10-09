@@ -4,6 +4,8 @@ package com.krishagni.catissueplus.core.biospecimen.domain.factory;
 import com.krishagni.catissueplus.core.common.errors.ErrorCode;
 
 public enum SpecimenErrorCode implements ErrorCode {
+	ACCESS_DENIED,
+	
 	NOT_FOUND,
 	
 	INVALID_SPECIMEN_CLASS,

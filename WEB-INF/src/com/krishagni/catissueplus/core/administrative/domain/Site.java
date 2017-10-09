@@ -38,20 +38,22 @@ public class Site extends BaseExtensionEntity {
 	private String activityStatus;
 
 	private String address;
-	
-	private Set<User> coordinators = new HashSet<User>();
 
-	private Set<Visit> visits = new HashSet<Visit>();
+	private StorageContainer container;
+	
+	private Set<User> coordinators = new HashSet<>();
 
-	private Set<StorageContainer> storageContainers = new HashSet<StorageContainer>();
+	private Set<Visit> visits = new HashSet<>();
+
+	private Set<StorageContainer> storageContainers = new HashSet<>();
 	
-	private Set<CollectionProtocol> collectionProtocols = new HashSet<CollectionProtocol>();
+	private Set<CollectionProtocol> collectionProtocols = new HashSet<>();
 	
-	private Set<Participant> participants = new HashSet<Participant>();
+	private Set<Participant> participants = new HashSet<>();
 	
-	private Set<CollectionProtocolEvent> collectionProtocolEvents = new HashSet<CollectionProtocolEvent>();
+	private Set<CollectionProtocolEvent> collectionProtocolEvents = new HashSet<>();
 	
-	private Set<DistributionOrder> distributionOrders = new HashSet<DistributionOrder>();
+	private Set<DistributionOrder> distributionOrders = new HashSet<>();
 
 	public static String getEntityName() {
 		return ENTITY_NAME;
@@ -103,6 +105,14 @@ public class Site extends BaseExtensionEntity {
 
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	public StorageContainer getContainer() {
+		return container;
+	}
+
+	public void setContainer(StorageContainer container) {
+		this.container = container;
 	}
 
 	public Set<User> getCoordinators() {

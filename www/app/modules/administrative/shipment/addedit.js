@@ -1,29 +1,23 @@
 
 angular.module('os.administrative.shipment.addedit', ['os.administrative.models', 'os.biospecimen.models'])
   .controller('ShipmentAddEditCtrl', function(
-    $scope, $state, shipment, spmnRequest, cp, Shipment,
+    $scope, $state, shipment, shipmentItems, Shipment,
     Institute, Site, Specimen, SpecimensHolder, Alerts, Util, SpecimenUtil) {
 
     function init() {
+      var spmnShipment = $scope.spmnShipment = shipment.isSpecimenShipment();
+      shipment[spmnShipment ? 'shipmentSpmns' : 'shipmentContainers'] = shipmentItems || [];
+
       $scope.shipment = shipment;
       $scope.spmnOpts = {filters: {}, error: {}};
       $scope.input = {};
 
-      shipment.request = spmnRequest;
-      if (!!spmnRequest) {
-        shipment.receivingInstitute = spmnRequest.requestorInstitute;
-      }
-
-      $scope.shipment.shipmentItems = shipment.shipmentItems || [];
-
-      if (!!spmnRequest) {
-        shipment.shipmentItems = getShipmentItemsFromReq(spmnRequest.items, shipment.shipmentItems);
-      } else if (!shipment.id && angular.isArray(SpecimensHolder.getSpecimens())) {
-        shipment.shipmentItems = getShipmentItems(SpecimensHolder.getSpecimens());
+      if (!shipment.id && angular.isArray(SpecimensHolder.getSpecimens())) {
+        shipment.shipmentSpmns = getShipmentSpecimens(SpecimensHolder.getSpecimens());
         SpecimensHolder.setSpecimens(null);
       }
 
-      if (!shipment.id && !areSpmnsOfSameSite(shipment.shipmentItems)) {
+      if (!shipment.id && spmnShipment && !areSpmnsOfSameSite(shipment.shipmentSpmns)) {
         Alerts.error('shipments.multi_site_specimens');
         $scope.back();
         return;
@@ -37,20 +31,16 @@ angular.module('os.administrative.shipment.addedit', ['os.administrative.models'
       setUserAndSiteList(shipment);
     }
 
-    function areSpmnsOfSameSite(shipmentItems) {
-      if (!shipmentItems) {
+    function areSpmnsOfSameSite(shipmentSpmns) {
+      if (!shipmentSpmns) {
         return true;
       }
 
       var site, sameSite = true;
-      for (var i = 0; i < shipmentItems.length; ++i) {
-        var spmn = shipmentItems[i].specimen;
+      for (var i = 0; i < shipmentSpmns.length; ++i) {
+        var spmn = shipmentSpmns[i].specimen;
 
-        if (!spmn.storageSite || (!!spmnRequest && !spmn.selected)) {
-          //
-          // either the specimen doesn't have storage site or
-          // it is coming from request but not selected for shipping
-          //
+        if (!spmn.storageSite) {
           continue;
         }
 
@@ -70,10 +60,6 @@ angular.module('os.administrative.shipment.addedit', ['os.administrative.models'
     }
     
     function loadInstitutes () {
-      if (!!spmnRequest) {
-        return;
-      }
-
       Institute.query().then(
         function (institutes) {
           $scope.instituteNames = Institute.getNames(institutes);
@@ -84,33 +70,13 @@ angular.module('os.administrative.shipment.addedit', ['os.administrative.models'
     function loadRecvSites(instituteName, searchTerm) {
       return Site.listForInstitute(instituteName, true, searchTerm).then(
         function(sites) {
-          if (!spmnRequest) {
-            return sites;
-          }
-
-          return cp.cpSites.map(
-            function(cpSite) {
-              return cpSite.siteName;
-            }
-          ).filter(
-            function(site) {
-              return sites.indexOf(site) != -1;
-            }
-          );
+          return sites;
         }
       );
     }
 
     function loadSendingSites(searchTerm) {
-      if (!spmnRequest) {
-        return Site.list({name: searchTerm});
-      } else {
-        return cp.cpSites.map(
-          function(cpSite) {
-            return cpSite.siteName;
-          }
-        );
-      }
+      return Site.list({name: searchTerm});
     }
 
     function setUserFilterOpts(institute) {
@@ -124,7 +90,7 @@ angular.module('os.administrative.shipment.addedit', ['os.administrative.models'
       }
     }
 
-    function getShipmentItems(specimens) {
+    function getShipmentSpecimens(specimens) {
       return specimens.filter(
         function(specimen) {
           return (specimen.availableQty == undefined || specimen.availableQty > 0)
@@ -139,57 +105,20 @@ angular.module('os.administrative.shipment.addedit', ['os.administrative.models'
       );
     }
 
-    function getShipmentItemsFromReq(reqItems, shipmentItems) {
-      var shipmentItemsMap = {};
-      angular.forEach(shipmentItems,
-        function(shipmentItem) {
-          shipmentItemsMap[shipmentItem.specimen.id] = shipmentItem;
+    function getShipmentContainers(containers) {
+      return containers.map(
+        function(container) {
+          return {
+            container: container,
+            specimensCount: container.storedSpecimens
+          } 
         }
       );
-
-      var items = [];
-      angular.forEach(reqItems,
-        function(reqItem) {
-          var shipmentItem = shipmentItemsMap[reqItem.specimen.id];
-          if (shipmentItem) {
-            shipmentItem.specimen.selected = true;
-          } else if (reqItem.status == 'PENDING') {
-            shipmentItem = {
-              specimen: reqItem.specimen,
-            }
-
-            reqItem.specimen.selected = reqItem.selected;
-          }
-
-          if (shipmentItem) {
-            items.push(shipmentItem);
-          }
-        }
-      );
-
-      return items;
     }
 
     function saveOrUpdate(status) {
       var shipmentClone = angular.copy($scope.shipment);
       shipmentClone.status = status;
-
-      if (!!spmnRequest) {
-        var items = [];
-        angular.forEach(shipmentClone.shipmentItems,
-          function(item) {
-            if (!item.specimen.selected) {
-              return;
-            }
-
-            delete item.specimen.selected;
-            items.push(item);
-          }
-        );
-
-        shipmentClone.shipmentItems = items;
-      }
-
       shipmentClone.$saveOrUpdate().then(
         function(savedShipment) {
           $state.go('shipment-detail.overview', {shipmentId: savedShipment.id});
@@ -250,15 +179,29 @@ angular.module('os.administrative.shipment.addedit', ['os.administrative.models'
         return false;
       }
 
-      Util.addIfAbsent($scope.shipment.shipmentItems, getShipmentItems(specimens), 'specimen.id');
+      Util.addIfAbsent($scope.shipment.shipmentSpmns, getShipmentSpecimens(specimens), 'specimen.id');
       return true;
     }
 
     $scope.removeShipmentItem = function(shipmentItem) {
-      var idx = shipment.shipmentItems.indexOf(shipmentItem);
+      var collection = shipment[(shipment.type == 'SPECIMEN') ? 'shipmentSpmns' : 'shipmentContainers'];
+      var idx = collection.indexOf(shipmentItem);
       if (idx != -1) {
-        shipment.shipmentItems.splice(idx, 1);
+        collection.splice(idx, 1);
       }
+    }
+
+    $scope.addContainers = function(names) {
+      if (!names) {
+        return false;
+      }
+
+      return shipment.searchContainers(names).then(
+        function(containers) {
+          Util.addIfAbsent(shipment.shipmentContainers, getShipmentContainers(containers), 'container.id');
+          return true;
+        }
+      );
     }
 
     $scope.ship = function() {
@@ -271,24 +214,6 @@ angular.module('os.administrative.shipment.addedit', ['os.administrative.models'
 
     $scope.passThrough = function() {
       return true;
-    }
-
-    $scope.toggleAllSpecimensSelect = function() {
-      angular.forEach($scope.shipment.shipmentItems,
-        function(item) {
-          item.specimen.selected = $scope.input.allSelected;
-        }
-      );
-    }
-
-    $scope.toggleSpecimenSelect = function() {
-      var allNotSelected = $scope.shipment.shipmentItems.some(
-        function(item) {
-          return !item.specimen.selected;
-        }
-      );
-
-      $scope.input.allSelected = !allNotSelected;
     }
 
     $scope.validateSpecimens = function(ctrl) {

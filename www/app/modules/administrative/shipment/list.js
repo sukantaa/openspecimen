@@ -7,7 +7,7 @@ angular.module('os.administrative.shipment.list', ['os.administrative.models'])
 
     function init() {
       pagerOpts = $scope.pagerOpts = new ListPagerOpts({listSizeGetter: getShipmentsCount, recordsPerPage: 50});
-      $scope.filterOpts = Util.filterOpts({maxResults: pagerOpts.recordsPerPage + 1});
+      $scope.filterOpts = Util.filterOpts({maxResults: pagerOpts.recordsPerPage + 1, includeStat: true});
 
       loadInstitutes();
       loadShipments($scope.filterOpts);

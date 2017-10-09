@@ -13,8 +13,14 @@ import com.krishagni.catissueplus.core.importer.services.ObjectImporter;
 public class ShipmentImporter implements ObjectImporter<ShipmentDetail, ShipmentDetail> {	
 	private ShipmentService shipmentSvc;
 
+	private String type;
+
 	public void setShipmentSvc(ShipmentService shipmentSvc) {
 		this.shipmentSvc = shipmentSvc;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	@Override
@@ -23,8 +29,9 @@ public class ShipmentImporter implements ObjectImporter<ShipmentDetail, Shipment
 		try {
 			ImportObjectDetail<ShipmentDetail> detail = req.getPayload();
 			detail.getObject().setSendMail(false);
-			RequestEvent<ShipmentDetail> shipmentReq = new RequestEvent<ShipmentDetail>(detail.getObject());
-			
+			detail.getObject().setType(type);
+
+			RequestEvent<ShipmentDetail> shipmentReq = new RequestEvent<>(detail.getObject());
 			if (detail.isCreate()) {
 				return createShipment(shipmentReq);
 			} else {

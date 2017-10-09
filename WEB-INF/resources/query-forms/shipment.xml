@@ -176,8 +176,8 @@
       <subForm>
         <name>shipmentItems</name>
         <udn>shipmentItems</udn>
-        <caption>#getMessage("shipment_items")</caption>
-        <table>OS_SHIPMENT_ITEMS</table>
+        <caption>#getMessage("shipment_specimens")</caption>
+        <table>OS_SHIPMENT_SPECIMENS</table>
         <foreignKey>SHIPMENT_ID</foreignKey>
         <parentKey>IDENTIFIER</parentKey>
         
@@ -228,7 +228,7 @@
           <dropDown>
             <name>receivedQuality</name>
             <udn>receivedQuality</udn>
-            <caption>#getMessage("shipment_items_recv_quality")</caption>
+            <caption>#getMessage("shipment_item_recv_quality")</caption>
             <column>RECEIVED_QUALITY</column>
             <options>
               <option><value>Acceptable</value></option>

@@ -30,7 +30,7 @@ angular.module('os.administrative.shipment',
         parent: 'shipment-root'
       })
       .state('shipment-addedit', {
-        url: '/shipment-addedit/:shipmentId?requestId',
+        url: '/shipment-addedit/:shipmentId?type',
         templateUrl: 'modules/administrative/shipment/addedit.html',
         resolve: {
           shipment: function($stateParams , Shipment) {
@@ -38,40 +38,26 @@ angular.module('os.administrative.shipment',
               return Shipment.getById($stateParams.shipmentId);
             }
 
-            return new Shipment({status: 'Pending', shipmentItems: []});
+            var type = $stateParams.type;
+            if (type != 'SPECIMEN' && type != 'CONTAINER') {
+              type = 'SPECIMEN';
+            }
+            return new Shipment({id: '', status: 'Pending', type: type, shipmentSpmns: [], shipmentContainers: []});
           },
 
-          spmnRequest: function($stateParams, $injector, shipment) {
-            var SpecimenRequest       = undefined;
-            var SpecimenRequestHolder = undefined;
-            if ($injector.has('spmnReqSpecimenRequest')) {
-              SpecimenRequest = $injector.get('spmnReqSpecimenRequest');
-              SpecimenRequestHolder = $injector.get('spmnReqHolder');
+          shipmentItems: function(shipment) {
+            var items = [];
+            if (!shipment.id) {
+              return items;
             }
 
-            if (angular.isDefined(shipment.id)) {
-              return !!shipment.request ? SpecimenRequest.getById(shipment.request.id) : undefined;
+            if (shipment.isSpecimenShipment()) {
+              items = shipment.getSpecimens(0, 10000);
+            } else {
+              items = shipment.getContainers(0, 10000);
             }
 
-            if (!angular.isDefined($stateParams.requestId)) {
-              return undefined;
-            }
-
-            var request = SpecimenRequestHolder.get();
-            SpecimenRequestHolder.clear();
-            if (!request) {
-              request = SpecimenRequest.getById($stateParams.requestId);
-            }
-
-            return request;
-          },
-
-          cp: function(spmnRequest, CollectionProtocol) {
-            if (!spmnRequest) {
-              return undefined;
-            }
-
-            return CollectionProtocol.getById(spmnRequest.cp.id);
+            return items;
           },
 
           isEditAllowed: function(shipment, Util) {
@@ -83,14 +69,14 @@ angular.module('os.administrative.shipment',
         parent: 'shipment-root'
       })
       .state('shipment-import', {
-        url: '/shipment-import',
+        url: '/shipment-import?type',
         templateUrl: 'modules/common/import/add.html',
         controller: 'ImportObjectCtrl',
         resolve: {
-          importDetail: function() {
+          importDetail: function($stateParams) {
             return {
               breadcrumbs: [{state: 'shipment-list', title: 'shipments.list'}],
-              objectType: 'shipment',
+              objectType: ($stateParams.type || 'shipment'),
               csvType: 'MULTIPLE_ROWS_PER_OBJ',
               title: 'shipments.bulk_import',
               onSuccess: {state: 'shipment-list'}
@@ -108,7 +94,7 @@ angular.module('os.administrative.shipment',
             return {
               breadcrumbs: [{state: 'shipment-list', title: 'shipments.list'}],
               title: 'shipments.bulk_import_jobs',
-              objectTypes: ['shipment']
+              objectTypes: ['shipment', 'containerShipment']
             }
           }
         },
@@ -130,6 +116,18 @@ angular.module('os.administrative.shipment',
         templateUrl: 'modules/administrative/shipment/overview.html',
         parent: 'shipment-detail'
       })
+      .state('shipment-detail.specimens', {
+        url: '/specimens',
+        templateUrl: 'modules/administrative/shipment/specimens.html',
+        parent: 'shipment-detail',
+        controller: 'ShipmentSpecimensCtrl'
+      })
+      .state('shipment-detail.containers', {
+        url: '/containers',
+        templateUrl: 'modules/administrative/shipment/containers.html',
+        parent: 'shipment-detail',
+        controller: 'ShipmentContainersCtrl'
+      })
       .state('shipment-receive', {
         url: '/shipments/:shipmentId/receive',
         templateUrl: 'modules/administrative/shipment/addedit.html',
@@ -140,7 +138,17 @@ angular.module('os.administrative.shipment',
           
           isReceiveAllowed: function(shipment, Util) {
             return Util.booleanPromise(shipment.status == 'Shipped');
-          }
+          },
+
+          shipmentItems: function(isReceiveAllowed, shipment) {
+            if (shipment.isSpecimenShipment()) {
+              items = shipment.getSpecimens(0, 10000);
+            } else {
+              items = shipment.getContainers(0, 10000);
+            }
+
+            return items;
+          },
         },
         controller: 'ShipmentReceiveCtrl',
         parent: 'shipment-root'

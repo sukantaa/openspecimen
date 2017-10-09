@@ -14,8 +14,20 @@
     <ul>
       <li ui-sref-active="active">
         <a ui-sref="shipment-detail.overview"> 
-          <i class="fa fa-eye"></i>
+          <span class="fa fa-eye"></span>
           <span class="os-title" translate="shipments.menu.overview">Overview</span>
+        </a>
+      </li>
+      <li ui-sref-active="active" ng-if="shipment.type == 'CONTAINER'">
+        <a ui-sref="shipment-detail.containers">
+          <span class="fa fa-dropbox"></span>
+          <span class="os-title" translate="shipments.menu.containers">Containers</span>
+        </a>
+      </li>
+      <li ui-sref-active="active" ng-if="shipment.type == 'SPECIMEN' || shipment.status != 'Pending'">
+        <a ui-sref="shipment-detail.specimens">
+          <span class="fa fa-flask"></span>
+          <span class="os-title" translate="shipments.menu.specimens">Specimens</span>
         </a>
       </li>
     </ul>

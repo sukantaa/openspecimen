@@ -1,26 +1,22 @@
 package com.krishagni.catissueplus.core.administrative.domain;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
 
 import com.krishagni.catissueplus.core.administrative.domain.factory.ShipmentErrorCode;
-import com.krishagni.catissueplus.core.administrative.domain.factory.SpecimenRequestErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.common.CollectionUpdater;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
-import com.krishagni.catissueplus.core.common.util.Utility;
 
 @Audited
 public class Shipment extends BaseEntity {
@@ -35,7 +31,7 @@ public class Shipment extends BaseEntity {
 		
 		private final String name;
 		
-		private Status(String name) {
+		Status(String name) {
 			this.name = name;
 		}
 		
@@ -59,8 +55,18 @@ public class Shipment extends BaseEntity {
 			return result;
 		}
 	}
-	
+
+	public enum Type {
+		SPECIMEN, CONTAINER
+	}
+
+	public enum ItemReceiveQuality {
+		ACCEPTABLE, UNACCEPTABLE
+	}
+
 	private String name;
+
+	private Type type;
 	
 	private String  courierName;
 	
@@ -88,11 +94,11 @@ public class Shipment extends BaseEntity {
 	
 	private String activityStatus;
 	
-	private Set<ShipmentItem> shipmentItems = new HashSet<ShipmentItem>();
-	
-	private Set<User> notifyUsers = new HashSet<User>();
+	private Set<ShipmentSpecimen> shipmentSpecimens = new HashSet<>();
 
-	private SpecimenRequest request;
+	private Set<ShipmentContainer> shipmentContainers = new HashSet<>();
+
+	private Set<User> notifyUsers = new HashSet<>();
 
 	public static String getEntityName() {
 		return ENTITY_NAME;
@@ -104,6 +110,14 @@ public class Shipment extends BaseEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Type getType() {
+		return type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
 	}
 
 	public String getCourierName() {
@@ -210,12 +224,20 @@ public class Shipment extends BaseEntity {
 		this.activityStatus = activityStatus;
 	}
 
-	public Set<ShipmentItem> getShipmentItems() {
-		return shipmentItems;
+	public Set<ShipmentSpecimen> getShipmentSpecimens() {
+		return shipmentSpecimens;
 	}
 
-	public void setShipmentItems(Set<ShipmentItem> shipmentItems) {
-		this.shipmentItems = shipmentItems;
+	public void setShipmentSpecimens(Set<ShipmentSpecimen> shipmentSpecimens) {
+		this.shipmentSpecimens = shipmentSpecimens;
+	}
+
+	public Set<ShipmentContainer> getShipmentContainers() {
+		return shipmentContainers;
+	}
+
+	public void setShipmentContainers(Set<ShipmentContainer> shipmentContainers) {
+		this.shipmentContainers = shipmentContainers;
 	}
 
 	public Set<User> getNotifyUsers() {
@@ -226,13 +248,12 @@ public class Shipment extends BaseEntity {
 		this.notifyUsers = notifyUsers;
 	}
 
-	@NotAudited
-	public SpecimenRequest getRequest() {
-		return request;
+	public boolean isSpecimenShipment() {
+		return getType() == Type.SPECIMEN;
 	}
 
-	public void setRequest(SpecimenRequest request) {
-		this.request = request;
+	public boolean isContainerShipment() {
+		return getType() == Type.CONTAINER;
 	}
 
 	public void update(Shipment other) {
@@ -250,23 +271,10 @@ public class Shipment extends BaseEntity {
 		setReceiverComments(other.getReceiverComments());
 		setActivityStatus(other.getActivityStatus());
 
-		updateRequest(other);
-		updateOrderItems(other);
+		updateShipmentSpecimens(other);
+		updateShipmentContainers(other);
 		updateNotifyUsers(other);
 		updateStatus(other);
-	}
-
-	public Set<ShipmentItem> getShipmentItemsWithReqDetail() {
-		Map<Long, SpecimenRequestItem> reqItemsMap = Collections.emptyMap();
-		if (getRequest() != null) {
-			reqItemsMap = getRequest().getSpecimenIdRequestItemMap();
-		}
-
-		for (ShipmentItem item : getShipmentItems()) {
-			item.setRequestItem(reqItemsMap.get(item.getSpecimen().getId()));
-		}
-
-		return getShipmentItems();
 	}
 
 	public void ship() {
@@ -274,39 +282,43 @@ public class Shipment extends BaseEntity {
 			throw OpenSpecimenException.userError(ShipmentErrorCode.ALREADY_SHIPPED);
 		}
 
-		Set<ShipmentItem> shipmentItems = getShipmentItemsWithReqDetail();
-		if (CollectionUtils.isEmpty(shipmentItems)) {
-			throw OpenSpecimenException.userError(ShipmentErrorCode.NO_SPECIMENS_TO_SHIP);
+		if (isSpecimenShipment()) {
+			if (CollectionUtils.isEmpty(getShipmentSpecimens())) {
+				throw OpenSpecimenException.userError(ShipmentErrorCode.NO_SPECIMENS_TO_SHIP);
+			}
+
+			getShipmentSpecimens().forEach(ShipmentSpecimen::ship);
+		} else if (isContainerShipment()) {
+			if (CollectionUtils.isEmpty(getShipmentContainers())) {
+				throw OpenSpecimenException.userError(ShipmentErrorCode.NO_CONTAINERS_TO_SHIP);
+			}
+
+			getShipmentContainers().forEach(ShipmentContainer::ship);
 		}
 
-		shipmentItems.forEach(ShipmentItem::ship);
 		setStatus(Status.SHIPPED);
-
-		if (getRequest() != null) {
-			getRequest().closeIfFulfilled();
-		}
 	}
 	
 	public void receive(Shipment other) {
 		if (isReceived()) {
 			throw OpenSpecimenException.userError(ShipmentErrorCode.ALREADY_RECEIVED);
 		}
-		
-		ensureShippedSpecimens(other);
-		
-		Map<Specimen, ShipmentItem> existingItems = new HashMap<Specimen, ShipmentItem>();
-		for (ShipmentItem item : getShipmentItems()) {
-			existingItems.put(item.getSpecimen(), item); 
+
+		if (isSpecimenShipment()) {
+			receiveSpecimens(other);
+		} else if (isContainerShipment()) {
+			receiveContainers(other);
 		}
-		
-		for (ShipmentItem newItem : other.getShipmentItems()) {
-			ShipmentItem oldItem = existingItems.remove(newItem.getSpecimen());
-			oldItem.receive(newItem);
-		}
-		
+
 		setStatus(Status.RECEIVED);
  	}
-	
+
+	public ShipmentSpecimen addShipmentSpecimen(Specimen spmn) {
+		ShipmentSpecimen shipmentSpmn = ShipmentSpecimen.createShipmentSpecimen(this, spmn);
+		getShipmentSpecimens().add(shipmentSpmn);
+		return shipmentSpmn;
+	}
+
 	public boolean isPending() {
 		return Status.PENDING == getStatus();
 	}
@@ -318,48 +330,95 @@ public class Shipment extends BaseEntity {
 	public boolean isReceived() {
 		return Status.RECEIVED == getStatus();
 	}
-	
-	public void ensureShippedSpecimens(Shipment other) {
-		List<String> existingSpecimens = Utility.<List<String>>collect(getShipmentItems(), "specimen.label");
-		List<String> newSpecimens = Utility.<List<String>>collect(other.getShipmentItems(), "specimen.label");
+
+	private Map<Specimen, ShipmentSpecimen> getShipmentSpecimensMap() {
+		return getShipmentSpecimens().stream()
+			.collect(Collectors.toMap(ShipmentSpecimen::getSpecimen, item -> item));
+	}
+
+	private Map<StorageContainer, ShipmentContainer> getShipmentContainersMap() {
+		return getShipmentContainers().stream()
+			.collect(Collectors.toMap(ShipmentContainer::getContainer, item -> item));
+	}
+
+	private void updateShipmentSpecimens(Shipment other) {
+		if (!isSpecimenShipment() || getStatus() != Status.PENDING) {
+			return;
+		}
+
+		Map<Specimen, ShipmentSpecimen> existingItems = getShipmentSpecimensMap();
+		for (ShipmentSpecimen newItem : other.getShipmentSpecimens()) {
+			ShipmentSpecimen oldItem = existingItems.remove(newItem.getSpecimen());
+			if (oldItem == null) {
+				newItem.setShipment(this);
+				getShipmentSpecimens().add(newItem);
+			}
+		}
 		
+		getShipmentSpecimens().removeAll(existingItems.values());
+	}
+
+	private void receiveSpecimens(Shipment other) {
+		ensureShippedSpecimens(other);
+
+		Map<Specimen, ShipmentSpecimen> existingItems = getShipmentSpecimensMap();
+		for (ShipmentSpecimen newItem : other.getShipmentSpecimens()) {
+			ShipmentSpecimen oldItem = existingItems.remove(newItem.getSpecimen());
+			oldItem.receive(newItem);
+		}
+	}
+
+	private void ensureShippedSpecimens(Shipment other) {
+		Function<ShipmentSpecimen, String> fn = (ss) -> ss.getSpecimen().getLabel();
+		List<String> existingSpecimens = getShipmentSpecimens().stream().map(fn).collect(Collectors.toList());
+		List<String> newSpecimens = other.getShipmentSpecimens().stream().map(fn).collect(Collectors.toList());
+
 		if (!CollectionUtils.isEqualCollection(existingSpecimens, newSpecimens)) {
 			throw OpenSpecimenException.userError(ShipmentErrorCode.INVALID_SHIPPED_SPECIMENS);
 		}
 	}
 
-	private void updateRequest(Shipment other) {
-		if (getStatus() != Status.PENDING) {
+	private void updateShipmentContainers(Shipment other) {
+		if (!isContainerShipment() || getStatus() != Status.PENDING) {
 			return;
 		}
 
-		SpecimenRequest request = other.getRequest();
-		if (request != null && request.isClosed()) {
-			throw OpenSpecimenException.userError(SpecimenRequestErrorCode.CLOSED, request.getId());
-		}
-
-		setRequest(request);
-	}
-
-	private void updateOrderItems(Shipment other) {
-		if (getStatus() != Status.PENDING) {
-			return;
-		}
-
-		Map<Specimen, ShipmentItem> existingItems = new HashMap<Specimen, ShipmentItem>();
-		for (ShipmentItem item : getShipmentItems()) {
-			existingItems.put(item.getSpecimen(), item); 
-		}
-		
-		for (ShipmentItem newItem : other.getShipmentItems()) {
-			ShipmentItem oldItem = existingItems.remove(newItem.getSpecimen());
+		Map<StorageContainer, ShipmentContainer> existingItems = getShipmentContainersMap();
+		for (ShipmentContainer newItem : other.getShipmentContainers()) {
+			ShipmentContainer oldItem = existingItems.remove(newItem.getContainer());
 			if (oldItem == null) {
 				newItem.setShipment(this);
-				getShipmentItems().add(newItem);
+				getShipmentContainers().add(newItem);
 			}
 		}
-		
-		getShipmentItems().removeAll(existingItems.values());
+
+		getShipmentContainers().removeAll(existingItems.values());
+	}
+
+	private void receiveContainers(Shipment other) {
+		ensureShippedContainers(other);
+
+		Map<StorageContainer, ShipmentContainer> existingItems = getShipmentContainersMap();
+		for (ShipmentContainer newItem : other.getShipmentContainers()) {
+			ShipmentContainer oldItem = existingItems.get(newItem.getContainer());
+			oldItem.receive(newItem);
+		}
+
+		for (ShipmentSpecimen shipmentSpecimen : getShipmentSpecimens()) {
+			Specimen spmn = shipmentSpecimen.getSpecimen();
+			StorageContainer container = spmn.getPosition().getContainer();
+			shipmentSpecimen.receive(existingItems.get(container).getReceivedQuality());
+		}
+	}
+
+	private void ensureShippedContainers(Shipment other) {
+		Function<ShipmentContainer, String> fn = (ss) -> ss.getContainer().getName();
+		List<String> existingContainers = getShipmentContainers().stream().map(fn).collect(Collectors.toList());
+		List<String> newContainers = other.getShipmentContainers().stream().map(fn).collect(Collectors.toList());
+
+		if (!CollectionUtils.isEqualCollection(existingContainers, newContainers)) {
+			throw OpenSpecimenException.userError(ShipmentErrorCode.INVALID_SHIPPED_CONTAINERS);
+		}
 	}
 
 	private void updateNotifyUsers(Shipment other) {

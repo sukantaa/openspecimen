@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.krishagni.catissueplus.core.administrative.domain.Shipment;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
-
 
 public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serializable {
 
@@ -19,6 +19,8 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 	private Long id;
 	
 	private String name;
+
+	private String type;
 	
 	private String  courierName;
 	
@@ -48,16 +50,22 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 	
 	private String activityStatus;
 	
-	private List<ShipmentItemDetail> shipmentItems = new ArrayList<ShipmentItemDetail>();
+	private List<ShipmentSpecimenDetail> shipmentSpmns = new ArrayList<>();
+
+	private List<ShipmentContainerDetail> shipmentContainers = new ArrayList<>();
 	
-	private List<UserSummary> notifyUsers = new ArrayList<UserSummary>();
+	private List<UserSummary> notifyUsers = new ArrayList<>();
+
+	private Integer specimensCount;
 
 	private SpecimenRequestSummary request;
 	
 	//
 	// For BO template
 	//
-	private ShipmentItemDetail shipmentItem;
+	private ShipmentSpecimenDetail shipmentSpecimen;
+
+	private ShipmentContainerDetail shipmentContainer;
 	
 	private boolean sendMail = true;
 	
@@ -75,6 +83,14 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	public String getCourierName() {
@@ -189,12 +205,20 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 		this.activityStatus = activityStatus;
 	}
 
-	public List<ShipmentItemDetail> getShipmentItems() {
-		return shipmentItems;
+	public List<ShipmentSpecimenDetail> getShipmentSpmns() {
+		return shipmentSpmns;
 	}
 
-	public void setShipmentItems(List<ShipmentItemDetail> shipmentItems) {
-		this.shipmentItems = shipmentItems;
+	public void setShipmentSpmns(List<ShipmentSpecimenDetail> shipmentSpmns) {
+		this.shipmentSpmns = shipmentSpmns;
+	}
+
+	public List<ShipmentContainerDetail> getShipmentContainers() {
+		return shipmentContainers;
+	}
+
+	public void setShipmentContainers(List<ShipmentContainerDetail> shipmentContainers) {
+		this.shipmentContainers = shipmentContainers;
 	}
 
 	public List<UserSummary> getNotifyUsers() {
@@ -205,6 +229,14 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 		this.notifyUsers = notifyUsers;
 	}
 
+	public Integer getSpecimensCount() {
+		return specimensCount;
+	}
+
+	public void setSpecimensCount(Integer specimensCount) {
+		this.specimensCount = specimensCount;
+	}
+
 	public SpecimenRequestSummary getRequest() {
 		return request;
 	}
@@ -213,12 +245,20 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 		this.request = request;
 	}
 
-	public ShipmentItemDetail getShipmentItem() {
-		return shipmentItem;
+	public ShipmentSpecimenDetail getShipmentSpecimen() {
+		return shipmentSpecimen;
 	}
 
-	public void setShipmentItem(ShipmentItemDetail shipmentItem) {
-		this.shipmentItem = shipmentItem;
+	public void setShipmentSpecimen(ShipmentSpecimenDetail shipmentSpecimen) {
+		this.shipmentSpecimen = shipmentSpecimen;
+	}
+
+	public ShipmentContainerDetail getShipmentContainer() {
+		return shipmentContainer;
+	}
+
+	public void setShipmentContainer(ShipmentContainerDetail shipmentContainer) {
+		this.shipmentContainer = shipmentContainer;
 	}
 
 	public boolean isSendMail() {
@@ -233,6 +273,7 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 		ShipmentDetail detail = new ShipmentDetail();
 		detail.setId(shipment.getId());
 		detail.setName(shipment.getName());
+		detail.setType(shipment.getType().name());
 		detail.setCourierName(shipment.getCourierName());
 		detail.setTrackingNumber(shipment.getTrackingNumber());
 		detail.setTrackingUrl(shipment.getTrackingUrl());
@@ -247,26 +288,12 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 		detail.setReceiverComments(shipment.getReceiverComments());
 		detail.setStatus(shipment.getStatus().getName());
 		detail.setActivityStatus(shipment.getActivityStatus());
-		detail.setShipmentItems(ShipmentItemDetail.from(shipment.getShipmentItems()));
-		
-		if (shipment.isPending()) {
-			detail.setNotifyUsers(UserSummary.from(shipment.getNotifyUsers()));
-		}
-
-		if (shipment.getRequest() != null) {
-			detail.setRequest(SpecimenRequestSummary.from(shipment.getRequest()));
-		}
-		
+		detail.setNotifyUsers(UserSummary.from(shipment.getNotifyUsers()));
 		return detail;
 	}
 	
-	public static List<ShipmentDetail> from(Collection<Shipment> orders) {
-		List<ShipmentDetail> details = new ArrayList<ShipmentDetail>();
-		for(Shipment order : orders) {
-			details.add(from(order));
-		}
-		
-		return details;
+	public static List<ShipmentDetail> from(Collection<Shipment> shipments) {
+		return shipments.stream().map(ShipmentDetail::from).collect(Collectors.toList());
 	}
 
 	@Override
@@ -277,6 +304,10 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 
 	@Override
 	public void merge(ShipmentDetail detail) {
-		getShipmentItems().add(detail.getShipmentItem());
+		if (detail.getShipmentSpecimen() != null) {
+			getShipmentSpmns().add(detail.getShipmentSpecimen());
+		} else if (detail.getShipmentContainer() != null) {
+			getShipmentContainers().add(detail.getShipmentContainer());
+		}
 	}
 }

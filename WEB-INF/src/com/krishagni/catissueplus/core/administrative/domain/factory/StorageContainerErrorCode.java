@@ -74,7 +74,9 @@ public enum StorageContainerErrorCode implements ErrorCode {
 
 	INV_CONT_SEL_STRATEGY,
 
-	INV_CONT_SEL_RULE;
+	INV_CONT_SEL_RULE,
+
+	SITE_CONT_VIOLATED;
 
 	@Override
 	public String code() {

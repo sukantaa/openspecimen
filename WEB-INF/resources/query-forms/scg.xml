@@ -254,7 +254,7 @@
             <name>specimenShipments</name>
             <udn>specimenShipments</udn>
             <caption>#getMessage("specimen_shipment_items")</caption>
-            <table>OS_SHIPMENT_ITEMS</table>
+            <table>OS_SHIPMENT_SPECIMENS</table>
             <foreignKey>SPECIMEN_ID</foreignKey>
             <parentKey>IDENTIFIER</parentKey>
            

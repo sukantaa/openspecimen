@@ -2,7 +2,7 @@ package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import java.util.Map;
 
-import com.krishagni.catissueplus.core.administrative.domain.ShipmentItem;
+import com.krishagni.catissueplus.core.administrative.domain.ShipmentSpecimen;
 
 
 public class SpecimenShipmentReceivedEvent extends SpecimenEvent {
@@ -26,7 +26,7 @@ public class SpecimenShipmentReceivedEvent extends SpecimenEvent {
 		
 	}
 	
-	public static SpecimenShipmentReceivedEvent createForShipmentItem(ShipmentItem item) {
+	public static SpecimenShipmentReceivedEvent createForShipmentItem(ShipmentSpecimen item) {
 		SpecimenShipmentReceivedEvent event = new SpecimenShipmentReceivedEvent(item.getSpecimen());
 		event.setId(item.getId());
 		return event;

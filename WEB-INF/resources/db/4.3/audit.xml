@@ -11,4 +11,59 @@
       <column name="storeSprEnabled_MOD" type="${bit.type}"/>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit and track changes to site container">
+    <addColumn tableName="CATISSUE_SITE_AUD">
+      <column name="CONTAINER_ID" type="${int.type}"/>
+      <column name="container_MOD" type="${bit.type}"/>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit and track changes to shipment type">
+    <addColumn tableName="OS_SHIPMENTS_AUD">
+      <column name="TYPE" type="${text.type}(16)"/>
+      <column name="type_MOD" type="${bit.type}"/>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit and track changes to shipment specimens collection">
+    <renameColumn tableName="OS_SHIPMENTS_AUD"
+      oldColumnName="shipmentItems_MOD" newColumnName="shipmentSpecimens_MOD"
+      columnDataType="${bit.type}"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit and track changes to shipment containers collection">
+    <addColumn tableName="OS_SHIPMENTS_AUD">
+      <column name="shipmentContainers_MOD" type="${bit.type}"/>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Rename specimen shipments table">
+    <renameTable oldTableName="OS_SHIPMENT_ITEMS_AUD" newTableName="OS_SHIPMENT_SPECIMENS_AUD"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen containers audit table">
+    <createTable tableName="OS_SHIPMENT_CONTAINERS_AUD">
+      <column name="IDENTIFIER" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="REV" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="REVTYPE" type="${smallint.type}"/>
+      <column name="SHIPMENT_ID" type="${int.type}"/>
+      <column name="shipment_MOD" type="${bit.type}"/>
+      <column name="CONTAINER_ID" type="${int.type}"/>
+      <column name="container_MOD" type="${bit.type}"/>
+      <column name="RECEIVED_QUALITY" type="${text.type}(32)"/>
+      <column name="receivedQuality_MOD" type="${bit.type}"/>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit and track changes to shipment specimen container ID">
+    <addColumn tableName="OS_SHIPMENT_SPECIMENS_AUD">
+      <column name="SHIPMENT_CONTAINER_ID" type="${int.type}"/>
+      <column name="shipmentContainer_MOD" type="${bit.type}"/>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

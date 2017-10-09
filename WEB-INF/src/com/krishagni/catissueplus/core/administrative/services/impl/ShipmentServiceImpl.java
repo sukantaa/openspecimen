@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.administrative.services.impl;
 
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,17 +17,24 @@ import org.apache.commons.lang3.StringUtils;
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.Shipment;
 import com.krishagni.catissueplus.core.administrative.domain.Shipment.Status;
+import com.krishagni.catissueplus.core.administrative.domain.ShipmentContainer;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
-import com.krishagni.catissueplus.core.administrative.domain.SpecimenRequest;
-import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.factory.ShipmentErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.ShipmentFactory;
-import com.krishagni.catissueplus.core.administrative.domain.factory.SpecimenRequestErrorCode;
+import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
+import com.krishagni.catissueplus.core.administrative.events.ShipmentContainerDetail;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentDetail;
+import com.krishagni.catissueplus.core.administrative.events.ShipmentItemsListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentListCriteria;
+import com.krishagni.catissueplus.core.administrative.events.ShipmentSpecimenDetail;
+import com.krishagni.catissueplus.core.administrative.events.StorageContainerSummary;
 import com.krishagni.catissueplus.core.administrative.repository.ShipmentDao;
+import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.ShipmentService;
+import com.krishagni.catissueplus.core.administrative.services.StorageContainerService;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.common.Pair;
@@ -66,6 +74,8 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	private EmailService emailService;
 	
 	private QueryService querySvc;
+
+	private StorageContainerService containerSvc;
 	
 	private com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory;
 	
@@ -84,7 +94,11 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	public void setQuerySvc(QueryService querySvc) {
 		this.querySvc = querySvc;
 	}
-	
+
+	public void setContainerSvc(StorageContainerService containerSvc) {
+		this.containerSvc = containerSvc;
+	}
+
 	public void setDeDaoFactory(com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory) {
 		this.deDaoFactory = deDaoFactory;
 	}
@@ -94,7 +108,14 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	public ResponseEvent<List<ShipmentDetail>> getShipments(RequestEvent<ShipmentListCriteria> req) {
 		try {
 			ShipmentListCriteria listCrit = addShipmentListCriteria(req.getPayload());
-			return ResponseEvent.response(ShipmentDetail.from(getShipmentDao().getShipments(listCrit)));
+			List<ShipmentDetail> result = ShipmentDetail.from(getShipmentDao().getShipments(listCrit));
+			if (listCrit.includeStat() && !result.isEmpty()) {
+				Map<Long, ShipmentDetail> shipmentsMap = result.stream().collect(Collectors.toMap(ShipmentDetail::getId, s -> s));
+				Map<Long, Integer> spmnsCount = getShipmentDao().getSpecimensCount(shipmentsMap.keySet());
+				spmnsCount.forEach((shipmentId, count) -> shipmentsMap.get(shipmentId).setSpecimensCount(count));
+			}
+
+			return ResponseEvent.response(result);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -131,6 +152,55 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<List<ShipmentContainerDetail>> getShipmentContainers(RequestEvent<ShipmentItemsListCriteria> req) {
+		try {
+			ShipmentItemsListCriteria crit = req.getPayload();
+			Shipment shipment = getShipment(crit.shipmentId(), null);
+			AccessCtrlMgr.getInstance().ensureReadShipmentRights(shipment);
+			if (shipment.isSpecimenShipment()) {
+				return ResponseEvent.response(Collections.emptyList());
+			}
+
+			Map<Long, ShipmentContainerDetail> containersMap = getShipmentDao().getShipmentContainers(crit).stream()
+				.collect(Collectors.toMap(sc -> sc.getContainer().getId(), ShipmentContainerDetail::from));
+
+			if (containersMap.isEmpty()) {
+				return ResponseEvent.response(Collections.emptyList());
+			}
+
+			Map<Long, Integer> spmnCounts;
+			if (shipment.isPending()) {
+				spmnCounts = daoFactory.getStorageContainerDao().getSpecimensCount(containersMap.keySet());
+			} else {
+				spmnCounts = getShipmentDao().getSpecimensCountByContainer(shipment.getId(), containersMap.keySet());
+			}
+
+			spmnCounts.forEach((cid, count) -> containersMap.get(cid).setSpecimensCount(count));
+			return ResponseEvent.response(new ArrayList<>(containersMap.values()));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<ShipmentSpecimenDetail>> getShipmentSpecimens(RequestEvent<ShipmentItemsListCriteria> req) {
+		try {
+			ShipmentItemsListCriteria crit = req.getPayload();
+			Shipment shipment = getShipment(crit.shipmentId(), null);
+			AccessCtrlMgr.getInstance().ensureReadShipmentRights(shipment);
+			return ResponseEvent.response(ShipmentSpecimenDetail.from(getShipmentDao().getShipmentSpecimens(crit)));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<ShipmentDetail> createShipment(RequestEvent<ShipmentDetail> req) {
 		try {
 			AccessCtrlMgr.getInstance().ensureCreateShipmentRights();
@@ -140,25 +210,17 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 			ensureValidShipmentStatus(shipment, detail.getStatus(), ose);
 			ensureUniqueConstraint(null, shipment, ose);
-			ensureValidSpecimens(shipment, ose);
+			ensureValidItems(null, shipment, ose);
 			ensureValidNotifyUsers(shipment, ose);
 			ose.checkAndThrow();
 
-			SpecimenRequest request = shipment.getRequest();
-			if (request != null && request.isClosed()) {
-				throw OpenSpecimenException.userError(SpecimenRequestErrorCode.CLOSED, request.getId());
-			}
-			
 			Status status = Status.fromName(detail.getStatus());
 			if (status == Status.SHIPPED) {
+				createRecvSiteContainer(shipment);
 				shipment.ship();
 			}
-			
-			//
-			//  Saved to obtain IDs to make shipment events
-			//
+
 			getShipmentDao().saveOrUpdate(shipment, true);
-			
 			sendEmailNotifications(shipment, null, detail.isSendMail());
 			return ResponseEvent.response(ShipmentDetail.from(shipment));
 		} catch (OpenSpecimenException ose) {
@@ -176,15 +238,23 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			Shipment existing = getShipment(detail.getId(), detail.getName());
 
 			Shipment newShipment = shipmentFactory.createShipment(detail, null);
+			if (existing.getType() != newShipment.getType()) {
+				return ResponseEvent.userError(ShipmentErrorCode.CANNOT_CHG_TYPE);
+			}
+
 			AccessCtrlMgr.getInstance().ensureUpdateShipmentRights(newShipment);
 			
 			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 			ensureUniqueConstraint(existing, newShipment, ose);
-			ensureValidSpecimens(newShipment, ose);
+			ensureValidItems(existing, newShipment, ose);
 			ensureValidNotifyUsers(newShipment, ose);
 			ose.checkAndThrow();
 			
 			Status oldStatus = existing.getStatus();
+			if (newShipment.getStatus() == Status.SHIPPED) {
+				createRecvSiteContainer(newShipment);
+			}
+
 			existing.update(newShipment);
 			getShipmentDao().saveOrUpdate(existing, true);
 			sendEmailNotifications(newShipment, oldStatus, detail.isSendMail());
@@ -216,6 +286,43 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 		}
 		
 		return new ResponseEvent<>(exportShipmentReport(shipment, query));
+	}
+
+	@Override
+	@PlusTransactional
+	public List<StorageContainerSummary> getContainers(List<String> names, String sendSiteName, String recvSiteName) {
+		if (CollectionUtils.isEmpty(names)) {
+			throw OpenSpecimenException.userError(ShipmentErrorCode.CONT_NAMES_REQ);
+		}
+
+		Set<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessContainerSiteCps();
+		if (siteCps != null && siteCps.isEmpty()) {
+			throw  OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
+		StorageContainerListCriteria crit = new StorageContainerListCriteria().siteCps(siteCps).names(names);
+		List<StorageContainer> containers = daoFactory.getStorageContainerDao().getStorageContainers(crit);
+		if (containers.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		ensureSpecimensAreAccessible(containers);
+
+		if (StringUtils.isNotBlank(sendSiteName)) {
+			ensureValidContainerSendingSites(containers, getSite(sendSiteName));
+		}
+
+		if (StringUtils.isNotBlank(recvSiteName)) {
+			ensureValidContainerRecvSite(containers, getSite(recvSiteName));
+		}
+
+		ensureContainersAreNotShipped(containers);
+
+		List<Long> containerIds = containers.stream().map(StorageContainer::getId).collect(Collectors.toList());
+		Map<Long, Integer> spmnsCount = daoFactory.getStorageContainerDao().getSpecimensCount(containerIds);
+		return containers.stream().map(StorageContainerSummary::from)
+			.map(s -> { s.setStoredSpecimens(spmnsCount.get(s.getId())); return s; })
+			.collect(Collectors.toList());
 	}
 
 	@Override
@@ -290,16 +397,30 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	}
 
 	private void ensureUniqueConstraint(Shipment existing, Shipment newShipment, OpenSpecimenException ose) {
-		if (existing == null || !newShipment.getName().equals(existing.getName())) {
-			Shipment shipment = getShipmentDao().getShipmentByName(newShipment.getName());
-			if (shipment != null) {
-				ose.addError(ShipmentErrorCode.DUP_NAME, newShipment.getName());
-			}
+		if (existing != null && newShipment.getName().equals(existing.getName())) {
+			return;
+		}
+
+		Shipment shipment = getShipmentDao().getShipmentByName(newShipment.getName());
+		if (shipment != null) {
+			ose.addError(ShipmentErrorCode.DUP_NAME, newShipment.getName());
+		}
+	}
+
+	private void ensureValidItems(Shipment existing, Shipment shipment, OpenSpecimenException ose) {
+		if (shipment.isSpecimenShipment()) {
+			ensureValidSpecimens(existing, shipment, ose);
+		} else {
+			ensureValidContainers(existing, shipment, ose);
 		}
 	}
 	
-	private void ensureValidSpecimens(Shipment shipment, OpenSpecimenException ose) {
-		List<Long> specimenIds = Utility.collect(shipment.getShipmentItems(), "specimen.id");
+	private void ensureValidSpecimens(Shipment existing, Shipment shipment, OpenSpecimenException ose) {
+		if (existing != null && !existing.isPending()) {
+			return;
+		}
+
+		List<Long> specimenIds = Utility.collect(shipment.getShipmentSpecimens(), "specimen.id");
 		List<Specimen> specimens = getValidSpecimens(specimenIds, ose);
 		if (specimens == null) {
 			return;
@@ -309,10 +430,55 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 		ensureValidSpecimenSites(specimens, shipment.getSendingSite(), shipment.getReceivingSite(), ose);
 		ensureSpecimensAreNotShipped(shipment, specimenIds, ose);
 	}
-	
+
+	private void ensureValidContainers(Shipment existing, Shipment shipment, OpenSpecimenException ose) {
+		if (existing != null && !existing.isPending()) {
+			return;
+		}
+
+		List<StorageContainer> containers = shipment.getShipmentContainers().stream()
+			.map(ShipmentContainer::getContainer).collect(Collectors.toList());
+
+		boolean accessible = ensureSpecimensAreAccessible(containers, ose);
+		if (!accessible) {
+			return;
+		}
+
+		ensureValidContainerSites(containers, shipment.getSendingSite(), shipment.getReceivingSite(), ose);
+		ensureContainersAreNotShipped(shipment, containers, ose);
+	}
+
+	private boolean ensureSpecimensAreAccessible(List<StorageContainer> containers) {
+		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+		ensureSpecimensAreAccessible(containers, ose);
+		ose.checkAndThrow();
+		return true;
+	}
+
+	private boolean ensureSpecimensAreAccessible(List<StorageContainer> containers, OpenSpecimenException ose) {
+		List<Pair<Long, Long>> siteCpPairs = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps();
+		if (siteCpPairs != null && siteCpPairs.isEmpty()) {
+			ose.addError(SpecimenErrorCode.ACCESS_DENIED, null, 0);
+			return false;
+		}
+
+		List<Long> containerIds = containers.stream().map(StorageContainer::getId).collect(Collectors.toList());
+		boolean useMrnSites = AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn();
+		Map<String, List<String>> invalidSpmns = daoFactory.getStorageContainerDao()
+			.getInaccessibleSpecimens(containerIds, siteCpPairs, useMrnSites, 5);
+		if (!invalidSpmns.isEmpty()) {
+			Map.Entry<String, List<String>> contSpmns = invalidSpmns.entrySet().iterator().next();
+			String errorLabels = StringUtils.join(contSpmns.getValue(), ", ") + " (" + contSpmns.getKey() + ")";
+			ose.addError(SpecimenErrorCode.ACCESS_DENIED, errorLabels, 1);
+			return false;
+		}
+
+		return true;
+	}
+
 	private void ensureSpecimensAreAvailable(List<Specimen> specimens, OpenSpecimenException ose) {
-		List<Specimen> closedSpecimens = new ArrayList<Specimen>();
-		List<Specimen> unavailableSpecimens = new ArrayList<Specimen>();
+		List<Specimen> closedSpecimens = new ArrayList<>();
+		List<Specimen> unavailableSpecimens = new ArrayList<>();
 		for (Specimen specimen : specimens) {
 			if (specimen.isClosed()) {
 				closedSpecimens.add(specimen);
@@ -321,21 +487,26 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			}
 		}
 		
-		if (CollectionUtils.isNotEmpty(closedSpecimens)) {
-			List<String> labels = Utility.<List<String>>collect(closedSpecimens, "label");
-			ose.addError(ShipmentErrorCode.CLOSED_SPECIMENS, StringUtils.join(labels, ','));
+		if (!closedSpecimens.isEmpty()) {
+			String labels = closedSpecimens.stream().map(Specimen::getLabel).collect(Collectors.joining(", "));
+			ose.addError(ShipmentErrorCode.CLOSED_SPECIMENS, labels);
 		}
 		
-		if (CollectionUtils.isNotEmpty(unavailableSpecimens)) {
-			List<String> labels = Utility.<List<String>>collect(unavailableSpecimens, "label");
-			ose.addError(ShipmentErrorCode.UNAVAILABLE_SPECIMENS, StringUtils.join(labels, ','));
+		if (!unavailableSpecimens.isEmpty()) {
+			String labels = unavailableSpecimens.stream().map(Specimen::getLabel).collect(Collectors.joining(", "));
+			ose.addError(ShipmentErrorCode.UNAVAILABLE_SPECIMENS, labels);
 		}
 	}
-	
+
 	private void ensureValidSpecimenSites(List<Specimen> specimens, Site sendingSite, Site receivingSite, OpenSpecimenException ose) {
 		Map<Long, Specimen> specimenMap = specimens.stream().collect(Collectors.toMap(Specimen::getId, spmn -> spmn));
 		ensureValidSpecimenSendingSites(specimenMap, sendingSite, ose);
 		ensureValidSpecimenRecvSites(specimenMap, receivingSite, ose);
+	}
+
+	private void ensureValidContainerSites(List<StorageContainer> containers, Site sendingSite, Site receivingSite, OpenSpecimenException ose) {
+		ensureValidContainerSendingSites(containers, sendingSite, ose);
+		ensureValidContainerRecvSite(containers, receivingSite, ose);
 	}
 
 	private void ensureValidSpecimenSendingSites(Map<Long, Specimen> specimenMap, Site sendingSite, OpenSpecimenException ose) {
@@ -350,7 +521,25 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			.collect(Collectors.joining(", "));
 
 		if (StringUtils.isNotBlank(invalidSpmnLabels)) {
-			ose.addError(ShipmentErrorCode.SPEC_NOT_BELONG_TO_SEND_SITE, invalidSpmnLabels, sendingSite.getName());
+			ose.addError(ShipmentErrorCode.SPMN_NOT_STORED_AT_SEND_SITE, invalidSpmnLabels, sendingSite.getName());
+		}
+	}
+
+	private void ensureValidContainerSendingSites(List<StorageContainer> containers, Site sendingSite) {
+		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+		ensureValidContainerSendingSites(containers, sendingSite, ose);
+		ose.checkAndThrow();
+	}
+
+	private void ensureValidContainerSendingSites(List<StorageContainer> containers, Site sendingSite, OpenSpecimenException ose) {
+		List<String> invalidContainers = containers.stream()
+			.filter(c -> !c.getSite().equals(sendingSite))
+			.limit(5)
+			.map(StorageContainer::getName)
+			.collect(Collectors.toList());
+
+		if (!invalidContainers.isEmpty()) {
+			ose.addError(ShipmentErrorCode.CONTS_NOT_AT_SEND_SITE, sendingSite.getName(), StringUtils.join(invalidContainers, ", "), invalidContainers.size());
 		}
 	}
 
@@ -363,7 +552,25 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			.collect(Collectors.joining(", "));
 
 		if (StringUtils.isNotBlank(invalidSpmnLabels)) {
-			ose.addError(ShipmentErrorCode.SPEC_NOT_BELONG_TO_REC_SITE, invalidSpmnLabels, receivingSite.getName());
+			ose.addError(ShipmentErrorCode.CANNOT_STORE_SPMN_AT_RECV_SITE, invalidSpmnLabels, receivingSite.getName());
+		}
+	}
+
+	private void ensureValidContainerRecvSite(List<StorageContainer> containers, Site receivingSite) {
+		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+		ensureValidContainerRecvSite(containers, receivingSite, ose);
+		ose.checkAndThrow();
+	}
+
+	private void ensureValidContainerRecvSite(List<StorageContainer> containers, Site receivingSite, OpenSpecimenException ose) {
+		List<Long> containerIds = containers.stream().map(StorageContainer::getId).collect(Collectors.toList());
+		Map<String, List<String>> invalidSpmns = daoFactory.getStorageContainerDao()
+			.getInvalidSpecimensForSite(containerIds, receivingSite.getId(), 5);
+
+		if (!invalidSpmns.isEmpty()) {
+			Map.Entry<String, List<String>> contSpmns = invalidSpmns.entrySet().iterator().next();
+			String errorLabels = contSpmns.getKey() + " (" + StringUtils.join(contSpmns.getValue(), ", ") + ")";
+			ose.addError(ShipmentErrorCode.CANNOT_STORE_CONT_AT_RECV_SITE, receivingSite.getName(), errorLabels);
 		}
 	}
 	
@@ -374,24 +581,45 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 		
 		List<Specimen> shippedSpecimens = getShipmentDao().getShippedSpecimensByIds(specimenIds);
 		if (CollectionUtils.isNotEmpty(shippedSpecimens)) {
-			List<String> labels = Utility.<List<String>>collect(shippedSpecimens, "label");
-			ose.addError(ShipmentErrorCode.SPECIMEN_ALREADY_SHIPPED, StringUtils.join(labels, ','));
+			String labels = shippedSpecimens.stream().map(Specimen::getLabel).collect(Collectors.joining(", "));
+			ose.addError(ShipmentErrorCode.SPECIMEN_ALREADY_SHIPPED, labels);
 		}
 	}
 
-	public void ensureValidNotifyUsers(Shipment shipment, OpenSpecimenException ose) {
+	private void ensureContainersAreNotShipped(Shipment shipment, List<StorageContainer> containers, OpenSpecimenException ose) {
+		if (shipment.isReceived()) {
+			return;
+		}
+
+		ensureContainersAreNotShipped(containers, ose);
+	}
+
+	private void ensureContainersAreNotShipped(List<StorageContainer> containers) {
+		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+		ensureContainersAreNotShipped(containers, ose);
+		ose.checkAndThrow();
+	}
+
+	private void ensureContainersAreNotShipped(List<StorageContainer> containers, OpenSpecimenException ose) {
+		List<Long> containerIds = containers.stream().map(StorageContainer::getId).collect(Collectors.toList());
+		List<StorageContainer> shippedContainers = daoFactory.getStorageContainerDao().getShippedContainers(containerIds);
+		if (!shippedContainers.isEmpty()) {
+			List<String> names = shippedContainers.stream().limit(5).map(StorageContainer::getName).collect(Collectors.toList());
+			ose.addError(ShipmentErrorCode.CONTAINER_ALREADY_SHIPPED, StringUtils.join(names, ", "), names.size());
+		}
+	}
+
+	private void ensureValidNotifyUsers(Shipment shipment, OpenSpecimenException ose) {
 		if (shipment.isReceived()) {
 			return;
 		}
 		
 		Institute institute = shipment.getReceivingSite().getInstitute();
-		for (User user: shipment.getNotifyUsers()) {
-			if (!user.getInstitute().equals(institute)) {
-				ose.addError(ShipmentErrorCode.NOTIFY_USER_NOT_BELONG_TO_INST, user.formattedName(), institute.getName());
-			}
-		}
+		shipment.getNotifyUsers().stream()
+			.filter(user -> !user.getInstitute().equals(institute))
+			.forEach(user -> ose.addError(ShipmentErrorCode.NOTIFY_USER_NOT_BELONG_TO_INST, user.formattedName(), institute.getName()));
 	}
-	
+
 	private Shipment getShipment(Long id, String name) {
 		Shipment shipment = null;
 		if (id != null) {
@@ -406,9 +634,28 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 		
 		return shipment;
 	}
-	
-	private void sendEmailNotifications(Shipment shipment, Status oldStatus, boolean isSendMail) {
-		if (!isSendMail) {
+
+	private void createRecvSiteContainer(Shipment shipment) {
+		if (shipment.getReceivingSite().getContainer() != null) {
+			return;
+		}
+
+		Site recvSite = shipment.getReceivingSite();
+		StorageContainer recvSiteContainer = containerSvc.createSiteContainer(recvSite.getId(), recvSite.getName());
+		recvSite.setContainer(recvSiteContainer);
+	}
+
+	private Site getSite(String siteName) {
+		Site site = daoFactory.getSiteDao().getSiteByName(siteName);
+		if (site == null) {
+			throw OpenSpecimenException.userError(SiteErrorCode.NOT_FOUND, siteName);
+		}
+
+		return site;
+	}
+
+	private void sendEmailNotifications(Shipment shipment, Status oldStatus, boolean sendNotif) {
+		if (!sendNotif) {
 			return;
 		}
 		
