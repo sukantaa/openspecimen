@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,7 +43,6 @@ import com.krishagni.catissueplus.core.de.events.ListFormFields;
 import com.krishagni.catissueplus.core.de.events.RemoveFormContextOp;
 import com.krishagni.catissueplus.core.de.events.RemoveFormContextOp.RemoveType;
 import com.krishagni.catissueplus.core.de.services.FormService;
-
 import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.PermissibleValue;
 import edu.common.dynamicextensions.napi.FormData;
@@ -197,6 +197,32 @@ public class FormsController {
 		ResponseEvent<FormDataDetail> resp = formSvc.getFormData(getRequest(crit));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload().getFormData().getFieldNameValueMap(includeUdn);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value="{id}/latest-records")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<Map<String, Object>> getLatestRecords(
+		@PathVariable("id")
+		Long formId,
+
+		@RequestParam(value="entityType")
+		String entityType,
+
+		@RequestParam(value="objectId")
+		List<Long> objectIds,
+
+		@RequestParam(value="includeUdn", required=false, defaultValue="false")
+		boolean includeUdn) {
+
+		FormRecordCriteria crit = new FormRecordCriteria();
+		crit.setFormId(formId);
+		crit.setEntityType(entityType);
+		crit.setObjectIds(objectIds);
+
+		ResponseEvent<List<FormDataDetail>> resp = formSvc.getLatestRecords(getRequest(crit));
+		resp.throwErrorIfUnsuccessful();
+		return resp.getPayload().stream().map(r -> r.getFormData().getFieldNameValueMap(includeUdn)).collect(Collectors.toList());
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, value="{id}/data")
@@ -433,30 +459,6 @@ public class FormsController {
 		return resp.getPayload().getFormData().getFieldNameValueMap(formData.isUsingUdn());
 	}
 
-	/**
-	 * Commenting as this doesn't seem to be used in v2
-	 */
-//	private String bulkSaveFormData(Long formId, String formDataJsonArray) {
-//		JsonParser parser = new JsonParser();
-//  		JsonArray records = parser.parse(formDataJsonArray).getAsJsonArray();
-//  
-//  		List<FormData> formDataList = new ArrayList<FormData>();
-//  		for (int i = 0; i < records.size(); i++) {
-//  			String formDataJson = records.get(i).toString();
-//  			FormData formData = FormData.fromJson(formDataJson, formId);
-//  			formDataList.add(formData);
-//  		}
-//				
-//  		ResponseEvent<List<FormData>> resp = formSvc.saveBulkFormData(getRequestEvent(formDataList));
-//  		resp.throwErrorIfUnsuccessful();
-//  		
-//  		List<String> savedFormData = new ArrayList<String>();
-//  		for (FormData formData : resp.getPayload()) {
-//  			savedFormData.add(formData.toJson());
-//  		}
-//  		return new Gson().toJson(savedFormData);
-//  	}
-	
 	private String zipFiles(String dir) {
 		String zipFile = new StringBuilder(System.getProperty("java.io.tmpdir"))
 			.append(File.separator).append("export-form-")

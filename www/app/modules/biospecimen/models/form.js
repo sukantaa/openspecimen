@@ -120,6 +120,15 @@ angular.module('os.biospecimen.models.form', ['os.common.models'])
         .then(Form.modelArrayRespTransform);
     }
 
+    Form.getLatestRecords = function(formId, entityType, objectIds) {
+      var params = {entityType: entityType, objectId: objectIds};
+      return $http.get(Form.url() + formId + '/latest-records', {params: params}).then(
+        function(resp) {
+          return resp.data;
+        }
+      );
+    }
+
     Form.prototype.getRecords = function() {
       var result = [];
       var params = {objectId: this.objectId, entityType: this.entityType};

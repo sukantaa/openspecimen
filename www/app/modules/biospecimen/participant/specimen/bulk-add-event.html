@@ -1,13 +1,8 @@
 <div>
   <div os-page-header>
     <div class="os-page-header-content">
-      <ul os-breadcrumbs>
-        <li>
-          <span translate="specimens.bulk_events.title">Bulk Events</span>
-        </li>
-      </ul>
       <h3>
-        <span translate="specimens.bulk_events.create">Create Bulk Event</span>
+        <span translate="specimens.bulk_events.add_edit">Create Bulk Event</span>
       </h3>
     </div>
   </div>
@@ -18,7 +13,7 @@
         <div ng-include src="'participant/specimen/bulkevent-select-specimens.html'"></div>
       </os-wizard-step>
       
-      <os-wizard-step title="{{'specimens.bulk_events.add_event_details' | translate}}" on-finish="passThrough()">
+      <os-wizard-step title="{{'specimens.bulk_events.event_details' | translate}}" on-finish="passThrough()">
         <div ng-include src="'participant/specimen/bulkevent-add-details.html'"></div>
       </os-wizard-step>
     </div>
@@ -119,7 +114,26 @@
 <script type="text/ng-template" id="participant/specimen/bulkevent-add-details.html">
   <form name="eventForm" class="form-horizontal" os-form-validator="eventForm" validator="eventFormValidator" novalidate>
     <div class="form-group">
-      <label class="col-xs-3 control-label" translate="specimens.bulk_events.select_event">Select Event</label>
+      <label class="col-xs-3 control-label">
+        <span translate="specimens.bulk_events.op">Action</label>
+      </label>
+      <div class="col-xs-6">
+        <label class="radio-inline">
+          <input type="radio" name="op" ng-model="selectedEvent.op" ng-value="'ADD'" ng-change="initEventOpts()">
+          <span translate="specimens.bulk_events.add">Add</span>
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="op" ng-model="selectedEvent.op" ng-value="'EDIT'" ng-change="initEventOpts()">
+          <span translate="specimens.bulk_events.edit">Edit</span>
+        </label>
+        <div os-field-error field="eventForm.op"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-xs-3 control-label">
+        <span translate="specimens.bulk_events.select_event">Select Event</span>
+      </label>
       <div class="col-xs-6">
         <os-select name="eventName" list="specimenEvents" display-prop="caption"
           select-prop="formId" ng-model="selectedEvent.formId" on-select="initEventOpts()" required>
@@ -127,7 +141,7 @@
         <div os-field-error field="eventForm.eventName"></div>
       </div>
     </div>
-    
+
     <div class="form-group">
       <button class="btn os-btn-text" ng-click="copyFirstToAll()" ng-if="!!eventOpts">
         <span translate="specimens.bulk_events.copy_first_to_all">Copy First To All</span>

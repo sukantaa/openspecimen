@@ -613,7 +613,7 @@
         re.activity_status = 'ACTIVE' and
         fc.deleted_on is null
     </sql-query>
-    
+
     <sql-query name="getUpdateTime">
       <return-scalar column="lastModifyTime" type="date"/>
 
