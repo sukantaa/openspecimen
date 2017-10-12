@@ -1,238 +1,206 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!DOCTYPE hibernate-mapping PUBLIC
-    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-    <class
-        name="krishagni.catissueplus.beans.FormRecordEntryBean"
-        table="CATISSUE_FORM_RECORD_ENTRY"
-        dynamic-update="false"
-        dynamic-insert="false"
-		lazy="true"
-    >
-    
-        <id
-            name="identifier"
-            column="IDENTIFIER"
-            type="long"
-            length="30"
-            unsaved-value="null"
-        >
-            <generator class="native">
-              <param name="sequence">CATISSUE_FORM_REC_ENTRY_SEQ</param>
-            </generator>
-        </id>
+  <class  name="krishagni.catissueplus.beans.FormRecordEntryBean" table="CATISSUE_FORM_RECORD_ENTRY" lazy="true">
+    <id name="identifier" column="IDENTIFIER">
+      <generator class="native">
+        <param name="sequence">CATISSUE_FORM_REC_ENTRY_SEQ</param>
+      </generator>
+    </id>
 
-        <property
-            name="formCtxtId"
-            column="FORM_CTXT_ID"
-            type="long"
-            update="true"
-            insert="true"
-            length="30"
-        />
-        <property
-            name="objectId"
-            column="OBJECT_ID"
-            type="long"
-            update="true"
-            insert="true"
-            length="30"
-        />
+    <property name="formCtxtId" column="FORM_CTXT_ID"/>
 
-         <property
-            name="recordId"
-            column="RECORD_ID"
-            type="long"
-            update="true"
-            insert="true"
-            length="30"
-        />
-         
-          <property
-            name="updatedBy"
-            column="UPDATED_BY"
-            type="long"
-            update="true"
-            insert="true"
-            length="30"
-        />
+    <property name="objectId" column="OBJECT_ID"/>
 
-         <property
-            name="updatedTime"
-            column="UPDATE_TIME"
-            type="timestamp"
-            update="true"
-            insert="true"
-            length="30"
-        />
-         
-        <property
-            name="activityStatusStr"
-            column="ACTIVITY_STATUS"
-            type="string"
-            update="true"
-            insert="true"
-            length="16"
-        />
-        
-        <sql-query name="getRecordEntry">
-          <return-scalar column="id"              type="long"/>
-          <return-scalar column="ctx_id"          type="long"/>
-          <return-scalar column="object_id"       type="long"/>
-          <return-scalar column="record_id"       type="long"/>
-          <return-scalar column="updated_by"      type="long"/>
-          <return-scalar column="update_time"     type="timestamp"/>
-          <return-scalar column="status"          type="string"/>
-          <return-scalar column="entity_type"     type="string"/>
+    <property name="recordId" column="RECORD_ID"/>
+
+    <property name="updatedBy" column="UPDATED_BY"/>
+
+    <property name="updatedTime" column="UPDATE_TIME"/>
+
+    <property name="activityStatusStr" column="ACTIVITY_STATUS"/>
+
+    <sql-query name="getRecordEntry">
+      <return-scalar column="id"              type="long"/>
+      <return-scalar column="ctx_id"          type="long"/>
+      <return-scalar column="object_id"       type="long"/>
+      <return-scalar column="record_id"       type="long"/>
+      <return-scalar column="updated_by"      type="long"/>
+      <return-scalar column="update_time"     type="timestamp"/>
+      <return-scalar column="status"          type="string"/>
+      <return-scalar column="entity_type"     type="string"/>
  
-          select
-            re.identifier as id, re.form_ctxt_id as ctx_id,
-            re.object_id as object_id, re.record_id as record_id,
-            re.updated_by as updated_by, re.update_time as update_time,
-            re.activity_status as status, ctx.entity_type as entity_type
-          from
-            catissue_form_record_entry re
-            inner join catissue_form_context ctx on ctx.identifier = re.form_ctxt_id
-          where
-            re.form_ctxt_id = :formCtxtId and 
-            re.record_id = :recordId and
-            re.object_id = :objectId and
-            re.activity_status = 'ACTIVE' and
-            ctx.deleted_on is null
-        </sql-query>
+      select
+        re.identifier as id, re.form_ctxt_id as ctx_id,
+        re.object_id as object_id, re.record_id as record_id,
+        re.updated_by as updated_by, re.update_time as update_time,
+        re.activity_status as status, ctx.entity_type as entity_type
+      from
+        catissue_form_record_entry re
+        inner join catissue_form_context ctx on ctx.identifier = re.form_ctxt_id
+      where
+        re.form_ctxt_id = :formCtxtId and 
+        re.record_id = :recordId and
+        re.object_id = :objectId and
+        re.activity_status = 'ACTIVE' and
+        ctx.deleted_on is null
+    </sql-query>
 
-        <sql-query name="getRecordEntryByFormAndRecId">
-          <return-scalar column="id"              type="long"/>
-          <return-scalar column="ctx_id"          type="long"/>
-          <return-scalar column="object_id"       type="long"/>
-          <return-scalar column="record_id"       type="long"/>
-          <return-scalar column="updated_by"      type="long"/>
-          <return-scalar column="update_time"     type="timestamp"/>
-          <return-scalar column="status"          type="string"/>
-          <return-scalar column="entity_type"     type="string"/>
- 
-          select
-            re.identifier as id, re.form_ctxt_id as ctx_id,
-            re.object_id as object_id, re.record_id as record_id,
-            re.updated_by as updated_by, re.update_time as update_time,
-            re.activity_status as status, ctx.entity_type as entity_type
-          from
-            catissue_form_record_entry re
-            inner join catissue_form_context ctx on ctx.identifier = re.form_ctxt_id
-          where
-            ctx.container_id = :formId and
-            re.record_id = :recordId and
-            re.activity_status = 'ACTIVE' and
-            ctx.deleted_on is null
-        </sql-query>
+    <sql-query name="getRecordEntryByFormAndRecId">
+      <return-scalar column="id"              type="long"/>
+      <return-scalar column="ctx_id"          type="long"/>
+      <return-scalar column="object_id"       type="long"/>
+      <return-scalar column="record_id"       type="long"/>
+      <return-scalar column="updated_by"      type="long"/>
+      <return-scalar column="update_time"     type="timestamp"/>
+      <return-scalar column="status"          type="string"/>
+      <return-scalar column="entity_type"     type="string"/>
 
-        <query name="getRecordEntries">
-          from
-            krishagni.catissueplus.beans.FormRecordEntryBean re
-          where
-            re.formCtxtId = :formCtxtId and
-            re.objectId = :objectId and
-            re.activityStatusStr = 'ACTIVE'
-        </query>
+      select
+        re.identifier as id, re.form_ctxt_id as ctx_id,
+        re.object_id as object_id, re.record_id as record_id,
+        re.updated_by as updated_by, re.update_time as update_time,
+        re.activity_status as status, ctx.entity_type as entity_type
+      from
+        catissue_form_record_entry re
+        inner join catissue_form_context ctx on ctx.identifier = re.form_ctxt_id
+      where
+        ctx.container_id = :formId and
+        re.record_id = :recordId and
+        re.activity_status = 'ACTIVE' and
+        ctx.deleted_on is null
+    </sql-query>
 
-        <sql-query name="getRegistrationRecords">
+    <query name="getRecordEntries">
+      from
+        krishagni.catissueplus.beans.FormRecordEntryBean re
+      where
+        re.formCtxtId = :formCtxtId and
+        re.objectId = :objectId and
+        re.activityStatusStr = 'ACTIVE'
+    </query>
+
+    <sql-query name="getRegistrationRecords">
+      select
+        cp.identifier as cpId, cp.short_title as cpShortTitle,
+        cpr.identifier as cprId, cpr.protocol_participant_id as ppid, re.record_id as recordId
+      from
+        catissue_coll_prot_reg cpr
+        inner join catissue_collection_protocol cp on cp.identifier = cpr.collection_protocol_id
+        inner join catissue_form_context fc on (fc.cp_id = cp.identifier or fc.cp_id = -1) and fc.entity_type = 'Participant'
+        inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier and re.object_id = cpr.identifier
+      where
+        cpr.activity_status != 'Disabled' and
+        fc.deleted_on is null and
+        re.activity_status = 'ACTIVE' and
+        fc.container_id = :formId and
+        (:cpId is null or cp.identifier = :cpId)
+      order by
+        cprId, recordId
+    </sql-query>
+
+    <sql-query name="getParticipantRecords">
+      select
+        cp.identifier as cpId, cp.short_title as cpShortTitle,
+        cpr.identifier as cprId, cpr.participant_id as participantId, cpr.protocol_participant_id as ppid, re.record_id as recordId
+      from
+        catissue_coll_prot_reg cpr
+        inner join catissue_collection_protocol cp on cp.identifier = cpr.collection_protocol_id
+        inner join catissue_form_context fc on fc.cp_id = -1 and fc.entity_type = 'CommonParticipant'
+        inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier and re.object_id = cpr.participant_id
+      where
+        cpr.activity_status != 'Disabled' and
+        fc.deleted_on is null and
+        re.activity_status = 'ACTIVE' and
+        fc.container_id = :formId and
+        (:cpId is null or cp.identifier = :cpId)
+      order by
+        participantId, recordId
+    </sql-query>
+
+    <sql-query name="getVisitRecords">
+      select
+        cp.identifier as cpId, cp.short_title as cpShortTitle,
+        v.identifier as visitId, v.name as visitName, re.record_id as recordId
+      from
+        catissue_specimen_coll_group v
+        inner join catissue_coll_prot_reg cpr on cpr.identifier = v.collection_protocol_reg_id
+        inner join catissue_collection_protocol cp on cp.identifier = cpr.collection_protocol_id
+        inner join catissue_form_context fc on (fc.cp_id = cp.identifier or fc.cp_id = -1) and fc.entity_type = 'SpecimenCollectionGroup'
+        inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier and re.object_id = v.identifier
+      where
+        v.activity_status != 'Disabled' and
+        fc.deleted_on is null and
+        re.activity_status = 'ACTIVE' and
+        fc.container_id = :formId and
+        (:cpId is null or cp.identifier = :cpId)
+      order by
+        visitId, recordId
+    </sql-query>
+
+    <sql-query name="getSpecimenRecords">
+      select
+        cp.identifier as cpId, cp.short_title as cpShortTitle,
+        s.identifier as spmnId, s.label as spmnLabel, s.barcode as spmnBarcode,
+        re.record_id as recordId
+      from
+        catissue_specimen s
+        inner join catissue_collection_protocol cp on cp.identifier = s.collection_protocol_id
+        inner join catissue_form_context fc on (fc.cp_id = cp.identifier or fc.cp_id = -1) and fc.entity_type = :entityType
+        inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier and re.object_id = s.identifier
+      where
+        s.activity_status != 'Disabled' and
+        fc.deleted_on is null and
+        re.activity_status = 'ACTIVE' and
+        fc.container_id = :formId and
+        (:cpId is null or cp.identifier = :cpId)
+      order by
+        spmnId, recordId
+    </sql-query>
+
+    <sql-query name="deleteEntityRecords">
+      update
+        catissue_form_record_entry re
+      set
+        re.activity_status = 'CLOSED'
+      where
+        re.form_ctxt_id in (
           select
-            cp.identifier as cpId, cp.short_title as cpShortTitle,
-            cpr.identifier as cprId, cpr.protocol_participant_id as ppid, re.record_id as recordId
+            identifier
           from
-            catissue_coll_prot_reg cpr
-            inner join catissue_collection_protocol cp on cp.identifier = cpr.collection_protocol_id
-            inner join catissue_form_context fc on (fc.cp_id = cp.identifier or fc.cp_id = -1) and fc.entity_type = 'Participant'
-            inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier and re.object_id = cpr.identifier
+            catissue_form_context fc
           where
-            cpr.activity_status != 'Disabled' and
+            (fc.cp_id = -1 or fc.cp_id = :cpId) and
             fc.deleted_on is null and
-            re.activity_status = 'ACTIVE' and
-            fc.container_id = :formId and
-            (:cpId is null or cp.identifier = :cpId)
-          order by
-            cprId, recordId
-        </sql-query>
+            fc.entity_type in (:entityTypes)
+        ) and
+        re.object_id = :objectId and
+        re.activity_status = 'ACTIVE'
+    </sql-query>
 
-        <sql-query name="getParticipantRecords">
-          select
-            cp.identifier as cpId, cp.short_title as cpShortTitle,
-            cpr.identifier as cprId, cpr.participant_id as participantId, cpr.protocol_participant_id as ppid, re.record_id as recordId
-          from
-            catissue_coll_prot_reg cpr
-            inner join catissue_collection_protocol cp on cp.identifier = cpr.collection_protocol_id
-            inner join catissue_form_context fc on fc.cp_id = -1 and fc.entity_type = 'CommonParticipant'
-            inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier and re.object_id = cpr.participant_id
-          where
-            cpr.activity_status != 'Disabled' and
-            fc.deleted_on is null and
-            re.activity_status = 'ACTIVE' and
-            fc.container_id = :formId and
-            (:cpId is null or cp.identifier = :cpId)
-          order by
-            participantId, recordId
-        </sql-query>
+    <sql-query name="getLatestRecordIds">
+      <return-scalar column="objectId" type="long"/>
+      <return-scalar column="formCtxtId" type="long"/>
+      <return-scalar column="recordId" type="long"/>
 
-        <sql-query name="getVisitRecords">
-          select
-            cp.identifier as cpId, cp.short_title as cpShortTitle,
-            v.identifier as visitId, v.name as visitName, re.record_id as recordId
-          from
-            catissue_specimen_coll_group v
-            inner join catissue_coll_prot_reg cpr on cpr.identifier = v.collection_protocol_reg_id
-            inner join catissue_collection_protocol cp on cp.identifier = cpr.collection_protocol_id
-            inner join catissue_form_context fc on (fc.cp_id = cp.identifier or fc.cp_id = -1) and fc.entity_type = 'SpecimenCollectionGroup'
-            inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier and re.object_id = v.identifier
-          where
-            v.activity_status != 'Disabled' and
-            fc.deleted_on is null and
-            re.activity_status = 'ACTIVE' and
-            fc.container_id = :formId and
-            (:cpId is null or cp.identifier = :cpId)
-          order by
-            visitId, recordId
-        </sql-query>
-
-        <sql-query name="getSpecimenRecords">
-          select
-            cp.identifier as cpId, cp.short_title as cpShortTitle,
-            s.identifier as spmnId, s.label as spmnLabel, s.barcode as spmnBarcode,
-            re.record_id as recordId
-          from
-            catissue_specimen s
-            inner join catissue_collection_protocol cp on cp.identifier = s.collection_protocol_id
-            inner join catissue_form_context fc on (fc.cp_id = cp.identifier or fc.cp_id = -1) and fc.entity_type = :entityType
-            inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier and re.object_id = s.identifier
-          where
-            s.activity_status != 'Disabled' and
-            fc.deleted_on is null and
-            re.activity_status = 'ACTIVE' and
-            fc.container_id = :formId and
-            (:cpId is null or cp.identifier = :cpId)
-          order by
-            spmnId, recordId
-        </sql-query>
-
-        <sql-query name="deleteEntityRecords">
-          update
-            catissue_form_record_entry re
-          set
-            re.activity_status = 'CLOSED'
-          where
-            re.form_ctxt_id in (
-              select
-                identifier
-              from
-                catissue_form_context fc
-              where
-                (fc.cp_id = -1 or fc.cp_id = :cpId) and
-                fc.deleted_on is null and
-                fc.entity_type in (:entityTypes)
-            ) and
-            re.object_id = :objectId and
-            re.activity_status = 'ACTIVE'
-        </sql-query>
-    </class>
+      select
+        re.object_id as objectId, re.form_ctxt_id as formCtxtId, re.record_id as recordId
+      from
+        catissue_form_record_entry re
+        inner join catissue_form_context fc
+          on fc.identifier = re.form_ctxt_id
+        left join catissue_form_record_entry re1
+          on re1.form_ctxt_id = re.form_ctxt_id and re1.object_id = re.object_id and re.update_time &lt; re1.update_time
+      where
+        fc.container_id = :formId and
+        fc.entity_type = :entityType and
+        re.object_id in (:objectIds) and
+        fc.deleted_on is null and
+        re.activity_status = 'ACTIVE' and
+        re1.update_time is null
+    </sql-query>
+  </class>
 </hibernate-mapping>

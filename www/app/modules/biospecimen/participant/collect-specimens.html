@@ -213,10 +213,21 @@
         <div class="panel panel-default">
           <div class="panel-heading">
             <span>{{group.title}}</span>
-            <a ng-click="group.opts.$$sdeFormFields.copyFirstToAll()">
-              <span>(</span>
+            <a class="btn btn-xs btn-default" ng-click="group.opts.cofrc = !group.opts.cofrc" ng-if="group.opts.enableCofrc">
+              <span ng-if="group.opts.cofrc">
+                <span class="fa fa-plus"></span>
+                <span translate="common.show_all">Show all rows</span>
+                <span>({{group.input.length}})</span>
+              </span>
+              <span ng-if="!group.opts.cofrc">
+                <span class="fa fa-minus"></span>
+                <span translate="common.show_only_first">Show only first row</span>
+              </span>
+            </a>
+            <a class="btn btn-xs btn-default" ng-click="group.opts.$$sdeFormFields.copyFirstToAll()"
+              ng-if="!group.opts.enableCofrc || !group.opts.cofrc">
+              <span class="fa fa-clone"></span>
               <span translate="specimens.copy_first_to_all">Copy First To All</span>
-              <span>)</span>
             </a>
           </div>
           <div class="panel-body">

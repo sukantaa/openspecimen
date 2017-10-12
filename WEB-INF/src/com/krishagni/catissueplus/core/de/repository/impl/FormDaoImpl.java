@@ -379,7 +379,22 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 				.list();
 		return CollectionUtils.isEmpty(rows) ? null : getFormRecordEntry(rows.iterator().next());
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<Long, Pair<Long, Long>> getLatestRecordIds(Long formId, String entityType, List<Long> objectIds) {
+		List<Object[]> rows = sessionFactory.getCurrentSession()
+				.getNamedQuery(GET_LATEST_RECORD_IDS)
+				.setParameter("formId", formId)
+				.setParameter("entityType", entityType)
+				.setParameterList("objectIds", objectIds)
+				.list();
+		return rows.stream().collect(Collectors.toMap(
+			row -> (Long) row[0],
+			row -> Pair.make((Long) row[1], (Long) row[2])
+		));
+	}
+
 	private List<FormCtxtSummary> getEntityForms(List<Object[]> rows) {
 		Map<Long, FormCtxtSummary> formsMap = new LinkedHashMap<Long, FormCtxtSummary>(); 
 		
@@ -1015,6 +1030,8 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	private static final String GET_RECORD_ENTRIES = RE_FQN + ".getRecordEntries";
 
 	private static final String GET_REC_BY_FORM_N_REC_ID = RE_FQN + ".getRecordEntryByFormAndRecId";
+
+	private static final String GET_LATEST_RECORD_IDS = RE_FQN + ".getLatestRecordIds";
 
 	private static final String GET_FORM_IDS = FQN + ".getFormIds";
 	

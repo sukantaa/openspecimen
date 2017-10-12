@@ -246,6 +246,11 @@ angular.module('os.biospecimen.specimen',
         url: '/bulk-add-event',
         templateUrl: 'modules/biospecimen/participant/specimen/bulk-add-event.html',
         controller: 'BulkAddEventCtrl',
+        resolve: {
+          events: function(SpecimenEvent) {
+            return SpecimenEvent.getEvents();
+          }
+        },
         parent: 'signed-in'
       })
       .state('specimen-search', {

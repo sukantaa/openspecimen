@@ -73,6 +73,8 @@
     "close": "Close",
     "close_reason": "Reason for closing",
     "copy_first_to_all": "Copy first to all",
+    "show_all": "Show all",
+    "show_only_first": "Show first",
     "confirm_navigation": " You've unsaved form changes. If you navigate away from this page without submitting form, the changes will be lost. Are you sure you want to leave this page?",
     "footer_note": "<a href=\"http://www.openspecimen.org\" target=\"_blank\">OpenSpecimen</a> - powered by <a href=\"http://www.krishagni.com\" target=\"_blank\">Krishagni</a>",
     "download_initiated": "Download of file initiated. Please check your download directory ...",
@@ -748,17 +750,18 @@
     },
 
     "bulk_events": {
-      "title": "Bulk Events",
-      "create": "Create Bulk Event",
-      "add_event": "Add Event",
+      "add_edit": "Add or Edit Events",
       "select_specimens": "Select Specimens",
-      "add_event_details": "Add Event Details",
+      "event_details": "Event Details",
       "select_event": "Select Event",
+      "op": "Action",
+      "add": "Add",
+      "edit": "Edit",
       "no_specimens_in_list": "No specimens in list to add event. Add at least one specimen",
       "enter_specimen_label": "To add specimens to list, enter labels or barcodes separated by a comma, tab or newline and click add",
       "details": "Event Details",
       "copy_first_to_all": "Copy First To All",
-      "events_saved": "Event saved successfully"
+      "events_saved": "Events saved successfully"
     },
     "bulk_transfer": {
       "title": "Bulk Transfer Specimens",
@@ -1818,7 +1821,7 @@
     "inc_child_spmns": "Include Child Specimens",
     "export": "Export Cart",
     "remove_spmns": "Remove from Cart",
-    "add_event": "Add Event",
+    "add_event": "Add/Edit Event",
     "transfer_specimens": "Transfer Specimens",
     "retrieve_specimens": "Retrieve",
     "location": "Storage Location",
