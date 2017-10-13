@@ -56,6 +56,17 @@ angular.module('os.biospecimen.specimen')
           );
         }
 
+        scope.editSpecimens = function() {
+          var spmns = scope.specimens();
+          if (!spmns || spmns.length == 0) {
+            Alerts.error('specimen_list.no_specimens_to_edit');
+            return;
+          }
+
+          SpecimensHolder.setSpecimens(spmns);
+          $state.go('specimen-bulk-edit');
+        }
+
         scope.deleteSpecimens = function() {
           var spmns = scope.specimens();
           if (!spmns || spmns.length == 0) {
