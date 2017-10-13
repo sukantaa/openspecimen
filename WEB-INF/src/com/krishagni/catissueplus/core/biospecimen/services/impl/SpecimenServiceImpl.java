@@ -55,6 +55,7 @@ import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.events.BulkEntityDetail;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.LabelTokenDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -228,6 +229,29 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			List<Specimen> savedSpmns = new ArrayList<>();
 			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 			req.getPayload().forEach(spmn -> savedSpmns.add(updateSpecimen(spmn, ose)));
+			ose.checkAndThrow();
+			return ResponseEvent.response(SpecimenDetail.from(savedSpmns));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<SpecimenInfo>> bulkUpdateSpecimens(RequestEvent<BulkEntityDetail<SpecimenDetail>> req) {
+		try {
+			BulkEntityDetail<SpecimenDetail> buDetail = req.getPayload();
+			SpecimenDetail spmn = buDetail.getDetail();
+
+			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+			List<Specimen> savedSpmns = new ArrayList<>();
+			for (Long id : buDetail.getIds()) {
+				spmn.setId(id);
+				savedSpmns.add(updateSpecimen(spmn, ose));
+			}
+
 			ose.checkAndThrow();
 			return ResponseEvent.response(SpecimenDetail.from(savedSpmns));
 		} catch (OpenSpecimenException ose) {
