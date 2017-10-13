@@ -3,34 +3,65 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
     $scope, $translate, $q, events, Form, SpecimensHolder,
     Specimen, SpecimenEvent, Alerts, Util, SpecimenUtil) {
 
-    var formCtx = {};
+    var ctx;
     function init() {
-      $scope.selectedEvent = {op: 'ADD'};
-      $scope.eventTableCtrl = {};
-      
-      $scope.specimens = SpecimensHolder.getSpecimens() || [];
-      $scope.showVisit = showVisit($scope.specimens);
-
+      var spmns = SpecimensHolder.getSpecimens() || [];
       SpecimensHolder.setSpecimens(null);
+
+      var formOpts = {};
+      $scope.ctx = ctx = {
+        events   : events,
+        specimens: spmns,
+        op       : 'ADD',
+        mode     : 'SINGLE',
+        tabCtrl  : {},
+        formCtrl : {},
+        opts     : {
+          appColumns        : [],
+          idColumnLabel     : $translate.instant('specimens.title'),
+          mode              : 'add',
+          allowRowSelection : false,
+          onValidationError : onValidationError,
+          showActionBtns    : false,
+          labelAlignment    : 'horizontal',
+          records           : []
+        },
+        showVisit: showVisit(spmns),
+        formDef  : undefined,
+        mFormDef : undefined,
+        formDefToUse: undefined,
+        records  : []
+      };
     }
-    
+
+    function isAddOp() {
+      return ctx.op == 'ADD';
+    }
+
+    function isTabMode() {
+      return ctx.mode == 'TABLE';
+    }
+
+    function isCollRecvEvent(event) {
+      return ['SpecimenCollectionEvent', 'SpecimenReceivedEvent'].indexOf(event.name) != -1;
+    }
+
     function filterEvents() {
-      var showCollRecvEvent =  ($scope.selectedEvent.op != 'ADD');
+      var showCollRecvEvent =  !isAddOp();
       if (showCollRecvEvent) {
-        showCollRecvEvent = $scope.specimens.every(function(spmn) { return spmn.lineage == 'New'; });
+        showCollRecvEvent = ctx.specimens.every(function(spmn) { return spmn.lineage == 'New'; });
       }
 
       return events.filter(
         function(event) {
-          return !event.sysForm ||
-            (showCollRecvEvent && ['SpecimenCollectionEvent', 'SpecimenReceivedEvent'].indexOf(event.name) != -1)
+          return !event.sysForm || (showCollRecvEvent && isCollRecvEvent(event));
         }
       );
     }
-    
-    function getSpecimenOpts(eventOpts, specimens) {
-      var opts = [], optsMap = {}, spmnIds = [];
-      angular.forEach(specimens,
+
+    function getTableData() {
+      var opts = [], optsMap = {};
+      angular.forEach(ctx.specimens,
         function(spmn) {
           var opt = {
             key: {
@@ -43,28 +74,19 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
           };
           opts.push(opt);
           optsMap[spmn.id] = opt;
-          spmnIds.push(spmn.id);
         }
       );
 
-      if (eventOpts.op == 'ADD') {
-        var q = $q.defer();
-        q.resolve(opts);
-        return q.promise;
-      } else {
-        var params = {entityType: 'SpecimenEvent', objectId: spmnIds};
-        return Form.getLatestRecords(eventOpts.formId, 'SpecimenEvent', spmnIds).then(
-          function(records) {
-            angular.forEach(records,
-              function(record) {
-                optsMap[record.appData.objectId].records.push(record);
-              }
-            );
-
-            return opts;
+      if (ctx.op == 'EDIT') {
+        angular.forEach(ctx.records,
+          function(record) {
+            var spmnId = record.appData.objectId;
+            optsMap[spmnId].records.push(record);
           }
         );
       }
+
+      return opts;
     }
 
     function onValidationError() {
@@ -75,6 +97,106 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
       return specimens.some(function(spmn) { return !spmn.$$specimenCentricCp; });
     }
 
+    function removeRequiredAndDefValues(formDef) {
+      var result = angular.copy(formDef);
+      angular.forEach(result.rows,
+        function(row) {
+          angular.forEach(row,
+            function(field) {
+              field.defaultValue = field.defaultType = field.defaultChecked = undefined;
+              field.validationRules = field.validationRules || [];
+              field.defaultType = 'none';
+              for (var i = 0; i < field.validationRules.length; ++i) {
+                var rule = field.validationRules[i];
+                if (rule.name == 'required') {
+                  field.validationRules.splice(i, 1);
+                  break;
+                }
+              }
+            }
+          )
+        }
+      );
+
+      return result;
+    }
+
+    function setFormDefToUse() {
+      if (isAddOp() || isTabMode()) {
+        ctx.formDefToUse = ctx.formDef;
+      } else {
+        ctx.formDefToUse = ctx.mFormDef;
+      }
+    }
+
+    function getEventRecords() {
+      if (ctx.op == 'ADD' && ctx.mode == 'SINGLE') {
+        var formData = ctx.formCtrl.ctrl.getFormData();
+        var eventData = {};
+        angular.forEach(formData.attrs,
+          function(attr) {
+            eventData[attr.name] = attr.value;
+          }
+        );
+
+        var records = [];
+        angular.forEach(ctx.specimens,
+          function(specimen) {
+            var record = angular.copy(eventData);
+            record.appData = record.appData || {};
+            record.appData.id = specimen.id;
+            records.push(record);
+          }
+        );
+
+        return records;
+      } else if (ctx.op == 'EDIT' && ctx.mode == 'SINGLE') {
+        var formData = ctx.formCtrl.ctrl.getFormData();
+        angular.forEach(ctx.records,
+          function(record) {
+            record.appData.id = record.appData.objectId;
+            angular.forEach(formData.attrs,
+              function(attr) {
+                if (!attr.value && attr.value !== 0) {
+                  record[attr.name] = record.$$original[attr.name];
+                } else {
+                  record[attr.name] = attr.value;
+                }
+              }
+            )
+          }
+        );
+
+        return ctx.records;
+      } else if (ctx.mode == 'TABLE') {
+        return ctx.tabCtrl.ctrl.getData();
+      }
+    }
+
+    function loadRecords() {
+      var result = [];
+      if (ctx.op != 'EDIT') {
+        return result;
+      }
+
+      var spmnIds = ctx.specimens.map(function(spmn) { return spmn.id; });
+      return Form.getLatestRecords(ctx.formId, 'SpecimenEvent', spmnIds).then(
+        function(records) {
+          angular.forEach(records,
+            function(record) {
+              record.$$original = angular.copy(record);
+              result.push(record);
+            }
+          );
+
+          return result;
+        }
+      );
+    }
+
+    //
+    // View functions
+    //
     $scope.passThrough = function() {
       return true;
     }
@@ -84,64 +206,67 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
         return false;
       }
 
-      if (!$scope.showVisit) {
-        $scope.showVisit = showVisit(specimens);
+      if (!ctx.showVisit) {
+        ctx.showVisit = showVisit(specimens);
       }
 
-      Util.addIfAbsent($scope.specimens, specimens, 'id');
+      Util.addIfAbsent(ctx.specimens, specimens, 'id');
       return true;
     }
     
     $scope.removeSpecimen = function(index) {
-      $scope.specimens.splice(index, 1);
-      $scope.showVisit = showVisit($scope.specimens);
+      ctx.specimens.splice(index, 1);
+      ctx.showVisit = showVisit(ctx.specimens);
     }
-    
-    $scope.initEventOpts = function() {
-      $scope.specimenEvents = filterEvents();
-      if (!$scope.selectedEvent.formId) {
-        return;
-      }
 
-      var promises = [];
-      if (formCtx.lastFormId != $scope.selectedEvent.formId) {
-        promises.push(Form.getDefinition($scope.selectedEvent.formId));
-      } else {
-        var q = $q.defer();
-        q.resolve(formCtx.lastFormDef);
-        promises.push(q.promise);
-      }
+    $scope.initOptionsView = function() {
+      ctx.events = filterEvents();
+    }
 
-      promises.push(getSpecimenOpts($scope.selectedEvent, $scope.specimens));
+    $scope.initEventDetailsView = function() {
+      Form.getDefinition(ctx.formId).then(
+        function(formDef) {
+          ctx.formDef = formDef;
+          ctx.mFormDef = removeRequiredAndDefValues(formDef);
+          setFormDefToUse();
+          ctx.opts.formId  = ctx.formId;
+          ctx.opts.formDef = ctx.formDefToUse;
+        }
+      );
 
-      $q.all(promises).then(
-        function(result) {
-          formCtx = {lastFormId: $scope.selectedEvent.formId, formDef: result[0]};
+      $q.when(loadRecords()).then(
+        function(records) {
+          ctx.records = records;
+          if (!records || records.length == 0) {
+            ctx.mode = 'TABLE';
+            setFormDefToUse();
+          }
 
-          var opts = {
-            formId            : $scope.selectedEvent.formId,
-            formDef           : result[0],
-            appColumns        : [],
-            tableData         : result[1],
-            idColumnLabel     : $translate.instant('specimens.title'),
-            mode              : 'add',
-            allowRowSelection : false,
-            onValidationError : onValidationError
-          };
-
-          $scope.eventOpts = opts;
+          if (ctx.mode == 'TABLE') {
+            ctx.opts.tableData = getTableData();
+          }
         }
       );
     }
 
-    $scope.saveEvent = function() {
-      var tableCtrl = $scope.eventTableCtrl.ctrl;
-      var data = tableCtrl.getData();
-      if (!data) {
-        return;
-      }
+    $scope.onEventSelect = function() {
+      ctx.records = undefined;
+    }
 
-      SpecimenEvent.save($scope.selectedEvent.formId, data).then(
+    $scope.onOpSelect = function() {
+      ctx.records = undefined;
+      ctx.events = filterEvents();
+      if (ctx.formId && !ctx.events.some(function(event) { event.id == ctx.formId; })) {
+        ctx.formId = undefined;
+      }
+    }
+
+    $scope.onModeSelect = function() {
+    }
+
+    $scope.saveEvent = function() {
+      var records = getEventRecords();
+      SpecimenEvent.save(ctx.formId, records).then(
         function(savedData) {
           $scope.back();
           Alerts.success("specimens.bulk_events.events_saved");
@@ -150,7 +275,7 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
     }
 
     $scope.copyFirstToAll = function () {
-      $scope.eventTableCtrl.ctrl.copyFirstToAll();
+      ctx.tabCtrl.ctrl.copyFirstToAll();
     }
     
     init();
