@@ -5,6 +5,7 @@
 
 .os-extn-form .panel {
   border: none;
+  box-shadow: none;
 }
 
 .os-extn-form .modal-footer {
