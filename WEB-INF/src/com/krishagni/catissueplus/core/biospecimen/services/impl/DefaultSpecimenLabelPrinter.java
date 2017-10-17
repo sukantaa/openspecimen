@@ -248,20 +248,22 @@ public class DefaultSpecimenLabelPrinter extends AbstractLabelPrinter<Specimen> 
 
 	private void saveToDb(List<SpecimenLabelPrintRule> rules) {
 		User systemUser = daoFactory.getUserDao().getSystemUser();
+		int ruleIdx = 0;
 		for (SpecimenLabelPrintRule rule : rules) {
-			PrintRuleConfig ruleCfg = getPrintRuleConfig(rule, systemUser);
+			PrintRuleConfig ruleCfg = getPrintRuleConfig(rule, systemUser, ++ruleIdx);
 			daoFactory.getPrintRuleConfigDao().saveOrUpdate(ruleCfg);
 		}
 	}
 
-	private PrintRuleConfig getPrintRuleConfig(SpecimenLabelPrintRule rule, User systemUser) {
-		PrintRuleConfig printRuleConfig = new PrintRuleConfig();
-		printRuleConfig.setObjectType("SPECIMEN");
-		printRuleConfig.setRule(replaceWildcardsWithNull(rule));
-		printRuleConfig.setUpdatedBy(systemUser);
-		printRuleConfig.setUpdatedOn(Calendar.getInstance().getTime());
-		printRuleConfig.setActivityStatus("Active");
-		return printRuleConfig;
+	private PrintRuleConfig getPrintRuleConfig(SpecimenLabelPrintRule rule, User systemUser, int ruleIdx) {
+		PrintRuleConfig ruleCfg = new PrintRuleConfig();
+		ruleCfg.setObjectType("SPECIMEN");
+		ruleCfg.setRule(replaceWildcardsWithNull(rule));
+		ruleCfg.setUpdatedBy(systemUser);
+		ruleCfg.setUpdatedOn(Calendar.getInstance().getTime());
+		ruleCfg.setActivityStatus("Active");
+		ruleCfg.setDescription("Print rule " + ruleIdx);
+		return ruleCfg;
 	}
 
 	private SpecimenLabelPrintRule replaceWildcardsWithNull(SpecimenLabelPrintRule rule) {
