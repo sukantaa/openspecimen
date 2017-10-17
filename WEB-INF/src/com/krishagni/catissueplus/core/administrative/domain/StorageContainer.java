@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -136,10 +138,6 @@ public class StorageContainer extends BaseEntity {
 		ancestorContainers.add(this);
 	}
 	
-	public static String getEntityName() {
-		return ENTITY_NAME;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -548,8 +546,8 @@ public class StorageContainer extends BaseEntity {
 			return createPosition(null, null, null, null);
 		}
 
-		int posOneOrdinal = toOrdinal(getColumnLabelingScheme(), posOne);
-		int posTwoOrdinal = toOrdinal(getRowLabelingScheme(), posTwo);
+		Integer posOneOrdinal = toOrdinal(getColumnLabelingScheme(), posOne);
+		Integer posTwoOrdinal = toOrdinal(getRowLabelingScheme(), posTwo);
 		return createPosition(posOneOrdinal, posOne, posTwoOrdinal, posTwo);
 	}
 	
@@ -659,6 +657,14 @@ public class StorageContainer extends BaseEntity {
 		int posTwoOrdinal = toOrdinal(getRowLabelingScheme(), posTwo);
 		return getOccupiedPosition(posOneOrdinal, posTwoOrdinal) != null;
 	}
+
+	public boolean isPositionOccupied(int posOneOrdinal, int posTwoOrdinal) {
+		if (isDimensionless()) {
+			return false;
+		}
+
+		return getOccupiedPosition(posOneOrdinal, posTwoOrdinal) != null;
+	}
 	
 	public boolean canSpecimenOccupyPosition(Long specimenId, String posOne, String posTwo) {
 		return canOccupyPosition(true, specimenId, posOne, posTwo, false);
@@ -739,18 +745,6 @@ public class StorageContainer extends BaseEntity {
 		}
 
 		return reservedPos;
-	}
-
-	public static boolean isValidScheme(String scheme) {
-		if (StringUtils.isBlank(scheme)) {
-			return false;
-		}
-		
-		return scheme.equals(NUMBER_LABELING_SCHEME) ||
-				scheme.equals(UPPER_CASE_ALPHA_LABELING_SCHEME) ||
-				scheme.equals(LOWER_CASE_ALPHA_LABELING_SCHEME) ||
-				scheme.equals(UPPER_CASE_ROMAN_LABELING_SCHEME) ||
-				scheme.equals(LOWER_CASE_ROMAN_LABELING_SCHEME);
 	}
 
 	public void validateRestrictions() {
@@ -858,7 +852,7 @@ public class StorageContainer extends BaseEntity {
 
 		Set<Long> specimenIds = Collections.emptySet();
 		if (vacateOccupant) {
-			specimenIds = new HashSet<Long>();
+			specimenIds = new HashSet<>();
 			for (StorageContainerPosition position : positions) {
 				if (position.getOccupyingSpecimen() != null) {
 					specimenIds.add(position.getOccupyingSpecimen().getId());
@@ -896,6 +890,68 @@ public class StorageContainer extends BaseEntity {
 					childContainer.updateComputedClassAndTypes();
 					childContainer.updateComputedCps();
 				}
+			}
+		}
+	}
+
+	public List<StorageContainerPosition> reservePositions(int numPositions) {
+		return reservePositions(getReservationId(), Calendar.getInstance().getTime(), numPositions);
+	}
+
+	public List<StorageContainerPosition> reservePositions(String reservationId, Date reservationTime, int numPositions) {
+		List<StorageContainerPosition> reservedPositions = new ArrayList<>();
+
+		while (numPositions != 0) {
+			StorageContainerPosition pos = nextAvailablePosition(true);
+			if (pos == null) {
+				break;
+			}
+
+			pos.setReservationId(reservationId);
+			pos.setReservationTime(reservationTime);
+			reservedPositions.add(pos);
+
+			--numPositions;
+			if (!isDimensionless()) {
+				addPosition(pos);
+			}
+		}
+
+		return reservedPositions;
+	}
+
+	public void blockPositions(Collection<StorageContainerPosition> positions) {
+		if (isDimensionless()) {
+			throw OpenSpecimenException.userError(StorageContainerErrorCode.DL_POS_BLK_NP, getName());
+		}
+
+		Date reservationTime = Calendar.getInstance().getTime();
+		String reservationId = getReservationId();
+		for (StorageContainerPosition position : positions) {
+			if (!position.isSpecified() || !areValidPositions(position.getPosOneOrdinal(), position.getPosTwoOrdinal())) {
+				throw OpenSpecimenException.userError(StorageContainerErrorCode.INV_POS, getName(), position.getPosOne(), position.getPosTwo());
+			}
+
+			if (isPositionOccupied(position.getPosOneOrdinal(), position.getPosTwoOrdinal())) {
+				throw OpenSpecimenException.userError(StorageContainerErrorCode.POS_OCCUPIED, getName(), position.getPosOne(), position.getPosTwo());
+			}
+
+			position.setBlocked(true);
+			position.setReservationTime(reservationTime);
+			position.setReservationId(reservationId);
+			addPosition(position);
+		}
+	}
+
+	public void unblockPositions(Collection<StorageContainerPosition> positions) {
+		if (isDimensionless()) {
+			throw OpenSpecimenException.userError(StorageContainerErrorCode.DL_POS_BLK_NP, getName());
+		}
+
+		for (StorageContainerPosition position : positions) {
+			StorageContainerPosition occupied = getOccupiedPosition(position.getPosOneOrdinal(), position.getPosTwoOrdinal());
+			if (occupied != null && occupied.isBlocked()) {
+				occupied.vacate();
 			}
 		}
 	}
@@ -976,6 +1032,26 @@ public class StorageContainer extends BaseEntity {
 
 	public static String getDefaultSiteContainerName(Site site) {
 		return MessageUtil.getInstance().getMessage(DEF_SITE_CONT_NAME, new Object[] { site.getName() });
+	}
+
+	public static String getEntityName() {
+		return ENTITY_NAME;
+	}
+
+	public static boolean isValidScheme(String scheme) {
+		if (StringUtils.isBlank(scheme)) {
+			return false;
+		}
+
+		return scheme.equals(NUMBER_LABELING_SCHEME) ||
+				scheme.equals(UPPER_CASE_ALPHA_LABELING_SCHEME) ||
+				scheme.equals(LOWER_CASE_ALPHA_LABELING_SCHEME) ||
+				scheme.equals(UPPER_CASE_ROMAN_LABELING_SCHEME) ||
+				scheme.equals(LOWER_CASE_ROMAN_LABELING_SCHEME);
+	}
+
+	public static String getReservationId() {
+		return UUID.randomUUID().toString();
 	}
 
 	private void deleteWithoutCheck() {
