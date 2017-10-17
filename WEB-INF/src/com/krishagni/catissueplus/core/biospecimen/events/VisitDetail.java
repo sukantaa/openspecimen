@@ -4,10 +4,12 @@ package com.krishagni.catissueplus.core.biospecimen.events;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -349,17 +351,11 @@ public class VisitDetail extends AttributeModifiedSupport {
 	}
 	
 	public static List<VisitDetail> from(Collection<Visit> visits) {
-		List<VisitDetail> result = new ArrayList<VisitDetail>();
-		
 		if (CollectionUtils.isEmpty(visits)) {
-			return result;
+			return Collections.emptyList();
 		}
-		
-		for (Visit visit : visits) {
-			result.add(from(visit));
-		}
-		
-		return result;
+
+		return visits.stream().map(VisitDetail::from).collect(Collectors.toList());
 	}
 
 }
