@@ -613,6 +613,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 					}
 
 					List<StorageContainerPosition> positions = container.reservePositions(reservationId, reservationTime, numPositions);
+					reservedPositions.addAll(positions);
 					numPositions -= positions.size();
 					if (numPositions == 0) {
 						allAllocated = true;
