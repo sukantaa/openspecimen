@@ -32,7 +32,7 @@ public abstract class BaseExtensionEntity extends BaseEntity {
 	}
 	
 	public boolean hasPhiFields() {
-		return getExtension() == null ? false : getExtension().hasPhiFields();
+		return getExtension() != null && getExtension().hasPhiFields();
 	}
 	
 	public void copyExtensionTo(BaseExtensionEntity entity) {

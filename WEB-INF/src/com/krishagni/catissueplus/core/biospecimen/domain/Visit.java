@@ -460,6 +460,10 @@ public class Visit extends BaseExtensionEntity {
 			createPendingSpecimen(sr, null);
 		}
 	}
+
+	public boolean hasPhiFields() {
+		return StringUtils.isNotBlank(getSurgicalPathologyNumber()) || super.hasPhiFields();
+	}
 	
 	public static boolean isCompleted(String status) {
 		return Visit.VISIT_STATUS_COMPLETED.equals(status);
