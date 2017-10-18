@@ -1,11 +1,11 @@
 angular.module('os.administrative.institute.list', ['os.administrative.models'])
   .controller('InstituteListCtrl', function($scope, $state, Institute, Util, DeleteUtil, ListPagerOpts, CheckList) {
 
-    var pagerOpts;
+    var pagerOpts, filterOpts;
 
     function init() {
       pagerOpts = $scope.pagerOpts = new ListPagerOpts({listSizeGetter: getInstitutesCount});
-      $scope.instituteFilterOpts = {includeStats: true, maxResults: pagerOpts.recordsPerPage + 1};
+      filterOpts = $scope.instituteFilterOpts = {includeStats: true, maxResults: pagerOpts.recordsPerPage + 1};
       $scope.ctx = {
         exportDetail: {objectType: 'institute'}
       };
@@ -47,6 +47,10 @@ angular.module('os.administrative.institute.list', ['os.administrative.models'])
       }
 
       DeleteUtil.bulkDelete({bulkDelete: Institute.bulkDelete}, getInstituteIds(institutes), opts);
+    }
+
+    $scope.pageSizeChanged = function() {
+      filterOpts.maxResults = pagerOpts.recordsPerPage + 1;
     }
 
     init();

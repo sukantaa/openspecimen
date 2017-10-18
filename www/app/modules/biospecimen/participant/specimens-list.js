@@ -18,6 +18,7 @@ angular.module('os.biospecimen.participant')
         filters: {},
         specimens: {},
         listSize: -1,
+        pagerOpts: pagerOpts,
         resourceOpts: {
           orderCreateOpts:    $scope.orderCreateOpts,
           shipmentCreateOpts: $scope.shipmentCreateOpts,
@@ -39,10 +40,15 @@ angular.module('os.biospecimen.participant')
     }
 
     function loadSpecimens() {
-      cp.getListDetail(listParams, getFilters()).then(
+      var params = angular.extend({}, listParams);
+      if (pagerOpts.$$pageSizeChanged > 0) {
+        params.includeCount = false;
+      }
+
+      cp.getListDetail(params, getFilters()).then(
         function(specimens) {
           $scope.ctx.specimens = specimens;
-          if (listParams.includeCount) {
+          if (params.includeCount) {
             $scope.ctx.listSize = specimens.size;
           }
 
@@ -122,6 +128,11 @@ angular.module('os.biospecimen.participant')
     }
 
     this.loadSpecimens = loadSpecimens;
+
+    $scope.pageSizeChanged = function(newPageSize) {
+      listParams.maxResults = pagerOpts.recordsPerPage + 1;
+      loadSpecimens();
+    }
 
     this.pagerOpts = function() {
       return pagerOpts;

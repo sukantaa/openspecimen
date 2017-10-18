@@ -187,6 +187,7 @@
 </div>
 
 <script type="text/ng-template" id="modules/biospecimen/specimen-list/search-specimens.html">
+<div>
   <div class="os-search" ng-if="ctx.filterPvs.init">
     <div class="os-head">
       <h3 class="os-title" translate="specimen_list.filter_specimens">
@@ -254,4 +255,7 @@
       </div>
     </div>
   </div>
+
+  <os-list-page-size opts="pagingOpts" on-change="pageSizeChanged()"></os-list-page-size>
+</div>
 </script>

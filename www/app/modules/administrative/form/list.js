@@ -5,11 +5,11 @@ angular.module('os.administrative.form.list', ['os.administrative.models'])
     CollectionProtocol, Util, DeleteUtil, Alerts, ListPagerOpts, CheckList) {
 
     var cpListQ = undefined;
-    var pagerOpts;
+    var pagerOpts, filterOpts;
 
     function init() {
       pagerOpts = $scope.pagerOpts = new ListPagerOpts({listSizeGetter: getFormsCount});
-      $scope.formFilterOpts = {maxResults: pagerOpts.recordsPerPage + 1, excludeSysForms: true};
+      filterOpts = $scope.formFilterOpts = {maxResults: pagerOpts.recordsPerPage + 1, excludeSysForms: true};
       $scope.formsList = [];
       $scope.ctx = {};
       loadForms($scope.formFilterOpts);
@@ -132,6 +132,10 @@ angular.module('os.administrative.form.list', ['os.administrative.models'])
       }
 
       DeleteUtil.bulkDelete({bulkDelete: Form.bulkDelete}, getFormIds(forms), opts);
+    }
+
+    $scope.pageSizeChanged = function() {
+      filterOpts.maxResults = pagerOpts.recordsPerPage + 1;
     }
 
     init();

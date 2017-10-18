@@ -2,19 +2,19 @@ angular.module('os.administrative.site.list', ['os.administrative.models'])
   .controller('SiteListCtrl', function($scope, $state, currentUser,
     Institute, Site, Util, DeleteUtil, ListPagerOpts, CheckList) {
 
-    var pagerOpts;
+    var pagerOpts, filterOpts;
     var defInstitutes;
 
     function init() {
       pagerOpts = $scope.pagerOpts = new ListPagerOpts({listSizeGetter: getSitesCount});
-      $scope.siteFilterOpts = {includeStats: true, maxResults: pagerOpts.recordsPerPage + 1};
+      filterOpts = $scope.siteFilterOpts = {includeStats: true, maxResults: pagerOpts.recordsPerPage + 1};
       $scope.ctx = {
         exportDetail: {objectType: 'site'},
         institutes: []
       };
 
       loadInstitutes();
-      loadSites($scope.siteFilterOpts);
+      loadSites(filterOpts);
       Util.filter($scope, 'siteFilterOpts', loadSites);
     }
 
@@ -74,6 +74,10 @@ angular.module('os.administrative.site.list', ['os.administrative.models'])
       }
 
       DeleteUtil.bulkDelete({bulkDelete: Site.bulkDelete}, getSiteIds(sites), opts);
+    }
+
+    $scope.pageSizeChanged = function() {
+      filterOpts.maxResults = pagerOpts.recordsPerPage + 1;
     }
 
     init();

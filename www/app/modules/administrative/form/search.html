@@ -1,14 +1,18 @@
-<div class="os-search">
-  <div class="os-head">
-    <h3 class="os-title" translate="form.filter.title">Form Filter</h3>
-  </div>
-
-  <div class="os-body">
-    <div class="form-group">
-      <input os-md-input type="text" ng-model="formFilterOpts.name" class="form-control"
-        placeholder="{{'form.name' | translate}}">
+<div>
+  <div class="os-search">
+    <div class="os-head">
+      <h3 class="os-title" translate="form.filter.title">Form Filter</h3>
     </div>
 
-    <os-clear-filters opts="formFilterOpts"></os-clear-filters>
+    <div class="os-body">
+      <div class="form-group">
+        <input os-md-input type="text" ng-model="formFilterOpts.name" class="form-control"
+          placeholder="{{'form.name' | translate}}">
+      </div>
+
+      <os-clear-filters opts="formFilterOpts"></os-clear-filters>
+    </div>
   </div>
+
+  <os-list-page-size opts="pagerOpts" on-change="pageSizeChanged()"></os-list-page-size>
 </div>

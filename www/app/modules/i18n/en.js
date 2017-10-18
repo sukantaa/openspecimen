@@ -2432,6 +2432,10 @@
       "showing": "Showing",
       "of": "of",
       "many_more": "many more",
-      "records": "records"
+      "records": "records",
+      "recs_to_display": "Records to Display",
+      "hundred": "100",
+      "two_hundred": "200",
+      "five_hundred": "500"
     }
 }

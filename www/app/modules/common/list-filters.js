@@ -39,6 +39,8 @@ angular.module('openspecimen')
     return {
       restrict: 'E',
 
+      replace: true,
+
       templateUrl: 'modules/common/list-filters.html',
 
       scope: {

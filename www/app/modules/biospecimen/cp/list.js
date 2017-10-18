@@ -66,5 +66,9 @@ angular.module('os.biospecimen.cp.list', ['os.biospecimen.models'])
       DeleteUtil.bulkDelete({bulkDelete: CollectionProtocol.bulkDelete}, getCpIds(cps), opts);
     }
 
+    $scope.pageSizeChanged = function() {
+      filterOpts.maxResults = pagerOpts.recordsPerPage + 1;
+    }
+
     init();
   });
