@@ -79,23 +79,8 @@ angular.module('os.query.addedit', ['os.query.models', 'os.query.util', 'os.quer
     }
 
     $scope.saveQuery = function() {
-      var mi = $modal.open({
-        templateUrl: 'modules/query/save.html',
-        controller: 'QuerySaveCtrl',
-        resolve: {
-          queryToSave: function() {
-            return SavedQuery.fromQueryCtx($scope.queryLocal);
-          }
-        }
-      });
-
-      mi.result.then(
-        function(query) { 
-          $state.go('query-list');
-          Alerts.success('queries.query_saved', {title: query.title});
-        }
-      );
-    };
+      QueryUtil.saveQuery($scope.queryLocal);
+    }
 
     $scope.getCount = function() {
       var ql = $scope.queryLocal;

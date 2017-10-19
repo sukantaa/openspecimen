@@ -1,28 +1,7 @@
 
-angular.module('os.query.util', [])
-  .factory('QueryUtil',function($translate, $document) {
-    var ops = {
-      eq:          {name: "eq",         desc: "", code: "&#61;",       symbol: '=',           model: 'EQ'},
-      ne:          {name: "ne",         desc: "", code: "&#8800;",     symbol: '!=',          model: 'NE',},
-      lt:          {name: "lt",         desc: "", code: "&#60;",       symbol: '<',           model: 'LT'},
-      le:          {name: "le",         desc: "", code: "&#8804;",     symbol: '<=',          model: 'LE'},
-      gt:          {name: "gt",         desc: "", code: "&#62;",       symbol: '>',           model: 'GT'},
-      ge:          {name: "ge",         desc: "", code: "&#8805;",     symbol: '>=',          model: 'GE'},
-      any:         {name: "any",        desc: "", code: "all",         symbol: 'any',         model: 'ANY'},
-      exists:      {name: "exists",     desc: "", code: "&#8707;",     symbol: 'exists',      model: 'EXISTS'},
-      not_exists:  {name: "not_exists", desc: "", code: "&#8708;",     symbol: 'not exists',  model: 'NOT_EXISTS'},
-      qin:         {name: "qin",        desc: "", code: "&#8712;",     symbol: 'in',          model: 'IN'},
-      not_in:      {name: "not_in",     desc: "", code: "&#8713;",     symbol: 'not in',      model: 'NOT_IN'},
-      starts_with: {name: "starts_with",desc: "", code: "&#8963;&#61;",symbol: 'starts with', model: 'STARTS_WITH'},
-      ends_with:   {name: "ends_with",  desc: "", code: "&#36;&#61;",  symbol: 'ends with',   model: 'ENDS_WITH'},
-      contains:    {name: "contains",   desc: "", code: "&#126;",      symbol: 'contains',    model: 'CONTAINS'},
-      and:         {name: 'and',        desc: "", code: 'and',         symbol: 'and',         model: 'AND'},
-      or:          {name: 'or',         desc: "", code: 'or',          symbol: 'or',          model: 'OR'},
-      intersect:   {name: 'intersect',  desc: "", code: '&#8745;',     symbol: 'pand',        model: 'PAND'},
-      not:         {name: 'not',        desc: "", code: 'not',         symbol: 'not',         model: 'NOT'},
-      nthchild:    {name: 'nthchild',   desc: "", code: '&#xf1e0;',    symbol: 'nthchild',    model: 'NTHCHILD'},
-      between:     {name: 'between',    desc: "", code: '&#xf1e0;',    symbol: 'between',     model: 'BETWEEN'}
-    };
+angular.module('os.query.util', ['os.query.models', 'os.query.save'])
+  .factory('QueryUtil',function($translate, $document, $modal, $state, $stateParams, Alerts, SavedQuery) {
+    var ops = SavedQuery.ops;
 
     var propIdFields = {
       'Participant.ppid': {expr: 'Participant.id', caption: '$cprId'},
@@ -633,6 +612,25 @@ angular.module('os.query.util', [])
       }
     }
 
+    function saveQuery(queryContext) {
+      $modal.open({
+        templateUrl: 'modules/query/save.html',
+        controller: 'QuerySaveCtrl',
+        resolve: {
+          queryToSave: function() {
+            return SavedQuery.fromQueryCtx(queryContext);
+          }
+        }
+      }).result.then(
+        function(savedQuery) {
+          angular.extend(queryContext, {id: savedQuery.id, title: savedQuery.title});
+
+          var params = {queryId: savedQuery.id, cpId: savedQuery.cpId || -1, editMode: $stateParams.editMode};
+          $state.go($state.current.name, params, {reload: true});
+          Alerts.success('queries.query_saved', {title: savedQuery.title});
+        }
+      );
+    }
 
     return {
       initOpsDesc:         initOpsDesc,
@@ -679,6 +677,8 @@ angular.module('os.query.util', [])
 
       getStringifiedValue: getStringifiedValue,
 
-      sortDatesFn:         sortDatesFn
+      sortDatesFn:         sortDatesFn,
+
+      saveQuery:           saveQuery
     };
   });

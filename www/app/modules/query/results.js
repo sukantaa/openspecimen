@@ -786,5 +786,9 @@ angular.module('os.query.results', ['os.query.models'])
       }
     }
 
+    $scope.saveQuery = function() {
+      QueryUtil.saveQuery($scope.queryCtx);
+    }
+
     init();
   });

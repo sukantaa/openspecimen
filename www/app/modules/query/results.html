@@ -49,6 +49,12 @@
         <span translate="queries.edit_filters">Edit Filters</span>
       </button>
 
+      <button class="default" ng-click="saveQuery()"
+        ng-disabled="!queryCtx.isValid || queryCtx.filters.length == 0">
+        <span class="fa fa-save"></span>
+        <span translate="common.buttons.save">Save</span>
+      </button>
+
       <button class="default" ng-click="defineView()">
         <span class="fa fa-columns"></span>
         <span translate="queries.define_view">Columns</span>
