@@ -60,7 +60,8 @@ angular.module('os.query.models.savedquery', ['os.common.models'])
         cpId: qc.selectedCp.id,
         drivingForm: qc.drivingForm,
         reporting: qc.reporting,
-        wideRowMode: qc.wideRowMode
+        wideRowMode: qc.wideRowMode,
+        outputColumnExprs: qc.outputColumnExprs
       })
     }
 

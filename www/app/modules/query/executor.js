@@ -28,7 +28,9 @@ angular.module('os.query.executor', [])
         );
       },
 
-      getRecords: function(queryId, cpId, aql, wideRowMode, outputIsoFmt) {
+      getRecords: function(queryId, cpId, aql, wideRowMode, outputIsoFmt, opts) {
+        opts = opts || {};
+
         var req = {
           savedQueryId: queryId, 
           cpId: cpId,
@@ -36,7 +38,8 @@ angular.module('os.query.executor', [])
           runType: 'Data', 
           aql: aql, 
           wideRowMode: wideRowMode || "OFF",
-          outputIsoDateTime: (outputIsoFmt || false)
+          outputIsoDateTime: (outputIsoFmt || false),
+          outputColumnExprs: opts.outputColumnExprs || false
         };
         return $http.post(queryUrl, req).then(
           function(resp) {
@@ -45,7 +48,9 @@ angular.module('os.query.executor', [])
         );
       },
 
-      exportQueryResultsData: function(queryId, cpId, aql, wideRowMode) {
+      exportQueryResultsData: function(queryId, cpId, aql, wideRowMode, opts) {
+        opts = opts || {};
+
         var req = {
           savedQueryId: queryId,
           cpId: cpId,
@@ -53,7 +58,8 @@ angular.module('os.query.executor', [])
           runType: 'Export',
           aql: aql,
           indexOf: 'Specimen.label',
-          wideRowMode: wideRowMode || "OFF"
+          wideRowMode: wideRowMode || "OFF",
+          outputColumnExprs: opts.outputColumnExprs || false
         };
 
         return $http.post(queryUrl + '/export', req).then(

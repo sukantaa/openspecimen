@@ -147,8 +147,10 @@ angular.module('os.query.results', ['os.query.models'])
 
       currResults = {};
 
+      var aql = getAql(true, true);
       var outputIsoFmt = (qc.reporting.type != 'crosstab');
-      QueryExecutor.getRecords(qc.id, qc.selectedCp.id, getAql(true, true), qc.wideRowMode || 'DEEP', outputIsoFmt).then(
+      var opts = {outputColumnExprs: qc.outputColumnExprs};
+      QueryExecutor.getRecords(qc.id, qc.selectedCp.id, aql, qc.wideRowMode || 'DEEP', outputIsoFmt, opts).then(
         function(result) {
           currResults = result;
           $scope.resultsCtx.waitingForRecords = false;
@@ -590,7 +592,9 @@ angular.module('os.query.results', ['os.query.models'])
       var qc = $scope.queryCtx;
 
       var alert = Alerts.info('queries.export_initiated', {}, false);  
-      QueryExecutor.exportQueryResultsData(qc.id, qc.selectedCp.id, getAql(false), qc.wideRowMode || 'DEEP').then(
+      var aql = getAql(false);
+      var opts = {outputColumnExprs: qc.outputColumnExprs};
+      QueryExecutor.exportQueryResultsData(qc.id, qc.selectedCp.id, aql, qc.wideRowMode || 'DEEP', opts).then(
         function(result) {
           Alerts.remove(alert);
           if (result.completed) {

@@ -932,6 +932,7 @@ public class QueryServiceImpl implements QueryService {
 		savedQuery.setLastUpdated(Calendar.getInstance().getTime());
 		savedQuery.setReporting(detail.getReporting());
 		savedQuery.setWideRowMode(detail.getWideRowMode());
+		savedQuery.setOutputColumnExprs(detail.isOutputColumnExprs());
 		return savedQuery;
 	}
 
@@ -955,6 +956,7 @@ public class QueryServiceImpl implements QueryService {
 			.wideRowMode(WideRowMode.valueOf(op.getWideRowMode()))
 			.ic(true)
 			.outputIsoDateTime(op.isOutputIsoDateTime())
+			.outputExpression(op.isOutputColumnExprs())
 			.dateFormat(ConfigUtil.getInstance().getDeDateFmt())
 			.timeFormat(ConfigUtil.getInstance().getTimeFmt());
 		query.compile(rootForm, op.getAql());

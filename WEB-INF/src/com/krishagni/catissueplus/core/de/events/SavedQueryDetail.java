@@ -21,6 +21,8 @@ public class SavedQueryDetail extends SavedQuerySummary {
 	
 	private String wideRowMode;
 
+	private boolean outputColumnExprs;
+
 	public Long getCpId() {
 		return cpId;
 	}
@@ -77,6 +79,14 @@ public class SavedQueryDetail extends SavedQuerySummary {
 		this.wideRowMode = wideRowMode;
 	}
 
+	public boolean isOutputColumnExprs() {
+		return outputColumnExprs;
+	}
+
+	public void setOutputColumnExprs(boolean outputColumnExprs) {
+		this.outputColumnExprs = outputColumnExprs;
+	}
+
 	public static SavedQueryDetail fromSavedQuery(SavedQuery savedQuery){
 		SavedQueryDetail detail = new SavedQueryDetail();
 		
@@ -92,6 +102,7 @@ public class SavedQueryDetail extends SavedQuerySummary {
 		detail.setSelectList(savedQuery.getSelectList());
 		detail.setReporting(savedQuery.getReporting());
 		detail.setWideRowMode(savedQuery.getWideRowMode());
+		detail.setOutputColumnExprs(savedQuery.isOutputColumnExprs());
 		return detail;
 	}	
 }

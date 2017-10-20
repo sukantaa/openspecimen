@@ -152,7 +152,8 @@ angular.module('os.query.globaldata', ['os.query.models', 'os.biospecimen.models
         selectedCp: {id: savedQuery.cpId},
         isValid: true,
         drivingForm: 'Participant',
-        wideRowMode: savedQuery.wideRowMode || 'DEEP'
+        wideRowMode: savedQuery.wideRowMode || 'DEEP',
+        outputColumnExprs: savedQuery.outputColumnExprs
       };
 
       var that = this;

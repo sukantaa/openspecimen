@@ -38,9 +38,11 @@ public class SavedQuery {
 	
 	private ReportSpec reporting;
 	
-	private Set<QueryFolder> folders = new HashSet<QueryFolder>();
+	private Set<QueryFolder> folders = new HashSet<>();
 	
 	private String wideRowMode = "DEEP";
+
+	private boolean outputColumnExprs;
 
 	private Date deletedOn;
 
@@ -168,6 +170,14 @@ public class SavedQuery {
 		this.wideRowMode = wideRowMode;
 	}
 
+	public boolean isOutputColumnExprs() {
+		return outputColumnExprs;
+	}
+
+	public void setOutputColumnExprs(boolean outputColumnExprs) {
+		this.outputColumnExprs = outputColumnExprs;
+	}
+
 	public Date getDeletedOn() {
 		return deletedOn;
 	}
@@ -195,6 +205,7 @@ public class SavedQuery {
 		query.folders = null;
 		query.reporting = reporting;
 		query.wideRowMode = wideRowMode;
+		query.outputColumnExprs = outputColumnExprs;
 		
 		try {
 			return getWriteMapper().writeValueAsString(query);
@@ -224,6 +235,7 @@ public class SavedQuery {
 		this.drivingForm = query.drivingForm;
 		this.reporting = query.reporting;
 		this.wideRowMode = query.wideRowMode;
+		this.outputColumnExprs = query.outputColumnExprs;
 	}
 	
 	public String getAql() {
@@ -249,6 +261,7 @@ public class SavedQuery {
 		setQueryExpression(query.getQueryExpression());
 		setReporting(query.getReporting());
 		setWideRowMode(query.getWideRowMode());
+		setOutputColumnExprs(query.isOutputColumnExprs());
 	}
 	
 	@Override

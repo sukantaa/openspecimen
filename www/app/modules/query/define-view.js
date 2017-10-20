@@ -15,6 +15,7 @@ angular.module('os.query.defineview', ['os.query.models'])
     function init() {
       initAggFnsDesc();
 
+      $scope.outputColumnExprs = queryCtx.outputColumnExprs;
       $scope.wideRowMode = angular.copy(queryCtx.wideRowMode); 
       $scope.reporting = angular.copy(queryCtx.reporting);
       $scope.pivotTable = (queryCtx.reporting.type == 'crosstab');
@@ -81,6 +82,7 @@ angular.module('os.query.defineview', ['os.query.models'])
 
       sanitizeSelectedFields($scope.selectedFields);
       $modalInstance.close(angular.extend(queryCtx, {
+         outputColumnExprs: $scope.outputColumnExprs,
          wideRowMode: $scope.wideRowMode, 
          selectedFields: $scope.selectedFields, 
          reporting: $scope.reporting
@@ -96,6 +98,10 @@ angular.module('os.query.defineview', ['os.query.models'])
     $scope.setWideRowsMode = function(wideRows) {
       $scope.wideRowMode = wideRows == true ? 'DEEP' : 'SHALLOW';
     };
+
+    $scope.setOutputColumnExprs = function(checked) {
+      $scope.outputColumnExprs = checked;
+    }
 
     $scope.showCurrField = function(field) {
       $scope.currField = field;
