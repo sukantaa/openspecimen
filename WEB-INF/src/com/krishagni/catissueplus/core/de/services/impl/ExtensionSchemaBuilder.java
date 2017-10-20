@@ -16,6 +16,7 @@ import com.krishagni.catissueplus.core.importer.domain.ObjectSchema.Field;
 import com.krishagni.catissueplus.core.importer.domain.ObjectSchema.Record;
 import com.krishagni.catissueplus.core.importer.services.ObjectSchemaBuilder;
 
+import edu.common.dynamicextensions.domain.nui.CheckBox;
 import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.Control;
 import edu.common.dynamicextensions.domain.nui.DataType;
@@ -123,6 +124,8 @@ public class ExtensionSchemaBuilder implements ObjectSchemaBuilder {
 			}
 		} else if (ctrl instanceof FileUploadControl) {
 			field.setType("defile");
+		} else if (ctrl instanceof CheckBox) {
+			field.setType("boolean");
 		}
 
 		return field;
