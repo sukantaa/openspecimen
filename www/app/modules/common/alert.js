@@ -13,6 +13,7 @@ angular.module('openspecimen')
           timeout: timeout,
           close: function() {
             self.remove(this);
+            $interval.cancel(msg.promise);
           }           
         };
 
@@ -23,15 +24,17 @@ angular.module('openspecimen')
         }
 
         if (timeout === undefined || timeout === null) {
-          timeout = ($rootScope.global.appProps.toast_disp_time || 5) * 1000;
+          var dispTime = undefined;
+          if (type == 'danger') {
+            dispTime = $rootScope.global.appProps.toast_disp_time;
+          }
+
+          timeout = (dispTime || 5) * 1000;
           timeout < 1000 && (timeout = 5000);
         }
 
-        var promise = $interval(function() {
-          self.remove(msg);
-          $interval.cancel(promise);
-        }, timeout, 1);
-
+        var promise = $interval(function() { msg.close() }, timeout, 1);
+        msg.promise = promise;
         return msg;
       },
 
