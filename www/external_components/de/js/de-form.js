@@ -1537,6 +1537,8 @@ edu.common.de.SubFormField = function(id, sfField, args) {
   };
 
   this.setValue = function(recId, value) {
+    value = value || [];
+
     this.recId = recId;
     this.sfFieldsEl.children().remove();
     this.fieldObjsRows = [];
