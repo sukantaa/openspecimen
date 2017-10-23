@@ -59,7 +59,7 @@ angular.module('os.common.notif')
     }
 
     function scheduleNextSync() {
-      ctx.stop = $interval(syncUnreadCount, 5000, 1);
+      ctx.stop = $interval(syncUnreadCount, 300000, 1);
     }
 
     init();
