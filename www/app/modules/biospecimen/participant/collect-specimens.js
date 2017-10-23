@@ -49,7 +49,10 @@ angular.module('os.biospecimen.participant.collect-specimens',
 
       var attrsToDelete = [
         'hasChildren', 'parent', 'children', 'depth',
-        'hasOnlyPendingChildren', 'isOpened', 'selected'
+        'hasOnlyPendingChildren', 'isOpened', 'selected',
+        'aliquotGrp', 'grpLeader', 'pLabel', 'pBarcode',
+        'isVirtual', 'existingStatus', 'showInTree',
+        'expanded', 'aliquotLabels', 'aliquotBarcodes'
       ];
       angular.forEach(attrsToDelete, function(attr) { delete selectorCrit.specimen[attr]; });
       return selectorCrit;
@@ -77,15 +80,24 @@ angular.module('os.biospecimen.participant.collect-specimens',
       data.specimens = specimens;
       data.opts = opts || {};
 
-      CpConfigSvc.getWorkflowData(visit.cpId, 'auto-allocation').then(
+      allocatePositions(visit, specimens).then(
+        function() {
+          $state.go('participant-detail.collect-specimens', {visitId: visit.id, eventId: visit.eventId});
+        }
+      );
+    }
+
+    function allocatePositions(visit, specimens, reservationToCancel) {
+      return CpConfigSvc.getWorkflowData(visit.cpId, 'auto-allocation').then(
         function(data) {
           var resvOp = getReservePositionsOp(visit.cpId, visit.cprId, data.rules || [], specimens);
-          Container.getReservedPositions(resvOp).then(
+          resvOp.reservationToCancel = reservationToCancel;
+          return Container.getReservedPositions(resvOp).then(
             function(positions) {
               if (positions.length > 0) {
                 assignReservedPositions(resvOp, positions);
               }
-              $state.go('participant-detail.collect-specimens', {visitId: visit.id, eventId: visit.eventId});
+              return true;
             }
           )
         }
@@ -150,6 +162,8 @@ angular.module('os.biospecimen.participant.collect-specimens',
           }
         );
       },
+
+      allocatePositions: allocatePositions,
 
       clear: function() {
         data.stateDetail = undefined;
@@ -366,14 +380,12 @@ angular.module('os.biospecimen.participant.collect-specimens',
       }
 
       function vacateReservedPositions() {
-        for (var i = 0; i < $scope.specimens.length; ++i) {
-          var loc = $scope.specimens[i].storageLocation;
-          if (loc && loc.reservationId) {
-            return Container.cancelReservation(loc.reservationId);
-          }
+        var reservationId = getReservationToCancel();
+        if (!reservationId) {
+          return null;
         }
 
-        return null;
+        return Container.cancelReservation(reservationId);
       }
 
       function setShowInTree(aliquot, showInTree) {
@@ -586,36 +598,15 @@ angular.module('os.biospecimen.participant.collect-specimens',
         }
       }
 
-      $scope.applyFirstLocationToAll = function() {
-        var location = {};
+      function getReservationToCancel() {
         for (var i = 0; i < $scope.specimens.length; ++i) {
-          var spmn = $scope.specimens[i];
-          if (spmn.existingStatus != 'Collected' && !spmn.isVirtual) {
-            location = {name: spmn.storageLocation.name, mode: spmn.storageLocation.mode};
-            break;
+          var loc = $scope.specimens[i].storageLocation;
+          if (loc && loc.reservationId) {
+            return loc.reservationId;
           }
         }
 
-        for (var i = 1; i < $scope.specimens.length; i++) {
-          var spmn = $scope.specimens[i];
-          if (spmn.existingStatus != 'Collected' && !spmn.isVirtual) {
-            angular.extend(spmn.storageLocation, location);
-          }
-        }
-      };
-
-      $scope.manuallySelectContainers = function() {
-        $q.when(vacateReservedPositions()).then(
-          function() {
-            angular.forEach($scope.specimens,
-              function(spmn) {
-                spmn.storageLocation = {};
-              }
-            );
-
-            $scope.autoPosAllocate = false;
-          }
-        );
+        return undefined;
       }
 
       $scope.openSpecimenNode = function(specimen) {
@@ -702,6 +693,10 @@ angular.module('os.biospecimen.participant.collect-specimens',
       }  
 
       $scope.statusChanged = function(specimen) {
+        if (!specimen) {
+          return;
+        }
+
         setDescendentStatus(specimen); 
 
         if (specimen.status == 'Collected') {
@@ -1005,6 +1000,74 @@ angular.module('os.biospecimen.participant.collect-specimens',
       $scope.closePopover = function() {
         Util.hidePopovers();
       }
-      
+
+      $scope.reallocatePositions = function() {
+        var specimens = [];
+        for (var i = 0; i < $scope.specimens.length; ++i) {
+          var spmn = $scope.specimens[i];
+          if (spmn.existingStatus == 'Collected') {
+            continue;
+          }
+
+          if (spmn.status == 'Collected') {
+            spmn.status = '';
+            specimens.push(spmn);
+          } else {
+            spmn.storageLocation = {};
+          }
+        }
+
+        function reassignSelectedStatus() {
+          angular.forEach(specimens, function(spmn) { spmn.status = 'Collected'; });
+        }
+
+        CollectSpecimensSvc.allocatePositions(visit, specimens, getReservationToCancel())
+          .then(reassignSelectedStatus, reassignSelectedStatus);
+      }
+
+      $scope.selectPositionsManually = function(clearPositions) {
+        $q.when(vacateReservedPositions()).then(
+          function() {
+            $scope.autoPosAllocate = false;
+            angular.forEach($scope.specimens,
+              function(spmn) {
+                var loc = spmn.storageLocation;
+                if (spmn.existingStatus == 'Collected' || !loc) {
+                  return;
+                }
+
+                delete loc.reservationId;
+                if (clearPositions) {
+                  loc.positionX = loc.positionY = loc.position = undefined;
+                }
+              }
+            );
+          }
+        );
+      }
+
+      $scope.applyFirstLocationToAll = function() {
+        var location = {}, firstIdx = -1;
+        for (var i = 0; i < $scope.specimens.length; ++i) {
+          var spmn = $scope.specimens[i];
+          if (spmn.existingStatus != 'Collected' && !spmn.isVirtual) {
+            location = {name: spmn.storageLocation.name, mode: spmn.storageLocation.mode};
+            firstIdx = i;
+            break;
+          }
+        }
+
+        if (firstIdx == -1) {
+          return;
+        }
+
+        for (var i = 1; i < $scope.specimens.length; i++) {
+          var spmn = $scope.specimens[i];
+          if (spmn.existingStatus != 'Collected' && !spmn.isVirtual && firstIdx != i) {
+            spmn.storageLocation = angular.extend({}, location);
+          }
+        }
+      };
+
       init();
     });
