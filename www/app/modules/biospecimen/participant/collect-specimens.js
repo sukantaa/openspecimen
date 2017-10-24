@@ -52,7 +52,7 @@ angular.module('os.biospecimen.participant.collect-specimens',
         'hasOnlyPendingChildren', 'isOpened', 'selected',
         'aliquotGrp', 'grpLeader', 'pLabel', 'pBarcode',
         'isVirtual', 'existingStatus', 'showInTree',
-        'expanded', 'aliquotLabels', 'aliquotBarcodes'
+        'expanded', 'aliquotLabels', 'aliquotBarcodes', 'removed'
       ];
       angular.forEach(attrsToDelete, function(attr) { delete selectorCrit.specimen[attr]; });
       return selectorCrit;
