@@ -11,7 +11,7 @@
       load-values="loadFilterValues(expr)" init-ctrl="setFiltersCtrl($listFilters)">
     </os-list-filters>
 
-    <os-clear-filters opts="ctx.filters"></os-clear-filters>
+    <os-list-page-size opts="ctx.pagerOpts" on-change="pageSizeChanged(recordsPerPage)"></os-list-page-size>
   </div>
 </div>
 

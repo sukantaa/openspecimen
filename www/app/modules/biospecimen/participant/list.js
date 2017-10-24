@@ -18,7 +18,8 @@ angular.module('os.biospecimen.participant.list', ['os.biospecimen.models'])
         filtersCfg: angular.copy(participantListCfg.filters),
         filters: Util.filterOpts({}),
         participants: {},
-        listSize: -1
+        listSize: -1,
+        pagerOpts: pagerOpts
       };
 
       angular.extend($scope.listViewCtx, {
@@ -34,10 +35,15 @@ angular.module('os.biospecimen.participant.list', ['os.biospecimen.models'])
     }
 
     function loadParticipants() {
-      cp.getListDetail(listParams, getFilters()).then(
+      var params = angular.extend({}, listParams);
+      if (pagerOpts.$$pageSizeChanged > 0) {
+        params.includeCount = false;
+      }
+
+      cp.getListDetail(params, getFilters()).then(
         function(participants) {
           $scope.ctx.participants = participants;
-          if (listParams.includeCount) {
+          if (params.includeCount) {
             $scope.ctx.listSize = participants.size;
           }
 
@@ -86,6 +92,11 @@ angular.module('os.biospecimen.participant.list', ['os.biospecimen.models'])
 
     $scope.setFiltersCtrl = function($listFilters) {
       $scope.ctx.$listFilters = $listFilters;
+      loadParticipants();
+    }
+
+    $scope.pageSizeChanged = function(newPageSize) {
+      listParams.maxResults = pagerOpts.recordsPerPage + 1;
       loadParticipants();
     }
 

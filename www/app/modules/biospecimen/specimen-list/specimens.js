@@ -30,7 +30,8 @@ angular.module('os.biospecimen.specimenlist')
       $scope.pagingOpts = {
         totalSpmns: 0,
         currPage: 1,
-        spmnsPerPage: 100
+        spmnsPerPage: 100,
+        recordsPerPage: 100
       };
 
       Util.filter($scope, 'ctx.filterOpts', loadSpecimens);
@@ -44,7 +45,8 @@ angular.module('os.biospecimen.specimenlist')
         $scope.pagingOpts = {
           totalSpmns: 0,
           currPage: 1,
-          spmnsPerPage: 100
+          spmnsPerPage: $scope.pagingOpts.spmnsPerPage,
+          recordsPerPage: $scope.pagingOpts.recordsPerPage
         };
       }
 
@@ -232,6 +234,15 @@ angular.module('os.biospecimen.specimenlist')
 
     $scope.clearFilters = function() {
       $scope.ctx.filterOpts = {};
+    }
+
+    $scope.pageSizeChanged = function() {
+      $scope.pagingOpts.spmnsPerPage = $scope.pagingOpts.recordsPerPage;
+      if ($scope.pagingOpts.currPage == 1) {
+        loadSpecimens();
+      } else {
+        $scope.pagingOpts.currPage = 1;
+      }
     }
 
     init();

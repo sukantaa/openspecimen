@@ -61,11 +61,15 @@ angular.module('openspecimen')
 
             if (opts.currentPageRecs > opts.recordsPerPage) {
               angular.extend(pagerCtx, {showMore: true, viewSize: opts.recordsPerPage});
-              if (pagerCtx.showListSize) {
+              if (pagerCtx.showListSize && !opts.$$pageSizeChanged) {
                 showListSize(pagerCtx, opts);
               }
             } else {
               angular.extend(pagerCtx, {showMore: false, viewSize: opts.currentPageRecs});
+            }
+
+            if (angular.isDefined(opts.$$pageSizeChanged)) {
+              opts.$$pageSizeChanged--;
             }
           }, true);
 
@@ -75,5 +79,34 @@ angular.module('openspecimen')
       },
 
       templateUrl: 'modules/common/list-pager.html'
+    }
+  })
+
+  .directive('osListPageSize', function() {
+    return {
+      restrict: 'E',
+
+      replace: true,
+
+      templateUrl: 'modules/common/list-page-size.html',
+
+      scope: {
+        opts: '=',
+
+        onChange: '&'
+      },
+
+      link: function(scope, element, attrs) {
+        scope.pageSizeChanged = function(newPageSize) {
+          var opts = scope.opts;
+          if (!opts || opts.recordsPerPage == newPageSize) {
+            return;
+          }
+
+          opts.recordsPerPage = newPageSize;
+          opts.$$pageSizeChanged = 2; // +1 for recordsPerPage and +1 for currentRecsPerPage
+          scope.onChange({recordsPerPage: newPageSize});
+        }
+      }
     }
   });

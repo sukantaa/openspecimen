@@ -151,16 +151,18 @@ public class AuthTokenFilter extends GenericFilterBean {
 		Date callStartTime = Calendar.getInstance().getTime();
 		chain.doFilter(req, resp);
 		AuthUtil.clearCurrentUser();
-	
-		UserApiCallLog userAuditLog = new UserApiCallLog();
-		userAuditLog.setUser(userDetails);
-		userAuditLog.setUrl(httpReq.getRequestURI().toString());
-		userAuditLog.setMethod(httpReq.getMethod());
-		userAuditLog.setCallStartTime(callStartTime);
-		userAuditLog.setCallEndTime(Calendar.getInstance().getTime());
-		userAuditLog.setResponseCode(Integer.toString(httpResp.getStatus()));
-		userAuditLog.setLoginAuditLog(loginAuditLog);
-		auditService.insertApiCallLog(userAuditLog);
+
+		if (isRecordableApi(httpReq)) {
+			UserApiCallLog userAuditLog = new UserApiCallLog();
+			userAuditLog.setUser(userDetails);
+			userAuditLog.setUrl(httpReq.getRequestURI().toString());
+			userAuditLog.setMethod(httpReq.getMethod());
+			userAuditLog.setCallStartTime(callStartTime);
+			userAuditLog.setCallEndTime(Calendar.getInstance().getTime());
+			userAuditLog.setResponseCode(Integer.toString(httpResp.getStatus()));
+			userAuditLog.setLoginAuditLog(loginAuditLog);
+			auditService.insertApiCallLog(userAuditLog);
+		}
 	}
 	
 	private User doBasicAuthentication(HttpServletRequest httpReq, HttpServletResponse httpResp) throws UnsupportedEncodingException {
@@ -201,7 +203,15 @@ public class AuthTokenFilter extends GenericFilterBean {
 				"You must supply valid credentials to access the OpenSpecimen REST API");
 	}
 
+	private boolean isRecordableApi(HttpServletRequest httpReq) {
+		return !matches(httpReq, "/user-notifications/unread-count/**");
+	}
+
 	private boolean matches(HttpServletRequest httpReq, String url) {
+		return new AntPathRequestMatcher(getUrlPattern(url), httpReq.getMethod(), true).matches(httpReq);
+	}
+
+	private String getUrlPattern(String url) {
 		if (!url.startsWith("/**")) {
 			String prefix = "/**";
 			if (!url.startsWith("/")) {
@@ -211,6 +221,6 @@ public class AuthTokenFilter extends GenericFilterBean {
 			url = prefix + url;
 		}
 
-		return new AntPathRequestMatcher(url, httpReq.getMethod(), true).matches(httpReq);
+		return url;
 	}
 }

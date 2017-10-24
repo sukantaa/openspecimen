@@ -618,7 +618,9 @@
     "cp": "Collection Protocol",
     "ppid": "PPID",
     "concentration_unit": "&#181;g/&#181;l",
-    "manual_selection": "Manual Selection",
+    "manual_selection": "Manual allocation",
+    "reallocate": "Rerun auto allocation",
+    "clear_positions": "Clear positions",
     "copy_first_to_all": "Copy first to all",
     "row": "Row",
     "column": "Column",
@@ -2465,6 +2467,10 @@
       "showing": "Showing",
       "of": "of",
       "many_more": "many more",
-      "records": "records"
+      "records": "records",
+      "recs_to_display": "Records to Display",
+      "hundred": "100",
+      "two_hundred": "200",
+      "five_hundred": "500"
     }
 }

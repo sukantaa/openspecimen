@@ -5,7 +5,7 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
     osRightDrawerSvc, Institute, User, ItemsHolder, PvManager,
     Util, DeleteUtil, CheckList, Alerts, ListPagerOpts) {
 
-    var pagerOpts;
+    var pagerOpts, filterOpts;
     var pvInit = false;
 
     function init() {
@@ -20,7 +20,7 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
     }
   
     function initPvsAndFilterOpts() {
-      $scope.userFilterOpts = Util.filterOpts({includeStats: true, maxResults: pagerOpts.recordsPerPage + 1});
+      filterOpts = $scope.userFilterOpts = Util.filterOpts({includeStats: true, maxResults: pagerOpts.recordsPerPage + 1});
       $scope.$on('osRightDrawerOpen', function() {
         if (pvInit) {
           return;
@@ -174,6 +174,10 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
 
     $scope.lockUsers = function() {
       updateStatus('Locked', 'user.users_locked');
+    }
+
+    $scope.pageSizeChanged = function() {
+      filterOpts.maxResults = pagerOpts.recordsPerPage + 1;
     }
 
     init();
