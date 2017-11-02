@@ -20,6 +20,15 @@
 
     <property name="eventPoint" column="STUDY_CALENDAR_EVENT_POINT"/>
 
+    <property name="eventPointUnit" column="EVENT_POINT_UNIT">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">
+          com.krishagni.catissueplus.core.common.domain.IntervalUnit
+        </param>
+        <param name="type">12</param>
+      </type>
+    </property>
+
     <many-to-one
       name="collectionProtocol"
       class="com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol"
@@ -91,16 +100,6 @@
       where
         cp.shortTitle = :shortTitle and
         cpe.code = :code
-    </query>
-
-    <query name="getMinEventPoint">
-      select
-        min(cpe.eventPoint)
-      from
-        com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent cpe
-        join cpe.collectionProtocol cp
-      where
-        cp.id = :cpId
     </query>
   </class>
 </hibernate-mapping>

@@ -7,6 +7,7 @@ angular.module('os.biospecimen.common.eventdesc', [])
 
       scope: {
         eventPoint: '=',
+        eventPointUnit: '=',
         eventLabel: '=',
         eventCode: '=',
         codingEnabled: '='
@@ -18,10 +19,10 @@ angular.module('os.biospecimen.common.eventdesc', [])
             '<span ng-switch-when="true" ng-switch on="eventPoint != null">' +
               '<span ng-switch-when="true">' +
                 '<span ng-if="eventPoint >= 0">' +
-                  'T{{eventPoint}}: ' +
+                  'T{{eventPoint}}{{"cp.cpe_point_units_abbr." + eventPointUnit | translate}}: '+
                 '</span>' +
                 '<span ng-if="eventPoint < 0">' +
-                  '-T{{-eventPoint}}: ' +
+                  '-T{{-eventPoint}}{{"cp.cpe_point_units_abbr." + eventPointUnit | translate}}: ' +
                 '</span>' +
               '</span>' +
               '<span>' +

@@ -247,16 +247,6 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 	}
 
 	@Override
-	public int getMinEventPoint(Long cpId) {
-		Number minEventPoint = (Number)sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_MIN_CPE_CAL_POINT)
-			.setLong("cpId", cpId)
-			.uniqueResult();
-
-		return minEventPoint != null ? minEventPoint.intValue() : 0;
-	}
-
-	@Override
 	public void saveCpe(CollectionProtocolEvent cpe) {
 		saveCpe(cpe, false);		
 	}

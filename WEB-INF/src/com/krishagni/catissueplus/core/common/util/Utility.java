@@ -45,6 +45,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
+import com.krishagni.catissueplus.core.common.domain.IntervalUnit;
 import com.krishagni.catissueplus.core.common.PdfUtil;
 
 import au.com.bytecode.opencsv.CSVWriter;
@@ -590,5 +591,32 @@ public class Utility {
 		}
 
 		return isValid;
+	}
+
+	public static Integer getNoOfDays(Integer interval, IntervalUnit intervalUnit) {
+		if (interval == null) {
+			return null;
+		}
+
+		Integer noOfDays = null;
+		switch (intervalUnit) {
+			case DAYS:
+				noOfDays = interval;
+				break;
+
+			case WEEKS:
+				noOfDays = interval * 7;
+				break;
+
+			case MONTHS:
+				noOfDays = interval * 30;
+				break;
+
+			case YEARS:
+				noOfDays = interval * 365;
+				break;
+		}
+
+		return noOfDays;
 	}
 }

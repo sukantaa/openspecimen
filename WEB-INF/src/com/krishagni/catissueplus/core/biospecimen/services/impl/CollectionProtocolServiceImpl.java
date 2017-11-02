@@ -640,8 +640,13 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			CollectionProtocol cp = cpe.getCollectionProtocol();
 			AccessCtrlMgr.getInstance().ensureReadCpRights(cp);
 
-			int minEventPoint = daoFactory.getCollectionProtocolDao().getMinEventPoint(cp.getId());
-			cpe.setOffset(minEventPoint > 0 ? 0 : minEventPoint);
+			if (cpe.getEventPoint() != null) {
+				CollectionProtocolEvent firstEvent = cp.firstEvent();
+				if (firstEvent.getEventPoint() != null) {
+					cpe.setOffset(firstEvent.getEventPoint());
+					cpe.setOffsetUnit(firstEvent.getEventPointUnit());
+				}
+			}
 
 			return ResponseEvent.response(CollectionProtocolEventDetail.from(cpe));
 		} catch (OpenSpecimenException ose) {

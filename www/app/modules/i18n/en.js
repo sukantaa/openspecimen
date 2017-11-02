@@ -82,6 +82,13 @@
     "use_system_setting": "Use System Setting",
     "search_user_manual": "Search user manual",
 
+    "interval_units": {
+      "DAYS": "Days",
+      "WEEKS": "Weeks",
+      "MONTHS": "Months",
+      "YEARS": "Years"
+    },
+
     "filters": {
       "title": "Filters",
       "min": "Min. {{caption}}",
@@ -235,7 +242,8 @@
     "add_cpe": "Add Event...",
     "cpe_list": "Events",
     "cpe_code": "Event Code",
-    "cpe_point": "Event Point (in Days)",
+    "cpe_point": "Event Point",
+    "cpe_point_unit": "Event Point Unit",
     "cpe_point_label": "Event Point Label",
     "deleting_event": "Deleting Event...",
     "confirm_delete_event": "Collection Protocol Event and its specimen requirements will be deleted. Are you sure you want to proceed?",
@@ -314,6 +322,13 @@
       "ON_REGISTRATION": "On Registration",
       "ON_VISIT": "On Visit",
       "NONE": "None"
+    },
+
+    "cpe_point_units_abbr": {
+      "DAYS": "D",
+      "WEEKS": "W",
+      "MONTHS": "M",
+      "YEARS": "Y"
     },
 
     "spmn_lineages": {

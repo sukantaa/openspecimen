@@ -58,8 +58,6 @@ public interface CollectionProtocolDao extends Dao<CollectionProtocol> {
 
 	public CollectionProtocolEvent getCpeByCode(String shortTitle, String code);
 
-	public int getMinEventPoint(Long cpId);
-	
 	public void saveCpe(CollectionProtocolEvent cpe);
 	
 	public void saveCpe(CollectionProtocolEvent cpe, boolean flush);

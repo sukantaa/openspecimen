@@ -13,6 +13,30 @@ angular.module('os.biospecimen.models.visit', ['os.common.models', 'os.biospecim
       return visits;
     };
 
+    function getAnticipatedDate(baseDate, offset, offsetUnit) {
+      var result = new Date(baseDate);
+
+      switch (offsetUnit) {
+        case 'DAYS':
+          result.setDate(result.getDate() + offset);
+          break;
+
+        case 'WEEKS':
+          result.setDate(result.getDate() + offset * 7);
+          break;
+
+        case 'MONTHS':
+          result.setMonth(result.getMonth() + offset);
+          break;
+
+        case 'YEARS':
+          result.setFullYear(result.getFullYear() + offset);
+          break;
+      }
+
+      return result.getTime();
+    }
+
     Visit.listFor = function(cprId, includeStats) {
       return Visit.query({cprId: cprId, includeStats: !!includeStats}).then(enrich);
     };
@@ -40,9 +64,11 @@ angular.module('os.biospecimen.models.visit', ['os.common.models', 'os.biospecim
           }
 
           if (event.eventPoint != null) {
-            event.anticipatedVisitDate = (event.eventPoint - event.offset) * 24 * 60 * 60 * 1000 + regDate;
+            var ad = getAnticipatedDate(regDate, event.eventPoint, event.eventPointUnit);
+            event.anticipatedVisitDate = getAnticipatedDate(ad, -event.offset, event.offsetUnit);
           }
           delete event.offset;
+          delete event.offsetUnit;
 
           return new Visit(event);
         }

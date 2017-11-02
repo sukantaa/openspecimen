@@ -21,7 +21,9 @@ public class CollectionProtocolEventDetail {
 	
 	private String eventLabel;
 	
-	private Double eventPoint;
+	private Integer eventPoint;
+
+	private String eventPointUnit;
 
 	private Long cpId;
 	
@@ -50,6 +52,8 @@ public class CollectionProtocolEventDetail {
 
 	private int offset;
 
+	private String offsetUnit;
+
 	public Long getId() {
 		return id;
 	}
@@ -74,12 +78,20 @@ public class CollectionProtocolEventDetail {
 		this.eventLabel = eventLabel;
 	}
 
-	public Double getEventPoint() {
+	public Integer getEventPoint() {
 		return eventPoint;
 	}
 
-	public void setEventPoint(Double eventPoint) {
+	public void setEventPoint(Integer eventPoint) {
 		this.eventPoint = eventPoint;
+	}
+
+	public String getEventPointUnit() {
+		return eventPointUnit;
+	}
+
+	public void setEventPointUnit(String eventPointUnit) {
+		this.eventPointUnit = eventPointUnit;
 	}
 
 	public Long getCpId() {
@@ -170,6 +182,14 @@ public class CollectionProtocolEventDetail {
 		this.offset = offset;
 	}
 
+	public String getOffsetUnit() {
+		return offsetUnit;
+	}
+
+	public void setOffsetUnit(String offsetUnit) {
+		this.offsetUnit = offsetUnit;
+	}
+
 	public static CollectionProtocolEventDetail from(CollectionProtocolEvent event) {
 		return from(event, false);
 	}
@@ -181,6 +201,7 @@ public class CollectionProtocolEventDetail {
 		detail.setCode(event.getCode());
 		detail.setEventLabel(event.getEventLabel());
 		detail.setEventPoint(event.getEventPoint());
+		detail.setEventPointUnit(event.getEventPointUnit() != null ? event.getEventPointUnit().name(): null);
 		detail.setClinicalDiagnosis(event.getClinicalDiagnosis());
 		detail.setClinicalStatus(event.getClinicalStatus());
 		detail.setCpId(event.getCollectionProtocol().getId());
@@ -190,6 +211,7 @@ public class CollectionProtocolEventDetail {
 		detail.setActivityStatus(event.getActivityStatus());
 
 		detail.setOffset(event.getOffset());
+		detail.setOffsetUnit(event.getOffsetUnit() != null ? event.getOffsetUnit().name() : null);
 		
 		if (event.getDefaultSite() != null) {
 			detail.setDefaultSite(event.getDefaultSite().getName());

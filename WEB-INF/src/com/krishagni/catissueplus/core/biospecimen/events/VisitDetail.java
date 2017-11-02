@@ -2,7 +2,6 @@
 package com.krishagni.catissueplus.core.biospecimen.events;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -15,6 +14,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
@@ -32,7 +32,9 @@ public class VisitDetail extends AttributeModifiedSupport {
 	
 	private String eventLabel;
 
-	private Double eventPoint;
+	private Integer eventPoint;
+
+	private String eventPointUnit;
 
 	private Long cpId;
 
@@ -114,12 +116,20 @@ public class VisitDetail extends AttributeModifiedSupport {
 		this.eventLabel = eventLabel;
 	}
 
-	public Double getEventPoint() {
+	public Integer getEventPoint() {
 		return eventPoint;
 	}
 
-	public void setEventPoint(Double eventPoint) {
+	public void setEventPoint(Integer eventPoint) {
 		this.eventPoint = eventPoint;
+	}
+
+	public String getEventPointUnit() {
+		return eventPointUnit;
+	}
+
+	public void setEventPointUnit(String eventPointUnit) {
+		this.eventPointUnit = eventPointUnit;
 	}
 
 	public Long getCpId() {
@@ -339,9 +349,11 @@ public class VisitDetail extends AttributeModifiedSupport {
 		detail.setCpShortTitle(cpr.getCollectionProtocol().getShortTitle());
 		
 		if (!visit.isUnplanned()) {
-			detail.setEventId(visit.getCpEvent().getId());
-			detail.setEventLabel(visit.getCpEvent().getEventLabel());
-			detail.setEventPoint(visit.getCpEvent().getEventPoint());
+			CollectionProtocolEvent cpe = visit.getCpEvent();
+			detail.setEventId(cpe.getId());
+			detail.setEventLabel(cpe.getEventLabel());
+			detail.setEventPoint(cpe.getEventPoint());
+			detail.setEventPointUnit(cpe.getEventPointUnit() != null ? cpe.getEventPointUnit().name() : null);
 		}
 		
 		if (!partial) {

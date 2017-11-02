@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.springframework.beans.BeanUtils;
@@ -16,19 +17,23 @@ import org.springframework.beans.BeanUtils;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol.VisitNamePrintMode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
+import com.krishagni.catissueplus.core.common.domain.IntervalUnit;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 @Audited
 public class CollectionProtocolEvent implements Comparable<CollectionProtocolEvent> {
+
 	private static final String ENTITY_NAME = "collection_protocol_event";
 	
 	private Long id;
 
 	private String eventLabel;
 
-	private Double eventPoint;
+	private Integer eventPoint;
+
+	private IntervalUnit eventPointUnit;
 
 	private CollectionProtocol collectionProtocol;
 	
@@ -52,6 +57,8 @@ public class CollectionProtocolEvent implements Comparable<CollectionProtocolEve
 
 	private transient int offset = 0;
 
+	private transient IntervalUnit offsetUnit = IntervalUnit.DAYS;
+
 	public static String getEntityName() {
 		return ENTITY_NAME;
 	}
@@ -72,12 +79,20 @@ public class CollectionProtocolEvent implements Comparable<CollectionProtocolEve
 		this.eventLabel = eventLabel;
 	}
 
-	public Double getEventPoint() {
+	public Integer getEventPoint() {
 		return eventPoint;
 	}
 
-	public void setEventPoint(Double eventPoint) {
+	public void setEventPoint(Integer eventPoint) {
 		this.eventPoint = eventPoint;
+	}
+
+	public IntervalUnit getEventPointUnit() {
+		return eventPointUnit;
+	}
+
+	public void setEventPointUnit(IntervalUnit eventPointUnit) {
+		this.eventPointUnit = eventPointUnit;
 	}
 
 	@NotAudited
@@ -194,9 +209,18 @@ public class CollectionProtocolEvent implements Comparable<CollectionProtocolEve
 		this.offset = offset;
 	}
 
+	public IntervalUnit getOffsetUnit() {
+		return offsetUnit;
+	}
+
+	public void setOffsetUnit(IntervalUnit offsetUnit) {
+		this.offsetUnit = offsetUnit;
+	}
+
 	// updates all but specimen requirements
 	public void update(CollectionProtocolEvent other) { 
 		setEventPoint(other.getEventPoint());
+		setEventPointUnit(other.getEventPointUnit());
 		setEventLabel(other.getEventLabel());
 		setCollectionProtocol(other.getCollectionProtocol());
 		setCode(other.getCode());
@@ -287,16 +311,16 @@ public class CollectionProtocolEvent implements Comparable<CollectionProtocolEve
 
 	@Override
 	public int compareTo(CollectionProtocolEvent other) {
-		Double thisEventPoint = getEventPoint() == null ? 0d : getEventPoint();
-		Double otherEventPoint = other.getEventPoint() == null ? 0d : other.getEventPoint();
-
-		if (thisEventPoint.equals(otherEventPoint)) {
-			return getId().compareTo(other.getId());
-		} else {
-			return thisEventPoint.compareTo(otherEventPoint);
+		Integer thisEventPoint  = Utility.getNoOfDays(getEventPoint(), getEventPointUnit());
+		Integer otherEventPoint = Utility.getNoOfDays(other.getEventPoint(), other.getEventPointUnit());
+		int result = ObjectUtils.compare(thisEventPoint, otherEventPoint, true);
+		if (result == 0) {
+			result = getId().compareTo(other.getId());
 		}
+
+		return result;
 	}
-	
+
 	private static final String[] EXCLUDE_COPY_PROPS = {
 			"id",
 			"code",
