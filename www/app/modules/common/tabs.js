@@ -25,6 +25,7 @@ angular.module('openspecimen')
 
           this.selected = $index;
           angular.extend($scope.tabs[this.selected], {selected: true});
+          $scope.tabs[this.selected].onSelect();
         }
       },
 
@@ -48,7 +49,8 @@ angular.module('openspecimen')
       transclude: true,
       replace : true,
       scope : {
-        title : '@'
+        title : '@',
+        onSelect : '&'
       },
 
       link: function(scope, element, attrs, tabsCtrl) {
