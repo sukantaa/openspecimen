@@ -19,6 +19,8 @@ public interface SpecimenDao extends Dao<Specimen> {
 	Specimen getByLabelAndCp(String cpShortTitle, String label);
 
 	Specimen getByBarcode(String barcode);
+
+	Specimen getByBarcodeAndCp(String cpShortTitle, String barcode);
 	
 	List<Specimen> getSpecimensByIds(List<Long> specimenIds);
 	
@@ -41,6 +43,8 @@ public interface SpecimenDao extends Dao<Specimen> {
 	List<Visit> getSpecimenVisits(SpecimenListCriteria crit);
 
 	boolean areDuplicateLabelsPresent();
+
+	boolean areDuplicateBarcodesPresent();
 
 	Map<Long, Long> getSpecimenStorageSite(Set<Long> specimenIds);
 

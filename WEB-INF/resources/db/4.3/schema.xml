@@ -140,4 +140,29 @@
       <column name="EVENT_POINT_UNIT" type="${text.type}(16)" defaultValue="DAYS"/>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vgaikwad" id="Remove unique constraint to allow duplicate specimen barcode" dbms="mysql">
+    <dropUniqueConstraint tableName="CATISSUE_SPECIMEN" constraintName="BARCODE"/>
+  </changeSet>
+
+  <changeSet author="vgaikwad" id="Remove unique constraint to allow duplicate specimen barcode" dbms="oracle">
+    <dropUniqueConstraint tableName="CATISSUE_SPECIMEN" constraintName="SYS_C00107673"/>
+  </changeSet>
+
+  <changeSet author="vgaikwad" id="Unique specimen barcode per collection protocol" dbms="mysql">
+    <addUniqueConstraint constraintName="CAT_SPEC_CP_ID_BARCODE_UQ"
+      tableName="CATISSUE_SPECIMEN" columnNames="COLLECTION_PROTOCOL_ID, BARCODE"/>
+  </changeSet>
+
+  <changeSet author="vgaikwad" id="Unique specimen barcode per collection protocol" dbms="oracle">
+    <sql>
+      create unique index CAT_SPEC_CP_ID_BARCODE_UQ on catissue_specimen(
+        case when
+          collection_protocol_id is not null and barcode is not null
+        then
+          collection_protocol_id || '-' || barcode
+        end
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

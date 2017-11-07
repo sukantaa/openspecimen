@@ -1,13 +1,13 @@
 <form name="rform" class="form-horizontal" os-form-validator="rform" novalidate>
   <div class="os-modal-header">
     <span translate="specimens.multiple_cp_specimens">
-      Specimen labels with multiple protocols
+      Specimen in multiple protocols
     </span>
   </div>
   <div class="os-modal-body">
     <div class="os-section">
       <span translate="specimens.select_protocol">
-        Following specimen labels are present in multiple protocols. Please select the right protocol before proceeding
+        Following specimens are present in multiple protocols. Please select the right protocol before proceeding
       </span>
     </div>
 
@@ -15,7 +15,7 @@
       <thead class="os-table-head">
         <tr class="row">
           <th class="col col-xs-5 text-right">
-            <span translate="specimens.label"> Label </span>
+            <span>{{ ('specimens.' + attr) | translate}}</span>
           </th>
           <th class="col col-xs-7">
             <span translate="specimens.cp"> Collection Protocol </span>

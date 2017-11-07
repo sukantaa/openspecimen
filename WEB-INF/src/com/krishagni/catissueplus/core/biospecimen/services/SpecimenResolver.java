@@ -13,4 +13,6 @@ public interface SpecimenResolver {
 	public Specimen getSpecimen(Long specimenId, String cpShortTitle, String label, String barcode);
 
 	public Specimen getSpecimen(Long specimenId, String cpShortTitle, String label, String barcode, OpenSpecimenException ose);
+
+	public Specimen getSpecimenByBarcode(String cpShortTitle, String barcode);
 }

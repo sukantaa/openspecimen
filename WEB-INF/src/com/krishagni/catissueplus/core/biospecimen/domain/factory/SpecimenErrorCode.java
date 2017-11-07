@@ -27,6 +27,8 @@ public enum SpecimenErrorCode implements ErrorCode {
 	MANUAL_LABEL_NOT_ALLOWED,
 	
 	DUP_BARCODE,
+
+	DUP_BARCODE_IN_CP,
 	
 	INVALID_LINEAGE,
 	
@@ -105,6 +107,8 @@ public enum SpecimenErrorCode implements ErrorCode {
 	INVALID_FREEZE_THAW_CYCLES,
 
 	UQ_LBL_CP_CHG_NA,
+
+	UQ_BC_CP_CHG_NA,
 
 	INVALID_DISPOSE_STATUS,
 

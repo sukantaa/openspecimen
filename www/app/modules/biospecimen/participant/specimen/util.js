@@ -230,29 +230,6 @@ angular.module('os.biospecimen.specimen')
       return url.length;
     }
 
-    function ensureAllBarcodesExist(barcodes, specimens, errorOpts) {
-      var spmnsMap = specimens.reduce(
-        function(map, spmn) {
-          map[spmn.barcode] = spmn;
-          return map;
-        },
-        {}
-      );
-
-      var notFoundBarcodes = barcodes.filter(
-        function(barcode) {
-          return !spmnsMap[barcode];
-        }
-      );
-
-      if (notFoundBarcodes.length != 0) {
-        showError(notFoundBarcodes, errorOpts);
-        return deferred(undefined);
-      }
-
-      return deferred(specimens);
-    }
-
     function deferred(resp) {
       var deferred = $q.defer();
       deferred.resolve(resp);
@@ -260,21 +237,33 @@ angular.module('os.biospecimen.specimen')
     }
 
     function resolveSpecimens(labels, barcodes, specimens, errorOpts) {
-      if (!labels || labels.length == 0) {
-        return ensureAllBarcodesExist(barcodes, specimens, errorOpts);
+      var inputs, attr;
+      if (!!labels && labels.length > 0) {
+        inputs = labels;
+        attr = 'label';
+      } else {
+        inputs = barcodes;
+        attr = 'barcode';
       }
 
+      return resolveSpecimens1(inputs, attr, specimens, errorOpts);
+    }
+
+    //
+    // labels could be either specimen label or barcode
+    //
+    function resolveSpecimens1(labels, attr, specimens, errorOpts) {
       var specimensMap = {};
       angular.forEach(specimens, function(spmn) {
-        if (!specimensMap[spmn.label]) {
-          specimensMap[spmn.label] = [spmn];
+        if (!specimensMap[spmn[attr]]) {
+          specimensMap[spmn[attr]] = [spmn];
         } else {
-          specimensMap[spmn.label].push(spmn);
+          specimensMap[spmn[attr]].push(spmn);
         }
       });
 
       //
-      // {label: label, specimens; [s1, s2], selected: s1}
+      // {label: label/barcode, specimens; [s1, s2], selected: s1}
       //
       var labelsInfo = [];
       var dupLabels = [], notFoundLabels = [];
@@ -312,12 +301,15 @@ angular.module('os.biospecimen.specimen')
         resolve: {
           labels: function() {
             return dupLabels;
+          },
+          attr: function() {
+            return attr;
           }
         }
       }).result.then(
         function(spmns) {
           //
-          // Duplicate labels info passed to modal is a sub-view of labelsInfo list;
+          // Duplicate labels/barcodes info passed to modal is a sub-view of labelsInfo list;
           // therefore any updates/selection done in modal are visible in labelsInfo
           // list as well
           //
@@ -453,9 +445,10 @@ angular.module('os.biospecimen.specimen')
       sdeGroupSpecimens: sdeGroupSpecimens
     };
   })
-  .controller('ResolveSpecimensCtrl', function($scope, $modalInstance, labels, Alerts) {
+  .controller('ResolveSpecimensCtrl', function($scope, $modalInstance, labels, attr, Alerts) {
     function init() {
       $scope.labels = labels;
+      $scope.attr = attr;
     }
 
     $scope.cancel = function() {

@@ -64,7 +64,7 @@ public class SpecimenResolverImpl implements SpecimenResolver {
 			specimen = getSpecimen(cpShortTitle, label);
 		} else if (StringUtils.isNotBlank(barcode)) {
 			key = barcode;
-			specimen = daoFactory.getSpecimenDao().getByBarcode(barcode);
+			specimen = getSpecimenByBarcode(cpShortTitle, barcode);
 		}
 
 		if (key == null) {
@@ -88,10 +88,36 @@ public class SpecimenResolverImpl implements SpecimenResolver {
 		return null;
 	}
 
+	@Override
+	@PlusTransactional
+	public Specimen getSpecimenByBarcode(String cpShortTitle, String barcode) {
+		Specimen specimen = null;
+
+		if (areBarcodesUniquePerCp()) {
+			if (StringUtils.isBlank(cpShortTitle)) {
+				throw OpenSpecimenException.userError(CpErrorCode.SHORT_TITLE_REQUIRED);
+			}
+
+			specimen = daoFactory.getSpecimenDao().getByBarcodeAndCp(cpShortTitle, barcode);
+		} else {
+			specimen = daoFactory.getSpecimenDao().getByBarcode(barcode);
+		}
+
+		return specimen;
+	}
+
 	private boolean areLabelsUniquePerCp() {
 		return ConfigUtil.getInstance().getBoolSetting(
 			ConfigParams.MODULE,
 			ConfigParams.UNIQUE_SPMN_LABEL_PER_CP,
+			false
+		);
+	}
+
+	private boolean areBarcodesUniquePerCp() {
+		return ConfigUtil.getInstance().getBoolSetting(
+			ConfigParams.MODULE,
+			ConfigParams.UNIQUE_SPMN_BARCODE_PER_CP,
 			false
 		);
 	}

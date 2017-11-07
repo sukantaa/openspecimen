@@ -557,11 +557,22 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 	@Override
 	public void onConfigChange(String name, String value) {
-		if (name.equals(ConfigParams.UNIQUE_SPMN_LABEL_PER_CP) && !"true".equalsIgnoreCase(value)) {
-			boolean dupSpmnLabels = daoFactory.getSpecimenDao().areDuplicateLabelsPresent();
-			if (dupSpmnLabels) {
-				throw OpenSpecimenException.userError(SpecimenErrorCode.UQ_LBL_CP_CHG_NA);
-			}
+		if ("true".equalsIgnoreCase(value)) {
+			return;
+		}
+
+		boolean duplicates = false;
+		SpecimenErrorCode errorCode = null;
+		if (name.equals(ConfigParams.UNIQUE_SPMN_LABEL_PER_CP)) {
+			duplicates = daoFactory.getSpecimenDao().areDuplicateLabelsPresent();
+			errorCode = SpecimenErrorCode.UQ_LBL_CP_CHG_NA;
+		} else if (name.equals(ConfigParams.UNIQUE_SPMN_BARCODE_PER_CP)) {
+			duplicates = daoFactory.getSpecimenDao().areDuplicateBarcodesPresent();
+			errorCode = SpecimenErrorCode.UQ_BC_CP_CHG_NA;
+		}
+
+		if (duplicates) {
+			throw OpenSpecimenException.userError(errorCode);
 		}
 	}
 
@@ -683,9 +694,14 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		if (existing != null && specimen.getBarcode().equals(existing.getBarcode())) {
 			return;
 		}
-		
-		if (daoFactory.getSpecimenDao().getByBarcode(specimen.getBarcode()) != null) {
-			ose.addError(SpecimenErrorCode.DUP_BARCODE, specimen.getBarcode());
+
+		CollectionProtocol cp = specimen.getCollectionProtocol();
+		if (getSpecimenByBarcode(cp.getShortTitle(), specimen.getBarcode()) != null) {
+			if (areBarcodesUniquePerCp()) {
+				ose.addError(SpecimenErrorCode.DUP_BARCODE_IN_CP, specimen.getBarcode(), cp.getShortTitle());
+			} else {
+				ose.addError(SpecimenErrorCode.DUP_BARCODE, specimen.getBarcode());
+			}
 		}
 	}
 
@@ -889,8 +905,16 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		return specimenResolver.getSpecimen(cpShortTitle, label);
 	}
 
+	private Specimen getSpecimenByBarcode(String cpShortTitle, String barcode) {
+		return specimenResolver.getSpecimenByBarcode(cpShortTitle, barcode);
+	}
+
 	private boolean areLabelsUniquePerCp() {
 		return cfgSvc.getBoolSetting(ConfigParams.MODULE, ConfigParams.UNIQUE_SPMN_LABEL_PER_CP, false);
+	}
+
+	private boolean areBarcodesUniquePerCp() {
+		return cfgSvc.getBoolSetting(ConfigParams.MODULE, ConfigParams.UNIQUE_SPMN_BARCODE_PER_CP, false);
 	}
 
 	private void incrParentFreezeThawCycles(SpecimenDetail detail, Specimen spec) {

@@ -34,4 +34,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vgaikwad" id="Config property to enable or disable unique specimen barcode per CP">
+    <sql>
+      call add_cfg_prop(
+        'biospecimen', 'unique_spmn_barcode_per_cp',
+        'unique_spmn_barcode_per_cp', 'unique_spmn_barcode_per_cp_desc',
+        'BOOLEAN', 'false'
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

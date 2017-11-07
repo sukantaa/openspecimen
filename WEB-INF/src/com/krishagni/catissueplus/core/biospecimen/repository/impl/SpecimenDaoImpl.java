@@ -98,13 +98,26 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	@SuppressWarnings("unchecked")
 	@Override
 	public Specimen getByBarcode(String barcode) {
-		Criteria query = sessionFactory.getCurrentSession().createCriteria(Specimen.class);
-		query.add(Restrictions.eq("barcode", barcode));
-		List<Specimen> specimens = query.list();
-		
+		List<Specimen> specimens = sessionFactory.getCurrentSession()
+			.getNamedQuery(GET_BY_BARCODE)
+			.setParameter("barcode", barcode)
+			.list();
+
 		return specimens.isEmpty() ? null : specimens.iterator().next();
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Specimen getByBarcodeAndCp(String cpShortTitle, String barcode) {
+		List<Specimen> specimens = sessionFactory.getCurrentSession()
+			.getNamedQuery(GET_BY_BARCODE_AND_CP)
+			.setParameter("barcode", barcode)
+			.setParameter("cpShortTitle", cpShortTitle)
+			.list();
+
+		return specimens.isEmpty() ? null : specimens.iterator().next();
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Specimen> getSpecimensByIds(List<Long> specimenIds) {
@@ -248,7 +261,17 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 			.getNamedQuery(GET_DUPLICATE_LABEL_COUNT)
 			.list();
 
-		return rows.size() > 0;
+		return !rows.isEmpty();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public boolean areDuplicateBarcodesPresent() {
+		List<Object[]> rows = getSessionFactory().getCurrentSession()
+			.getNamedQuery(GET_DUPLICATE_BARCODE_COUNT)
+			.list();
+
+		return !rows.isEmpty();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -524,6 +547,10 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	private static final String GET_BY_LABEL = FQN + ".getByLabel";
 
 	private static final String GET_BY_LABEL_AND_CP = FQN + ".getByLabelAndCp";
+
+	private static final String GET_BY_BARCODE = FQN + ".getByBarcode";
+
+	private static final String GET_BY_BARCODE_AND_CP = FQN + ".getByBarcodeAndCp";
 	
 	private static final String GET_BY_VISIT_AND_SR = FQN + ".getByVisitAndReq";
 
@@ -538,6 +565,8 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	private static final String GET_LATEST_DISTRIBUTION_AND_RETURN_DATES = FQN + ".getLatestDistributionAndReturnDates";
 
 	private static final String GET_DUPLICATE_LABEL_COUNT = FQN + ".getDuplicateLabelCount";
+
+	private static final String GET_DUPLICATE_BARCODE_COUNT = FQN + ".getDuplicateBarcodeCount";
 
 	private static final String GET_STORAGE_SITE = FQN + ".getStorageSite";
 }

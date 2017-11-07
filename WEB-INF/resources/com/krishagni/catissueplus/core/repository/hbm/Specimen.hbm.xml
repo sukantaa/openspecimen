@@ -101,7 +101,7 @@
     <filter name="activeEntity"/>
 
     <query name="getByLabel">
-      from 
+      from
         com.krishagni.catissueplus.core.biospecimen.domain.Specimen s
       where
         s.label = :label
@@ -112,11 +112,27 @@
         s
       from
         com.krishagni.catissueplus.core.biospecimen.domain.Specimen s
-        join s.visit v
-        join v.registration reg
-        join reg.collectionProtocol cp
+        join s.collectionProtocol cp
       where
         s.label = :label and
+        cp.shortTitle = :cpShortTitle
+    </query>
+
+    <query name="getByBarcode">
+      from
+        com.krishagni.catissueplus.core.biospecimen.domain.Specimen s
+      where
+        s.barcode = :barcode
+    </query>
+
+    <query name="getByBarcodeAndCp">
+      select
+        s
+      from
+        com.krishagni.catissueplus.core.biospecimen.domain.Specimen s
+        join s.collectionProtocol cp
+      where
+        s.barcode = :barcode and
         cp.shortTitle = :cpShortTitle
     </query>
 
@@ -214,6 +230,19 @@
         label is not null
       group by
         label
+      having
+        count(id) > 1
+    </query>
+
+    <query name="getDuplicateBarcodeCount">
+      select
+        count(id)
+      from
+        com.krishagni.catissueplus.core.biospecimen.domain.Specimen
+      where
+        barcode is not null
+      group by
+        barcode
       having
         count(id) > 1
     </query>
