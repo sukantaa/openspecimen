@@ -118,7 +118,7 @@
         sp.occupying_specimen_id is not null and
         s.identifier in (:shipmentIds)
       group by
-        s.identifier;
+        s.identifier
     </sql-query>
 
     <sql-query name="getSpecimensCountByContainer">
