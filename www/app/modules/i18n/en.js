@@ -13,12 +13,12 @@
     "queries": "Queries",
     "containers": "Containers",
     "forms": "Forms",
-    "specimen_lists": "Specimen Carts",
-    "distribution_orders": "Distribution Orders",
-    "shipping_and_tracking": "Shipping and Tracking",
+    "specimen_lists": "Carts",
+    "distribution_orders": "Orders",
+    "shipping_and_tracking": "Shipments",
     "jobs": "Jobs",
     "training": "Training",
-    "consent_statements": "Consent Statements",
+    "consent_statements": "Consents",
 
     "cp_desc": "Create, update SOP of visits and specimens",
     "rde_desc": "Rapidly capture patients, visits and specimens data",
@@ -290,7 +290,7 @@
     "anticipated_participant_count": "Expected Registrations",
 
     "label_format": {
-      "title": "Label Format and Print Settings",
+      "title": "Label Format and Print",
       "specimen": "Specimen",
       "visit": "Visit",
       "aliquot": "Aliquot",
@@ -301,13 +301,13 @@
     },
 
     "catalog": {
-      "title": "Catalog settings",
+      "title": "Catalog",
       "query": "Query",
       "query_desc": "Select saved query to use for Specimen Catalog"
     },
 
     "container": {
-      "title": "Container Settings",
+      "title": "Container",
       "auto_alloc": "Auto Allocation",
       "store_aliquots_same_box": "Store aliquots in same box"
     },
@@ -338,14 +338,14 @@
     },
 
     "dp": {
-      "title": "Distribution Settings",
+      "title": "Distribution",
       "add_dp": "Add Distribution Protocol",
       "dup_dp": "Distribution protocol already added to the collection protocol.",
       "no_dp": "No distribution protocols can be assigned to collection protocol."
     },
 
     "reporting": {
-      "title": "Monthly Report Settings",
+      "title": "Monthly Report",
       "add": "Customise Report",
       "disable": "Disable Report",
       "enable": "Enable Report",
@@ -469,7 +469,7 @@
       "bulk_register": "Bulk Register",
       "single": "Single",
       "multiple": "Multiple",
-      "specimen_catalog": "Specimen Catalog",
+      "specimen_catalog": "Catalog",
       "import": "Import",
       "anonymize": "Anonymize",
       "prepare_kit": "Prepare Specimen Kit",
@@ -648,7 +648,7 @@
     "search_results": "Specimen Search Result for {{key}}",
     "print": "Print",
     "close_parent": "Close Parent",
-    "ops": "Specimen Actions",
+    "ops": "Actions",
     "auto": "Auto",
     "aliquot_specs": "Aliquots Specifications",
     "review_locations": "Review Locations",
@@ -1175,6 +1175,7 @@
   
   "container": {
     "list": "Containers",
+    "types": "Types",
     "create_mode": "Create",
     "single_container": "Single Container",
     "multiple_containers": "Multiple Containers",
@@ -1643,8 +1644,8 @@
     },
 
     "audit_logs": {
-      "view_logs": "View Audit Logs",
-      "title": "Query Audit Logs",
+      "view_logs": "Query Audit",
+      "title": "Query Audit",
       "query": "Query",
       "executed_by": "Executed By",
       "type": "Type",
@@ -1668,18 +1669,18 @@
     "user": "User",
     "site": "Site",
     "institute": "Institute",
-    "storage_container": "Storage Container",
+    "storage_container": "Container",
     "visit": "Visit",
     "medical_record_number": "MRN",
     "collection_protocol_event": "Collection Protocol Event",
     "collection_protocol_registration": "Collection Protocol Registration",
     "specimen": "Specimen",
-    "distribution_order": "Distribution Order",
+    "distribution_order": "Order",
     "form": "Form",
     "participant_reg": "Collection Protocol Registration",
     "participant": "Participant",
-    "specimen_event": "Specimen Event",
-    "specimen_list": "Specimen Cart",
+    "specimen_event": "Event",
+    "specimen_list": "Cart",
     "consent_response": "Consent Response",
     "consent": "Consent",
     "container": "Container",
@@ -1735,7 +1736,7 @@
       "userRoles": "User Roles",
       "institute": "Institutes",
       "site": "Sites",
-      "storageContainer": "Storage Containers",
+      "storageContainer": "Containers",
       "cpr": "Collection Protocol Registrations",
       "cprMultiple": "Participant Registrations",
       "otherCpr": "Register to Other Protocols",
@@ -1749,7 +1750,7 @@
       "specimenDisposal": "Specimen Disposal",
       "shipment": "Specimen Shipments",
       "containerShipment": "Container Shipments",
-      "distributionOrder": "Distribution Order"
+      "distributionOrder": "Order"
     },
 
     "import_types": {
@@ -1799,15 +1800,15 @@
   },
 
   "specimen_list": {
-    "new_list": "New Specimen Cart",
-    "create_list": "Create Specimen Cart",
-    "update_list": "Update Specimen Cart",
+    "new_list": "New Cart",
+    "create_list": "Create Cart",
+    "update_list": "Update Cart",
     "create_new_list": "Create New",
     "manage_lists": "Manage Carts",
-    "search_list": "Search Specimen Cart",
+    "search_list": "Search Cart",
     "default_list": "My Default Cart",
     "user_default_list": "{{firstName}} {{lastName}}'s Default Cart",
-    "lists": "Specimen Carts",
+    "lists": "Carts",
     "name": "Name",
     "share_list_with_users": "Share cart with following users",
     "users": "Users",
@@ -1876,9 +1877,9 @@
   },
 
   "orders": {
-    "list": "Distribution Orders",
+    "list": "Orders",
     "title": "Distribution Order",
-    "create_order": "Create Distribution Order",
+    "create_order": "Create Order",
     "name": "Name",
     "request": "Request",
     "requestor": "Requestor",
@@ -1907,8 +1908,8 @@
     "report_gen_initiated": "Generating distribution order report...",
     "downloading_report": "Downloading distribution order report...",
     "report_will_be_emailed": "Generating distribution order report is taking more time than anticipated. Link to download report will be sent to you by email",
-    "bulk_import": "Bulk Import Distribution Orders",
-    "bulk_import_jobs": "Import Distribution Orders Job List",
+    "bulk_import": "Bulk Import Orders",
+    "bulk_import_jobs": "Import Orders Job List",
 
     "filters": "Filters",
 
@@ -1958,8 +1959,8 @@
     },
 
     "tooltip": {
-      "create": "Create new distribution order",
-      "search": "Filter out distribution orders"
+      "create": "Create new order",
+      "search": "Filter out orders"
     },
 
     "errors": {
@@ -2166,14 +2167,14 @@
     },
     
   "consent_statement": {
-    "list": "Consent Statements",
-    "create_stmt": "Create Statement",
+    "list": "Consents",
+    "create_stmt": "Create Consent",
     "code": "Code",
     "statement": "Statement",
 
     "tooltip": {
-      "add": "Click to add new Consent Statement",
-      "search": "Click to search Consent Statements"
+      "add": "Click to add new Consent",
+      "search": "Click to search Consent"
     },
 
     "filter": {
@@ -2389,8 +2390,8 @@
         "email_query_export_data_desc": "Send an email when query interface has finished exporting requested data.",
         "email_query_share_query_folder": "Query Folder Shared",
         "email_query_share_query_folder_desc": "Send an email when a query folder is shared with one or more users.",
-        "email_specimen_list_shared": "Specimen Cart Shared",
-        "email_specimen_list_shared_desc": "Send an email when a specimen cart is shared with one or more users.",
+        "email_specimen_list_shared": "Cart Shared",
+        "email_specimen_list_shared_desc": "Send an email when a cart is shared with one or more users.",
         "email_users_created": "User Created",
         "email_users_created_desc": "Send an email when a new user is created.",
         "email_users_new_user_request": "User Signup Request",
