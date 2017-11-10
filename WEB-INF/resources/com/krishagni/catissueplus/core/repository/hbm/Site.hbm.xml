@@ -43,7 +43,7 @@
       <filter name="activeEntity"/>
     </set>
 
-    <set name="collectionProtocols" table="CATISSUE_SITE_CP" inverse="false" cascade="none" sort="unsorted">
+    <set name="collectionProtocols" table="CATISSUE_SITE_CP" inverse="true" cascade="none" sort="unsorted">
       <key column="SITE_ID"/>
       <many-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol" column="COLLECTION_PROTOCOL_ID">
         <filter name="activeEntity"/>
