@@ -59,6 +59,8 @@ public enum CpErrorCode implements ErrorCode {
 	
 	DUP_CP_SITE_CODES,
 
+	USED_SITES,
+
 	SOP_DOC_NOT_FOUND,
 
 	SOP_DOC_MOVED_OR_DELETED,

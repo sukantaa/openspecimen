@@ -80,4 +80,11 @@
       <column name="externalSubjectId_MOD" type="${bit.type}"/>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit and track changes to registration site">
+    <addColumn tableName="CATISSUE_COLL_PROT_REG_AUD">
+      <column name="SITE_ID" type="${int.type}"/>
+      <column name="site_MOD" type="${bit.type}"/>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

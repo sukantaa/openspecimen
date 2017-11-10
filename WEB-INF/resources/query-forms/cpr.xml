@@ -213,6 +213,15 @@
       </textField>
     </row>
     <row>
+      <siteField>
+        <name>site</name>
+        <udn>site</udn>
+        <caption>#getMessage("participant_reg_site")</caption>
+        <column>SITE_ID</column>
+        <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+      </siteField>
+    </row>
+    <row>
       <textField>
         <name>externalSubjectId</name>
         <udn>externalSubjectId</udn>

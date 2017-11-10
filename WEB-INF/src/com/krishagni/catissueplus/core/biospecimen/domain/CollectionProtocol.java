@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.envers.AuditTable;
@@ -466,7 +467,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	}
 	
 	public Set<Site> getRepositories() {
-		return Utility.<Set<Site>>collect(sites, "site", true);
+		return getSites().stream().map(CollectionProtocolSite::getSite).collect(Collectors.toSet());
 	}
 
 	@NotAudited

@@ -376,6 +376,7 @@
     "register_participant": "Register Participant",
     "edit_participant": "Edit Participant",
     "reg_date": "Registration Date",
+    "reg_site": "Registration Site",
     "ppid": "Participant Protocol ID",
     "external_id": "External Subject ID",
     "name": "Name",

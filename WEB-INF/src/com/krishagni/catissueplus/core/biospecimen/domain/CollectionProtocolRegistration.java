@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -37,6 +38,8 @@ public class CollectionProtocolRegistration extends BaseEntity {
 	private Date registrationDate;
 
 	private String externalSubjectId;
+
+	private Site site;
 
 	private Participant participant;
 
@@ -90,6 +93,14 @@ public class CollectionProtocolRegistration extends BaseEntity {
 
 	public void setExternalSubjectId(String externalSubjectId) {
 		this.externalSubjectId = externalSubjectId;
+	}
+
+	public Site getSite() {
+		return site;
+	}
+
+	public void setSite(Site site) {
+		this.site = site;
 	}
 
 	public Participant getParticipant() {
@@ -285,6 +296,7 @@ public class CollectionProtocolRegistration extends BaseEntity {
 
 		setBarcode(cpr.getBarcode());
 		setExternalSubjectId(cpr.getExternalSubjectId());
+		setSite(cpr.getSite());
 	}
 	
 	public void updateConsents(ConsentResponses consentResponses) {

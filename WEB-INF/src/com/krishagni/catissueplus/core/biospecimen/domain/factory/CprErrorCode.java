@@ -39,7 +39,9 @@ public enum CprErrorCode implements ErrorCode {
 	
 	CANNOT_MERGE_PARTICIPANT,
 
-	COLLECTION_SITE_REQUIRED;
+	COLLECTION_SITE_REQUIRED,
+
+	NOT_CP_SITE;
 	
 	@Override
 	public String code() {

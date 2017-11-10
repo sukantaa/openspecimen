@@ -36,6 +36,8 @@ public class CollectionProtocolRegistrationDetail extends AttributeModifiedSuppo
 
 	private String externalSubjectId;
 
+	private String site;
+
 	private ConsentDetail consentDetails;
 	
 	/** For UI efficiency **/
@@ -130,6 +132,14 @@ public class CollectionProtocolRegistrationDetail extends AttributeModifiedSuppo
 		this.externalSubjectId = externalSubjectId;
 	}
 
+	public String getSite() {
+		return site;
+	}
+
+	public void setSite(String site) {
+		this.site = site;
+	}
+
 	public ConsentDetail getConsentDetails() {
 		return consentDetails;
 	}
@@ -186,6 +196,10 @@ public class CollectionProtocolRegistrationDetail extends AttributeModifiedSuppo
 		detail.setPpid(cpr.getPpid());
 		detail.setRegistrationDate(cpr.getRegistrationDate());
 		detail.setExternalSubjectId(cpr.getExternalSubjectId());
+
+		if (cpr.getSite() != null) {
+			detail.setSite(cpr.getSite().getName());
+		}
 		
 		CollectionProtocol cp = cpr.getCollectionProtocol();
 		detail.setCpId(cp.getId());

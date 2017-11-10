@@ -333,6 +333,10 @@ public class Utility {
 		return collect(collection, propertyName, false);
     }
 
+    public static <T> Set<T> subtract(Collection<T> coll1, Collection<T> coll2) {
+		return coll1.stream().filter(element -> !coll2.contains(element)).collect(Collectors.toSet());
+	}
+
     public static <T> List<T> nullSafe(List<T> iterable) {
 		return iterable == null ? Collections.emptyList() : iterable;
 	}

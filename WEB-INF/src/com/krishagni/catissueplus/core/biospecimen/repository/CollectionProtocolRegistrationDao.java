@@ -1,6 +1,7 @@
 
 package com.krishagni.catissueplus.core.biospecimen.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,8 @@ public interface CollectionProtocolRegistrationDao extends Dao<CollectionProtoco
 	CollectionProtocolRegistration getCprByParticipantId(Long cpId, Long participantId);
 
 	Map<String, Object> getCprIds(String key, Object value);
+
+	Map<String, Integer> getParticipantsBySite(Long cpId, Collection<Long> siteIds);
 
 
 }

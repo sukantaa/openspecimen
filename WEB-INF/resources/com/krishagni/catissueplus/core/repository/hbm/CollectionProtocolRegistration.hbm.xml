@@ -26,6 +26,8 @@
 
     <property name="externalSubjectId" column="EXTERNAL_SUBJECT_ID"/>
 
+    <many-to-one name="site" column="SITE_ID"/>
+
     <property name="activityStatus" column="ACTIVITY_STATUS"/>
 
     <many-to-one name="consentWitness" column="CONSENT_WITNESS" />
@@ -107,6 +109,20 @@
         cpr.collectionProtocol.id = :cpId
       order by
         cpr.id
+    </query>
+
+    <query name="getParticipantsCountBySite">
+      select
+        site.name, count(*)
+      from
+        com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration cpr
+        join cpr.site site
+        join cpr.collectionProtocol cp
+      where
+        cp.id = :cpId and
+        site.id in (:siteIds)
+      group by
+        site.name
     </query>
   </class>
 </hibernate-mapping>

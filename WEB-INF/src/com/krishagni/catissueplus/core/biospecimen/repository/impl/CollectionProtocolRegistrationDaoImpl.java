@@ -2,12 +2,14 @@
 package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -217,6 +219,17 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 		ids.put("cprId", row[0]);
 		ids.put("cpId", row[1]);
 		return ids;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Map<String, Integer> getParticipantsBySite(Long cpId, Collection<Long> siteIds) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_COUNTS_BY_SITE)
+			.setParameter("cpId", cpId)
+			.setParameterList("siteIds", siteIds)
+			.list();
+
+		return rows.stream().collect(Collectors.toMap(row -> (String)row[0], row -> ((Number)row[1]).intValue()));
 	}
 
 	private Criteria getCprListQuery(CprListCriteria cprCrit) {
@@ -471,4 +484,6 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 	private static final String GET_BY_CP_ID_AND_PID = FQN + ".getCprByCpIdAndPid";
 
 	private static final String GET_BY_CP_ID = FQN + ".getCprsByCpId";
+
+	private static final String GET_COUNTS_BY_SITE = FQN + ".getParticipantsCountBySite";
 }

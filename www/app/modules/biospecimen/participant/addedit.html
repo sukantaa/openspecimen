@@ -288,6 +288,16 @@
     </div>
 
     <div class="form-group">
+      <label class="col-xs-3 control-label" translate="participant.reg_site">Registration Site</label>
+      <div class="col-xs-6">
+        <os-select name="regSite" ng-model="cpr.site" list="partCtx.cpSites"
+          placeholder="{{'participant.reg_site' | translate}}">
+        </os-select>
+        <div os-field-error field="pform.regSite"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
       <label class="col-xs-3 control-label" translate="participant.external_id">External Subject ID</label>
       <div class="col-xs-6">
         <input type="text" name="externalSubjectId" ng-model="cpr.externalSubjectId" class="form-control"

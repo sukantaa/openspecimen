@@ -19,6 +19,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
       setBirthDate($scope.cpr);
 
       $scope.partCtx = {
+        cpSites: cp.cpSites.map(function(cpSite) { return cpSite.siteName; }),
         firstCpEvent: firstCpEvent,
         fieldOpts: {lockedFields: lockedFields},
         twoStep: lookupFieldsCfg.configured,
@@ -133,6 +134,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
 
       var cprToSave = angular.copy($scope.cpr);
       cprToSave.cpId = $scope.cpId;
+      cprToSave.site = cprToSave.site || '';
 
       if (formCtrl) {
         cprToSave.participant.extensionDetail = formCtrl.getFormData();
@@ -143,6 +145,8 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
           if (savedCpr.activityStatus == 'Active') {
             var registeredCps = cpr.participant.registeredCps;
             angular.extend(cpr, savedCpr);
+            cpr.site = savedCpr.site;
+
             cpr.participant.registeredCps = registeredCps;
 
             if (proceedToSpmnColl) {

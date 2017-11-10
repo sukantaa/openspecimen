@@ -3,6 +3,8 @@ package com.krishagni.catissueplus.core.biospecimen.domain.factory.impl;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.krishagni.catissueplus.core.administrative.domain.Site;
+import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
@@ -44,12 +46,13 @@ public class CollectionProtocolRegistrationFactoryImpl implements CollectionProt
 		
 		CollectionProtocolRegistration cpr = new CollectionProtocolRegistration();
 		cpr.setForceDelete(detail.isForceDelete());
+		setCollectionProtocol(detail, existing, cpr, ose);
+		setPpid(detail, existing, cpr, ose);
 		setBarcode(detail, existing, cpr, ose);
 		setRegDate(detail, existing, cpr, ose);
 		setExternalSubjectId(detail, existing, cpr, ose);
+		setSite(detail, existing, cpr, ose);
 		setActivityStatus(detail, existing, cpr, ose);
-		setCollectionProtocol(detail, existing, cpr, ose);
-		setPpid(detail, existing, cpr, ose);
 		setParticipant(detail, existing, cpr, ose);
 
 		ose.checkAndThrow();
@@ -104,6 +107,37 @@ public class CollectionProtocolRegistrationFactoryImpl implements CollectionProt
 			setExternalSubjectId(detail, cpr, ose);
 		} else {
 			cpr.setExternalSubjectId(existing.getExternalSubjectId());
+		}
+	}
+
+	private void setSite(CollectionProtocolRegistrationDetail detail, CollectionProtocolRegistration cpr, OpenSpecimenException ose) {
+		if (StringUtils.isBlank(detail.getSite())) {
+			return;
+		}
+
+		Site site = daoFactory.getSiteDao().getSiteByName(detail.getSite());
+		if (site == null) {
+			ose.addError(SiteErrorCode.NOT_FOUND, detail.getSite());
+			return;
+		}
+
+		if (cpr.getCollectionProtocol() != null && !cpr.getCollectionProtocol().getRepositories().contains(site)) {
+			ose.addError(CprErrorCode.NOT_CP_SITE, site.getName(), cpr.getCollectionProtocol().getShortTitle());
+			return;
+		}
+
+		cpr.setSite(site);
+	}
+
+	private void setSite(
+			CollectionProtocolRegistrationDetail detail,
+			CollectionProtocolRegistration existing,
+			CollectionProtocolRegistration cpr,
+			OpenSpecimenException ose) {
+		if (existing == null || detail.isAttrModified("site")) {
+			setSite(detail, cpr, ose);
+		} else {
+			cpr.setSite(existing.getSite());
 		}
 	}
 

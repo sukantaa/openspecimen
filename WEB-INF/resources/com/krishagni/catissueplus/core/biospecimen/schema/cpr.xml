@@ -28,6 +28,11 @@
     </field>
 
     <field>
+      <caption>#getMessage("participant_reg_site")</caption>
+      <attribute>site</attribute>
+    </field>
+
+    <field>
       <caption>#getMessage("participant_external_id")</caption>
       <attribute>externalSubjectId</attribute>
     </field>

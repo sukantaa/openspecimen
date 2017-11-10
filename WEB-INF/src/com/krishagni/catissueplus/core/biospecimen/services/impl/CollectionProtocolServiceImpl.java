@@ -290,11 +290,12 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			ose.checkAndThrow();
 			
 			User oldPi = existingCp.getPrincipalInvestigator();
-			Collection<User> addedCoord = CollectionUtils.subtract(cp.getCoordinators(), existingCp.getCoordinators());
-			Collection<User> removedCoord = CollectionUtils.subtract(existingCp.getCoordinators(), cp.getCoordinators());
+			Collection<User> addedCoord = Utility.subtract(cp.getCoordinators(), existingCp.getCoordinators());
+			Collection<User> removedCoord = Utility.subtract(existingCp.getCoordinators(), cp.getCoordinators());
 
-			Collection<CollectionProtocolSite> addedSites = CollectionUtils.subtract(cp.getSites(), existingCp.getSites());
-			Collection<CollectionProtocolSite> removedSites = CollectionUtils.subtract(existingCp.getSites(), cp.getSites());
+			Set<Site> addedSites = Utility.subtract(cp.getRepositories(), existingCp.getRepositories());
+			Set<Site> removedSites = Utility.subtract(existingCp.getRepositories(), cp.getRepositories());
+			ensureSitesAreNotInUse(existingCp, removedSites);
 
 			existingCp.update(cp);
 			existingCp.addOrUpdateExtension();
@@ -1387,6 +1388,19 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		}
 	}
 
+	private void ensureSitesAreNotInUse(CollectionProtocol cp, Collection<Site> sites) {
+		if (sites.isEmpty()) {
+			return;
+		}
+
+		List<Long> siteIds = sites.stream().map(Site::getId).collect(Collectors.toList());
+		Map<String, Integer> counts = daoFactory.getCprDao().getParticipantsBySite(cp.getId(), siteIds);
+		if (!counts.isEmpty()) {
+			String siteLabels = counts.keySet().stream().collect(Collectors.joining(", "));
+			throw OpenSpecimenException.userError(CpErrorCode.USED_SITES, siteLabels, counts.size());
+		}
+	}
+
 	private void fixSopDocumentName(CollectionProtocol cp) {
 		if (StringUtils.isBlank(cp.getSopDocumentName())) {
 			return;
@@ -1786,7 +1800,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	}
 
 	private boolean deleteCps(List<CollectionProtocol> cps) {
-		cps.forEach(cp -> deleteCp(cp));
+		cps.forEach(this::deleteCp);
 		return true;
 	}
 
@@ -1845,17 +1859,17 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	}
 
 	private void notifyUsersOnCpCreate(CollectionProtocol cp) {
-		notifyUsersOnCpOp(cp, cp.getSites(), OP_CP_CREATED);
+		notifyUsersOnCpOp(cp, cp.getRepositories(), OP_CP_CREATED);
 	}
 
-	private void notifyUsersOnCpUpdate(CollectionProtocol cp, Collection<CollectionProtocolSite> addedSites, Collection<CollectionProtocolSite> removedSites) {
+	private void notifyUsersOnCpUpdate(CollectionProtocol cp, Collection<Site> addedSites, Collection<Site> removedSites) {
 		notifyUsersOnCpOp(cp, removedSites, OP_CP_SITE_REMOVED);
 		notifyUsersOnCpOp(cp, addedSites, OP_CP_SITE_ADDED);
 	}
 
 	private void notifyUsersOnCpDelete(CollectionProtocol cp, boolean success, String stackTrace) {
 		if (success) {
-			notifyUsersOnCpOp(cp, cp.getSites(), OP_CP_DELETED);
+			notifyUsersOnCpOp(cp, cp.getRepositories(), OP_CP_DELETED);
 		} else {
 			User currentUser = AuthUtil.getCurrentUser();
 			String[] rcpts = {currentUser.getEmailAddress(), cp.getPrincipalInvestigator().getEmailAddress()};
@@ -1870,7 +1884,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		}
 	}
 
-	private void notifyUsersOnCpOp(CollectionProtocol cp, Collection<CollectionProtocolSite> sites, int op) {
+	private void notifyUsersOnCpOp(CollectionProtocol cp, Collection<Site> sites, int op) {
 		Map<String, Object> emailProps = new HashMap<>();
 		emailProps.put("$subject", new Object[] {cp.getShortTitle(), op});
 		emailProps.put("cp", cp);
@@ -1883,11 +1897,11 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			notifyUsers(superAdmins, CP_OP_EMAIL_TMPL, emailProps, (op == OP_CP_CREATED) ? "CREATE" : "DELETE");
 		}
 
-		for (CollectionProtocolSite cpSite : sites) {
-			String siteName = cpSite.getSite().getName();
+		for (Site site : sites) {
+			String siteName = site.getName();
 			emailProps.put("siteName", siteName);
 			emailProps.put("$subject", new Object[] {siteName, op, cp.getShortTitle()});
-			notifyUsers(cpSite.getSite().getCoordinators(), CP_SITE_UPDATED_EMAIL_TMPL, emailProps, "UPDATE");
+			notifyUsers(site.getCoordinators(), CP_SITE_UPDATED_EMAIL_TMPL, emailProps, "UPDATE");
 		}
 	}
 
