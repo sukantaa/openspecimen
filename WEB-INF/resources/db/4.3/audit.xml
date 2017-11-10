@@ -73,4 +73,11 @@
       <column name="eventPointUnit_MOD" type="${bit.type}"/>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit and track changes to external subject ID">
+    <addColumn tableName="CATISSUE_COLL_PROT_REG_AUD">
+      <column name="EXTERNAL_SUBJECT_ID" type="${text.type}(128)"/>
+      <column name="externalSubjectId_MOD" type="${bit.type}"/>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

@@ -165,4 +165,46 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="External subject ID">
+    <addColumn tableName="CATISSUE_COLL_PROT_REG">
+      <column name="EXTERNAL_SUBJECT_ID" type="${text.type}(128)"/>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique external subject ID per CP" dbms="mysql">
+    <addUniqueConstraint constraintName="CAT_CPR_EXT_SUBJ_ID_UQ"
+      tableName="CATISSUE_COLL_PROT_REG" columnNames="COLLECTION_PROTOCOL_ID, EXTERNAL_SUBJECT_ID"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique external subject ID per CP" dbms="oracle">
+    <sql>
+      create unique index CAT_CPR_EXT_SUBJ_ID_UQ on catissue_coll_prot_reg(
+        case when
+          collection_protocol_id is not null and external_subject_id is not null
+        then
+          collection_protocol_id || '-' || external_subject_id
+        end
+      );
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Recreating CPR view to add external subject ID column">
+    <createView viewName="cpr_view" replaceIfExists="true">
+      select
+        cpr.identifier as cpr_id, cpr.collection_protocol_id as cp_id,
+        cpr.participant_id as participant_id, p.first_name as first_name,
+        p.middle_name as middle_name, p.last_name as last_name,
+        p.birth_date as dob, p.social_security_number as ssn,
+        cpr.activity_status as activity_status, p.gender as gender,
+        p.genotype as genotype, cpr.registration_date as registration_date,
+        cpr.protocol_participant_id as ppid, p.vital_status as vital_status,
+        p.death_date as death_date, p.empi_id as empi_id, cpr.barcode as barcode,
+        cpr.consent_sign_date as consent_sign_date, cpr.consent_witness as consent_witness,
+        cpr.consent_comments as consent_comments, cpr.external_subject_id as external_subject_id
+      from
+        catissue_coll_prot_reg cpr
+        inner join catissue_participant p on cpr.participant_id = p.identifier
+    </createView>
+  </changeSet>
 </databaseChangeLog>

@@ -12,43 +12,36 @@
       </generator>
     </id>
 
-    <property name="consentSignDate" column="CONSENT_SIGN_DATE" />
+    <property name="consentSignDate" column="CONSENT_SIGN_DATE"/>
 
-    <property name="consentComments" column="CONSENT_COMMENTS" />
+    <property name="consentComments" column="CONSENT_COMMENTS"/>
     
     <property name="signedConsentDocumentName" column="CONSENT_DOCUMENT_NAME"/>
 
-    <property name="ppid" column="PROTOCOL_PARTICIPANT_ID" />
+    <property name="ppid" column="PROTOCOL_PARTICIPANT_ID"/>
 
-    <property name="barcode" column="BARCODE" />
+    <property name="barcode" column="BARCODE"/>
 
-    <property name="registrationDate" column="REGISTRATION_DATE" />
+    <property name="registrationDate" column="REGISTRATION_DATE"/>
 
-    <property name="activityStatus" column="ACTIVITY_STATUS" />
+    <property name="externalSubjectId" column="EXTERNAL_SUBJECT_ID"/>
 
-    <many-to-one 
-      name="consentWitness" 
-      class="com.krishagni.catissueplus.core.administrative.domain.User"
-      column="CONSENT_WITNESS" />
+    <property name="activityStatus" column="ACTIVITY_STATUS"/>
 
-    <many-to-one 
-      name="participant"
-      class="com.krishagni.catissueplus.core.biospecimen.domain.Participant"
-      column="PARTICIPANT_ID" />
+    <many-to-one name="consentWitness" column="CONSENT_WITNESS" />
 
-    <many-to-one 
-      name="collectionProtocol"
-      class="com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol" 
-      column="COLLECTION_PROTOCOL_ID" />
+    <many-to-one name="participant" column="PARTICIPANT_ID" />
+
+    <many-to-one name="collectionProtocol" column="COLLECTION_PROTOCOL_ID" />
 
     <set name="consentResponses" table="CATISSUE_CONSENT_TIER_RESPONSE" inverse="true" cascade="all-delete-orphan">
       <key column="COLL_PROT_REG_ID" />
-      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.ConsentTierResponse" />
+      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.ConsentTierResponse"/>
     </set>
 
     <set name="visits" table="CATISSUE_SPECIMEN_COLL_GROUP" inverse="true">
       <key column="COLLECTION_PROTOCOL_REG_ID" />
-      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.Visit" />
+      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.Visit"/>
       <filter name="activeEntity"/>
     </set>
 

@@ -36,6 +36,8 @@ public class CollectionProtocolRegistration extends BaseEntity {
 
 	private Date registrationDate;
 
+	private String externalSubjectId;
+
 	private Participant participant;
 
 	private CollectionProtocol collectionProtocol;
@@ -80,6 +82,14 @@ public class CollectionProtocolRegistration extends BaseEntity {
 
 	public void setRegistrationDate(Date registrationDate) {
 		this.registrationDate = registrationDate;
+	}
+
+	public String getExternalSubjectId() {
+		return externalSubjectId;
+	}
+
+	public void setExternalSubjectId(String externalSubjectId) {
+		this.externalSubjectId = externalSubjectId;
 	}
 
 	public Participant getParticipant() {
@@ -274,6 +284,7 @@ public class CollectionProtocolRegistration extends BaseEntity {
 		}
 
 		setBarcode(cpr.getBarcode());
+		setExternalSubjectId(cpr.getExternalSubjectId());
 	}
 	
 	public void updateConsents(ConsentResponses consentResponses) {

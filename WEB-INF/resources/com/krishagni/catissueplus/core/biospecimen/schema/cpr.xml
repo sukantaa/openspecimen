@@ -28,6 +28,11 @@
     </field>
 
     <field>
+      <caption>#getMessage("participant_external_id")</caption>
+      <attribute>externalSubjectId</attribute>
+    </field>
+
+    <field>
       <caption>#getMessage("participant_activity_status")</caption>
       <attribute>activityStatus</attribute>
     </field>

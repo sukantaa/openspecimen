@@ -213,6 +213,15 @@
       </textField>
     </row>
     <row>
+      <textField>
+        <name>externalSubjectId</name>
+        <udn>externalSubjectId</udn>
+        <caption>#getMessage("participant_external_id")</caption>
+        <column>EXTERNAL_SUBJECT_ID</column>
+        <recordUrl>#/object-state-params-resolver?stateName=participant-detail.overview&amp;objectName=collection_protocol_registration&amp;key=id&amp;value={{$cprId}}</recordUrl>
+      </textField>
+    </row>
+    <row>
       <subForm>
         <name>scgs</name>
         <udn>scgs</udn>

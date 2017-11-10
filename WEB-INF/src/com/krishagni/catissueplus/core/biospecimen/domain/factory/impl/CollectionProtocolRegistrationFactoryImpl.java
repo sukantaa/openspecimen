@@ -46,6 +46,7 @@ public class CollectionProtocolRegistrationFactoryImpl implements CollectionProt
 		cpr.setForceDelete(detail.isForceDelete());
 		setBarcode(detail, existing, cpr, ose);
 		setRegDate(detail, existing, cpr, ose);
+		setExternalSubjectId(detail, existing, cpr, ose);
 		setActivityStatus(detail, existing, cpr, ose);
 		setCollectionProtocol(detail, existing, cpr, ose);
 		setPpid(detail, existing, cpr, ose);
@@ -87,6 +88,22 @@ public class CollectionProtocolRegistrationFactoryImpl implements CollectionProt
 			setRegDate(detail, cpr, ose);
 		} else {
 			cpr.setRegistrationDate(existing.getRegistrationDate());
+		}
+	}
+
+	private void setExternalSubjectId(CollectionProtocolRegistrationDetail detail, CollectionProtocolRegistration cpr, OpenSpecimenException ose) {
+		cpr.setExternalSubjectId(detail.getExternalSubjectId());
+	}
+
+	private void setExternalSubjectId(
+			CollectionProtocolRegistrationDetail detail,
+			CollectionProtocolRegistration existing,
+			CollectionProtocolRegistration cpr,
+			OpenSpecimenException ose) {
+		if (existing == null || detail.isAttrModified("externalSubjectId")) {
+			setExternalSubjectId(detail, cpr, ose);
+		} else {
+			cpr.setExternalSubjectId(existing.getExternalSubjectId());
 		}
 	}
 

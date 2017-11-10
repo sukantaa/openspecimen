@@ -34,6 +34,8 @@ public class CollectionProtocolRegistrationDetail extends AttributeModifiedSuppo
 
 	private Date registrationDate;
 
+	private String externalSubjectId;
+
 	private ConsentDetail consentDetails;
 	
 	/** For UI efficiency **/
@@ -120,6 +122,14 @@ public class CollectionProtocolRegistrationDetail extends AttributeModifiedSuppo
 		this.registrationDate = registrationDate;
 	}
 
+	public String getExternalSubjectId() {
+		return externalSubjectId;
+	}
+
+	public void setExternalSubjectId(String externalSubjectId) {
+		this.externalSubjectId = externalSubjectId;
+	}
+
 	public ConsentDetail getConsentDetails() {
 		return consentDetails;
 	}
@@ -175,6 +185,7 @@ public class CollectionProtocolRegistrationDetail extends AttributeModifiedSuppo
 		detail.setBarcode(cpr.getBarcode());
 		detail.setPpid(cpr.getPpid());
 		detail.setRegistrationDate(cpr.getRegistrationDate());
+		detail.setExternalSubjectId(cpr.getExternalSubjectId());
 		
 		CollectionProtocol cp = cpr.getCollectionProtocol();
 		detail.setCpId(cp.getId());

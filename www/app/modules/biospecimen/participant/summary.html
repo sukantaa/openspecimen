@@ -23,6 +23,11 @@
       <span class="value value-md"> {{cpr.ppid}} </span>
     </li>
 
+    <li class="item" ng-if="!!cpr.externalSubjectId">
+      <strong class="key key-sm" translate="participant.external_id">External Subject ID</strong>
+      <span class="value value-md"> {{cpr.externalSubjectId}} </span>
+    </li>
+
     <li class="item">
       <strong class="key key-sm" translate="participant.first_name">First Name</strong>
       <span class="value value-md"> {{cpr.participant.firstName | osNoValue}} </span>
