@@ -161,6 +161,7 @@ dependencies {
   compile group: 'com.thoughtworks.xstream', name: 'xstream', version:'1.4.8'
   compile group: 'com.itextpdf', name: 'itextpdf', version:'5.5.6'
   compile group: 'dom4j', name: 'dom4j', version: '1.6.1'
+  compile group: 'com.hierynomus', name: 'sshj', version: '0.23.0'
 
   //SAML dependencies lib
   compile group: 'org.springframework.security.extensions', name: 'spring-security-saml2-core', version:'1.0.0.RELEASE'

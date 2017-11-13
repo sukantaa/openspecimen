@@ -49,6 +49,9 @@ import com.krishagni.catissueplus.core.common.domain.IntervalUnit;
 import com.krishagni.catissueplus.core.common.PdfUtil;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import net.schmizz.sshj.SSHClient;
+import net.schmizz.sshj.sftp.SFTPClient;
+import net.schmizz.sshj.xfer.FileSystemFile;
 
 public class Utility {
 	private static final String key = "0pEN@eSEncRyPtKy";
@@ -622,5 +625,45 @@ public class Utility {
 		}
 
 		return noOfDays;
+	}
+
+	public void sftpPut(String host, String user, String password, String localFilePath, String remoteFilePath) {
+		SSHClient client = new SSHClient();
+		try {
+			client.loadKnownHosts();
+			client.connect(host);
+			client.authPassword(user, password);
+
+			SFTPClient sftp = client.newSFTPClient();
+			try {
+				sftp.put(new FileSystemFile(localFilePath), remoteFilePath);
+			} finally {
+				IOUtils.closeQuietly(sftp);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error uploading file: " + localFilePath, e);
+		} finally {
+			IOUtils.closeQuietly(client);
+		}
+	}
+
+	public void sftpGet(String host, String user, String password, String remoteFilePath, String localFilePath) {
+		SSHClient client = new SSHClient();
+		try {
+			client.loadKnownHosts();
+			client.connect(host);
+			client.authPassword(user, password);
+
+			SFTPClient sftp = client.newSFTPClient();
+			try {
+				sftp.get(remoteFilePath, new FileSystemFile(localFilePath));
+			} finally {
+				IOUtils.closeQuietly(sftp);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error downloading file: " + remoteFilePath, e);
+		} finally {
+			IOUtils.closeQuietly(client);
+		}
 	}
 }
