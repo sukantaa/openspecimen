@@ -1,5 +1,5 @@
 angular.module('openspecimen')
-  .directive('datepickerPopup', function ($filter, $timeout) {
+  .directive('datepickerPopup', function ($filter, $timeout, dateParser) {
     function link(scope, element, attrs, ngModel) {
       function parseDate(viewValue) {
         if (angular.isNumber(viewValue)) {
@@ -47,6 +47,17 @@ angular.module('openspecimen')
 
 
       // View -> Model
+      $timeout(function() {
+        ngModel.$parsers.unshift(function(viewValue) {
+          if (viewValue == '' || viewValue == undefined || viewValue == null) {
+            return viewValue;
+          }
+
+          var result = dateParser.parse(viewValue, attrs.datepickerPopup);
+          return !!result ? viewValue : 420;
+        });
+      });
+
       ngModel.$parsers.push(function(val) {
         try {
           if (!val) {
@@ -131,4 +142,3 @@ angular.module('openspecimen')
       }
     };
   });
-
