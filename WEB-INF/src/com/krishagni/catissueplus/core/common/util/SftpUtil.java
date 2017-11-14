@@ -1,20 +1,19 @@
 package com.krishagni.catissueplus.core.common.util;
 
-import java.io.IOException;
+import java.io.Closeable;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Vector;
 
-import org.apache.commons.io.IOUtils;
+import com.jcraft.jsch.ChannelSftp;
 
-import net.schmizz.sshj.sftp.RemoteResourceInfo;
-import net.schmizz.sshj.sftp.SFTPClient;
-import net.schmizz.sshj.xfer.FileSystemFile;
-
-public class SftpUtil {
+public class SftpUtil implements Closeable {
 	public static class File {
 		private String path;
 
-		private String type;
+		private String name;
+
+		private boolean directory;
 
 		private long atime;
 
@@ -30,12 +29,20 @@ public class SftpUtil {
 			this.path = path;
 		}
 
-		public String getType() {
-			return type;
+		public String getName() {
+			return name;
 		}
 
-		public void setType(String type) {
-			this.type = type;
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public boolean isDirectory() {
+			return directory;
+		}
+
+		public void setDirectory(boolean directory) {
+			this.directory = directory;
 		}
 
 		public long getAtime() {
@@ -61,58 +68,72 @@ public class SftpUtil {
 		public void setSize(long size) {
 			this.size = size;
 		}
-
-		public static File from(RemoteResourceInfo rri) {
-			File file = new File();
-			file.setPath(rri.getPath());
-			file.setType(rri.getAttributes().getType().name());
-			file.setAtime(rri.getAttributes().getAtime());
-			file.setMtime(rri.getAttributes().getMtime());
-			file.setSize(rri.getAttributes().getSize());
-			return file;
-		}
 	}
 
-	private SFTPClient client;
+	private ChannelSftp channel;
 
-	public SftpUtil(SFTPClient client) {
-		this.client = client;
+	public SftpUtil(ChannelSftp channel) {
+		this.channel = channel;
 	}
 
 	public void put(String localPath, String remotePath) {
 		try {
-			client.put(new FileSystemFile(localPath), remotePath);
-		} catch (Exception e) {
-			throw new RuntimeException("Error uploading file " + localPath + " to " + remotePath, e);
+			channel.put(localPath, remotePath);
+		} catch (Throwable t) {
+			throw new RuntimeException("Error uploading file " + localPath + " to " + remotePath, t);
 		}
 	}
 
 	public void get(String remotePath, String localPath) {
 		try {
-			client.get(remotePath, new FileSystemFile(localPath));
-		} catch (Exception e) {
-			throw new RuntimeException("Error downloading file " + remotePath + " to " + localPath, e);
+			channel.get(remotePath, localPath);
+		} catch (Throwable t) {
+			throw new RuntimeException("Error downloading file " + remotePath + " to " + localPath, t);
 		}
 	}
 
 	public List<File> ls(String remotePath) {
 		try {
-			List<RemoteResourceInfo> remoteFiles = client.ls(remotePath);
-			return remoteFiles.stream().map(File::from).collect(Collectors.toList());
-		} catch (Exception e) {
-			throw new RuntimeException("Error listing remote files " + remotePath, e);
+			Vector<ChannelSftp.LsEntry> remoteFiles = channel.ls(remotePath);
+
+			List<File> result = new ArrayList<>();
+			for (ChannelSftp.LsEntry remoteFile : remoteFiles) {
+				if (remoteFile.getFilename().equals(".") || remoteFile.getFilename().equals("..")) {
+					continue;
+				}
+
+				File file = new File();
+				file.setDirectory(remoteFile.getAttrs().isDir());
+				file.setName(remoteFile.getFilename());
+				file.setPath(remotePath + "/" + remoteFile.getFilename());
+				file.setAtime(remoteFile.getAttrs().getATime());
+				file.setMtime(remoteFile.getAttrs().getMTime());
+				file.setSize(remoteFile.getAttrs().getSize());
+				result.add(file);
+			}
+
+			return result;
+		} catch (Throwable t) {
+			throw new RuntimeException("Error listing remote files " + remotePath, t);
 		}
 	}
 
 	public void rm(String remotePath) {
 		try {
-			client.rm(remotePath);
-		} catch (Exception e) {
-			throw new RuntimeException("Error deleting remote file " + remotePath, e);
+			channel.rm(remotePath);
+		} catch (Throwable t) {
+			throw new RuntimeException("Error deleting remote file " + remotePath, t);
 		}
 	}
 
+	@Override
 	public void close() {
-		IOUtils.closeQuietly(client);
+		try {
+			if (channel != null) {
+				channel.disconnect();
+			}
+		} catch (Throwable t) {
+
+		}
 	}
 }

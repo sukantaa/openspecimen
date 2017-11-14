@@ -1,17 +1,23 @@
 package com.krishagni.catissueplus.core.common.util;
 
-import org.apache.commons.io.IOUtils;
+import java.io.Closeable;
+import java.util.Properties;
 
-import net.schmizz.sshj.SSHClient;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
 
-public class SshSession {
+public class SshSession implements Closeable {
 	private String host;
 
 	private String user;
 
 	private String password;
 
-	private SSHClient client;
+	private JSch jSch;
+
+	private Session session;
 
 	public SshSession(String host, String user, String password) {
 		this.host = host;
@@ -20,25 +26,38 @@ public class SshSession {
 	}
 
 	public void connect() {
-		client = new SSHClient();
+		jSch = new JSch();
 		try {
-			client.loadKnownHosts();
-			client.connect(host);
-			client.authPassword(user, password);
-		} catch (Exception e) {
+			Properties config = new Properties();
+			config.put("StrictHostKeyChecking", "no");
+
+			session = jSch.getSession(user, host);
+			session.setConfig(config);
+			session.setPassword(password);
+			session.connect();
+		} catch (Throwable e) {
 			throw new RuntimeException("Error connecting to remote host", e);
 		}
 	}
 
 	public SftpUtil newSftp() {
 		try {
-			return new SftpUtil(client.newSFTPClient());
+			Channel channel = session.openChannel("sftp");
+			channel.connect();
+			return new SftpUtil((ChannelSftp)channel);
 		} catch (Exception e) {
 			throw new RuntimeException("Error creating SFTP client", e);
 		}
 	}
 
+	@Override
 	public void close() {
-		IOUtils.closeQuietly(client);
+		try {
+			if (session != null) {
+				session.disconnect();
+			}
+		} catch (Throwable t) {
+
+		}
 	}
 }

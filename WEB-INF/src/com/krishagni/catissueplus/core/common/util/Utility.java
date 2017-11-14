@@ -45,13 +45,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
-import com.krishagni.catissueplus.core.common.domain.IntervalUnit;
 import com.krishagni.catissueplus.core.common.PdfUtil;
+import com.krishagni.catissueplus.core.common.domain.IntervalUnit;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import net.schmizz.sshj.SSHClient;
-import net.schmizz.sshj.sftp.SFTPClient;
-import net.schmizz.sshj.xfer.FileSystemFile;
 
 public class Utility {
 	private static final String key = "0pEN@eSEncRyPtKy";
