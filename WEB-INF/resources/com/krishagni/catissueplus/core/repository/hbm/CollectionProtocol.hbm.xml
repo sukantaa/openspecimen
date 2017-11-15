@@ -74,6 +74,7 @@
         <param name="enumClass">
           com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol$VisitCollectionMode
         </param>
+        <param name="type">12</param>
       </type>
     </property>
 
