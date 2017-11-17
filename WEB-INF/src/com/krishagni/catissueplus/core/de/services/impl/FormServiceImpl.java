@@ -24,6 +24,7 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.repository.FormListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
+import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
@@ -761,6 +762,49 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		field.setSubFields(extensionFields);
 		return field;
 	}
+
+	//
+	// The idea was to sort forms in the backend
+	// However, at present the workflows is fully UI concept.
+	// therefore junked this idea and sorted forms in UI.
+	// remove this code after 31/12/2017
+	//
+//	private List<FormCtxtSummary> sortForms(Long cpId, String entityType, List<FormCtxtSummary> forms) {
+//		CpWorkflowConfig cfg = daoFactory.getCollectionProtocolDao().getCpWorkflows(cpId);
+//		if (cfg == null) {
+//			return forms;
+//		}
+//
+//		Map<String, CpWorkflowConfig.Workflow> workflows = cfg.getWorkflows();
+//		if (workflows == null || workflows.isEmpty() || !workflows.containsKey("forms")) {
+//			return forms;
+//		}
+//
+//		CpWorkflowConfig.Workflow workflow = workflows.get("forms");
+//		if (workflow.getData() == null || workflow.getData().isEmpty() || workflow.getData().get(entityType) == null) {
+//			return forms;
+//		}
+//
+//		List<Map<String, Object>> order = (List<Map<String, Object>>)workflow.getData().get(entityType);
+//		List<Long> orderedFormIds = order.stream().map(f -> ((Number)f.get("id")).longValue()).collect(Collectors.toList());
+//
+//		Collections.sort(forms, (f1, f2) -> {
+//			int f1Idx = orderedFormIds.indexOf(f1.getFormId());
+//			int f2Idx = orderedFormIds.indexOf(f2.getFormId());
+//
+//			if (f1Idx == -1 && f2Idx == -1) {
+//				return 0;
+//			} else if (f1Idx == -1) {
+//				return 1;
+//			} else if (f2Idx == -1) {
+//				return -1;
+//			} else {
+//				return f1Idx - f2Idx;
+//			}
+//		});
+//
+//		return forms;
+//	}
 		
 	private FormData saveOrUpdateFormData(User user, Long recordId, FormData formData, boolean isPartial) {
 		Map<String, Object> appData = formData.getAppData();

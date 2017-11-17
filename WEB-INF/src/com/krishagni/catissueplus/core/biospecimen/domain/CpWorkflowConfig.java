@@ -10,7 +10,7 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 public class CpWorkflowConfig extends BaseEntity {
 	private CollectionProtocol cp;
 	
-	private Map<String, Workflow> workflows = new HashMap<String, Workflow>();
+	private Map<String, Workflow> workflows = new HashMap<>();
 		
 	public CollectionProtocol getCp() {
 		return cp;

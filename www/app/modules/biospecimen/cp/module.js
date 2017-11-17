@@ -229,6 +229,21 @@ angular.module('os.biospecimen.cp',
         parent: 'cp-detail.settings',
         controller: 'CpLabelSettingsCtrl'
       })
+      .state('cp-detail.settings.forms', {
+        url: '/forms',
+        templateUrl: 'modules/biospecimen/cp/form-settings.html',
+        parent: 'cp-detail.settings',
+        resolve: {
+          forms: function(cp) {
+            return cp.getForms(['CommonParticipant', 'Participant', 'SpecimenCollectionGroup', 'Specimen']);
+          },
+
+          formsWf: function(cp, CpConfigSvc) {
+            return CpConfigSvc.getWorkflow(cp.id, 'forms');
+          }
+        },
+        controller: 'CpFormSettingsCtrl'
+      })
       .state('cp-detail.settings.catalog', {
         url: '/catalog',
         templateUrl: 'modules/biospecimen/cp/catalog-settings.html',

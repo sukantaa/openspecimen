@@ -3,6 +3,7 @@ package com.krishagni.catissueplus.core.biospecimen.events;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.springframework.beans.BeanUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
@@ -13,8 +14,11 @@ public class CpWorkflowCfgDetail {
 	
 	private String shortTitle;
 	
-	private Map<String, WorkflowDetail> workflows = new HashMap<String, WorkflowDetail>();
-	
+	private Map<String, WorkflowDetail> workflows = new HashMap<>();
+
+	@JsonIgnore
+	private boolean patch;
+
 	public Long getCpId() {
 		return cpId;
 	}
@@ -38,7 +42,16 @@ public class CpWorkflowCfgDetail {
 	public void setWorkflows(Map<String, WorkflowDetail> workflows) {
 		this.workflows = workflows;
 	}
-	
+
+	@JsonIgnore
+	public boolean isPatch() {
+		return patch;
+	}
+
+	public void setPatch(boolean patch) {
+		this.patch = patch;
+	}
+
 	public static CpWorkflowCfgDetail from(CpWorkflowConfig cfg) {
 		CpWorkflowCfgDetail result = new CpWorkflowCfgDetail();
 

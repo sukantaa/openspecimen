@@ -26,6 +26,11 @@ angular.module('openspecimen')
       }
     }
 
+    function back() {
+      allowChange();
+      $window.history.back();
+    }
+
     init();
 
     return {
@@ -34,5 +39,7 @@ angular.module('openspecimen')
       preventChange: preventChange,
 
       onChange: onChange,
+
+      back: back
     };
   })

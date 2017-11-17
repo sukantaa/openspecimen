@@ -65,6 +65,26 @@ angular.module('openspecimen')
       );
     }
 
+    function getWorkflow(cpId, name) {
+      return loadWorkflows(cpId).then(
+        function(cfg) {
+          return cfg.workflows[name];
+        }
+      );
+    }
+
+    function saveWorkflow(cpId, workflow) {
+      return CollectionProtocol.saveWorkflows(cpId, [workflow], true).then(
+        function(resp) {
+          if (cpWorkflowsMap[cpId]) {
+            cpWorkflowsMap[cpId].workflows[workflow.name] = workflow;
+          }
+
+          return resp;
+        }
+      );
+    }
+
     return {
       getRegParticipantTmpl: function(cpId, cprId) {
         if (cprId != -1) { //edit case
@@ -87,6 +107,8 @@ angular.module('openspecimen')
         // template provider
         return getRegParticipantCtrl(cpId, cprId);
       },
+
+      getWorkflow: getWorkflow,
 
       getWorkflowData: getWorkflowData,
 
@@ -159,6 +181,8 @@ angular.module('openspecimen')
             return (data.participant || {})[src || 'OpenSpecimen'] || [];
           }
         );
-      }
+      },
+
+      saveWorkflow: saveWorkflow
     }
   });

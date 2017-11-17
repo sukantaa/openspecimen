@@ -1101,7 +1101,10 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 				cfg.setCp(cp);
 			}
 
-			cfg.getWorkflows().clear();
+			if (!input.isPatch()) {
+				cfg.getWorkflows().clear();
+			}
+
 			for (WorkflowDetail detail : input.getWorkflows().values()) {
 				Workflow wf = new Workflow();
 				BeanUtils.copyProperties(detail, wf);

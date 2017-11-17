@@ -70,6 +70,7 @@ angular.module('os.biospecimen.extensions', ['os.biospecimen.models'])
             onPrint        : opts.onPrint,
             onDelete       : opts.onDelete,
             showActionBtns : opts.showActionBtns,
+            showSaveNext   : opts.showSaveNext,
             showPanel      : opts.showPanel,
             customHdrs     : hdrs,
             skipLogicFieldValue   : opts.skipLogicFieldValue ||

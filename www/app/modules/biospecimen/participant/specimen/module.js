@@ -91,24 +91,45 @@ angular.module('os.biospecimen.specimen',
       .state('specimen-detail.extensions', {
         url: '/extensions',
         template: '<div ui-view></div>',
-        controller: function($scope, specimen) {
+        controller: function($scope, specimen, forms, records, ExtensionsUtil) {
           $scope.extnOpts = {
             update: $scope.specimenResource.updateOpts,
             entity: specimen,
             isEntityActive: (specimen.activityStatus == 'Active')
           };
+
+          ExtensionsUtil.linkFormRecords(forms, records);
+        },
+        resolve: {
+          orderSpec: function(cp, CpConfigSvc) {
+            return CpConfigSvc.getWorkflowData(cp.id, 'forms', {}).then(
+              function(wf) {
+                return [{type: 'Specimen', forms: wf['Specimen'] || []}];
+              } 
+            );
+          },
+          forms: function(specimen, orderSpec, ExtensionsUtil) {
+            return specimen.getForms().then(
+              function(forms) {
+                return ExtensionsUtil.sortForms(forms, orderSpec);
+              } 
+            ) 
+          },
+          records: function(specimen) {
+            return specimen.getRecords();
+          } 
         },
         abstract: true,
         parent: 'specimen-detail'
       })
       .state('specimen-detail.extensions.list', {
-        url: '/list',
+        url: '/list?formCtxtId&formId&recordId',
         templateUrl: 'modules/biospecimen/extensions/list.html',
         controller: 'FormsListCtrl', 
         parent: 'specimen-detail.extensions'
       })
       .state('specimen-detail.extensions.addedit', {
-        url: '/addedit?formId&recordId&formCtxId',
+        url: '/addedit?formId&recordId&formCtxId&spe',
         templateUrl: 'modules/biospecimen/extensions/addedit.html',
         resolve: {
           formDef: function($stateParams, Form) {
@@ -128,6 +149,12 @@ angular.module('os.biospecimen.specimen',
                 return formData
               }
             ];
+          },
+          viewOpts: function($window, $stateParams, LocationChangeListener) {
+            return {
+              goBackFn: ($stateParams.spe == 'true') ? LocationChangeListener.back : null,
+              showSaveNext: $stateParams.spe != 'true'
+            };
           }
         },
         controller: 'FormRecordAddEditCtrl',
@@ -140,7 +167,12 @@ angular.module('os.biospecimen.specimen',
           $scope.entityType = 'SpecimenEvent';
           $scope.extnState = 'specimen-detail.events';
           $scope.events = specimen.getEvents();
-          $scope.eventForms = specimen.getForms({entityType: 'SpecimenEvent'});
+          $scope.eventForms = [];
+          specimen.getForms({entityType: 'SpecimenEvent'}).then(
+            function(eventForms) {
+              $scope.eventForms = eventForms;
+            }
+          );
 
           $scope.deleteEvent = function(event) {
             var record = {recordId: event.id, formId: event.formId, formCaption: event.name};

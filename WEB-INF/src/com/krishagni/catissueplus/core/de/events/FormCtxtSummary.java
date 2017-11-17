@@ -26,6 +26,8 @@ public class FormCtxtSummary {
 	private Date creationTime;
 	
 	private Date modificationTime;
+
+	private String entityType;
 	
 	public Long getFormCtxtId() {
 		return formCtxtId;
@@ -98,13 +100,22 @@ public class FormCtxtSummary {
 	public void setModificationTime(Date modificationTime) {
 		this.modificationTime = modificationTime;
 	}
-	
+
+	public String getEntityType() {
+		return entityType;
+	}
+
+	public void setEntityType(String entityType) {
+		this.entityType = entityType;
+	}
+
 	public static FormCtxtSummary from(FormContextBean formCtxt) {
 		FormCtxtSummary result = new FormCtxtSummary();
 		result.setFormCtxtId(formCtxt.getIdentifier());
 		result.setFormId(formCtxt.getContainerId());
 		result.setSysForm(formCtxt.isSysForm());
 		result.setMultiRecord(formCtxt.isMultiRecord());
+		result.setEntityType(formCtxt.getEntityType());
 		return result;
 	}
 	

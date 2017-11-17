@@ -210,6 +210,7 @@
       <return-scalar column="formId" type="long"/>
       <return-scalar column="formCaption" type="string"/>
       <return-scalar column="cpId" type="long"/>
+      <return-scalar column="entityType" type="string"/>
       <return-scalar column="creationTime" type="timestamp"/>
       <return-scalar column="modificationTime" type="timestamp"/>
       <return-scalar column="userId" type="long"/>
@@ -221,7 +222,7 @@
             
       select
         fc.identifier as formCtxtId, fc.container_id as formId, c.caption as formCaption, fc.cp_id as cpId,
-        c.create_time as creationTime,
+        fc.entity_type as entityType, c.create_time as creationTime,
         case when c.last_modify_time is null then c.create_time else c.last_modify_time end as modificationTime,
         u.identifier as userId, u.first_name as userFirstName, u.last_name as userLastName,
         fc.is_multirecord as multirecord, fc.is_sys_form as sysForm,	
@@ -248,6 +249,7 @@
       <return-scalar column="formId" type="long"/>
       <return-scalar column="formCaption" type="string"/>
       <return-scalar column="cpId" type="long"/>
+      <return-scalar column="entityType" type="string"/>
       <return-scalar column="creationTime" type="timestamp"/>
       <return-scalar column="modificationTime" type="timestamp"/>
       <return-scalar column="userId" type="long"/>
@@ -259,7 +261,7 @@
 
       select
         fc.identifier as formCtxtId, fc.container_id as formId, c.caption as formCaption, fc.cp_id as cpId,
-        c.create_time as creationTime,
+        fc.entity_type as entityType, c.create_time as creationTime,
         case when c.last_modify_time is null then c.create_time else c.last_modify_time end as modificationTime,
         u.identifier as userId, u.first_name as userFirstName, u.last_name as userLastName,
         fc.is_multirecord as multirecord, fc.is_sys_form as sysForm,
@@ -285,6 +287,7 @@
       <return-scalar column="formId" type="long"/>
       <return-scalar column="formCaption" type="string"/>
       <return-scalar column="cpId" type="long"/>
+      <return-scalar column="entityType" type="string"/>
       <return-scalar column="creationTime" type="timestamp"/>
       <return-scalar column="modificationTime" type="timestamp"/>
       <return-scalar column="userId" type="long"/>
@@ -296,7 +299,7 @@
             
       select
         fc.identifier as formCtxtId, fc.container_id as formId, c.caption as formCaption, fc.cp_id as cpId,
-        c.create_time as creationTime,
+        fc.entity_type as entityType, c.create_time as creationTime,
         case when c.last_modify_time is null then c.create_time else c.last_modify_time end as modificationTime,
         u.identifier as userId, u.first_name as userFirstName, u.last_name as userLastName,
         fc.is_multirecord as multirecord, fc.is_sys_form as sysForm,	
@@ -327,6 +330,7 @@
       <return-scalar column="formId" type="long"/>
       <return-scalar column="formCaption" type="string"/>
       <return-scalar column="cpId" type="long"/>
+      <return-scalar column="entityType" type="string"/>
       <return-scalar column="creationTime" type="timestamp"/>
       <return-scalar column="modificationTime" type="timestamp"/>
       <return-scalar column="userId" type="long"/>
@@ -338,7 +342,7 @@
 
       select
         fc.identifier as formCtxtId, fc.container_id as formId, c.caption as formCaption, fc.cp_id as cpId,
-        c.create_time as creationTime,
+        fc.entity_type as entityType, c.create_time as creationTime,
         case when c.last_modify_time is null then c.create_time else c.last_modify_time end as modificationTime,
         u.identifier as userId, u.first_name as userFirstName, u.last_name as userLastName,
         fc.is_multirecord as multirecord, fc.is_sys_form as sysForm, 	
@@ -371,6 +375,7 @@
       <return-scalar column="formId" type="long"/>
       <return-scalar column="formCaption" type="string"/>
       <return-scalar column="cpId" type="long"/>
+      <return-scalar column="entityType" type="string"/>
       <return-scalar column="creationTime" type="timestamp"/>
       <return-scalar column="modificationTime" type="timestamp"/>
       <return-scalar column="userId" type="long"/>
@@ -382,7 +387,7 @@
 
       select
         fc.identifier as formCtxtId, fc.container_id as formId, c.caption as formCaption, fc.cp_id as cpId,
-        c.create_time as creationTime,
+        fc.entity_type as entityType, c.create_time as creationTime,
         case when c.last_modify_time is null then c.create_time else c.last_modify_time end as modificationTime,
         u.identifier as userId, u.first_name as userFirstName, u.last_name as userLastName,
         fc.is_multirecord as multirecord, fc.is_sys_form as sysForm, 

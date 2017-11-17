@@ -554,6 +554,11 @@ h4.os-sub-section-title, h5.os-sub-section-title, h6.os-sub-section-title {
   padding-left: 150px;
 }
 
+.os-kv-vertical .os-key-values .item {
+  float: none;
+  padding-left: 0px;
+}
+
 .os-one-col > .item {
   width: 100%;
 }
@@ -605,6 +610,19 @@ h4.os-sub-section-title, h5.os-sub-section-title, h6.os-sub-section-title {
   clear: left;
   margin-left: -150px;
   width: 150px;
+}
+
+.os-kv-vertical .os-key-values .item .key {
+  float: none;
+  margin-left: 0px;
+  width: 100%;
+  display: block;
+}
+
+.os-kv-vertical .os-key-values .item .value {
+  float: none;
+  width: 100%;
+  display: block;
 }
 
 .popover .os-key-values {

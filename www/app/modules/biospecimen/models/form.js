@@ -76,30 +76,25 @@ angular.module('os.biospecimen.models.form', ['os.common.models'])
     };
 
     Form.listFor = function(url, objectId, params) {
-      var result = [];
-    
-      $http.get(url + objectId + '/forms', {params: params}).then(
+      return $http.get(url + objectId + '/forms', {params: params}).then(
         function(resp) {
           var opts = angular.extend({objectId: objectId}, params);
+          var result = [];
           angular.forEach(resp.data, function(form) {
             form.id = form.formId;
             result.push(new Form(angular.extend(form, opts)));
           });
+          return result;
         }
       );
-
-      return result;
     };
 
     Form.listRecords = function(url) {
-      var records = [];
-      $http.get(url).then(
+      return $http.get(url).then(
         function(resp) {
-          Util.unshiftAll(records, createRecordsList(resp.data));
+          return createRecordsList(resp.data);
         }
       );
-
-      return records;
     };
 
     Form.deleteRecord = function(formId, recordId) {
@@ -149,6 +144,15 @@ angular.module('os.biospecimen.models.form', ['os.common.models'])
 
       return result;
     };
+
+    Form.prototype.getRecord = function(recordId, opts) {
+      var params = {params: opts};
+      return $http.get(Form.url() + this.$id() + '/data/' + recordId, params).then(
+        function(resp) {
+          return resp.data;
+        }
+      );
+    }
 
     Form.prototype.getFields = function() {
       var cpId = -1;

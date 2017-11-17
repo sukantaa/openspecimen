@@ -11,8 +11,9 @@
           </button>
           <ul class="os-big-dropdown-menu dropdown-menu" role="menu">
             <li ng-repeat="eventForm in eventForms" ng-if="!eventForm.sysForm">
-              <a ui-sref="specimen-detail.extensions.addedit({formId: eventForm.formId, formCtxId: eventForm.formCtxtId})">
-                {{eventForm.formCaption}}
+              <a ui-sref="specimen-detail.extensions.addedit({spe: true,
+                formId: eventForm.formId, formCtxId: eventForm.formCtxtId})">
+                <span>{{eventForm.formCaption}}</span>
               </a>
             </li>
           </ul>
@@ -34,7 +35,8 @@
           <div class="os-table-body">
             <div class="row" ng-repeat="event in events">
               <div class="col col-xs-5">
-                <a ui-sref="specimen-detail.extensions.addedit({formId: event.formId, recordId: event.id, formCtxId: event.formCtxtId})">
+                <a ui-sref="specimen-detail.extensions.addedit({spe: true, formId: event.formId,
+                  recordId: event.id, formCtxId: event.formCtxtId})">
                   <span>#{{event.id}} {{event.name}}</span>
                 </a>
               </div>

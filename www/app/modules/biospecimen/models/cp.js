@@ -58,8 +58,9 @@ angular.module('os.biospecimen.models.cp', ['os.common.models'])
       )
     }
 
-    CollectionProtocol.saveWorkflows = function(cpId, workflows) {
-      return $http.put(CollectionProtocol.url() + cpId  + '/workflows', workflows).then(
+    CollectionProtocol.saveWorkflows = function(cpId, workflows, patch) {
+      var httpFn = patch ? $http.patch : $http.put;
+      return httpFn(CollectionProtocol.url() + cpId  + '/workflows', workflows).then(
         function(result) {
           return result.data;
         }

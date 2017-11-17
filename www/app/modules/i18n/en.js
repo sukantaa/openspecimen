@@ -300,6 +300,14 @@
       "barcoding": "Specimen Barcoding"
     },
 
+    "forms": {
+      "title": "Forms",
+      "CommonParticipant": "Participant",
+      "Participant": "Registration",
+      "SpecimenCollectionGroup": "Visit",
+      "Specimen": "Specimen"
+    },
+
     "catalog": {
       "title": "Catalog",
       "query": "Query",
@@ -1436,6 +1444,9 @@
     "update_time": "Update Time",
 
     "no_records": "No form records to show",
+    "record": "Record",
+    "records": "Records",
+    "records_lc": "records",
     
     "edit_record": "Edit Record",
     "new_record": "Create New Record",

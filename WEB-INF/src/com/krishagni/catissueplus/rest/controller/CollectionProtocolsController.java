@@ -123,7 +123,7 @@ public class CollectionProtocolsController {
 			.startAt(startAt)
 			.maxResults(maxResults);
 
-		ResponseEvent<List<CollectionProtocolSummary>> resp = cpSvc.getProtocols(getRequest(crit));
+		ResponseEvent<List<CollectionProtocolSummary>> resp = cpSvc.getProtocols(request(crit));
 		resp.throwErrorIfUnsuccessful();		
 		return resp.getPayload();
 	}
@@ -150,7 +150,7 @@ public class CollectionProtocolsController {
 			.piId(piId)
 			.repositoryName(repositoryName);
 		
-		ResponseEvent<Long> resp = cpSvc.getProtocolsCount(getRequest(crit));
+		ResponseEvent<Long> resp = cpSvc.getProtocolsCount(request(crit));
 		resp.throwErrorIfUnsuccessful();
 		return Collections.singletonMap("count", resp.getPayload());
 	}
@@ -162,7 +162,7 @@ public class CollectionProtocolsController {
 		CpQueryCriteria crit = new CpQueryCriteria();
 		crit.setId(cpId);
 		
-		ResponseEvent<CollectionProtocolDetail> resp = cpSvc.getCollectionProtocol(getRequest(crit));
+		ResponseEvent<CollectionProtocolDetail> resp = cpSvc.getCollectionProtocol(request(crit));
 		resp.throwErrorIfUnsuccessful();		
 		return resp.getPayload();
 	}	
@@ -176,7 +176,7 @@ public class CollectionProtocolsController {
 		crit.setId(cpId);
 		crit.setFullObject(true);
 		
-		ResponseEvent<CollectionProtocolDetail> resp = cpSvc.getCollectionProtocol(getRequest(crit));
+		ResponseEvent<CollectionProtocolDetail> resp = cpSvc.getCollectionProtocol(request(crit));
 		resp.throwErrorIfUnsuccessful();
 		
 		CollectionProtocolDetail cp = resp.getPayload();
@@ -220,7 +220,7 @@ public class CollectionProtocolsController {
 	@ResponseBody
 	public void downloadSopDocument(@PathVariable("id") Long cpId, HttpServletResponse httpResp)
 	throws IOException {
-		ResponseEvent<File> resp = cpSvc.getSopDocument(getRequest(cpId));
+		ResponseEvent<File> resp = cpSvc.getSopDocument(request(cpId));
 		resp.throwErrorIfUnsuccessful();
 
 		File file = resp.getPayload();
@@ -241,7 +241,7 @@ public class CollectionProtocolsController {
 			detail.setFilename(file.getOriginalFilename());
 			detail.setFileIn(in);
 
-			ResponseEvent<String> resp = cpSvc.uploadSopDocument(getRequest(detail));
+			ResponseEvent<String> resp = cpSvc.uploadSopDocument(request(detail));
 			resp.throwErrorIfUnsuccessful();
 			return resp.getPayload();
 		} finally {
@@ -253,7 +253,7 @@ public class CollectionProtocolsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public CollectionProtocolDetail createCollectionProtocol(@RequestBody CollectionProtocolDetail cp) {
-		ResponseEvent<CollectionProtocolDetail> resp = cpSvc.createCollectionProtocol(getRequest(cp));
+		ResponseEvent<CollectionProtocolDetail> resp = cpSvc.createCollectionProtocol(request(cp));
 		resp.throwErrorIfUnsuccessful();		
 		return resp.getPayload();
 	}
@@ -262,7 +262,7 @@ public class CollectionProtocolsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public CollectionProtocolDetail updateCollectionProtocol(@RequestBody CollectionProtocolDetail cp) {
-		ResponseEvent<CollectionProtocolDetail> resp = cpSvc.updateCollectionProtocol(getRequest(cp));
+		ResponseEvent<CollectionProtocolDetail> resp = cpSvc.updateCollectionProtocol(request(cp));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}
@@ -281,7 +281,7 @@ public class CollectionProtocolsController {
 		opDetail.setCpId(cpId);
 		opDetail.setCp(cpDetail);
 
-		ResponseEvent<CollectionProtocolDetail> resp = cpSvc.copyCollectionProtocol(getRequest(opDetail));
+		ResponseEvent<CollectionProtocolDetail> resp = cpSvc.copyCollectionProtocol(request(opDetail));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}
@@ -294,7 +294,7 @@ public class CollectionProtocolsController {
 		cp.setId(id);
 		cp.setConsentsWaived(Boolean.valueOf(props.get("consentsWaived")));
 		
-		ResponseEvent<CollectionProtocolDetail> resp = cpSvc.updateConsentsWaived(getRequest(cp));
+		ResponseEvent<CollectionProtocolDetail> resp = cpSvc.updateConsentsWaived(request(cp));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}
@@ -303,7 +303,7 @@ public class CollectionProtocolsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public List<DependentEntityDetail> getCpDependentEntities(@PathVariable Long id) {
-		ResponseEvent<List<DependentEntityDetail>> resp = cpSvc.getCpDependentEntities(getRequest(id));
+		ResponseEvent<List<DependentEntityDetail>> resp = cpSvc.getCpDependentEntities(request(id));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}
@@ -322,7 +322,7 @@ public class CollectionProtocolsController {
 		crit.setIds(Collections.singleton(id));
 		crit.setForceDelete(forceDelete);
 
-		ResponseEvent<BulkDeleteEntityResp<CollectionProtocolDetail>> resp = cpSvc.deleteCollectionProtocols(getRequest(crit));
+		ResponseEvent<BulkDeleteEntityResp<CollectionProtocolDetail>> resp = cpSvc.deleteCollectionProtocols(request(crit));
 		resp.throwErrorIfUnsuccessful();
 		BulkDeleteEntityResp<CollectionProtocolDetail> payload = resp.getPayload();
 		return new EntityDeleteResp<>(payload.getEntities().get(0), payload.isCompleted());
@@ -342,7 +342,7 @@ public class CollectionProtocolsController {
 		crit.setIds(new HashSet<>(Arrays.asList(ids)));
 		crit.setForceDelete(forceDelete);
 
-		ResponseEvent<BulkDeleteEntityResp<CollectionProtocolDetail>> resp = cpSvc.deleteCollectionProtocols(getRequest(crit));
+		ResponseEvent<BulkDeleteEntityResp<CollectionProtocolDetail>> resp = cpSvc.deleteCollectionProtocols(request(crit));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}
@@ -351,7 +351,7 @@ public class CollectionProtocolsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public List<ConsentTierDetail> getConsentTiers(@PathVariable("id") Long cpId) {
-		ResponseEvent<List<ConsentTierDetail>> resp = cpSvc.getConsentTiers(getRequest(cpId));
+		ResponseEvent<List<ConsentTierDetail>> resp = cpSvc.getConsentTiers(request(cpId));
 		resp.throwErrorIfUnsuccessful();		
 		return resp.getPayload();
 	}
@@ -408,7 +408,7 @@ public class CollectionProtocolsController {
 		consentTierDetail.setCpId(cpId);
 		consentTierDetail.setId(tierId);
 		
-		ResponseEvent<List<DependentEntityDetail>> resp = cpSvc.getConsentDependentEntities(getRequest(consentTierDetail));
+		ResponseEvent<List<DependentEntityDetail>> resp = cpSvc.getConsentDependentEntities(request(consentTierDetail));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}
@@ -435,16 +435,14 @@ public class CollectionProtocolsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody		
 	public CpWorkflowCfgDetail saveWorkflowCfg(@PathVariable("id") Long cpId, @RequestBody List<WorkflowDetail> workflows) {
-		CpWorkflowCfgDetail input = new CpWorkflowCfgDetail();
-		input.setCpId(cpId);
-		
-		for (WorkflowDetail workflow : workflows) {
-			input.getWorkflows().put(workflow.getName(), workflow);
-		}
-		
-		ResponseEvent<CpWorkflowCfgDetail> resp = cpSvc.saveWorkflows(new RequestEvent<>(input));
-		resp.throwErrorIfUnsuccessful();
-		return resp.getPayload();
+		return saveWorkflows(cpId, workflows, false);
+	}
+
+	@RequestMapping(method = RequestMethod.PATCH, value="/{id}/workflows")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public CpWorkflowCfgDetail patchWorkflowCfg(@PathVariable("id") Long cpId, @RequestBody List<WorkflowDetail> workflows) {
+		return saveWorkflows(cpId, workflows, true);
 	}
 
 	//
@@ -659,7 +657,7 @@ public class CollectionProtocolsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public MergeCpDetail mergeCollectionProtocol(@RequestBody MergeCpDetail mergeDetail) {
-		ResponseEvent<MergeCpDetail> resp = cpSvc.mergeCollectionProtocols(getRequest(mergeDetail));
+		ResponseEvent<MergeCpDetail> resp = cpSvc.mergeCollectionProtocols(request(mergeDetail));
 		resp.throwErrorIfUnsuccessful();
 
 		return resp.getPayload();
@@ -741,7 +739,7 @@ public class CollectionProtocolsController {
 		listReq.put("includeCount", includeCount);
 		listReq.put("filters", filters);
 
-		ResponseEvent<ListDetail> resp = cpSvc.getList(getRequest(listReq));
+		ResponseEvent<ListDetail> resp = cpSvc.getList(request(listReq));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}
@@ -764,7 +762,7 @@ public class CollectionProtocolsController {
 		listReq.put("listName", listName);
 		listReq.put("filters", filters);
 
-		ResponseEvent<Integer> resp = cpSvc.getListSize(getRequest(listReq));
+		ResponseEvent<Integer> resp = cpSvc.getListSize(request(listReq));
 		resp.throwErrorIfUnsuccessful();
 		return Collections.singletonMap("size", resp.getPayload());
 	}
@@ -775,12 +773,29 @@ public class CollectionProtocolsController {
 		req.setCpId(cpId);
 		req.setOp(op);
 		
-		ResponseEvent<ConsentTierDetail> resp = cpSvc.updateConsentTier(getRequest(req));
+		ResponseEvent<ConsentTierDetail> resp = cpSvc.updateConsentTier(request(req));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}
 
-	private <T> RequestEvent<T> getRequest(T payload) {
-		return new RequestEvent<T>(payload);
+	private CpWorkflowCfgDetail saveWorkflows(Long cpId, List<WorkflowDetail> workflows, boolean patch) {
+		CpWorkflowCfgDetail input = new CpWorkflowCfgDetail();
+		input.setCpId(cpId);
+		input.setPatch(patch);
+
+		for (WorkflowDetail workflow : workflows) {
+			input.getWorkflows().put(workflow.getName(), workflow);
+		}
+
+		return response(cpSvc.saveWorkflows(request(input)));
+	}
+
+	private <T> RequestEvent<T> request(T payload) {
+		return new RequestEvent<>(payload);
+	}
+
+	private <T> T response(ResponseEvent<T> resp) {
+		resp.throwErrorIfUnsuccessful();
+		return resp.getPayload();
 	}
 }

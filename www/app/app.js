@@ -312,10 +312,7 @@ osApp.config(function(
       return $state.includes(stateName, params, options);
     }
 
-    $rootScope.back = function() {
-      LocationChangeListener.allowChange();
-      $window.history.back();
-    };
+    $rootScope.back = LocationChangeListener.back;
 
     $rootScope.global = {
       defaultDomain: 'openspecimen',	

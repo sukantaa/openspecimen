@@ -17,6 +17,7 @@ angular.module('os.biospecimen.participant',
     'os.biospecimen.visit',
     'os.biospecimen.specimen',
     'os.biospecimen.extensions.list',
+    'os.biospecimen.extensions.util',
     'os.biospecimen.extensions.addedit-record',
     'os.biospecimen.specimenkit'
   ])
@@ -565,18 +566,48 @@ angular.module('os.biospecimen.participant',
       .state('participant-detail.extensions', {
         url: '/extensions',
         template: '<div ui-view></div>',
-        controller: function($scope, cpr) {
+        controller: function($scope, cpr, forms, records, ExtensionsUtil) {
           $scope.extnOpts = {
             update: $scope.participantResource.updateOpts,
             isEntityActive: cpr.activityStatus == 'Active',
             entity: cpr
+          }
+
+          ExtensionsUtil.linkFormRecords(forms, records);
+        },
+        resolve: {
+          orderSpec: function(cp, CpConfigSvc) {
+            return CpConfigSvc.getWorkflowData(cp.id, 'forms', {}).then(
+              function(wf) {
+                return [
+                  {type: 'CommonParticipant', forms: wf['CommonParticipant'] || []},
+                  {type: 'Participant', forms: wf['Participant'] || []}
+                ];
+              }
+            );
+          },
+          forms: function(cpr, orderSpec, ExtensionsUtil) {
+            return cpr.getForms().then(
+              function(forms) {
+                return ExtensionsUtil.sortForms(forms, orderSpec);
+              }
+            )
+          },
+          records: function(cpr) {
+            return cpr.getRecords();
+          },
+          viewOpts: function() {
+            return {
+              goBackFn: null,
+              showSaveNext: true
+            };
           }
         },
         abstract: true,
         parent: 'participant-detail'
       })
       .state('participant-detail.extensions.list', {
-        url: '/list',
+        url: '/list?formId&formCtxtId&recordId',
         templateUrl: 'modules/biospecimen/extensions/list.html',
         controller: 'FormsListCtrl', 
         parent: 'participant-detail.extensions'

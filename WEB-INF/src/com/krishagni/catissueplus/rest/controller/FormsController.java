@@ -187,8 +187,11 @@ public class FormsController {
 			@PathVariable("recordId") 
 			Long recordId,
 			
-			@RequestParam(value="includeUdn", required=false, defaultValue="false")
-			boolean includeUdn) {
+			@RequestParam(value = "includeUdn", required = false, defaultValue = "false")
+			boolean includeUdn,
+
+			@RequestParam(value="includeMetadata", required = false, defaultValue = "false")
+			boolean includeMetadata) {
 		
 		FormRecordCriteria crit = new FormRecordCriteria();
 		crit.setFormId(formId);
@@ -196,7 +199,11 @@ public class FormsController {
 		
 		ResponseEvent<FormDataDetail> resp = formSvc.getFormData(getRequest(crit));
 		resp.throwErrorIfUnsuccessful();
-		return resp.getPayload().getFormData().getFieldNameValueMap(includeUdn);
+		if (includeMetadata) {
+			return resp.getPayload().getFormData().getFieldValueMap();
+		} else {
+			return resp.getPayload().getFormData().getFieldNameValueMap(includeUdn);
+		}
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value="{id}/latest-records")
