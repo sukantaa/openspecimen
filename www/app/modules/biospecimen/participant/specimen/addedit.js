@@ -58,12 +58,18 @@ angular.module('os.biospecimen.specimen.addedit', [])
       $scope.currSpecimen.availableQty = Util.getNumberInScientificNotation($scope.currSpecimen.availableQty);
       $scope.currSpecimen.concentration = Util.getNumberInScientificNotation($scope.currSpecimen.concentration);
 
-      $scope.spmnCtx = {
+      var viewRule = {
+        op: 'AND',
+        rules: [{field: 'viewCtx.mode', op: '==', value: '\'single\''}]
+      };
+      var spmnCtx = $scope.spmnCtx = {
         obj: {specimen: $scope.currSpecimen, cp: cp}, inObjs: ['specimen'], exObjs: exObjs,
+        opts: {viewShowIf: {'specimen.label': viewRule, 'specimen.storageLocation': viewRule}},
         isVirtual: specimen.showVirtual(),
         manualSpecLabelReq: !!currSpecimen.label || !currSpecimen.labelFmt || cp.manualSpecLabelEnabled,
         mode: 'single'
-      }
+      };
+      spmnCtx.obj.viewCtx = spmnCtx;
 
       $scope.deFormCtrl = {};
       $scope.extnOpts = ExtensionsUtil.getExtnOpts(currSpecimen, extensionCtxt);
