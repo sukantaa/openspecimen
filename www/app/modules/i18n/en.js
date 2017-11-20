@@ -699,6 +699,8 @@
     "spmn_aliquots": "Specimen Aliquots",
     "spmn_derivatives": "Specimen Derivatives",
     "new_aliquot_count": "Number of aliquots",
+    "aliquot_details": "Aliquot Details",
+    "create_aliquots_q": "Do you want to create aliquots?",
 
     "specimens_hierarchy_deleted": "Selected specimens and their children are deleted successfully",
     "specimens_deleted": "Selected specimens are deleted successfully",
@@ -712,6 +714,7 @@
     "create_derivatives": "Create Derived Specimens",
     "specimen_type": "Specimen Type",
     "anatomic_site": "Anatomic Site",
+    "custom_fields": "Additional Fields",
 
     "multiple_cp_specimens": "Specimens in multiple protocols",
     "select_protocol": "Following specimens are present in multiple protocols. Please select the right protocol before proceeding",

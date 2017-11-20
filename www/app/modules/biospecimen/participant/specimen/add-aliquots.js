@@ -29,20 +29,21 @@ angular.module('os.biospecimen.specimen.addaliquots', [])
       }
 
       var exObjs = [
-        'specimen.lineage', 'specimen.parentLabel', 'specimen.initialQty',
+        'specimen.label', 'specimen.barcode', 'specimen.lineage',
+        'specimen.parentLabel', 'specimen.initialQty',
         'specimen.availableQty', 'specimen.storageLocation',
         'specimen.events', 'specimen.collectionEvent', 'specimen.receivedEvent'
       ];
 
       if (hasDict) {
         $scope.spmnCtx = {
-          obj: {specimen: $scope.aliquotSpec}, inObjs: ['specimen'], exObjs: exObjs
+          aobj: {specimen: $scope.aliquotSpec}, ainObjs: ['specimen'], aexObjs: exObjs
         }
       } else {
-        $scope.extnOpts = ExtensionsUtil.getExtnOpts($scope.aliquotSpec, extensionCtxt);
+        $scope.aextnOpts = ExtensionsUtil.getExtnOpts($scope.aliquotSpec, extensionCtxt);
       }
 
-      $scope.deFormCtrl = {};
+      $scope.adeFormCtrl = {};
     }
 
     function getState() {
@@ -62,6 +63,7 @@ angular.module('os.biospecimen.specimen.addaliquots', [])
     }
 
     $scope.collectAliquots = function() {
+      $scope.deFormCtrl = $scope.adeFormCtrl;
       var specimens = SpecimenUtil.collectAliquots($scope);
       if (specimens) {
         var opts = {ignoreQtyWarning: true, showCollVisitDetails: false};

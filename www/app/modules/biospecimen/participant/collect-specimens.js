@@ -195,7 +195,7 @@ angular.module('os.biospecimen.participant.collect-specimens',
   .controller('CollectSpecimensCtrl', 
     function(
       $scope, $translate, $state, $document, $q, $parse, $injector,
-      cpr, visit, latestVisit, cpDict, spmnCollFields, mrnAccessRestriction,
+      cp, cpr, visit, latestVisit, cpDict, spmnCollFields, mrnAccessRestriction,
       Visit, Specimen, PvManager, CollectSpecimensSvc, Container,
       ExtensionsUtil, Alerts, Util, SpecimenUtil) {
 
@@ -207,6 +207,13 @@ angular.module('os.biospecimen.participant.collect-specimens',
         $scope.customFieldGroups = [];
         $scope.mrnAccessRestriction = mrnAccessRestriction;
 
+        var printSettings = {};
+        angular.forEach(cp.spmnLabelPrintSettings,
+          function(setting) {
+            printSettings[setting.lineage] = setting.printMode;
+          }
+        );
+
         $scope.specimens = CollectSpecimensSvc.getSpecimens().map(
           function(specimen) {
             specimen.existingStatus = specimen.status;
@@ -214,7 +221,7 @@ angular.module('os.biospecimen.participant.collect-specimens',
             specimen.initialQty = Util.getNumberInScientificNotation(specimen.initialQty);
             if (specimen.status != 'Collected') {
               specimen.status = 'Collected';
-              specimen.printLabel = (specimen.labelAutoPrintMode == 'ON_COLLECTION');
+              specimen.printLabel = printLabel(printSettings, specimen);
             }
 
             if (specimen.closeAfterChildrenCreation) {
@@ -264,6 +271,11 @@ angular.module('os.biospecimen.participant.collect-specimens',
         initAliquotGrps($scope.specimens);
         $scope.$on('$destroy', vacateReservedPositions);
       };
+
+      function printLabel(cpPrintSettings, specimen) {
+        return (specimen.labelAutoPrintMode == 'ON_COLLECTION') ||
+          (!specimen.reqId && cpPrintSettings[specimen.lineage] == 'ON_COLLECTION');
+      }
 
       function initAliquotGrps(specimens) {
         angular.forEach(specimens, function(specimen, $index) {
