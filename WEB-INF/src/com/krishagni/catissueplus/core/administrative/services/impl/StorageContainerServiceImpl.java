@@ -1342,6 +1342,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 	private Function<ExportJob, List<? extends Object>> getContainersGenerator() {
 		return new Function<ExportJob, List<? extends Object>>() {
+			private boolean paramsInited;
+
 			private boolean loadTopLevelContainers = true;
 
 			private boolean endOfContainers;
@@ -1356,6 +1358,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 			@Override
 			public List<StorageContainerDetail> apply(ExportJob job) {
+				initParams();
+
 				if (endOfContainers) {
 					return Collections.emptyList();
 				}
@@ -1414,6 +1418,15 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				}
 
 				return result;
+			}
+
+			private void initParams() {
+				if (paramsInited) {
+					return;
+				}
+
+				endOfContainers = !AccessCtrlMgr.getInstance().hasStorageContainerEximRights();
+				paramsInited = true;
 			}
 
 			private List<StorageContainerDetail> getContainers(StorageContainerListCriteria crit) {

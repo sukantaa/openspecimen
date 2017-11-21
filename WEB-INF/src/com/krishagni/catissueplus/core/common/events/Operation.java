@@ -15,11 +15,11 @@ public enum Operation {
 	
 	UNLOCK("Unlock"),
 
-	BULK_IMPORT("Bulk Import");
+	EXIM("Export Import");
 	
 	private final String name; 
 	
-	private Operation(String name) {
+	Operation(String name) {
 		this.name = name;
 	}
 	

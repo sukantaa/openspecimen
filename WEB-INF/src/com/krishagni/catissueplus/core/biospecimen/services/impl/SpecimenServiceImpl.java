@@ -1041,6 +1041,11 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 					return;
 				}
 
+				if (!AccessCtrlMgr.getInstance().hasVisitSpecimenEximRights(cpId)) {
+					endOfSpecimens = true;
+					return;
+				}
+
 				crit = new SpecimenListCriteria()
 					.labels(Utility.csvToStringList(params.get("specimenLabels")))
 					.siteCps(siteCps)

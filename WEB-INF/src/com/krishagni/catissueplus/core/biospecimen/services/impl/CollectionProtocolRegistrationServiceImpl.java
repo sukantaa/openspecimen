@@ -1157,6 +1157,11 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 				return;
 			}
 
+			if (!AccessCtrlMgr.getInstance().hasCprEximRights(cpId)) {
+				endOfCprs = true;
+				return;
+			}
+
 			crit = new CprListCriteria()
 				.cpId(cpId)
 				.ppids(Utility.csvToStringList(params.get("ppids")))

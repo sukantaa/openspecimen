@@ -976,8 +976,12 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 
 			private int startAt;
 
+			private boolean paramsInited;
+
 			@Override
 			public List<? extends Object> apply(ExportJob job) {
+				initParams();
+
 				if (endOfUsers) {
 					return Collections.emptyList();
 				}
@@ -990,6 +994,18 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 				}
 
 				return UserDetail.from(users);
+			}
+
+			private void initParams() {
+				if (paramsInited) {
+					return;
+				}
+
+				if (!AccessCtrlMgr.getInstance().hasUserEximRights()) {
+					endOfUsers = true;
+				}
+
+				paramsInited = true;
 			}
 		};
 	}

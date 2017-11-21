@@ -122,10 +122,6 @@ public class ExportServiceImpl implements ExportService {
 
 	@PlusTransactional
 	private Pair<ExportJob, Future<Integer>> exportObjects(ExportDetail detail) {
-		if (!AuthUtil.isAdmin() && !AuthUtil.isInstituteAdmin()) {
-			throw OpenSpecimenException.userError(RbacErrorCode.INST_ADMIN_RIGHTS_REQ, AuthUtil.getCurrentUserInstitute().getName());
-		}
-
 		ObjectSchema schema = schemaFactory.getSchema(detail.getObjectType(), detail.getParams());
 		if (schema == null) {
 			throw OpenSpecimenException.userError(ExportErrorCode.INVALID_OBJECT_TYPE, detail.getObjectType());
@@ -189,6 +185,8 @@ public class ExportServiceImpl implements ExportService {
 
 			try {
 				AuthUtil.setCurrentUser(job.getCreatedBy());
+				ExporterContextHolder.getInstance().newContext();
+
 				generateRawRecordsFile();
 				generateOutputFile();
 				generateOutputZip(job);
@@ -199,6 +197,7 @@ public class ExportServiceImpl implements ExportService {
 				logger.error("Error exporting records", e);
 				return -1;
 			} finally {
+				ExporterContextHolder.getInstance().clearContext();
 				AuthUtil.clearCurrentUser();
 				cleanupFiles(job);
 				sendJobStatusNotification(job);

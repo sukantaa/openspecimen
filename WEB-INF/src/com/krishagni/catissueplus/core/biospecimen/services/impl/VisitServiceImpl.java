@@ -835,7 +835,12 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 				Long cpId = getCpId(params);
 				List<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps(cpId);
 				if (siteCps != null && siteCps.isEmpty()) {
-					endOfVisits = true;
+					paramsInited = endOfVisits = true;
+					return;
+				}
+
+				if (!AccessCtrlMgr.getInstance().hasVisitSpecimenEximRights(cpId)) {
+					paramsInited = endOfVisits = true;
 					return;
 				}
 

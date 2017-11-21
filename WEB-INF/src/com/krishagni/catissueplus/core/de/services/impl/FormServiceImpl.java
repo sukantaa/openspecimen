@@ -24,11 +24,9 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.repository.FormListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
-import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
-import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CprErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
@@ -1136,6 +1134,19 @@ public class FormServiceImpl implements FormService, InitializingBean {
 					} catch (Exception e) {
 						logger.error("Invalid CP ID: " + cpIdStr, e);
 					}
+				}
+
+				Function<Long, Boolean> hasEximRights = null;
+				if (entityType.equals("Participant") || entityType.equals("CommonParticipant")) {
+					hasEximRights = AccessCtrlMgr.getInstance()::hasCprEximRights;
+				} else if (entityType.equals("SpecimenCollectionGroup")) {
+					hasEximRights = AccessCtrlMgr.getInstance()::hasVisitSpecimenEximRights;
+				} else if (entityType.equals("Specimen") || entityType.equals("SpecimenEvent")) {
+					hasEximRights = AccessCtrlMgr.getInstance()::hasVisitSpecimenEximRights;
+				}
+
+				if (hasEximRights == null || !hasEximRights.apply(cpId)) {
+					endOfRecords = true;
 				}
 
 				paramsInited = true;
