@@ -628,6 +628,7 @@ public class ExportServiceImpl implements ExportService {
 		props.put("entityName", entityName);
 		props.put("status", getMsg("export_statuses_" + job.getStatus().name().toLowerCase()));
 		props.put("$subject", subjParams);
+		props.put("timeTaken", TimeUnit.MILLISECONDS.toMinutes(job.getEndTime().getTime() - job.getCreationTime().getTime()));
 
 		String[] rcpts = {job.getCreatedBy().getEmailAddress()};
 		EmailUtil.getInstance().sendEmail(JOB_STATUS_EMAIL_TMPL, rcpts, null, props);

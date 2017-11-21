@@ -49,8 +49,14 @@ angular.module('os.biospecimen.participant')
     }
 
     function getExportDetail(cp, allowedEntityTypes, forms) {
-      var breadcrumbs = [{state: 'cp-list-view', title: cp.shortTitle, params: '{cpId:' + cp.id + '}'}];
-      var onSuccess = {state: 'cp-list-view', params: {cpId: cp.id}};
+      var breadcrumbs, onSuccess;
+      if (cp.id == -1) {
+        breadcrumbs = [{state: 'cp-list', title: 'cp.list'}];
+        onSuccess = {state: 'cp-list', params: {}};
+      } else {
+        breadcrumbs = [{state: 'cp-list-view', title: cp.shortTitle, params: '{cpId:' + cp.id + '}'}];
+        onSuccess = {state: 'cp-list-view', params: {cpId: cp.id}};
+      }
 
       var entityForms = {};
       angular.forEach(forms,

@@ -1363,7 +1363,7 @@
     "create": "Create",
     "update": "Update",
     "delete": "Delete",
-    "import": "Import",
+    "export_import": "Exp/Imp",
     "add_resource": "Add Resource",
     "lock": "Lock",
     "unlock": "Unlock",

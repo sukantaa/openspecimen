@@ -45,22 +45,23 @@ angular.module('os.biospecimen.participant',
           },
 
           cpViewCtx: function(cp, currentUser, AuthorizationService) {
+            var participantEximAllowed = AuthorizationService.isAllowed({
+              resource: 'ParticipantPhi',
+              operations: ['Export Import'],
+              cp: cp.shortTitle
+            });
+
+            var visitSpmnEximAllowed = AuthorizationService.isAllowed({
+              resource: 'VisitAndSpecimen',
+              operations: ['Export Import'],
+              cp: cp.shortTitle
+            });
+
             return {
-              participantImportAllowed: AuthorizationService.isAllowed({
-                resource: 'ParticipantPhi',
-                operations: ['Bulk Import'],
-                cp: cp.shortTitle
-              }),
-
-              visitSpecimenImportAllowed: AuthorizationService.isAllowed({
-                resource: 'VisitAndSpecimen',
-                operations: ['Bulk Import'],
-                cp: cp.shortTitle
-              }),
-
-              participantExportAllowed: (currentUser.admin || currentUser.instituteAdmin),
-
-              visitSpecimenExportAllowed: (currentUser.admin || currentUser.instituteAdmin)
+              participantImportAllowed: participantEximAllowed,
+              visitSpecimenImportAllowed: visitSpmnEximAllowed,
+              participantExportAllowed: participantEximAllowed,
+              visitSpecimenExportAllowed: visitSpmnEximAllowed
             }
           },
 

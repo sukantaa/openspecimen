@@ -833,7 +833,7 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 				}
 
 				Long cpId = getCpId(params);
-				List<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps(cpId);
+				List<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps(cpId, false);
 				if (siteCps != null && siteCps.isEmpty()) {
 					paramsInited = endOfVisits = true;
 					return;
@@ -860,16 +860,21 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 			}
 
 			private Long getCpId(Map<String, String> params) {
+				Long cpId = null;
+
 				String cpIdStr = params.get("cpId");
 				if (StringUtils.isNotBlank(cpIdStr)) {
 					try {
-						return Long.parseLong(cpIdStr);
+						cpId = Long.parseLong(cpIdStr);
+						if (cpId == -1L) {
+							cpId = null;
+						}
 					} catch (Exception e) {
 						logger.error("Invalid CP ID: " + cpIdStr, e);
 					}
 				}
 
-				return null;
+				return cpId;
 			}
 		};
 	}

@@ -97,11 +97,13 @@ public abstract class DeObject {
 	}
 	
 	public Long getFormId() {
-		return getForm().getId(); 
+		Container form = getForm();
+		return form != null ? form.getId() : null;
 	}
 
 	public String getFormCaption() {
-		return getForm().getCaption();
+		Container form = getForm();
+		return form != null ? form.getCaption() : null;
 	}
 
 	public void saveOrUpdate() {

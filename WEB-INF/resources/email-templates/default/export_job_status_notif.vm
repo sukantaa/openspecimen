@@ -34,15 +34,12 @@
                   </tr>
                   <tr>
                     <td> Job finished in </td>
-                    <td> :
-                      #set($time = ($job.endTime.getTime() - $job.creationTime.getTime()) / (1000 * 60))
-                      $time minutes
-                    </td>
+                    <td> : $timeTaken minutes </td>
                   </tr>
                 </table>
               </td>
             </tr>
-            #if ($job.status == 'COMPLETED')
+            #if ($job.status.name() == 'COMPLETED')
             <tr>
               <td style="height:15px;line-height:5px;">&nbsp;</td>
             </tr>

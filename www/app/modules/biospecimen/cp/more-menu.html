@@ -20,3 +20,9 @@
     </li>
   </ul>
 </div>
+
+<button class="default" ui-sref="export-multi-cp-objs"
+  ng-if="cpsCtx.participantExportAllowed || cpsCtx.visitSpecimenExportAllowed">
+  <span class="fa fa-download"></span>
+  <span translate="common.buttons.export">Export</span>
+</button>

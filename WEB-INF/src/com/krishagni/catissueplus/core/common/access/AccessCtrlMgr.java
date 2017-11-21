@@ -698,14 +698,22 @@ public class AccessCtrlMgr {
 	}
 
 	public List<Pair<Long, Long>> getReadAccessSpecimenSiteCps(Long cpId) {
+		return getReadAccessSpecimenSiteCps(cpId, true);
+	}
+
+	public List<Pair<Long, Long>> getReadAccessSpecimenSiteCps(Long cpId, boolean addOrderSites) {
 		if (AuthUtil.isAdmin()) {
 			return null;
 		}
 
 		String[] ops = {Operation.READ.getName()};
-		Set<Pair<Long, Long>> siteCpPairs = getVisitAndSpecimenSiteCps(cpId, ops);
-		siteCpPairs.addAll(getDistributionOrderSiteCps(ops));
-		return deDupSiteCpPairs(siteCpPairs);
+		List<Pair<Long, Long>> siteCpPairs = new ArrayList<>(getVisitAndSpecimenSiteCps(cpId, ops));
+		if (addOrderSites) {
+			siteCpPairs.addAll(getDistributionOrderSiteCps(ops));
+			siteCpPairs = deDupSiteCpPairs(siteCpPairs);
+		}
+
+		return siteCpPairs;
 	}
 
 	private boolean ensureVisitObjectRights(Long visitId, Operation op, boolean checkPhiAccess) {
@@ -1378,6 +1386,10 @@ public class AccessCtrlMgr {
 	}
 
 	public boolean hasEximRights(Long cpId, String resource) {
+		if (AuthUtil.isAdmin()) {
+			return true;
+		}
+
 		Long userId = AuthUtil.getCurrentUser().getId();
 		String[] ops = {Operation.EXIM.getName()};
 
@@ -1424,7 +1436,7 @@ public class AccessCtrlMgr {
 		return siteCpPairs;
 	}
 
-	private List<Pair<Long, Long>> deDupSiteCpPairs(Set<Pair<Long, Long>> siteCpPairs) {
+	private List<Pair<Long, Long>> deDupSiteCpPairs(Collection<Pair<Long, Long>> siteCpPairs) {
 		Set<Long> sitesOfAllCps = new HashSet<>();
 		List<Pair<Long, Long>> result = new ArrayList<>();
 		for (Pair<Long, Long> siteCp : siteCpPairs) {

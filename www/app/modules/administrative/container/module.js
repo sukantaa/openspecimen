@@ -23,7 +23,7 @@ angular.module('os.administrative.container',
             createOpts: {resource: 'StorageContainer', operations: ['Create']},
             updateOpts: {resource: 'StorageContainer', operations: ['Update']},
             deleteOpts: {resource: 'StorageContainer', operations: ['Delete']},
-            importOpts: {resource: 'StorageContainer', operations: ['Bulk Import']}
+            importOpts: {resource: 'StorageContainer', operations: ['Export Import']}
           }
         },
         parent: 'signed-in'
