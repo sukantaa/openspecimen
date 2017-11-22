@@ -99,7 +99,9 @@ angular.module('openspecimen')
         };
         $rootScope.loggedIn = true;
         AuthService.saveToken(result.data.token);
-        if ($rootScope.reqState && $rootScope.state.name != $rootScope.reqState.name) {
+        if (result.data.researcher && !!result.data.queryId) {
+          $state.go('query-results', {queryId: result.data.queryId});
+        } else if ($rootScope.reqState && $rootScope.state.name != $rootScope.reqState.name) {
           $state.go($rootScope.reqState.name, $rootScope.reqState.params);
           $rootScope.reqState = undefined;
         } else {

@@ -1016,6 +1016,8 @@
     "address": "Address",
     "super_admin": "Super Administrator",
     "inst_admin": "Institute Administrator",
+    "researcher": "Researcher",
+    "query": "Catalog Query",
     "manage_forms": "Manage Forms?",
     "login_details": "Login Details",
     "permissions": "Permissions",
@@ -1110,6 +1112,7 @@
     "types": {
       "SUPER": "Super Administrator",
       "INSTITUTE": "Institute Administrator",
+      "RESEARCHER": "Researcher",
       "NONE": "None"
     },
 

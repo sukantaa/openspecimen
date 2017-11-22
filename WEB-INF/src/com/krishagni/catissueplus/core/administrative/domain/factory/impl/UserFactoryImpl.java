@@ -20,13 +20,22 @@ import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.catissueplus.core.de.domain.SavedQuery;
+import com.krishagni.catissueplus.core.de.events.SavedQuerySummary;
+import com.krishagni.catissueplus.core.de.services.SavedQueryErrorCode;
 
 public class UserFactoryImpl implements UserFactory {
 
 	private DaoFactory daoFactory;
 
+	private com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory;
+
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
+	}
+
+	public void setDeDaoFactory(com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory) {
+		this.deDaoFactory = deDaoFactory;
 	}
 
 	@Override
@@ -46,6 +55,7 @@ public class UserFactoryImpl implements UserFactory {
 		setAddress(detail, user, ose);
 		setAuthDomain(detail, user, ose);
 		setManageForms(detail, user, ose);
+		setQuery(detail, user, ose);
 		user.setCreationDate(Calendar.getInstance().getTime());
 		ose.checkAndThrow();
 		return user;
@@ -69,6 +79,7 @@ public class UserFactoryImpl implements UserFactory {
 		setAddress(detail, existing, user, ose);
 		setAuthDomain(detail, existing, user, ose);
 		setManageForms(detail, existing, user, ose);
+		setQuery(detail, existing, user, ose);
 		ose.checkAndThrow();
 		return user;		
 	}
@@ -303,6 +314,28 @@ public class UserFactoryImpl implements UserFactory {
 			setManageForms(detail, user, ose);
 		} else {
 			user.setManageForms(existing.getManageForms());
+		}
+	}
+
+	private void setQuery(UserDetail detail, User user, OpenSpecimenException ose) {
+		SavedQuerySummary queryDetail = detail.getQuery();
+		if (queryDetail == null || queryDetail.getId() == null) {
+			return;
+		}
+
+		SavedQuery query = deDaoFactory.getSavedQueryDao().getQuery(queryDetail.getId());
+		if (query == null) {
+			ose.addError(SavedQueryErrorCode.NOT_FOUND, queryDetail.getId());
+		}
+
+		user.setQuery(query);
+	}
+
+	private void setQuery(UserDetail detail, User existing, User user, OpenSpecimenException ose) {
+		if (detail.isAttrModified("query")) {
+			setQuery(detail, user, ose);
+		} else {
+			user.setQuery(existing.getQuery());
 		}
 	}
 }

@@ -100,10 +100,28 @@
             <span translate="user.inst_admin">Institute Administrator</span>
           </label>
           <label class="radio-inline">
+            <input type="radio" name="type" ng-model="user.type" ng-value="'RESEARCHER'">
+            <span translate="user.researcher">Researcher</span>
+          </label>
+          <label class="radio-inline">
             <input type="radio" name="type" ng-model="user.type" ng-value="'NONE'"
               ng-change="user.manageForms = false">
             <span translate="common.none">None</span>
           </label>
+        </div>
+      </div>
+
+      <div ng-if="user.type == 'RESEARCHER'">
+        <div class="form-group">
+          <label class="control-label col-xs-3">
+            <span translate="user.query">Query</span>
+          </label>
+          <div class="col-xs-6">
+            <os-select name="query" class="form-control" ng-model="user.query"
+              list="queryList.queries" refresh="loadQueries"
+              display-prop="title" placeholder="{{'user.query' | translate}}" required>
+            </os-select>
+          </div>
         </div>
       </div>
 

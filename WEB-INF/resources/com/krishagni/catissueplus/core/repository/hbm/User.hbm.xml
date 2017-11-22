@@ -33,6 +33,8 @@
     <many-to-one name="primarySite" column="PRIMARY_SITE_ID"/>
 
     <many-to-one name="authDomain" column="DOMAIN_NAME" property-ref="name" lazy="false" fetch="join"/>
+
+    <many-to-one name="query" column="QUERY_ID"/>
 	
     <property name="password" column="PASSWORD"/>
 	    

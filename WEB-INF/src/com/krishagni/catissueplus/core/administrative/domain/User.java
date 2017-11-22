@@ -29,6 +29,7 @@ import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.domain.SavedQuery;
 
 @Configurable
 @Audited
@@ -36,6 +37,7 @@ public class User extends BaseEntity implements UserDetails {
 	public enum Type {
 		SUPER,
 		INSTITUTE,
+		RESEARCHER,
 		NONE
 	};
 
@@ -78,6 +80,8 @@ public class User extends BaseEntity implements UserDetails {
 	private Boolean manageForms;
 	
 	private Set<Password> passwords = new HashSet<Password>();
+
+	private SavedQuery query;
 	
 	@Autowired 
 	private DaoFactory daoFactory;
@@ -211,6 +215,10 @@ public class User extends BaseEntity implements UserDetails {
 	public boolean isInstituteAdmin() {
 		return Type.INSTITUTE == getType();
 	}
+
+	public boolean isResearcher() {
+		return Type.RESEARCHER == getType();
+	}
 	
 	public boolean canManageForms() {
 		return manageForms != null ? manageForms : false;
@@ -232,7 +240,16 @@ public class User extends BaseEntity implements UserDetails {
 	public void setPasswords(Set<Password> passwords) {
 		this.passwords = passwords;
 	}
-	
+
+	@NotAudited
+	public SavedQuery getQuery() {
+		return query;
+	}
+
+	public void setQuery(SavedQuery query) {
+		this.query = query;
+	}
+
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
@@ -282,6 +299,7 @@ public class User extends BaseEntity implements UserDetails {
 		setPhoneNumber(user.getPhoneNumber());
 		setComments(user.getComments());
 		setType(user.getType());
+		setQuery(user.getQuery());
 		setManageForms(user.canManageForms());
 	}
 

@@ -11,6 +11,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
+import com.krishagni.catissueplus.core.de.events.SavedQuerySummary;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 @ListenAttributeChanges
@@ -43,6 +44,8 @@ public class UserDetail extends AttributeModifiedSupport {
 	private Date creationDate;
 
 	private String activityStatus;
+
+	private SavedQuerySummary query;
 
 	public Long getId() {
 		return id;
@@ -156,6 +159,14 @@ public class UserDetail extends AttributeModifiedSupport {
 		this.activityStatus = activityStatus;
 	}
 
+	public SavedQuerySummary getQuery() {
+		return query;
+	}
+
+	public void setQuery(SavedQuerySummary queryDetail) {
+		this.query = queryDetail;
+	}
+
 	public static UserDetail from(User user) {
 		UserDetail detail = new UserDetail();
 		detail.setId(user.getId());
@@ -172,6 +183,7 @@ public class UserDetail extends AttributeModifiedSupport {
 		detail.setAddress(user.getAddress());
 		detail.setCreationDate(user.getCreationDate());
 		detail.setActivityStatus(user.getActivityStatus());
+		detail.setQuery(SavedQuerySummary.fromSavedQuery(user.getQuery()));
 		return detail;
 	}
 	

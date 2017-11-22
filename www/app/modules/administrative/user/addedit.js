@@ -1,12 +1,13 @@
 angular.module('os.administrative.user.addedit', ['os.administrative.models'])
   .controller('UserAddEditCtrl', function($scope, $rootScope, $state, $stateParams,
-    user, users, User, Institute, AuthDomain) {
+    user, users, User, Institute, AuthDomain, SavedQuery) {
 
     var instituteSites = {};
  
     function init() {
       $scope.user = user;
       $scope.signedUp = false;
+      $scope.queryList = [];
       loadPvs();
     }
 
@@ -55,6 +56,10 @@ angular.module('os.administrative.user.addedit', ['os.administrative.models'])
       );
     }
 
+    function loadQueries(searchTerm) {
+      $scope.queryList = SavedQuery.list({searchString: searchTerm});
+    }
+
     $scope.onInstituteSelect = function(instituteName) {
       $scope.user.primarySite = undefined;
       loadSites(instituteName);
@@ -67,6 +72,8 @@ angular.module('os.administrative.user.addedit', ['os.administrative.models'])
 
       loadSites($scope.user.instituteName, siteName);
     }
+
+    $scope.loadQueries = loadQueries;
 
     $scope.createUser = function() {
       var user = angular.copy($scope.user);

@@ -265,6 +265,7 @@
 
   <bean id="userFact" class="com.krishagni.catissueplus.core.administrative.domain.factory.impl.UserFactoryImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="deDaoFactory" ref="deDaoFactory"/>
   </bean>
   
   <bean id="userSvc" class="com.krishagni.catissueplus.core.administrative.services.impl.UserServiceImpl">

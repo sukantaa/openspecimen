@@ -58,6 +58,8 @@ public class AuthenticationController {
 		detail.put("token", authToken);
 		detail.put("admin", user.isAdmin());
 		detail.put("instituteAdmin", user.isInstituteAdmin());
+		detail.put("researcher", user.isResearcher());
+		detail.put("queryId", user.getQuery() != null ? user.getQuery().getId() : null);
 		
 		return detail;
 	}
