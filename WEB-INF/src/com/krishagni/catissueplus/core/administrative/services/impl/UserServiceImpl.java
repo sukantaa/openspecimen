@@ -1001,10 +1001,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 					return;
 				}
 
-				if (!AccessCtrlMgr.getInstance().hasUserEximRights()) {
-					endOfUsers = true;
-				}
-
+				endOfUsers = !AccessCtrlMgr.getInstance().hasUserEximRights();
 				paramsInited = true;
 			}
 		};

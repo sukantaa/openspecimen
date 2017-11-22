@@ -835,25 +835,21 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 				Long cpId = getCpId(params);
 				List<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps(cpId, false);
 				if (siteCps != null && siteCps.isEmpty()) {
-					paramsInited = endOfVisits = true;
-					return;
-				}
-
-				if (!AccessCtrlMgr.getInstance().hasVisitSpecimenEximRights(cpId)) {
-					paramsInited = endOfVisits = true;
-					return;
-				}
-
-				crit = new VisitsListCriteria()
-					.cpId(cpId)
-					.names(Utility.csvToStringList(params.get("visitNames")))
-					.siteCps(siteCps)
-					.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn());
-
-				if (!crit.names().isEmpty()) {
-					crit.limitItems(false);
+					endOfVisits = true;
+				} else if (!AccessCtrlMgr.getInstance().hasVisitSpecimenEximRights(cpId)) {
+					endOfVisits = true;
 				} else {
-					crit.limitItems(true).maxResults(100);
+					crit = new VisitsListCriteria()
+						.cpId(cpId)
+						.names(Utility.csvToStringList(params.get("visitNames")))
+						.siteCps(siteCps)
+						.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn());
+
+					if (!crit.names().isEmpty()) {
+						crit.limitItems(false);
+					} else {
+						crit.limitItems(true).maxResults(100);
+					}
 				}
 
 				paramsInited = true;

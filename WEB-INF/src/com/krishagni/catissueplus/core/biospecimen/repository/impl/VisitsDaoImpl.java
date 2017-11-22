@@ -124,8 +124,7 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 		Criteria query = getCurrentSession().createCriteria(Visit.class, "visit")
 			.add(Subqueries.propertyIn("visit.id", getVisitIdsListQuery(crit)));
 
-		boolean limitItems = CollectionUtils.isEmpty(crit.names());
-		if (limitItems) {
+		if (CollectionUtils.isEmpty(crit.names())) {
 			query.setFirstResult(crit.startAt()).setMaxResults(crit.maxResults());
 		}
 

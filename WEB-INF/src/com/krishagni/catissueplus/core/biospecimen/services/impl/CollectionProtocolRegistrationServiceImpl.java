@@ -1158,24 +1158,20 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			AccessCtrlMgr.ParticipantReadAccess access = AccessCtrlMgr.getInstance().getParticipantReadAccess(cpId);
 			if (!access.admin && access.noAccessibleSites()) {
 				endOfCprs = true;
-				return;
-			}
-
-			if (!AccessCtrlMgr.getInstance().hasCprEximRights(cpId)) {
+			} else if (!AccessCtrlMgr.getInstance().hasCprEximRights(cpId)) {
 				endOfCprs = true;
-				return;
-			}
-
-			crit = new CprListCriteria()
-				.cpId(cpId)
-				.ppids(Utility.csvToStringList(params.get("ppids")))
-				.siteCps(access.siteCps)
-				.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn());
-
-			if (CollectionUtils.isNotEmpty(crit.ppids())) {
-				crit.limitItems(false);
 			} else {
-				crit.limitItems(true).maxResults(100);
+				crit = new CprListCriteria()
+					.cpId(cpId)
+					.ppids(Utility.csvToStringList(params.get("ppids")))
+					.siteCps(access.siteCps)
+					.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn());
+
+				if (CollectionUtils.isNotEmpty(crit.ppids())) {
+					crit.limitItems(false);
+				} else {
+					crit.limitItems(true).maxResults(100);
+				}
 			}
 
 			paramsInited = true;

@@ -1041,24 +1041,20 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 				List<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps(cpId, false);
 				if (siteCps != null && siteCps.isEmpty()) {
 					endOfSpecimens = true;
-					return;
-				}
-
-				if (!AccessCtrlMgr.getInstance().hasVisitSpecimenEximRights(cpId)) {
+				} else if (!AccessCtrlMgr.getInstance().hasVisitSpecimenEximRights(cpId)) {
 					endOfSpecimens = true;
-					return;
-				}
-
-				crit = new SpecimenListCriteria()
-					.labels(Utility.csvToStringList(params.get("specimenLabels")))
-					.siteCps(siteCps)
-					.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn())
-					.cpId(cpId);
-
-				if (CollectionUtils.isNotEmpty(crit.labels())) {
-					crit.limitItems(false);
 				} else {
-					crit.limitItems(true).maxResults(100);
+					crit = new SpecimenListCriteria()
+						.labels(Utility.csvToStringList(params.get("specimenLabels")))
+						.siteCps(siteCps)
+						.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn())
+						.cpId(cpId);
+
+					if (CollectionUtils.isNotEmpty(crit.labels())) {
+						crit.limitItems(false);
+					} else {
+						crit.limitItems(true).maxResults(100);
+					}
 				}
 
 				paramsInited = true;
