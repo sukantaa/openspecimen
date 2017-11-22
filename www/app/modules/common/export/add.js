@@ -15,11 +15,25 @@ angular.module('os.common.export')
       exportDetail.type = type;
     }
 
-    $scope.export = function() {
+    function warnNoInput(emptyInputAllowed, type) {
+      return !emptyInputAllowed && !!type.$$input && !!type.$$input.var;
+    }
+
+    $scope.export = function(emptyInputAllowed) {
       var type = exportDetail.type;
       var job  = new ExportJob({objectType: type.type, params: type.params || {}});
       if (!!exportDetail.inputCsv) {
         job.params[type.$$input.var] = exportDetail.inputCsv;
+      } else if (!exportDetail.inputCsv && warnNoInput(emptyInputAllowed, type)) {
+        Util.showConfirm({
+          title: 'export.confirm_export_all_title',
+          confirmMsg: 'export.confirm_export_all_msg',
+          input: type,
+          ok: function() { $scope.export(true); },
+          cancel: function() { }
+        });
+
+        return;
       }
 
       var msg = Alerts.info('export.initiated');

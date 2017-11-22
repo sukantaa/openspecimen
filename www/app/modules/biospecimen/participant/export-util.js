@@ -41,8 +41,8 @@ angular.module('os.biospecimen.participant')
 
     function getSpecimenTypes(cp, entityForms) {
       var group = $translate.instant('specimens.title');
-
       var input = {'var': 'specimenLabels', varName: 'specimens.labels', varDesc: 'specimens.labels_csv'};
+
       var exportTypes = [{ group: group, type: 'specimen', title: msg('specimens.list'), '$$input': input }]
       addForms(exportTypes, group, 'Specimen', input, entityForms['Specimen']);
       return addForms(exportTypes, group, 'SpecimenEvent', input, entityForms['SpecimenEvent']);
