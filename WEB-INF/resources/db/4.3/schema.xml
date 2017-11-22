@@ -220,4 +220,10 @@
         inner join catissue_participant p on cpr.participant_id = p.identifier
     </createView>
   </changeSet>
+
+  <changeSet author="vpawar" id="Rename bulk import operation to export import">
+    <sql>
+      update rbac_operations set name = 'Export Import' where name = 'Bulk Import'
+    </sql>
+  </changeSet>
 </databaseChangeLog>

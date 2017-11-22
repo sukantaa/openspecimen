@@ -833,38 +833,44 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 				}
 
 				Long cpId = getCpId(params);
-				List<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps(cpId);
+				List<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps(cpId, false);
 				if (siteCps != null && siteCps.isEmpty()) {
 					endOfVisits = true;
-					return;
-				}
-
-				crit = new VisitsListCriteria()
-					.cpId(cpId)
-					.names(Utility.csvToStringList(params.get("visitNames")))
-					.siteCps(siteCps)
-					.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn());
-
-				if (!crit.names().isEmpty()) {
-					crit.limitItems(false);
+				} else if (!AccessCtrlMgr.getInstance().hasVisitSpecimenEximRights(cpId)) {
+					endOfVisits = true;
 				} else {
-					crit.limitItems(true).maxResults(100);
+					crit = new VisitsListCriteria()
+						.cpId(cpId)
+						.names(Utility.csvToStringList(params.get("visitNames")))
+						.siteCps(siteCps)
+						.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn());
+
+					if (!crit.names().isEmpty()) {
+						crit.limitItems(false);
+					} else {
+						crit.limitItems(true).maxResults(100);
+					}
 				}
 
 				paramsInited = true;
 			}
 
 			private Long getCpId(Map<String, String> params) {
+				Long cpId = null;
+
 				String cpIdStr = params.get("cpId");
 				if (StringUtils.isNotBlank(cpIdStr)) {
 					try {
-						return Long.parseLong(cpIdStr);
+						cpId = Long.parseLong(cpIdStr);
+						if (cpId == -1L) {
+							cpId = null;
+						}
 					} catch (Exception e) {
 						logger.error("Invalid CP ID: " + cpIdStr, e);
 					}
 				}
 
-				return null;
+				return cpId;
 			}
 		};
 	}

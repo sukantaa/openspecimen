@@ -24,11 +24,9 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.repository.FormListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
-import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
-import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CprErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
@@ -1073,7 +1071,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 			private CollectionProtocol cp;
 
-			private Long cpId;
+			private Set<Long> cpIds;
 
 			private int startAt;
 
@@ -1132,10 +1130,33 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				String cpIdStr = params.get("cpId");
 				if (StringUtils.isNotBlank(cpIdStr)) {
 					try {
-						cpId = Long.parseLong(cpIdStr);
+						Long cpId = Long.parseLong(cpIdStr);
+						if (cpId != -1L) {
+							cpIds = Collections.singleton(cpId);
+						}
 					} catch (Exception e) {
 						logger.error("Invalid CP ID: " + cpIdStr, e);
 					}
+				}
+
+				if (cpIds == null) {
+					cpIds = AccessCtrlMgr.getInstance().getReadableCpIds();
+				}
+
+				Function<Long, Boolean> hasEximRights = null;
+				if (entityType.equals("Participant") || entityType.equals("CommonParticipant")) {
+					hasEximRights = AccessCtrlMgr.getInstance()::hasCprEximRights;
+				} else if (entityType.equals("SpecimenCollectionGroup")) {
+					hasEximRights = AccessCtrlMgr.getInstance()::hasVisitSpecimenEximRights;
+				} else if (entityType.equals("Specimen") || entityType.equals("SpecimenEvent")) {
+					hasEximRights = AccessCtrlMgr.getInstance()::hasVisitSpecimenEximRights;
+				}
+
+				if (hasEximRights == null) {
+					endOfRecords = true;
+				} else {
+					cpIds = cpIds.stream().filter(hasEximRights::apply).collect(Collectors.toSet());
+					endOfRecords = cpIds.isEmpty();
 				}
 
 				paramsInited = true;
@@ -1149,9 +1170,9 @@ public class FormServiceImpl implements FormService, InitializingBean {
 					"ppids",
 					(ppids) -> {
 						if (entityType.equals("Participant")) {
-							return formDao.getRegistrationRecords(cpId, form.getId(), ppids, startAt, 100);
+							return formDao.getRegistrationRecords(cpIds, form.getId(), ppids, startAt, 100);
 						} else {
-							return formDao.getParticipantRecords(cpId, form.getId(), ppids, startAt, 100);
+							return formDao.getParticipantRecords(cpIds, form.getId(), ppids, startAt, 100);
 						}
 					},
 					"cprId",
@@ -1181,7 +1202,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				return getRecords(
 					job,
 					"visitNames",
-					(visitNames) -> formDao.getVisitRecords(cpId, form.getId(), visitNames, startAt, 100),
+					(visitNames) -> formDao.getVisitRecords(cpIds, form.getId(), visitNames, startAt, 100),
 					"visitId",
 					(visitId) -> daoFactory.getVisitsDao().getById(visitId),
 					(visit) -> AccessCtrlMgr.getInstance().ensureReadVisitRights((Visit) visit, true),
@@ -1203,7 +1224,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				return getRecords(
 					job,
 					"specimenLabels",
-					(spmnLabels) -> formDao.getSpecimenRecords(cpId, form.getId(), entityType, spmnLabels, startAt, 100),
+					(spmnLabels) -> formDao.getSpecimenRecords(cpIds, form.getId(), entityType, spmnLabels, startAt, 100),
 					"spmnId",
 					(specimenId) -> daoFactory.getSpecimenDao().getById(specimenId),
 					(specimen) -> AccessCtrlMgr.getInstance().ensureReadSpecimenRights((Specimen) specimen, true),

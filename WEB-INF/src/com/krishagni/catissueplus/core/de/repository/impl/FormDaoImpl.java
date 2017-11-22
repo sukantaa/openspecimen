@@ -631,9 +631,9 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	}
 
 	@Override
-	public List<Map<String, Object>> getRegistrationRecords(Long cpId, Long formId, List<String> ppids, int startAt, int maxResults) {
+	public List<Map<String, Object>> getRegistrationRecords(Collection<Long> cpIds, Long formId, List<String> ppids, int startAt, int maxResults) {
 		return getEntityRecords(
-			cpId, formId, GET_REG_FORM_RECORDS,
+			cpIds, formId, GET_REG_FORM_RECORDS,
 			ppids, "ppids", "cpr.protocol_participant_id in (:ppids)", null,
 			startAt, maxResults,
 			row -> {
@@ -648,9 +648,9 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	}
 
 	@Override
-	public List<Map<String, Object>> getParticipantRecords(Long cpId, Long formId, List<String> ppids, int startAt, int maxResults) {
+	public List<Map<String, Object>> getParticipantRecords(Collection<Long> cpIds, Long formId, List<String> ppids, int startAt, int maxResults) {
 		return getEntityRecords(
-			cpId, formId, GET_PART_FORM_RECORDS,
+			cpIds, formId, GET_PART_FORM_RECORDS,
 			ppids, "ppids", "cpr.protocol_participant_id in (:ppids)", null,
 			startAt, maxResults,
 			row -> {
@@ -666,9 +666,9 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	}
 
 	@Override
-	public List<Map<String, Object>> getVisitRecords(Long cpId, Long formId, List<String> visitNames, int startAt, int maxResults) {
+	public List<Map<String, Object>> getVisitRecords(Collection<Long> cpIds, Long formId, List<String> visitNames, int startAt, int maxResults) {
 		return getEntityRecords(
-			cpId, formId, GET_VISIT_FORM_RECORDS,
+			cpIds, formId, GET_VISIT_FORM_RECORDS,
 			visitNames, "visitNames", "v.name in (:visitNames)", null,
 			startAt, maxResults,
 			row -> {
@@ -684,9 +684,9 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Map<String, Object>> getSpecimenRecords(Long cpId, Long formId, String entityType, List<String> spmnLabels, int startAt, int maxResults) {
+	public List<Map<String, Object>> getSpecimenRecords(Collection<Long> cpIds, Long formId, String entityType, List<String> spmnLabels, int startAt, int maxResults) {
 		return getEntityRecords(
-			cpId, formId, GET_SPMN_FORM_RECORDS,
+			cpIds, formId, GET_SPMN_FORM_RECORDS,
 			spmnLabels, "spmnLabels", "s.label in (:spmnLabels)",
 			Collections.singletonMap("entityType", entityType),
 			startAt, maxResults,
@@ -953,7 +953,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
  	}
 
 	private List<Map<String, Object>> getEntityRecords(
-		Long cpId, Long formId, String queryName,
+		Collection<Long> cpIds, Long formId, String queryName,
 		List<String> names, String namesVar, String namesCond,
 		Map<String, Object> params,
 		int startAt, int maxResults,
@@ -967,7 +967,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 
 		Query query = getCurrentSession().createSQLQuery(sql)
 			.setParameter("formId", formId)
-			.setParameter("cpId", cpId)
+			.setParameterList("cpIds", cpIds)
 			.setFirstResult(startAt)
 			.setMaxResults(maxResults);
 

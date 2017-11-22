@@ -1088,16 +1088,20 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	}
 
 	private Long getCpId(Map<String, String> params) {
+		Long cpId = null;
 		String cpIdStr = params.get("cpId");
 		if (StringUtils.isNotBlank(cpIdStr)) {
 			try {
-				return Long.parseLong(cpIdStr);
+				cpId = Long.parseLong(cpIdStr);
+				if (cpId == -1L) {
+					cpId = null;
+				}
 			} catch (Exception e) {
 				logger.error("Invalid CP ID: " + cpIdStr, e);
 			}
 		}
 
-		return null;
+		return cpId;
 	}
 
 	private abstract class AbstractCprsGenerator implements Function<ExportJob, List<? extends Object>> {
@@ -1154,19 +1158,20 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			AccessCtrlMgr.ParticipantReadAccess access = AccessCtrlMgr.getInstance().getParticipantReadAccess(cpId);
 			if (!access.admin && access.noAccessibleSites()) {
 				endOfCprs = true;
-				return;
-			}
-
-			crit = new CprListCriteria()
-				.cpId(cpId)
-				.ppids(Utility.csvToStringList(params.get("ppids")))
-				.siteCps(access.siteCps)
-				.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn());
-
-			if (CollectionUtils.isNotEmpty(crit.ppids())) {
-				crit.limitItems(false);
+			} else if (!AccessCtrlMgr.getInstance().hasCprEximRights(cpId)) {
+				endOfCprs = true;
 			} else {
-				crit.limitItems(true).maxResults(100);
+				crit = new CprListCriteria()
+					.cpId(cpId)
+					.ppids(Utility.csvToStringList(params.get("ppids")))
+					.siteCps(access.siteCps)
+					.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn());
+
+				if (CollectionUtils.isNotEmpty(crit.ppids())) {
+					crit.limitItems(false);
+				} else {
+					crit.limitItems(true).maxResults(100);
+				}
 			}
 
 			paramsInited = true;

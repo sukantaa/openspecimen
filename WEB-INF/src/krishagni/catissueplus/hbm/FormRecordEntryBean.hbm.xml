@@ -97,7 +97,7 @@
         fc.deleted_on is null and
         re.activity_status = 'ACTIVE' and
         fc.container_id = :formId and
-        (:cpId is null or cp.identifier = :cpId)
+        (:cpIds is null or cp.identifier in (:cpIds))
       order by
         cprId, recordId
     </sql-query>
@@ -116,7 +116,7 @@
         fc.deleted_on is null and
         re.activity_status = 'ACTIVE' and
         fc.container_id = :formId and
-        (:cpId is null or cp.identifier = :cpId)
+        (:cpIds is null or cp.identifier in (:cpIds))
       order by
         participantId, recordId
     </sql-query>
@@ -136,7 +136,7 @@
         fc.deleted_on is null and
         re.activity_status = 'ACTIVE' and
         fc.container_id = :formId and
-        (:cpId is null or cp.identifier = :cpId)
+        (:cpIds is null or cp.identifier in (:cpIds))
       order by
         visitId, recordId
     </sql-query>
@@ -156,7 +156,7 @@
         fc.deleted_on is null and
         re.activity_status = 'ACTIVE' and
         fc.container_id = :formId and
-        (:cpId is null or cp.identifier = :cpId)
+        (:cpIds is null or cp.identifier in (:cpIds))
       order by
         spmnId, recordId
     </sql-query>

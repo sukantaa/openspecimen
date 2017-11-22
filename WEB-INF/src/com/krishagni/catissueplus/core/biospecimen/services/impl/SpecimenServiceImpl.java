@@ -585,7 +585,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 	private List<Specimen> getSpecimens(SpecimenListCriteria crit) {
 		List<Pair<Long, Long>> siteCpPairs = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps(crit.cpId());
 		if (siteCpPairs != null && siteCpPairs.isEmpty()) {
-			return Collections.<Specimen>emptyList();
+			return Collections.emptyList();
 		}
 
 		crit.siteCps(siteCpPairs);
@@ -1030,27 +1030,31 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 				if (StringUtils.isNotBlank(cpIdStr)) {
 					try {
 						cpId = Long.parseLong(cpIdStr);
+						if (cpId == -1L) {
+							cpId = null;
+						}
 					} catch (Exception e) {
 						logger.error("Invalid CP ID: " + cpIdStr, e);
 					}
 				}
 
-				List<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps(cpId);
+				List<Pair<Long, Long>> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps(cpId, false);
 				if (siteCps != null && siteCps.isEmpty()) {
 					endOfSpecimens = true;
-					return;
-				}
-
-				crit = new SpecimenListCriteria()
-					.labels(Utility.csvToStringList(params.get("specimenLabels")))
-					.siteCps(siteCps)
-					.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn())
-					.cpId(cpId);
-
-				if (CollectionUtils.isNotEmpty(crit.labels())) {
-					crit.limitItems(false);
+				} else if (!AccessCtrlMgr.getInstance().hasVisitSpecimenEximRights(cpId)) {
+					endOfSpecimens = true;
 				} else {
-					crit.limitItems(true).maxResults(100);
+					crit = new SpecimenListCriteria()
+						.labels(Utility.csvToStringList(params.get("specimenLabels")))
+						.siteCps(siteCps)
+						.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn())
+						.cpId(cpId);
+
+					if (CollectionUtils.isNotEmpty(crit.labels())) {
+						crit.limitItems(false);
+					} else {
+						crit.limitItems(true).maxResults(100);
+					}
 				}
 
 				paramsInited = true;

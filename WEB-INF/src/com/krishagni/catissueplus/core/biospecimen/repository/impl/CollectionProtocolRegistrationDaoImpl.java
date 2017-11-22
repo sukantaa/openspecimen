@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.MatchMode;
@@ -22,6 +23,7 @@ import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Subqueries;
 import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
@@ -87,33 +89,10 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<CollectionProtocolRegistration> getCprs(CprListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(CollectionProtocolRegistration.class, "cpr");
+		Criteria query = getCurrentSession().createCriteria(CollectionProtocolRegistration.class, "cpr")
+			.add(Subqueries.propertyIn("cpr.id", getCprIdsQuery(crit)));
 
-		String startAlias = "cp";
-		if (crit.cpId() != null) {
-			startAlias = "cpSite";
-			query.createAlias("cpr.collectionProtocol", "cp")
-				.add(Restrictions.eq("cp.id", crit.cpId()));
-		}
-
-		boolean limitItems = true;
-		if (CollectionUtils.isNotEmpty(crit.ppids())) {
-			query.add(Restrictions.in("ppid", crit.ppids()));
-			limitItems = false;
-		}
-
-		if (CollectionUtils.isNotEmpty(crit.siteCps())) {
-			List<Pair<Long, Long>> siteCps = new ArrayList<>();
-			for (Pair<Set<Long>, Long> sitesCp : crit.siteCps()) {
-				for (Long siteId : sitesCp.first()) {
-					siteCps.add(Pair.make(siteId, sitesCp.second()));
-				}
-			}
-
-			BiospecimenDaoHelper.getInstance().addSiteCpsCond(query, siteCps, crit.useMrnSites(), startAlias);
-		}
-
-		if (limitItems) {
+		if (CollectionUtils.isEmpty(crit.ppids())) {
 			query.setFirstResult(crit.startAt()).setMaxResults(crit.maxResults());
 		}
 
@@ -469,6 +448,36 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 				.add(Projections.countDistinct("specimen.id"))
 				.add(Projections.groupProperty("id")))
 				.list();
+	}
+
+	private DetachedCriteria getCprIdsQuery(CprListCriteria crit) {
+		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(CollectionProtocolRegistration.class, "cpr")
+			.setProjection(Projections.distinct(Projections.property("cpr.id")));
+		Criteria query = detachedCriteria.getExecutableCriteria(getCurrentSession());
+
+		String startAlias = "cp";
+		if (crit.cpId() != null) {
+			startAlias = "cpSite";
+			query.createAlias("cpr.collectionProtocol", "cp")
+				.add(Restrictions.eq("cp.id", crit.cpId()));
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.ppids())) {
+			query.add(Restrictions.in("ppid", crit.ppids()));
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.siteCps())) {
+			List<Pair<Long, Long>> siteCps = new ArrayList<>();
+			for (Pair<Set<Long>, Long> sitesCp : crit.siteCps()) {
+				for (Long siteId : sitesCp.first()) {
+					siteCps.add(Pair.make(siteId, sitesCp.second()));
+				}
+			}
+
+			BiospecimenDaoHelper.getInstance().addSiteCpsCond(query, siteCps, crit.useMrnSites(), startAlias);
+		}
+
+		return detachedCriteria;
 	}
 	
 	private static final String FQN = CollectionProtocolRegistration.class.getName();

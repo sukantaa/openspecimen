@@ -1363,7 +1363,7 @@
     "create": "Create",
     "update": "Update",
     "delete": "Delete",
-    "import": "Import",
+    "export_import": "Exp/Imp",
     "add_resource": "Add Resource",
     "lock": "Lock",
     "unlock": "Unlock",
@@ -1788,7 +1788,9 @@
     "downloading_file": "Downloading records file",
     "file_will_be_emailed": "Export records job {{id}} is taking longer time to finish. Link to download records file will be sent to you by e-mail",
     "failed": "Export job {{id}} failed with errors. Please contact system administrator for help!",
-    "select_record_type": "Record Type"
+    "select_record_type": "Record Type",
+    "confirm_export_all_title": "Export All Records?",
+    "confirm_export_all_msg": "Are you sure you want to export all records of selected type: <b>{{title}}</b>?"
   },
 
   "specimen_kit": {

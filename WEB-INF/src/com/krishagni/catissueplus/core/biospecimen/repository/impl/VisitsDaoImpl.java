@@ -13,9 +13,11 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Subqueries;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.events.VisitSummary;
@@ -119,27 +121,10 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Visit> getVisitsList(VisitsListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(Visit.class, "visit");
+		Criteria query = getCurrentSession().createCriteria(Visit.class, "visit")
+			.add(Subqueries.propertyIn("visit.id", getVisitIdsListQuery(crit)));
 
-		String startAlias = "cpr";
-		if (crit.cpId() != null) {
-			startAlias = "cpSite";
-			query.createAlias("visit.registration", "cpr")
-				.createAlias("cpr.collectionProtocol", "cp")
-				.add(Restrictions.eq("cp.id", crit.cpId()));
-		}
-
-		boolean limitItems = true;
-		if (CollectionUtils.isNotEmpty(crit.names())) {
-			query.add(Restrictions.in("name", crit.names()));
-			limitItems = false;
-		}
-
-		if (CollectionUtils.isNotEmpty(crit.siteCps())) {
-			BiospecimenDaoHelper.getInstance().addSiteCpsCond(query, crit.siteCps(), crit.useMrnSites(), startAlias);
-		}
-
-		if (limitItems) {
+		if (CollectionUtils.isEmpty(crit.names())) {
 			query.setFirstResult(crit.startAt()).setMaxResults(crit.maxResults());
 		}
 
@@ -272,6 +257,30 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 				cal.add(Calendar.YEAR, interval);
 				break;
 		}
+	}
+
+	private DetachedCriteria getVisitIdsListQuery(VisitsListCriteria crit) {
+		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Visit.class, "visit")
+			.setProjection(Projections.distinct(Projections.property("visit.id")));
+		Criteria query = detachedCriteria.getExecutableCriteria(getCurrentSession());
+
+		String startAlias = "cpr";
+		if (crit.cpId() != null) {
+			startAlias = "cpSite";
+			query.createAlias("visit.registration", "cpr")
+				.createAlias("cpr.collectionProtocol", "cp")
+				.add(Restrictions.eq("cp.id", crit.cpId()));
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.names())) {
+			query.add(Restrictions.in("name", crit.names()));
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.siteCps())) {
+			BiospecimenDaoHelper.getInstance().addSiteCpsCond(query, crit.siteCps(), crit.useMrnSites(), startAlias);
+		}
+
+		return detachedCriteria;
 	}
 
 	private static final String FQN = Visit.class.getName();

@@ -46,7 +46,7 @@ angular.module('os.administrative.models.role', ['os.common.models'])
     var Operation = osModel('rbac/operations');
 
     Operation.getOrderedOperations = function() {
-      var operations = ['Read', 'Create', 'Update', 'Delete', 'Bulk Import', 'Lock', 'Unlock'];
+      var operations = ['Read', 'Create', 'Update', 'Delete', 'Export Import', 'Lock', 'Unlock'];
       return operations;
     }
 

@@ -42,16 +42,21 @@ angular.module('os.biospecimen.cp',
         },
         resolve: {
           cpsCtx: function(currentUser, AuthorizationService) {
-            return {
-              participantImportAllowed: AuthorizationService.isAllowed({
-                resource: 'ParticipantPhi',
-                operations: ['Bulk Import']
-              }),
+            var participantEximAllowed = AuthorizationService.isAllowed({
+              resource: 'ParticipantPhi',
+              operations: ['Export Import']
+            });
 
-              visitSpecimenImportAllowed: AuthorizationService.isAllowed({
-                resource: 'VisitAndSpecimen',
-                operations: ['Bulk Import']
-              })
+            var visitSpmnEximAllowed = AuthorizationService.isAllowed({
+              resource: 'VisitAndSpecimen',
+              operations: ['Export Import']
+            });
+
+            return {
+              participantImportAllowed: participantEximAllowed,
+              visitSpecimenImportAllowed: visitSpmnEximAllowed,
+              participantExportAllowed: participantEximAllowed,
+              visitSpecimenExportAllowed: visitSpmnEximAllowed
             }
           }
         },
@@ -152,6 +157,44 @@ angular.module('os.biospecimen.cp',
               ],
               objectParams: {cpId: -1}
             }
+          }
+        },
+        parent: 'cps'
+      })
+      .state('export-multi-cp-objs', {
+        url: '/export-multi-cp-objs',
+        templateUrl: 'modules/common/export/add.html',
+        controller: 'AddEditExportJobCtrl',
+        resolve: {
+          cp: function(CollectionProtocol) {
+            return new CollectionProtocol({id: -1});
+          },
+
+          allowedEntityTypes: function(cp, cpsCtx) {
+            var entityTypes = [];
+            if (cpsCtx.participantExportAllowed) {
+              entityTypes.push('CommonParticipant');
+              entityTypes.push('Participant');
+            }
+
+            if (cpsCtx.visitSpecimenExportAllowed) {
+              entityTypes.push('SpecimenCollectionGroup');
+            }
+
+            if (cpsCtx.visitSpecimenExportAllowed) {
+              entityTypes.push('Specimen');
+              entityTypes.push('SpecimenEvent');
+            }
+
+            return entityTypes;
+          },
+
+          forms: function(cp, allowedEntityTypes) {
+            return allowedEntityTypes.length > 0 ? cp.getForms(allowedEntityTypes) : [];
+          },
+
+          exportDetail: function(cp, allowedEntityTypes, forms, ExportUtil) {
+            return ExportUtil.getExportDetail(cp, allowedEntityTypes, forms);
           }
         },
         parent: 'cps'
